@@ -1,0 +1,21 @@
+# stubs/telefone/carplay-sem-chamada.txt — SIMULAÇÃO: o serviço do CarPlay dizendo "nenhuma chamada".
+#
+# Não há CarPlay na bancada: nem aparelho, nem tela dele. Este perfil faz o telefone de mentira
+# responder a UMA pergunta da HMI no serviço do CarPlay (DSICarplay2, domínio 512): a lista de
+# chamadas do CarPlay, que sai VAZIA e marcada como válida. Os outros estados desse serviço (modo,
+# aparelho, faixa que toca, tamanho da tela) continuam saindo sem a marca de validade, e a HMI os
+# ignora.
+#
+# Para que serve: o botão vermelho da tela de chamada. Ao tratar o toque a HMI consulta as
+# chamadas do CarPlay antes de mandar encerrar; se a parte de CarPlay dela não estiver de pé, ela
+# estoura e o pedido de encerrar não sai (rodadas "h1", "h3" e "r1" de 12/10/2026).
+#
+# Só tem efeito se a HMI perguntar, e ela só pergunta com o CarPlay marcado na adaptação da
+# central (campo ID_APPLE_DIO, DID 0555): ver o bloco "App-Connect" em
+# stubs/codificacao/ajustes.txt. Com a adaptação de hoje ela não pergunta, este perfil não muda
+# nada e o botão vermelho continua sem encerrar.
+#
+# arg1 é o segundo argumento da mensagem, a marca de validade (1 = válido). Nesta interface o campo
+# não se chama validFlag, e por isso o motor não o põe sozinho. arg0, a lista, fica vazia.
+[DSICarplay2.updateCallState]
+arg1 = 1

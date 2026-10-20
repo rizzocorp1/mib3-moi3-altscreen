@@ -1,0 +1,58 @@
+# stubs/codificacao/ajustes.txt — o que você quer experimentar, por cima de tudo.
+#
+# O modo ao vivo lê quatro arquivos, nesta ordem: padrao.txt (todos os campos no valor padrão da
+# HMI), jetta-gli-2021.txt (o que foi lido do carro), jetta-gli-2021-deducoes.txt (palpites
+# marcados) e, por último, este. O que estiver ligado aqui vale sobre os outros três.
+# Para ligar um ajuste, tire o '#' do começo da linha dele e reinicie a sessão ao vivo
+# (sh driver/ao_vivo.sh). Com tudo comentado, vale a identidade provisória do Jetta.
+#
+# Uma linha por campo:   <DID> @<byte>.<bit>+<bits> = <valor>
+#   DID   o identificador do conjunto, em hexa (0600 é a codificação longa da unidade)
+#   byte  o byte dentro do conjunto, contando do zero
+#   bit   o bit em que o campo começa (0 é o menos significativo)
+#   bits  quantos bits o campo tem
+# O byte, o bit e os valores de cada campo estão em tabela-campos.tsv, que saiu do firmware.
+#
+# É estudo no computador. Nada daqui vai para o carro, e NENHUM destes valores é a codificação
+# do Jetta: a dele só se conhece com o autoscan.
+
+# --- Navegação (adaptação) ---------------------------------------------------------------------
+# Campo ID_NAVIGATION_SYSTEM, requisito Dia_Anp_5153 "Funktion Navigation": DID 0558, byte 1,
+# bit 7. 0 = nicht aktiviert, 1 = aktiviert. Já vem LIGADO pelo arquivo de deduções do Jetta.
+# Com 1 (rodada cod3 de 11/10/2026): a grade tem o bloco "Navigation", a tecla NAV abre
+# "Starting navigation…" sobre um mapa e a barra do veículo tem um ícone. Com 0: grade de 7
+# blocos e "Navigation is not enabled". Para desligar:
+#0558 @1.7+1 = 0
+
+# --- Cor de destaque (codificação) -------------------------------------------------------------
+# Campo ID_VEHICLE_TYPE_POWER_STAGE_1, requisito Dia_Cod_308: DID 0600, byte 5, bit 1. Já vem
+# LIGADO pelo arquivo de deduções. Com 1 o destaque da HMI é vermelho; com 0, azul (rodada
+# cod8a). Para voltar ao azul:
+#0600 @5.1+1 = 0
+
+# --- Marca (codificação) -----------------------------------------------------------------------
+# Campo ID_BRAND, requisito Dia_Cod_230: DID 0600, byte 0, bits 4 a 7. Valores das constantes
+# BRAND_* da HMI: 0 sem marca, 1 Audi, 2 VW, 3 Skoda, 4 Seat, 5 Bentley, 6 VW Comerciais, 8 MAN.
+# As outras só têm a sigla no código: 7 PO, 9 LB, 10 BG, 11 SC, 12 DU. O arquivo de deduções põe 2.
+# Com 2 (rodada cod2): a HMI registra "VW brand is true" e não há o aviso "CURRENT SKIN DOES NOT
+# BELONG TO CODED BRAND". Outras marcas não foram experimentadas; esta linha seria a primeira:
+#0600 @0.4+4 = 3
+
+# --- Tipo de veículo (codificação) -------------------------------------------------------------
+# Marca, classe, geração e carroceria formam o "tipo de veículo", que escolhe a pasta de dados do
+# carro em /vw/hmi/Resources/skin0/Data. O arquivo de deduções põe VW, classe A, geração 7, sedã
+# (0203070100000000), e a tela do veículo mostra um sedã (rodada cod4).
+#   ID_CAR_CLASS (Dia_Cod_244): byte 0, bits 0 a 3. 1 A00, 2 A0, 3 A, 4 B, 5 C, 6 D, 7 E, 8 outras
+#   ID_CAR_GENERATION (Dia_Cod_246): byte 1, bits 4 a 7. 1 a 9, e 16 para a geração 10
+#   ID_CAR_BODYSTYLE (Dia_Cod_248): byte 1, bits 0 a 3. 0 KURZHECK (hatch), 1 STUFENHECK (sedã),
+#     2 KOMBI (perua), 3 FLIE, 4 COUPE, 5 CABRIOANDROADSTER, 6 SUV, 7 PICKUP, 8 MPV, 9 SONSTIGE (outras)
+# Só muda a figura se existir pasta para o conjunto inteiro (o firmware traz 39). Sem pasta igual
+# a HMI cai na genérica da VW, que mostra o hatch. Pela regra, é o que esta linha daria; não rodei:
+#0600 @1.0+4 = 0
+
+# --- Relógio disponível (adaptação) ------------------------------------------------------------
+# Campo ID_CLOCK_0X11, requisito Dia_Anp_2187 "Clock (0x11) Availability": DID 0B1D, byte 17,
+# bits 6 e 7. 0 = not activated, 1 = activated. Vem em 0.
+# Visto na rodada cod5: a HMI registra "Clock is true"; na tela não muda nada (o menu de data e
+# hora depende também de dados do veículo que a bancada não fornece).
+#0B1D @17.6+2 = 1

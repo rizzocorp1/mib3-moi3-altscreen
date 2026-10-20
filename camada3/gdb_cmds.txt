@@ -1,0 +1,99 @@
+# gdb batch (Python) — DIAG FEED v2 (17/10/2026): instrumenta o laço do feeder FUN_00113910.
+# Perguntas: o feeder ACORDA (gate entry 0x113b14)? qual operando do gate falha (W/passbuf/size/is_ready)?
+# vai pro ramo "not ready" (0x113e28) ou "FED" (0x113b7c -> read_and_empty)? is_ready real = E=*(W+0x30),
+# E+0x10 && E+0x11. base de /proc/PID/maps; runtime = base + (REA-0x100000).
+set pagination off
+set confirm off
+set follow-fork-mode child
+set follow-exec-mode same
+set breakpoint pending on
+python
+import gdb
+st = {'base': None, 'pacer':0, 'gate':0, 'notready':0, 'fed':0, 'empty':0, 'feeder':0, 'fbd':0, 'fbd_nz':0}
+def rd(a,n):
+    try: return int.from_bytes(bytes(gdb.selected_inferior().read_memory(a,n)),'little')
+    except Exception: return None
+def reg(n):
+    try: return int(gdb.parse_and_eval('$'+n)) & 0xffffffffffffffff
+    except Exception: return None
+
+class Pacer(gdb.Breakpoint):
+    def stop(self):
+        st['pacer'] += 1
+        if st['pacer']==1: gdb.write('[DIAG] PACER rodou\n')
+        return False
+class Feeder(gdb.Breakpoint):
+    def stop(self):
+        st['feeder'] += 1
+        if st['feeder']==1: gdb.write('[DIAG] FEEDER rodou (thread viva)\n')
+        return False
+class Gate(gdb.Breakpoint):      # 0x113b14: feeder acordou e chegou ao gate
+    def stop(self):
+        st['gate'] += 1
+        if st['gate'] <= 8:
+            x21 = reg('x21')
+            S = rd(x21+0x10,8) if x21 else None
+            if S:
+                W  = rd(S+0x30,8); pb = rd(S+0x3e8,8); sz = rd(S+0x3f0,8)
+                E  = rd(W+0x30,8) if W else None
+                r0 = rd(E+0x10,1) if E else None
+                r1 = rd(E+0x11,1) if E else None
+                e18= rd(E+0x18,1) if E else None
+                est= rd(E+0x1c,4) if E else None
+                gdb.write('[DIAG] gate#%d S=0x%x W=0x%x passbuf=0x%x size=%s | E=0x%x is_ready(E+0x10,0x11)=%s,%s E+0x18=%s state(E+0x1c)=%s\n'
+                          % (st['gate'], S, W or 0, pb or 0, sz, E or 0, r0, r1, e18, est))
+        return False
+class NotReady(gdb.Breakpoint):  # 0x113e28: ramo "input buffer or encoder pipeline not ready"
+    def stop(self):
+        st['notready'] += 1
+        if st['notready']==1: gdb.write('[DIAG] NOT-READY (gate falhou) 1a vez\n')
+        return False
+class Fed(gdb.Breakpoint):       # 0x113b7c: chamada do read_and_empty (feed de verdade)
+    def stop(self):
+        st['fed'] += 1
+        if st['fed']==1: gdb.write('[DIAG] *** FED: read_and_empty chamado (gate PASSOU)\n')
+        return False
+class Empty(gdb.Breakpoint):     # 0x11f220: entrada do read_and_empty
+    def stop(self):
+        st['empty'] += 1
+        if st['empty']==1: gdb.write('[DIAG] *** EmptyThisBuffer site (FUN_0011f220) alcancado\n')
+        return False
+class FBD(gdb.Breakpoint):       # 0x11f130: FillBufferDone do mss; x2=pBuffer, nFilledLen=*(x2+0x14)
+    def stop(self):
+        st['fbd'] += 1
+        try:
+            x2 = reg('x2'); nfl = rd(x2 + 0x14, 4) if x2 else None
+            if nfl and nfl > 0: st['fbd_nz'] += 1
+            if st['fbd'] <= 10:
+                gdb.write('[DIAG] FillBufferDone #%d nFilledLen=%s (>0 => mss manda RTP)\n' % (st['fbd'], nfl))
+        except Exception as e:
+            gdb.write('[DIAG] fbd err %s\n' % e)
+        return False
+
+class USL(gdb.Breakpoint):
+    def stop(self):
+        if st['base'] is None:
+            pid = gdb.selected_inferior().pid
+            try:
+                for line in open('/proc/%d/maps'%pid):
+                    if 'multi-screen-server' in line:
+                        st['base']=int(line.split('-')[0],16); break
+            except Exception as e: gdb.write('[DIAG] maps err %s\n'%e)
+            b=st['base']; gdb.write('[DIAG] base=0x%x\n'%(b or 0))
+            if b:
+                Pacer('*0x%x'%(b+0x12640))
+                Feeder('*0x%x'%(b+0x13910))
+                Gate('*0x%x'%(b+0x13b14))
+                NotReady('*0x%x'%(b+0x13e28))
+                Fed('*0x%x'%(b+0x13b7c))
+                Empty('*0x%x'%(b+0x1f220))
+                FBD('*0x%x'%(b+0x1f130))
+        return False
+USL('_ZN21MultiScreenController17updateStreamsListERKSt6vectorI10StreamInfoSaIS1_EE')
+end
+run
+python
+gdb.write('[DIAG] ==== RESUMO: pacer=%d feeder=%d gate=%d notready=%d fed=%d empty=%d fbd=%d fbd_nz=%d ====\n'
+          % (st['pacer'],st['feeder'],st['gate'],st['notready'],st['fed'],st['empty'],st['fbd'],st['fbd_nz']))
+end
+quit

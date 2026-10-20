@@ -1,0 +1,3114 @@
+# Perfil de PROVA do veiculostub: dá valor a toda folha de todo evento. GERADO por
+# driver/m8_esquema.sh; os valores não querem dizer nada. Não é perfil de carro.
+[DSIBluetooth.updateAccessibleMode]
+accessibleMode = -38
+visible = 1
+validFlag = -112
+[DSIBluetooth.updateBTState]
+bTState = 365
+validFlag = -186
+[DSIBluetooth.updateDiscoveredDevices]
+discoveredDevices.deviceName = "t6"
+discoveredDevices.deviceAddress = "aspas \" barra \\ é 7"
+discoveredDevices.deviceClass = "t8"
+discoveredDevices.serviceTypes = -334
+discoveredDevices.rssi = 911
+validFlag = -408
+[DSIBluetooth.updateTrustedDevices]
+trustedDevices[0].deviceName = "t12"
+trustedDevices[0].deviceAddress = "t13"
+trustedDevices[0].deviceClass = 1275
+trustedDevices[0].deviceSecurity = -556
+trustedDevices[0].linkMode = 1457
+trustedDevices[0].linkkeyStrength = -630
+trustedDevices[0].lastConnectedServiceTypes = 1639
+trustedDevices[0].activeServiceTypes = -704
+trustedDevices[0].offeredServiceTypes = 1821
+trustedDevices[1].deviceName = "aspas \" barra \\ é 21"
+trustedDevices[1].deviceAddress = "t22"
+trustedDevices[1].deviceClass = -852
+trustedDevices[1].deviceSecurity = 2185
+trustedDevices[1].linkMode = -926
+trustedDevices[1].linkkeyStrength = 2367
+trustedDevices[1].lastConnectedServiceTypes = -1000
+trustedDevices[1].activeServiceTypes = 2549
+trustedDevices[1].offeredServiceTypes = -1074
+validFlag = 2731
+[DSIBluetooth.updatePasskeyState]
+passkeyState.btPasskeyState = -1148
+passkeyState.btDeviceName = "t32"
+passkeyState.btDeviceAddress = "t33"
+passkeyState.btPasskey = "t34"
+validFlag = -1296
+[DSIBluetooth.updateServiceRequestState]
+serviceRequestState.btServiceRequestState = 3277
+serviceRequestState.btDeviceAddress = "t37"
+serviceRequestState.btDeviceName = "t38"
+validFlag = -1444
+[DSIBluetooth.updateUserFriendlyName]
+userFriendlyName = "t40"
+validFlag = -1518
+[DSIBluetooth.updateReconnectIndicator]
+reconnectInfo.reconnectIndicator = 3823
+reconnectInfo.deviceNameList[0] = "t43"
+reconnectInfo.deviceNameList[1] = "t44"
+reconnectInfo.serviceTypeList[0] = -1666
+reconnectInfo.serviceTypeList[1] = 4187
+validFlag = -1740
+[DSIBluetooth.updateIncomingServiceRequest]
+incomingServiceRequest.btDeviceName = "t48"
+incomingServiceRequest.btDeviceAddress = "aspas \" barra \\ é 49"
+incomingServiceRequest.btServiceType = 4551
+validFlag = -1888
+[DSIBluetooth.updateSupportedBTProfiles]
+supportedBTProfiles = 4733
+validFlag = -1962
+[DSIBluetooth.updateMasterRoleRequestError]
+masterRoleRequestError.btDeviceAddress = "t54"
+masterRoleRequestError.btDeviceName = "t55"
+masterRoleRequestError.requested = 1
+validFlag = -2110
+[DSIBluetooth.updateHUCandBTHSState]
+hUCandBTHSState = 5279
+validFlag = -2184
+[DSIBluetooth.updateA2DPUserSetting]
+active = 1
+validFlag = -2258
+[DSIBluetooth.updatePriorizedDeviceReconnect]
+active = 1
+btDeviceAddress = "aspas \" barra \\ é 63"
+validFlag = 5825
+[DSIBluetooth.updatePIMDevice]
+simID = "t65"
+btDeviceAddress = "t66"
+validFlag = -2480
+[DSIBluetooth.responseConnectService]
+btDeviceAddress = "t68"
+btDeviceName = "t69"
+btServiceType = 6371
+btDeviceAddressToReplace = "t71"
+result = 6553
+[DSIBluetooth.responseConnectServiceToInstance]
+btDeviceAddress = "t73"
+btDeviceName = "t74"
+btServiceType = -2776
+instanceNumber = 6917
+result = -2850
+[DSIBluetooth.responseAbortConnectService]
+result = 7099
+[DSIBluetooth.responseDisconnectService]
+btDeviceAddress = "t79"
+btServiceType = 7281
+result = -2998
+[DSIBluetooth.responseGetServices]
+btDeviceAddress = "t82"
+btDeviceName = "t83"
+btServiceTypes = 7645
+result = -3146
+[DSIBluetooth.responseInquiry]
+numDevices = 7827
+result = -3220
+[DSIBluetooth.responseAbortInquiry]
+result = 8009
+[DSIBluetooth.responseReconnectSuspend]
+result = -3294
+[DSIBluetooth.responsePasskeyResponse]
+btDeviceAddress = "t90"
+btDeviceName = "aspas \" barra \\ é 91"
+result = 8373
+[DSIBluetooth.responseRemoveAuthentication]
+btDeviceAddress = "t93"
+btDeviceName = "t94"
+result = -3516
+[DSIBluetooth.responseSwitchBTState]
+result = 8737
+[DSIBluetooth.responseRestoreFactorySettings]
+result = -3590
+[DSIBluetooth.responseAcceptIncomingServiceRequest]
+result = 8919
+[DSIBluetooth.responseSetA2DPUserSetting]
+result = -3664
+[DSIBluetooth.responseSetPriorizedDeviceReconnect]
+result = 9101
+[DSIBluetooth.responseSetAccessibleMode]
+result = -3738
+[DSIBluetooth.responseConnectPIMDevice]
+result = 9283
+[DSIBluetooth.responseDisconnectPIMDevice]
+result = -3812
+[DSIBluetooth.removeAuthenticationNoSupport]
+btDeviceAddress = "t104"
+btDeviceName = "aspas \" barra \\ é 105"
+[DSIBluetooth.deviceDisconnectionInfo]
+btDeviceAddress = "t106"
+btDeviceName = "t107"
+disconnectionInfo = 9829
+[DSIBluetooth.serviceRejectNoSupport]
+btDeviceAddress = "t109"
+btDeviceName = "t110"
+[DSIBluetoothLEDataChannel.responseSetCharacteristicState]
+characteristicUUID = "t111"
+result = 10193
+[DSIBluetoothLEDataChannel.responseSetCharacteristicUserDescription]
+characteristicUUID = "t113"
+result = 10375
+[DSIBluetoothLEDataChannel.responseSetCharacteristicValue]
+characteristicUUID = "t115"
+result = 10557
+[DSIBluetoothLEDataChannel.indicateCharacteristicValue]
+characteristicUUID = "t117"
+receivedValue[0] = 10739
+receivedValue[1] = -4404
+[DSIBluetoothLE.updateAccessibleMode]
+result = 10921
+validFlag = -4478
+[DSIBluetoothLE.updateBTState]
+bTState = 11103
+validFlag = -4552
+[DSIBluetoothLE.updateService]
+bleService.serviceID = 11285
+bleService.serviceState = -4626
+validFlag = 11467
+[DSIBluetoothLE.updateTrustedDevices]
+trustedleDevices[0].deviceName = "t127"
+trustedleDevices[0].deviceAddress = "t128"
+trustedleDevices[0].deviceClass = -4774
+trustedleDevices[0].deviceSecurity = 11831
+trustedleDevices[0].linkMode = -4848
+trustedleDevices[0].linkkeyStrength = 12013
+trustedleDevices[1].deviceName = "aspas \" barra \\ é 133"
+trustedleDevices[1].deviceAddress = "t134"
+trustedleDevices[1].deviceClass = -4996
+trustedleDevices[1].deviceSecurity = 12377
+trustedleDevices[1].linkMode = -5070
+trustedleDevices[1].linkkeyStrength = 12559
+validFlag = -5144
+[DSIBluetoothLE.updatePasskeyState]
+passkeyState.btPasskeyState = 12741
+passkeyState.btDeviceName = "t141"
+passkeyState.btDeviceAddress = "t142"
+passkeyState.btPasskey = "t143"
+validFlag = 13105
+[DSIBluetoothLE.updateUserFriendlyName]
+userFriendlyName = "t145"
+validFlag = 13287
+[DSIBluetoothLE.updateCharacteristicValue]
+characteristicUUID = "aspas \" barra \\ é 147"
+receivedValue = "t148"
+validFlag = -5514
+[DSIBluetoothLE.responsePasskeyResponse]
+btDeviceAddress = "t150"
+btDeviceName = "t151"
+result = 13833
+[DSIBluetoothLE.responseRemoveAuthentication]
+btDeviceAddress = "t153"
+btDeviceName = "aspas \" barra \\ é 154"
+result = -5736
+[DSIBluetoothLE.responseSwitchBTState]
+result = 14197
+[DSIBluetoothLE.responseSetService]
+result = -5810
+[DSIBluetoothLE.responseSetAccessibleMode]
+result = 14379
+[DSIBluetoothLE.responseSetCharacteristicState]
+result = -5884
+[DSIBluetoothLE.responseNotifyCharacteristicValue]
+result = 14561
+[DSIBluetoothLE.deviceDisconnectionInfo]
+btDeviceAddress = "aspas \" barra \\ é 161"
+btDeviceName = "t162"
+disconnectionInfo = -6032
+[DSIObexAuthentication.authenticationRequired]
+btServiceType = 14925
+userIdRequired = 1
+btDeviceName = "t166"
+[DSIObexAuthentication.indAuthentication]
+success = 1
+[DSIObjectPush.updateOPPIncomingObject]
+btDeviceAddress = "aspas \" barra \\ é 168"
+btDeviceName = "t169"
+objectType = 15471
+validFlag = -6328
+[DSIObjectPush.updateVCardsReceived]
+fullPathToVCards = "t172"
+validFlag = -6402
+[DSIObjectPush.responseOPPAbortSending]
+result = 15835
+[DSIObjectPush.responseOPPAcceptObject]
+result = -6476
+[DSIObjectPush.responseOPPSendBinary]
+result = 16017
+[DSIObjectPush.responseOPPSendContacts]
+result = -6550
+[DSIObjectPush.responseOPPSendMessages]
+result = 16199
+[DSINFC.updateSNEPPushHandover]
+type = -6624
+active = 1
+validFlag = -6698
+[DSINFC.updateSNEPPushCompleted]
+type = 16563
+validFlag = -6772
+[DSINFC.responseSNEPPushHandover]
+result = 16745
+[DSIMobileEquipment.updateDTMFTonePlaying]
+dtmfTone = "t185"
+validFlag = 16927
+[DSIMobileEquipment.updateEmergencyNumbers]
+telEmerNums.mainEmergencyNumber = "t187"
+telEmerNums.additionalEmergencyNumber[0] = "t188"
+telEmerNums.additionalEmergencyNumber[1] = "aspas \" barra \\ é 189"
+validFlag = 17291
+[DSIMobileEquipment.updateSIMPINRequired]
+simPINRequired = 1
+validFlag = 17473
+[DSIMobileEquipment.updateActivationState]
+activationState.telActivationState = -7142
+activationState.telPhoneModuleState = 17655
+activationState.telMode = -7216
+activationState.telFeat = 17837
+activationState.telHFPVersion = "t197"
+validFlag = 18019
+[DSIMobileEquipment.updateAutomaticPinEntryActive]
+automaticPinEntryActive = 1
+validFlag = 18201
+[DSIMobileEquipment.updateAutomaticRedialActive]
+automaticRedialActive = 1
+validFlag = 18383
+[DSIMobileEquipment.updateBatteryChargeLevel]
+batteryChargeLevel = -7512
+validFlag = 18565
+[DSIMobileEquipment.updateCallDurationList]
+callDurationList[0].telCallID = -7586
+callDurationList[0].telElapsedTime = 18747
+callDurationList[1].telCallID = -7660
+callDurationList[1].telElapsedTime = 18929
+validFlag = -7734
+[DSIMobileEquipment.updateCallList]
+callList[0].telCallID = 19111
+callList[0].telCallState = -7808
+callList[0].telMpty = 19293
+callList[0].contactInformation.name = "t213"
+callList[0].contactInformation.lastName = "t214"
+callList[0].contactInformation.firstName = "t215"
+callList[0].contactInformation.organization = "t216"
+callList[0].contactInformation.adbEntryID = -21700652
+callList[0].contactInformation.adbPictureID.id = 19839
+callList[0].contactInformation.adbPictureID.url = "t219"
+callList[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t220"
+callList[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -8178
+callList[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t222"
+callList[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -8252
+callList[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 224"
+callList[0].contactInformation.adbPhoneDataCount = -8326
+callList[0].contactInformation.entryType = 20567
+callList[0].contactInformation.generalDescription1 = "t227"
+callList[0].contactInformation.generalDescription2 = "t228"
+callList[0].contactInformation.probNavigable = -8474
+callList[0].contactInformation.navigable = 20931
+callList[0].contactInformation.webAddressCount = -8548
+callList[0].contactInformation.emailCount = 21113
+callList[0].telRemName = "t233"
+callList[0].telRemLastName = "t234"
+callList[0].telRemFirstName = "t235"
+callList[0].telRemOrganization = "t236"
+callList[0].telRemNumber = "t237"
+callList[0].telRemPictureId.id = 21659
+callList[0].telRemPictureId.url = "t239"
+callList[0].telRemPictureId.cdnAccess.cdnInternalIpv6 = "t240"
+callList[0].telRemPictureId.cdnAccess.cdnInternalPort = -8918
+callList[0].telRemPictureId.cdnAccess.cdnExternalIpv6 = "t242"
+callList[0].telRemPictureId.cdnAccess.cdnExternalPort = -8992
+callList[0].telRemPictureId.cdnAccess.imageResourcePath = "t244"
+callList[0].telNumType = -9066
+callList[0].telCallType = 22387
+callList[0].telRemEntryId = -24700742
+callList[0].telRemNumberType = 22569
+callList[0].telCallStartingTime = -9214
+callList[0].extendedCallInformation.telEntryType = 22751
+callList[0].extendedCallInformation.telDBPhoneNumberIndex = -9288
+callList[0].extendedCallInformation.adbPhoneDataCount = 22933
+callList[0].telCallCarrier = -9362
+callList[1].telCallID = 23115
+callList[1].telCallState = -9436
+callList[1].telMpty = 23297
+callList[1].contactInformation.name = "t257"
+callList[1].contactInformation.lastName = "t258"
+callList[1].contactInformation.firstName = "aspas \" barra \\ é 259"
+callList[1].contactInformation.organization = "t260"
+callList[1].contactInformation.adbEntryID = -26100784
+callList[1].contactInformation.adbPictureID.id = 23843
+callList[1].contactInformation.adbPictureID.url = "t263"
+callList[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t264"
+callList[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -9806
+callList[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 266"
+callList[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -9880
+callList[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t268"
+callList[1].contactInformation.adbPhoneDataCount = -9954
+callList[1].contactInformation.entryType = 24571
+callList[1].contactInformation.generalDescription1 = "t271"
+callList[1].contactInformation.generalDescription2 = "t272"
+callList[1].contactInformation.probNavigable = -10102
+callList[1].contactInformation.navigable = 24935
+callList[1].contactInformation.webAddressCount = -10176
+callList[1].contactInformation.emailCount = 25117
+callList[1].telRemName = "t277"
+callList[1].telRemLastName = "t278"
+callList[1].telRemFirstName = "t279"
+callList[1].telRemOrganization = "aspas \" barra \\ é 280"
+callList[1].telRemNumber = "t281"
+callList[1].telRemPictureId.id = 25663
+callList[1].telRemPictureId.url = "t283"
+callList[1].telRemPictureId.cdnAccess.cdnInternalIpv6 = "t284"
+callList[1].telRemPictureId.cdnAccess.cdnInternalPort = -10546
+callList[1].telRemPictureId.cdnAccess.cdnExternalIpv6 = "t286"
+callList[1].telRemPictureId.cdnAccess.cdnExternalPort = -10620
+callList[1].telRemPictureId.cdnAccess.imageResourcePath = "t288"
+callList[1].telNumType = -10694
+callList[1].telCallType = 26391
+callList[1].telRemEntryId = -29100874
+callList[1].telRemNumberType = 26573
+callList[1].telCallStartingTime = -10842
+callList[1].extendedCallInformation.telEntryType = 26755
+callList[1].extendedCallInformation.telDBPhoneNumberIndex = -10916
+callList[1].extendedCallInformation.adbPhoneDataCount = 26937
+callList[1].telCallCarrier = -10990
+validFlag = 27119
+[DSIMobileEquipment.updateCDMAThreeWayCallingSetting]
+cdmaThreeWayCallingSetting = 1
+validFlag = 27301
+[DSIMobileEquipment.updateCradlePlugInState]
+cradlePlugInState = -11138
+validFlag = 27483
+[DSIMobileEquipment.updateDisconnectReason]
+disconnectReason.disconnectReason = -11212
+disconnectReason.callId = 27665
+validFlag = -11286
+[DSIMobileEquipment.updateEmergencyCallActive]
+emergencyCallActive.value = 1
+emergencyCallActive.changeable = 1
+validFlag = 28029
+[DSIMobileEquipment.updateEnhancedPrivacyMode]
+enhancedPrivacyMode = 1
+validFlag = 28211
+[DSIMobileEquipment.updateHandsFreeMode]
+handsFreeMode = -11508
+validFlag = 28393
+[DSIMobileEquipment.updateLockState]
+lockState.telLockState = -11582
+lockState.telRetryCounter = 28575
+validFlag = -11656
+[DSIMobileEquipment.updateMailboxContent]
+mailboxContent[0].mailboxIdentifier = 28757
+mailboxContent[0].mailboxNumber = "t317"
+mailboxContent[0].tonNpiValid = 1
+mailboxContent[0].tonNpi = -11804
+mailboxContent[0].alphaIdentifierValid = 1
+mailboxContent[0].alphaIdentifier = "t321"
+mailboxContent[0].extConfCapValid = 1
+mailboxContent[0].extConfCap = -11952
+mailboxContent[0].extInfoValid = 1
+mailboxContent[0].extInfo = "t325"
+mailboxContent[1].mailboxIdentifier = 29667
+mailboxContent[1].mailboxNumber = "t327"
+mailboxContent[1].tonNpiValid = 1
+mailboxContent[1].tonNpi = -12174
+mailboxContent[1].alphaIdentifierValid = 1
+mailboxContent[1].alphaIdentifier = "t331"
+mailboxContent[1].extConfCapValid = 1
+mailboxContent[1].extConfCap = -12322
+mailboxContent[1].extInfoValid = 1
+mailboxContent[1].extInfo = "t335"
+validFlag = 30577
+[DSIMobileEquipment.updateMICMuteState]
+mICMuteState = -12470
+validFlag = 30759
+[DSIMobileEquipment.updateNADTemperature]
+nADTemperature.telNADTemperature = -12544
+nADTemperature.telNADTemperatureLevel = 30941
+validFlag = -12618
+[DSIMobileEquipment.updatePhoneInformation]
+phoneInformation.imsi = "t342"
+phoneInformation.simId = "aspas \" barra \\ é 343"
+phoneInformation.nadIMEI = "t344"
+phoneInformation.meIMEI = "t345"
+phoneInformation.meBtAddress = "t346"
+phoneInformation.meFriendlyName = "t347"
+phoneInformation.telNetIdAvailIMSI = 31669
+phoneInformation.telNetIdAvailSimId = -12914
+phoneInformation.telNetIdAvailNadIMEI = 31851
+phoneInformation.telNetIdAvailMeIMEI = -12988
+phoneInformation.telNetIdAvailMeBtAddress = 32033
+phoneInformation.telNetIdAvailMeFriendlyName = -13062
+phoneInformation.simName = "t354"
+validFlag = -13136
+[DSIMobileEquipment.updateNetworkProvider]
+networkProvider.telLongProviderName = "t356"
+networkProvider.telNumProviderName = "aspas \" barra \\ é 357"
+networkProvider.telRegMode = 32579
+validFlag = -13284
+[DSIMobileEquipment.updateNetworkType]
+networkType = 32761
+validFlag = -13358
+[DSIMobileEquipment.updatePrivacyMode]
+privacyMode = 1
+validFlag = -13432
+[DSIMobileEquipment.updateRegisterState]
+registerState.telRegisterState = 33125
+registerState.telLongProviderName = "t365"
+registerState.telNumProviderName = "t366"
+registerState.telRegMode = -13580
+validFlag = 33489
+[DSIMobileEquipment.updateServiceCodeType]
+serviceCodeType.telDialNumberType = -13654
+serviceCodeType.telServiceCode = "t370"
+serviceCodeType.telServiceCodeRequestType = -13728
+validFlag = 33853
+[DSIMobileEquipment.updateServiceNumbers]
+serviceNumbers.infonumber = "t373"
+serviceNumbers.infonumberRoaming = "t374"
+serviceNumbers.breakdownNumber = "t375"
+serviceNumbers.breakdownNumberRoaming = "t376"
+validFlag = -13950
+[DSIMobileEquipment.updateSignalQuality]
+signalQuality = 34399
+validFlag = -14024
+[DSIMobileEquipment.updateSuppServiceResponse]
+suppServiceResponse.telCWStatus = 34581
+suppServiceResponse.telCFResponseData[0].telCFStatus = -14098
+suppServiceResponse.telCFResponseData[0].telCFCondition = 34763
+suppServiceResponse.telCFResponseData[0].telCFNumber = "t383"
+suppServiceResponse.telCFResponseData[0].telClass = 34945
+suppServiceResponse.telCFResponseData[0].telNumType = -14246
+suppServiceResponse.telCFResponseData[0].telCFTime = 35127
+suppServiceResponse.telCFResponseData[0].result = -14320
+suppServiceResponse.telCFResponseData[1].telCFStatus = 35309
+suppServiceResponse.telCFResponseData[1].telCFCondition = -14394
+suppServiceResponse.telCFResponseData[1].telCFNumber = "t390"
+suppServiceResponse.telCFResponseData[1].telClass = -14468
+suppServiceResponse.telCFResponseData[1].telNumType = 35673
+suppServiceResponse.telCFResponseData[1].telCFTime = -14542
+suppServiceResponse.telCFResponseData[1].result = 35855
+suppServiceResponse.simPINRequired = 1
+suppServiceResponse.telCLIRState = 36037
+suppServiceResponse.telCLIRNWState = -14690
+suppServiceResponse.telServiceState = 36219
+suppServiceResponse.telResponseText = "aspas \" barra \\ é 399"
+validFlag = 36401
+[DSIMobileEquipment.updateServiceProvider]
+serviceProvider.displayConditionProviderName = 1
+serviceProvider.displayConditionServiceProviderName = 1
+serviceProvider.telServiceProviderName = "t403"
+validFlag = 36765
+[DSIMobileEquipment.updateSIMAliasInformation]
+simAliasInformation.btAddress = "t405"
+simAliasInformation.imsi = "aspas \" barra \\ é 406"
+simAliasInformation.activeName = "t407"
+simAliasInformation.inactiveName = "t408"
+validFlag = -15134
+[DSIMobileEquipment.updateMicGainLevel]
+micGainLevel = 37311
+validFlag = -15208
+[DSIMobileEquipment.updateOptimizationMode]
+optimizationMode = 37493
+validFlag = -15282
+[DSIMobileEquipment.updateNADMode]
+nadMode = 37675
+validFlag = -15356
+[DSIMobileEquipment.updateOtherSIMAvailable]
+otherSIMAvailable = 1
+validFlag = -15430
+[DSIMobileEquipment.updatePrefixContent]
+prefixContent = "t418"
+validFlag = -15504
+[DSIMobileEquipment.updatePhoneReminderSetting]
+phoneReminderSetting = 1
+validFlag = -15578
+[DSIMobileEquipment.updatePrefixActivated]
+prefixActivated = 1
+validFlag = -15652
+[DSIMobileEquipment.updateWidebandSpeech]
+active = 1
+validFlag = -15726
+[DSIMobileEquipment.updatePhoneRingtone]
+ringtoneIndex = 38767
+ringtonePath = "aspas \" barra \\ é 427"
+validFlag = 38949
+[DSIMobileEquipment.updateFavorites]
+favorites[0].name = "t429"
+favorites[0].number = "t430"
+favorites[1].name = "t431"
+favorites[1].number = "t432"
+validFlag = -16022
+[DSIMobileEquipment.updateSAPUpgradeActive]
+active = 1
+validFlag = -16096
+[DSIMobileEquipment.updateEUICCID]
+eUICCID = "t436"
+validFlag = -16170
+[DSIMobileEquipment.updateESIMMSISDN]
+eSIMMSISDN = "t438"
+validFlag = -16244
+[DSIMobileEquipment.updateESimActive]
+active = 1
+validFlag = -16318
+[DSIMobileEquipment.updateESimB2BMode]
+active = 1
+validFlag = -16392
+[DSIMobileEquipment.updateCallstacksIsReverted]
+isReverted = 1
+validFlag = -16466
+[DSIMobileEquipment.updateLastAnsweredNumbers]
+lastAnsweredNumbers[0].clEntryID = 40587
+lastAnsweredNumbers[0].clNumber = "t447"
+lastAnsweredNumbers[0].contactInformation.name = "aspas \" barra \\ é 448"
+lastAnsweredNumbers[0].contactInformation.lastName = "t449"
+lastAnsweredNumbers[0].contactInformation.firstName = "t450"
+lastAnsweredNumbers[0].contactInformation.organization = "t451"
+lastAnsweredNumbers[0].contactInformation.adbEntryID = 13560000008589
+lastAnsweredNumbers[0].contactInformation.adbPictureID.id = -16762
+lastAnsweredNumbers[0].contactInformation.adbPictureID.url = "t454"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 455"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 41497
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t457"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 41679
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t459"
+lastAnsweredNumbers[0].contactInformation.adbPhoneDataCount = 41861
+lastAnsweredNumbers[0].contactInformation.entryType = -17058
+lastAnsweredNumbers[0].contactInformation.generalDescription1 = "aspas \" barra \\ é 462"
+lastAnsweredNumbers[0].contactInformation.generalDescription2 = "t463"
+lastAnsweredNumbers[0].contactInformation.probNavigable = 42225
+lastAnsweredNumbers[0].contactInformation.navigable = -17206
+lastAnsweredNumbers[0].contactInformation.webAddressCount = 42407
+lastAnsweredNumbers[0].contactInformation.emailCount = -17280
+lastAnsweredNumbers[0].clName = "t468"
+lastAnsweredNumbers[0].lastName = "aspas \" barra \\ é 469"
+lastAnsweredNumbers[0].firstName = "t470"
+lastAnsweredNumbers[0].organization = "t471"
+lastAnsweredNumbers[0].clEntryOrigin = 42953
+lastAnsweredNumbers[0].clEntryType = -17502
+lastAnsweredNumbers[0].clYear = 43135
+lastAnsweredNumbers[0].clMonth = -17576
+lastAnsweredNumbers[0].clDay = 43317
+lastAnsweredNumbers[0].clHour = -17650
+lastAnsweredNumbers[0].clMinute = 43499
+lastAnsweredNumbers[0].clSecond = -17724
+lastAnsweredNumbers[0].adbPictureID.id = 43681
+lastAnsweredNumbers[0].adbPictureID.url = "t481"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t482"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = -17872
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t484"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = -17946
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "t486"
+lastAnsweredNumbers[0].adbEntryID = -48701462
+lastAnsweredNumbers[0].adbPhoneDataIndex = 44409
+lastAnsweredNumbers[0].adbPhoneDataCount = -18094
+lastAnsweredNumbers[0].newMissedCallAttempts = 44591
+lastAnsweredNumbers[0].adbNumberType = -18168
+lastAnsweredNumbers[1].clEntryID = 44773
+lastAnsweredNumbers[1].clNumber = "t493"
+lastAnsweredNumbers[1].contactInformation.name = "t494"
+lastAnsweredNumbers[1].contactInformation.lastName = "t495"
+lastAnsweredNumbers[1].contactInformation.firstName = "t496"
+lastAnsweredNumbers[1].contactInformation.organization = "aspas \" barra \\ é 497"
+lastAnsweredNumbers[1].contactInformation.adbEntryID = 14940000009463
+lastAnsweredNumbers[1].contactInformation.adbPictureID.id = -18464
+lastAnsweredNumbers[1].contactInformation.adbPictureID.url = "t500"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t501"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 45683
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t503"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 45865
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t505"
+lastAnsweredNumbers[1].contactInformation.adbPhoneDataCount = 46047
+lastAnsweredNumbers[1].contactInformation.entryType = -18760
+lastAnsweredNumbers[1].contactInformation.generalDescription1 = "t508"
+lastAnsweredNumbers[1].contactInformation.generalDescription2 = "t509"
+lastAnsweredNumbers[1].contactInformation.probNavigable = 46411
+lastAnsweredNumbers[1].contactInformation.navigable = -18908
+lastAnsweredNumbers[1].contactInformation.webAddressCount = 46593
+lastAnsweredNumbers[1].contactInformation.emailCount = -18982
+lastAnsweredNumbers[1].clName = "t514"
+lastAnsweredNumbers[1].lastName = "t515"
+lastAnsweredNumbers[1].firstName = "t516"
+lastAnsweredNumbers[1].organization = "t517"
+lastAnsweredNumbers[1].clEntryOrigin = 47139
+lastAnsweredNumbers[1].clEntryType = -19204
+lastAnsweredNumbers[1].clYear = 47321
+lastAnsweredNumbers[1].clMonth = -19278
+lastAnsweredNumbers[1].clDay = 47503
+lastAnsweredNumbers[1].clHour = -19352
+lastAnsweredNumbers[1].clMinute = 47685
+lastAnsweredNumbers[1].clSecond = -19426
+lastAnsweredNumbers[1].adbPictureID.id = 47867
+lastAnsweredNumbers[1].adbPictureID.url = "t527"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t528"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = -19574
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t530"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = -19648
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 532"
+lastAnsweredNumbers[1].adbEntryID = -53301600
+lastAnsweredNumbers[1].adbPhoneDataIndex = 48595
+lastAnsweredNumbers[1].adbPhoneDataCount = -19796
+lastAnsweredNumbers[1].newMissedCallAttempts = 48777
+lastAnsweredNumbers[1].adbNumberType = -19870
+validFlag = 48959
+[DSIMobileEquipment.updateLastDialedNumbers]
+lastDialedNumbers[0].clEntryID = -19944
+lastDialedNumbers[0].clNumber = "t540"
+lastDialedNumbers[0].contactInformation.name = "t541"
+lastDialedNumbers[0].contactInformation.lastName = "t542"
+lastDialedNumbers[0].contactInformation.firstName = "t543"
+lastDialedNumbers[0].contactInformation.organization = "t544"
+lastDialedNumbers[0].contactInformation.adbEntryID = -54501636
+lastDialedNumbers[0].contactInformation.adbPictureID.id = 49687
+lastDialedNumbers[0].contactInformation.adbPictureID.url = "t547"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t548"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -20314
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t550"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -20388
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t552"
+lastDialedNumbers[0].contactInformation.adbPhoneDataCount = -20462
+lastDialedNumbers[0].contactInformation.entryType = 50415
+lastDialedNumbers[0].contactInformation.generalDescription1 = "t555"
+lastDialedNumbers[0].contactInformation.generalDescription2 = "t556"
+lastDialedNumbers[0].contactInformation.probNavigable = -20610
+lastDialedNumbers[0].contactInformation.navigable = 50779
+lastDialedNumbers[0].contactInformation.webAddressCount = -20684
+lastDialedNumbers[0].contactInformation.emailCount = 50961
+lastDialedNumbers[0].clName = "t561"
+lastDialedNumbers[0].lastName = "t562"
+lastDialedNumbers[0].firstName = "t563"
+lastDialedNumbers[0].organization = "t564"
+lastDialedNumbers[0].clEntryOrigin = -20906
+lastDialedNumbers[0].clEntryType = 51507
+lastDialedNumbers[0].clYear = -20980
+lastDialedNumbers[0].clMonth = 51689
+lastDialedNumbers[0].clDay = -21054
+lastDialedNumbers[0].clHour = 51871
+lastDialedNumbers[0].clMinute = -21128
+lastDialedNumbers[0].clSecond = 52053
+lastDialedNumbers[0].adbPictureID.id = -21202
+lastDialedNumbers[0].adbPictureID.url = "aspas \" barra \\ é 574"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t575"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = 52417
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t577"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = 52599
+lastDialedNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "t579"
+lastDialedNumbers[0].adbEntryID = 17400000011021
+lastDialedNumbers[0].adbPhoneDataIndex = -21498
+lastDialedNumbers[0].adbPhoneDataCount = 52963
+lastDialedNumbers[0].newMissedCallAttempts = -21572
+lastDialedNumbers[0].adbNumberType = 53145
+lastDialedNumbers[1].clEntryID = -21646
+lastDialedNumbers[1].clNumber = "t586"
+lastDialedNumbers[1].contactInformation.name = "t587"
+lastDialedNumbers[1].contactInformation.lastName = "aspas \" barra \\ é 588"
+lastDialedNumbers[1].contactInformation.firstName = "t589"
+lastDialedNumbers[1].contactInformation.organization = "t590"
+lastDialedNumbers[1].contactInformation.adbEntryID = -59101774
+lastDialedNumbers[1].contactInformation.adbPictureID.id = 53873
+lastDialedNumbers[1].contactInformation.adbPictureID.url = "t593"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t594"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -22016
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t596"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -22090
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t598"
+lastDialedNumbers[1].contactInformation.adbPhoneDataCount = -22164
+lastDialedNumbers[1].contactInformation.entryType = 54601
+lastDialedNumbers[1].contactInformation.generalDescription1 = "t601"
+lastDialedNumbers[1].contactInformation.generalDescription2 = "aspas \" barra \\ é 602"
+lastDialedNumbers[1].contactInformation.probNavigable = -22312
+lastDialedNumbers[1].contactInformation.navigable = 54965
+lastDialedNumbers[1].contactInformation.webAddressCount = -22386
+lastDialedNumbers[1].contactInformation.emailCount = 55147
+lastDialedNumbers[1].clName = "t607"
+lastDialedNumbers[1].lastName = "t608"
+lastDialedNumbers[1].firstName = "aspas \" barra \\ é 609"
+lastDialedNumbers[1].organization = "t610"
+lastDialedNumbers[1].clEntryOrigin = -22608
+lastDialedNumbers[1].clEntryType = 55693
+lastDialedNumbers[1].clYear = -22682
+lastDialedNumbers[1].clMonth = 55875
+lastDialedNumbers[1].clDay = -22756
+lastDialedNumbers[1].clHour = 56057
+lastDialedNumbers[1].clMinute = -22830
+lastDialedNumbers[1].clSecond = 56239
+lastDialedNumbers[1].adbPictureID.id = -22904
+lastDialedNumbers[1].adbPictureID.url = "t620"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t621"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = 56603
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 623"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = 56785
+lastDialedNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "t625"
+lastDialedNumbers[1].adbEntryID = 18780000011895
+lastDialedNumbers[1].adbPhoneDataIndex = -23200
+lastDialedNumbers[1].adbPhoneDataCount = 57149
+lastDialedNumbers[1].newMissedCallAttempts = -23274
+lastDialedNumbers[1].adbNumberType = 57331
+validFlag = -23348
+[DSIMobileEquipment.updateMissedNumbers]
+missedNumbers[0].clEntryID = 57513
+missedNumbers[0].clNumber = "t633"
+missedNumbers[0].contactInformation.name = "t634"
+missedNumbers[0].contactInformation.lastName = "t635"
+missedNumbers[0].contactInformation.firstName = "t636"
+missedNumbers[0].contactInformation.organization = "aspas \" barra \\ é 637"
+missedNumbers[0].contactInformation.adbEntryID = 19140000012123
+missedNumbers[0].contactInformation.adbPictureID.id = -23644
+missedNumbers[0].contactInformation.adbPictureID.url = "t640"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t641"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 58423
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t643"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 58605
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t645"
+missedNumbers[0].contactInformation.adbPhoneDataCount = 58787
+missedNumbers[0].contactInformation.entryType = -23940
+missedNumbers[0].contactInformation.generalDescription1 = "t648"
+missedNumbers[0].contactInformation.generalDescription2 = "t649"
+missedNumbers[0].contactInformation.probNavigable = 59151
+missedNumbers[0].contactInformation.navigable = -24088
+missedNumbers[0].contactInformation.webAddressCount = 59333
+missedNumbers[0].contactInformation.emailCount = -24162
+missedNumbers[0].clName = "t654"
+missedNumbers[0].lastName = "t655"
+missedNumbers[0].firstName = "t656"
+missedNumbers[0].organization = "t657"
+missedNumbers[0].clEntryOrigin = 59879
+missedNumbers[0].clEntryType = -24384
+missedNumbers[0].clYear = 60061
+missedNumbers[0].clMonth = -24458
+missedNumbers[0].clDay = 60243
+missedNumbers[0].clHour = -24532
+missedNumbers[0].clMinute = 60425
+missedNumbers[0].clSecond = -24606
+missedNumbers[0].adbPictureID.id = 60607
+missedNumbers[0].adbPictureID.url = "t667"
+missedNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t668"
+missedNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = -24754
+missedNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t670"
+missedNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = -24828
+missedNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 672"
+missedNumbers[0].adbEntryID = -67302020
+missedNumbers[0].adbPhoneDataIndex = 61335
+missedNumbers[0].adbPhoneDataCount = -24976
+missedNumbers[0].newMissedCallAttempts = 61517
+missedNumbers[0].adbNumberType = -25050
+missedNumbers[1].clEntryID = 61699
+missedNumbers[1].clNumber = "aspas \" barra \\ é 679"
+missedNumbers[1].contactInformation.name = "t680"
+missedNumbers[1].contactInformation.lastName = "t681"
+missedNumbers[1].contactInformation.firstName = "t682"
+missedNumbers[1].contactInformation.organization = "t683"
+missedNumbers[1].contactInformation.adbEntryID = 20520000012997
+missedNumbers[1].contactInformation.adbPictureID.id = -25346
+missedNumbers[1].contactInformation.adbPictureID.url = "aspas \" barra \\ é 686"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t687"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 62609
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t689"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 62791
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t691"
+missedNumbers[1].contactInformation.adbPhoneDataCount = 62973
+missedNumbers[1].contactInformation.entryType = -25642
+missedNumbers[1].contactInformation.generalDescription1 = "t694"
+missedNumbers[1].contactInformation.generalDescription2 = "t695"
+missedNumbers[1].contactInformation.probNavigable = 63337
+missedNumbers[1].contactInformation.navigable = -25790
+missedNumbers[1].contactInformation.webAddressCount = 63519
+missedNumbers[1].contactInformation.emailCount = -25864
+missedNumbers[1].clName = "aspas \" barra \\ é 700"
+missedNumbers[1].lastName = "t701"
+missedNumbers[1].firstName = "t702"
+missedNumbers[1].organization = "t703"
+missedNumbers[1].clEntryOrigin = 64065
+missedNumbers[1].clEntryType = -26086
+missedNumbers[1].clYear = 64247
+missedNumbers[1].clMonth = -26160
+missedNumbers[1].clDay = 64429
+missedNumbers[1].clHour = -26234
+missedNumbers[1].clMinute = 64611
+missedNumbers[1].clSecond = -26308
+missedNumbers[1].adbPictureID.id = 64793
+missedNumbers[1].adbPictureID.url = "t713"
+missedNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 714"
+missedNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = -26456
+missedNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t716"
+missedNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = -26530
+missedNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "t718"
+missedNumbers[1].adbEntryID = -71902158
+missedNumbers[1].adbPhoneDataIndex = 65521
+missedNumbers[1].adbPhoneDataCount = -26678
+missedNumbers[1].newMissedCallAttempts = 65703
+missedNumbers[1].adbNumberType = -26752
+validFlag = 65885
+[DSIMobileEquipment.updateMEDataValidity]
+mEDataValidity = -26826
+validFlag = 66067
+[DSIMobileEquipment.updateMissedCallIndicator]
+missedCallIndicator.missedCall = 1
+missedCallIndicator.missedCallCount = 66249
+validFlag = -26974
+[DSIMobileEquipment.updateSpeechRecognitionAvailable]
+available = 66431
+validFlag = -27048
+[DSIMobileEquipment.updateSpeechRecognitionActive]
+active = 66613
+validFlag = -27122
+[DSIMobileEquipment.updateSpeechRecognitionType]
+type = 66795
+validFlag = -27196
+[DSIMobileEquipment.updateConfidentialMode]
+confidentialModeStruct.confidentialMode = 66977
+confidentialModeStruct.pin = "t737"
+confidentialModeStruct.allowedTerminals[0] = 67159
+confidentialModeStruct.allowedTerminals[1] = -27344
+confidentialModeStruct.confidentialModeDeactivatedTerminalId = 67341
+validFlag = -27418
+[DSIMobileEquipment.updateRejectCallWithSMS]
+text = "aspas \" barra \\ é 742"
+account = -27492
+on = 1
+validFlag = -27566
+[DSIMobileEquipment.updateLastAnsweredNumbersRaw]
+lastAnsweredNumbers[0].clEntryID = 67887
+lastAnsweredNumbers[0].clNumber = "t747"
+lastAnsweredNumbers[0].contactInformation.name = "t748"
+lastAnsweredNumbers[0].contactInformation.lastName = "aspas \" barra \\ é 749"
+lastAnsweredNumbers[0].contactInformation.firstName = "t750"
+lastAnsweredNumbers[0].contactInformation.organization = "t751"
+lastAnsweredNumbers[0].contactInformation.adbEntryID = 22560000014289
+lastAnsweredNumbers[0].contactInformation.adbPictureID.id = -27862
+lastAnsweredNumbers[0].contactInformation.adbPictureID.url = "t754"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t755"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 68797
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t757"
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 68979
+lastAnsweredNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t759"
+lastAnsweredNumbers[0].contactInformation.adbPhoneDataCount = 69161
+lastAnsweredNumbers[0].contactInformation.entryType = -28158
+lastAnsweredNumbers[0].contactInformation.generalDescription1 = "t762"
+lastAnsweredNumbers[0].contactInformation.generalDescription2 = "aspas \" barra \\ é 763"
+lastAnsweredNumbers[0].contactInformation.probNavigable = 69525
+lastAnsweredNumbers[0].contactInformation.navigable = -28306
+lastAnsweredNumbers[0].contactInformation.webAddressCount = 69707
+lastAnsweredNumbers[0].contactInformation.emailCount = -28380
+lastAnsweredNumbers[0].clName = "t768"
+lastAnsweredNumbers[0].lastName = "t769"
+lastAnsweredNumbers[0].firstName = "aspas \" barra \\ é 770"
+lastAnsweredNumbers[0].organization = "t771"
+lastAnsweredNumbers[0].clEntryOrigin = 70253
+lastAnsweredNumbers[0].clEntryType = -28602
+lastAnsweredNumbers[0].clYear = 70435
+lastAnsweredNumbers[0].clMonth = -28676
+lastAnsweredNumbers[0].clDay = 70617
+lastAnsweredNumbers[0].clHour = -28750
+lastAnsweredNumbers[0].clMinute = 70799
+lastAnsweredNumbers[0].clSecond = -28824
+lastAnsweredNumbers[0].adbPictureID.id = 70981
+lastAnsweredNumbers[0].adbPictureID.url = "t781"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t782"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = -28972
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 784"
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = -29046
+lastAnsweredNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "t786"
+lastAnsweredNumbers[0].adbEntryID = -78702362
+lastAnsweredNumbers[0].adbPhoneDataIndex = 71709
+lastAnsweredNumbers[0].adbPhoneDataCount = -29194
+lastAnsweredNumbers[0].newMissedCallAttempts = 71891
+lastAnsweredNumbers[0].adbNumberType = -29268
+lastAnsweredNumbers[1].clEntryID = 72073
+lastAnsweredNumbers[1].clNumber = "t793"
+lastAnsweredNumbers[1].contactInformation.name = "t794"
+lastAnsweredNumbers[1].contactInformation.lastName = "t795"
+lastAnsweredNumbers[1].contactInformation.firstName = "t796"
+lastAnsweredNumbers[1].contactInformation.organization = "t797"
+lastAnsweredNumbers[1].contactInformation.adbEntryID = 23940000015163
+lastAnsweredNumbers[1].contactInformation.adbPictureID.id = -29564
+lastAnsweredNumbers[1].contactInformation.adbPictureID.url = "t800"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t801"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 72983
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t803"
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 73165
+lastAnsweredNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 805"
+lastAnsweredNumbers[1].contactInformation.adbPhoneDataCount = 73347
+lastAnsweredNumbers[1].contactInformation.entryType = -29860
+lastAnsweredNumbers[1].contactInformation.generalDescription1 = "t808"
+lastAnsweredNumbers[1].contactInformation.generalDescription2 = "t809"
+lastAnsweredNumbers[1].contactInformation.probNavigable = 73711
+lastAnsweredNumbers[1].contactInformation.navigable = -30008
+lastAnsweredNumbers[1].contactInformation.webAddressCount = 73893
+lastAnsweredNumbers[1].contactInformation.emailCount = -30082
+lastAnsweredNumbers[1].clName = "t814"
+lastAnsweredNumbers[1].lastName = "t815"
+lastAnsweredNumbers[1].firstName = "t816"
+lastAnsweredNumbers[1].organization = "t817"
+lastAnsweredNumbers[1].clEntryOrigin = 74439
+lastAnsweredNumbers[1].clEntryType = -30304
+lastAnsweredNumbers[1].clYear = 74621
+lastAnsweredNumbers[1].clMonth = -30378
+lastAnsweredNumbers[1].clDay = 74803
+lastAnsweredNumbers[1].clHour = -30452
+lastAnsweredNumbers[1].clMinute = 74985
+lastAnsweredNumbers[1].clSecond = -30526
+lastAnsweredNumbers[1].adbPictureID.id = 75167
+lastAnsweredNumbers[1].adbPictureID.url = "t827"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t828"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = -30674
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t830"
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = -30748
+lastAnsweredNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "t832"
+lastAnsweredNumbers[1].adbEntryID = -83302500
+lastAnsweredNumbers[1].adbPhoneDataIndex = 75895
+lastAnsweredNumbers[1].adbPhoneDataCount = -30896
+lastAnsweredNumbers[1].newMissedCallAttempts = 76077
+lastAnsweredNumbers[1].adbNumberType = -30970
+validFlag = 76259
+[DSIMobileEquipment.updateLastDialedNumbersRaw]
+lastDialedNumbers[0].clEntryID = -31044
+lastDialedNumbers[0].clNumber = "aspas \" barra \\ é 840"
+lastDialedNumbers[0].contactInformation.name = "t841"
+lastDialedNumbers[0].contactInformation.lastName = "t842"
+lastDialedNumbers[0].contactInformation.firstName = "t843"
+lastDialedNumbers[0].contactInformation.organization = "t844"
+lastDialedNumbers[0].contactInformation.adbEntryID = -84502536
+lastDialedNumbers[0].contactInformation.adbPictureID.id = 76987
+lastDialedNumbers[0].contactInformation.adbPictureID.url = "aspas \" barra \\ é 847"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t848"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -31414
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t850"
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -31488
+lastDialedNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t852"
+lastDialedNumbers[0].contactInformation.adbPhoneDataCount = -31562
+lastDialedNumbers[0].contactInformation.entryType = 77715
+lastDialedNumbers[0].contactInformation.generalDescription1 = "t855"
+lastDialedNumbers[0].contactInformation.generalDescription2 = "t856"
+lastDialedNumbers[0].contactInformation.probNavigable = -31710
+lastDialedNumbers[0].contactInformation.navigable = 78079
+lastDialedNumbers[0].contactInformation.webAddressCount = -31784
+lastDialedNumbers[0].contactInformation.emailCount = 78261
+lastDialedNumbers[0].clName = "aspas \" barra \\ é 861"
+lastDialedNumbers[0].lastName = "t862"
+lastDialedNumbers[0].firstName = "t863"
+lastDialedNumbers[0].organization = "t864"
+lastDialedNumbers[0].clEntryOrigin = -32006
+lastDialedNumbers[0].clEntryType = 78807
+lastDialedNumbers[0].clYear = -32080
+lastDialedNumbers[0].clMonth = 78989
+lastDialedNumbers[0].clDay = -32154
+lastDialedNumbers[0].clHour = 79171
+lastDialedNumbers[0].clMinute = -32228
+lastDialedNumbers[0].clSecond = 79353
+lastDialedNumbers[0].adbPictureID.id = -32302
+lastDialedNumbers[0].adbPictureID.url = "t874"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 875"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = 79717
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t877"
+lastDialedNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = 79899
+lastDialedNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "t879"
+lastDialedNumbers[0].adbEntryID = 26400000016721
+lastDialedNumbers[0].adbPhoneDataIndex = -32598
+lastDialedNumbers[0].adbPhoneDataCount = 80263
+lastDialedNumbers[0].newMissedCallAttempts = -32672
+lastDialedNumbers[0].adbNumberType = 80445
+lastDialedNumbers[1].clEntryID = -32746
+lastDialedNumbers[1].clNumber = "t886"
+lastDialedNumbers[1].contactInformation.name = "t887"
+lastDialedNumbers[1].contactInformation.lastName = "t888"
+lastDialedNumbers[1].contactInformation.firstName = "aspas \" barra \\ é 889"
+lastDialedNumbers[1].contactInformation.organization = "t890"
+lastDialedNumbers[1].contactInformation.adbEntryID = -89102674
+lastDialedNumbers[1].contactInformation.adbPictureID.id = 81173
+lastDialedNumbers[1].contactInformation.adbPictureID.url = "t893"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t894"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -33116
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 896"
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -33190
+lastDialedNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t898"
+lastDialedNumbers[1].contactInformation.adbPhoneDataCount = -33264
+lastDialedNumbers[1].contactInformation.entryType = 81901
+lastDialedNumbers[1].contactInformation.generalDescription1 = "t901"
+lastDialedNumbers[1].contactInformation.generalDescription2 = "t902"
+lastDialedNumbers[1].contactInformation.probNavigable = -33412
+lastDialedNumbers[1].contactInformation.navigable = 82265
+lastDialedNumbers[1].contactInformation.webAddressCount = -33486
+lastDialedNumbers[1].contactInformation.emailCount = 82447
+lastDialedNumbers[1].clName = "t907"
+lastDialedNumbers[1].lastName = "t908"
+lastDialedNumbers[1].firstName = "t909"
+lastDialedNumbers[1].organization = "aspas \" barra \\ é 910"
+lastDialedNumbers[1].clEntryOrigin = -33708
+lastDialedNumbers[1].clEntryType = 82993
+lastDialedNumbers[1].clYear = -33782
+lastDialedNumbers[1].clMonth = 83175
+lastDialedNumbers[1].clDay = -33856
+lastDialedNumbers[1].clHour = 83357
+lastDialedNumbers[1].clMinute = -33930
+lastDialedNumbers[1].clSecond = 83539
+lastDialedNumbers[1].adbPictureID.id = -34004
+lastDialedNumbers[1].adbPictureID.url = "t920"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t921"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = 83903
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t923"
+lastDialedNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = 84085
+lastDialedNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "t925"
+lastDialedNumbers[1].adbEntryID = 27780000017595
+lastDialedNumbers[1].adbPhoneDataIndex = -34300
+lastDialedNumbers[1].adbPhoneDataCount = 84449
+lastDialedNumbers[1].newMissedCallAttempts = -34374
+lastDialedNumbers[1].adbNumberType = 84631
+validFlag = -34448
+[DSIMobileEquipment.updateMissedNumbersRaw]
+missedNumbers[0].clEntryID = 84813
+missedNumbers[0].clNumber = "t933"
+missedNumbers[0].contactInformation.name = "t934"
+missedNumbers[0].contactInformation.lastName = "t935"
+missedNumbers[0].contactInformation.firstName = "t936"
+missedNumbers[0].contactInformation.organization = "t937"
+missedNumbers[0].contactInformation.adbEntryID = 28140000017823
+missedNumbers[0].contactInformation.adbPictureID.id = -34744
+missedNumbers[0].contactInformation.adbPictureID.url = "t940"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t941"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 85723
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t943"
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 85905
+missedNumbers[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 945"
+missedNumbers[0].contactInformation.adbPhoneDataCount = 86087
+missedNumbers[0].contactInformation.entryType = -35040
+missedNumbers[0].contactInformation.generalDescription1 = "t948"
+missedNumbers[0].contactInformation.generalDescription2 = "t949"
+missedNumbers[0].contactInformation.probNavigable = 86451
+missedNumbers[0].contactInformation.navigable = -35188
+missedNumbers[0].contactInformation.webAddressCount = 86633
+missedNumbers[0].contactInformation.emailCount = -35262
+missedNumbers[0].clName = "t954"
+missedNumbers[0].lastName = "t955"
+missedNumbers[0].firstName = "t956"
+missedNumbers[0].organization = "t957"
+missedNumbers[0].clEntryOrigin = 87179
+missedNumbers[0].clEntryType = -35484
+missedNumbers[0].clYear = 87361
+missedNumbers[0].clMonth = -35558
+missedNumbers[0].clDay = 87543
+missedNumbers[0].clHour = -35632
+missedNumbers[0].clMinute = 87725
+missedNumbers[0].clSecond = -35706
+missedNumbers[0].adbPictureID.id = 87907
+missedNumbers[0].adbPictureID.url = "t967"
+missedNumbers[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t968"
+missedNumbers[0].adbPictureID.cdnAccess.cdnInternalPort = -35854
+missedNumbers[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t970"
+missedNumbers[0].adbPictureID.cdnAccess.cdnExternalPort = -35928
+missedNumbers[0].adbPictureID.cdnAccess.imageResourcePath = "t972"
+missedNumbers[0].adbEntryID = -97302920
+missedNumbers[0].adbPhoneDataIndex = 88635
+missedNumbers[0].adbPhoneDataCount = -36076
+missedNumbers[0].newMissedCallAttempts = 88817
+missedNumbers[0].adbNumberType = -36150
+missedNumbers[1].clEntryID = 88999
+missedNumbers[1].clNumber = "t979"
+missedNumbers[1].contactInformation.name = "aspas \" barra \\ é 980"
+missedNumbers[1].contactInformation.lastName = "t981"
+missedNumbers[1].contactInformation.firstName = "t982"
+missedNumbers[1].contactInformation.organization = "t983"
+missedNumbers[1].contactInformation.adbEntryID = 29520000018697
+missedNumbers[1].contactInformation.adbPictureID.id = -36446
+missedNumbers[1].contactInformation.adbPictureID.url = "t986"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 987"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 89909
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t989"
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 90091
+missedNumbers[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t991"
+missedNumbers[1].contactInformation.adbPhoneDataCount = 90273
+missedNumbers[1].contactInformation.entryType = -36742
+missedNumbers[1].contactInformation.generalDescription1 = "aspas \" barra \\ é 994"
+missedNumbers[1].contactInformation.generalDescription2 = "t995"
+missedNumbers[1].contactInformation.probNavigable = 90637
+missedNumbers[1].contactInformation.navigable = -36890
+missedNumbers[1].contactInformation.webAddressCount = 90819
+missedNumbers[1].contactInformation.emailCount = -36964
+missedNumbers[1].clName = "t1000"
+missedNumbers[1].lastName = "aspas \" barra \\ é 1001"
+missedNumbers[1].firstName = "t1002"
+missedNumbers[1].organization = "t1003"
+missedNumbers[1].clEntryOrigin = 91365
+missedNumbers[1].clEntryType = -37186
+missedNumbers[1].clYear = 91547
+missedNumbers[1].clMonth = -37260
+missedNumbers[1].clDay = 91729
+missedNumbers[1].clHour = -37334
+missedNumbers[1].clMinute = 91911
+missedNumbers[1].clSecond = -37408
+missedNumbers[1].adbPictureID.id = 92093
+missedNumbers[1].adbPictureID.url = "t1013"
+missedNumbers[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1014"
+missedNumbers[1].adbPictureID.cdnAccess.cdnInternalPort = -37556
+missedNumbers[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1016"
+missedNumbers[1].adbPictureID.cdnAccess.cdnExternalPort = -37630
+missedNumbers[1].adbPictureID.cdnAccess.imageResourcePath = "t1018"
+missedNumbers[1].adbEntryID = -101903058
+missedNumbers[1].adbPhoneDataIndex = 92821
+missedNumbers[1].adbPhoneDataCount = -37778
+missedNumbers[1].newMissedCallAttempts = 93003
+missedNumbers[1].adbNumberType = -37852
+validFlag = 93185
+[DSIMobileEquipment.updateAutomaticAccept]
+on = 1
+validFlag = 93367
+[DSIMobileEquipment.updateIntelligentCallStatisticsConfiguration]
+callStackTypes = -38000
+groupingCritieria = 93549
+includeNumbersWithoutContact = 1
+validFlag = 93731
+[DSIMobileEquipment.updateIntelligentCallStatistics]
+entries[0].callStackEntry.clEntryID = -38148
+entries[0].callStackEntry.clNumber = "t1032"
+entries[0].callStackEntry.contactInformation.name = "t1033"
+entries[0].callStackEntry.contactInformation.lastName = "t1034"
+entries[0].callStackEntry.contactInformation.firstName = "t1035"
+entries[0].callStackEntry.contactInformation.organization = "aspas \" barra \\ é 1036"
+entries[0].callStackEntry.contactInformation.adbEntryID = -103703112
+entries[0].callStackEntry.contactInformation.adbPictureID.id = 94459
+entries[0].callStackEntry.contactInformation.adbPictureID.url = "t1039"
+entries[0].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1040"
+entries[0].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -38518
+entries[0].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1042"
+entries[0].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -38592
+entries[0].callStackEntry.contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t1044"
+entries[0].callStackEntry.contactInformation.adbPhoneDataCount = -38666
+entries[0].callStackEntry.contactInformation.entryType = 95187
+entries[0].callStackEntry.contactInformation.generalDescription1 = "t1047"
+entries[0].callStackEntry.contactInformation.generalDescription2 = "t1048"
+entries[0].callStackEntry.contactInformation.probNavigable = -38814
+entries[0].callStackEntry.contactInformation.navigable = 95551
+entries[0].callStackEntry.contactInformation.webAddressCount = -38888
+entries[0].callStackEntry.contactInformation.emailCount = 95733
+entries[0].callStackEntry.clName = "t1053"
+entries[0].callStackEntry.lastName = "t1054"
+entries[0].callStackEntry.firstName = "t1055"
+entries[0].callStackEntry.organization = "t1056"
+entries[0].callStackEntry.clEntryOrigin = -39110
+entries[0].callStackEntry.clEntryType = 96279
+entries[0].callStackEntry.clYear = -39184
+entries[0].callStackEntry.clMonth = 96461
+entries[0].callStackEntry.clDay = -39258
+entries[0].callStackEntry.clHour = 96643
+entries[0].callStackEntry.clMinute = -39332
+entries[0].callStackEntry.clSecond = 96825
+entries[0].callStackEntry.adbPictureID.id = -39406
+entries[0].callStackEntry.adbPictureID.url = "t1066"
+entries[0].callStackEntry.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1067"
+entries[0].callStackEntry.adbPictureID.cdnAccess.cdnInternalPort = 97189
+entries[0].callStackEntry.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1069"
+entries[0].callStackEntry.adbPictureID.cdnAccess.cdnExternalPort = 97371
+entries[0].callStackEntry.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1071"
+entries[0].callStackEntry.adbEntryID = 32160000020369
+entries[0].callStackEntry.adbPhoneDataIndex = -39702
+entries[0].callStackEntry.adbPhoneDataCount = 97735
+entries[0].callStackEntry.newMissedCallAttempts = -39776
+entries[0].callStackEntry.adbNumberType = 97917
+entries[0].callCount = -39850
+entries[0].phoneNumberDetails[0].phoneNumber = "aspas \" barra \\ é 1078"
+entries[0].phoneNumberDetails[0].callCount = -39924
+entries[0].phoneNumberDetails[1].phoneNumber = "t1080"
+entries[0].phoneNumberDetails[1].callCount = -39998
+entries[1].callStackEntry.clEntryID = 98463
+entries[1].callStackEntry.clNumber = "t1083"
+entries[1].callStackEntry.contactInformation.name = "t1084"
+entries[1].callStackEntry.contactInformation.lastName = "aspas \" barra \\ é 1085"
+entries[1].callStackEntry.contactInformation.firstName = "t1086"
+entries[1].callStackEntry.contactInformation.organization = "t1087"
+entries[1].callStackEntry.contactInformation.adbEntryID = 32640000020673
+entries[1].callStackEntry.contactInformation.adbPictureID.id = -40294
+entries[1].callStackEntry.contactInformation.adbPictureID.url = "t1090"
+entries[1].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1091"
+entries[1].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 99373
+entries[1].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1093"
+entries[1].callStackEntry.contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 99555
+entries[1].callStackEntry.contactInformation.adbPictureID.cdnAccess.imageResourcePath = "t1095"
+entries[1].callStackEntry.contactInformation.adbPhoneDataCount = 99737
+entries[1].callStackEntry.contactInformation.entryType = -40590
+entries[1].callStackEntry.contactInformation.generalDescription1 = "t1098"
+entries[1].callStackEntry.contactInformation.generalDescription2 = "aspas \" barra \\ é 1099"
+entries[1].callStackEntry.contactInformation.probNavigable = 100101
+entries[1].callStackEntry.contactInformation.navigable = -40738
+entries[1].callStackEntry.contactInformation.webAddressCount = 100283
+entries[1].callStackEntry.contactInformation.emailCount = -40812
+entries[1].callStackEntry.clName = "t1104"
+entries[1].callStackEntry.lastName = "t1105"
+entries[1].callStackEntry.firstName = "aspas \" barra \\ é 1106"
+entries[1].callStackEntry.organization = "t1107"
+entries[1].callStackEntry.clEntryOrigin = 100829
+entries[1].callStackEntry.clEntryType = -41034
+entries[1].callStackEntry.clYear = 101011
+entries[1].callStackEntry.clMonth = -41108
+entries[1].callStackEntry.clDay = 101193
+entries[1].callStackEntry.clHour = -41182
+entries[1].callStackEntry.clMinute = 101375
+entries[1].callStackEntry.clSecond = -41256
+entries[1].callStackEntry.adbPictureID.id = 101557
+entries[1].callStackEntry.adbPictureID.url = "t1117"
+entries[1].callStackEntry.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1118"
+entries[1].callStackEntry.adbPictureID.cdnAccess.cdnInternalPort = -41404
+entries[1].callStackEntry.adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1120"
+entries[1].callStackEntry.adbPictureID.cdnAccess.cdnExternalPort = -41478
+entries[1].callStackEntry.adbPictureID.cdnAccess.imageResourcePath = "t1122"
+entries[1].callStackEntry.adbEntryID = -112303370
+entries[1].callStackEntry.adbPhoneDataIndex = 102285
+entries[1].callStackEntry.adbPhoneDataCount = -41626
+entries[1].callStackEntry.newMissedCallAttempts = 102467
+entries[1].callStackEntry.adbNumberType = -41700
+entries[1].callCount = 102649
+entries[1].phoneNumberDetails[0].phoneNumber = "t1129"
+entries[1].phoneNumberDetails[0].callCount = 102831
+entries[1].phoneNumberDetails[1].phoneNumber = "t1131"
+entries[1].phoneNumberDetails[1].callCount = 103013
+validFlag = -41922
+[DSIMobileEquipment.updateTelephoneFavoritesSupported]
+supported = 1
+validFlag = -41996
+[DSIMobileEquipment.updateTelephoneFavorites]
+telephoneFavorites[0].entryID = 103377
+telephoneFavorites[0].contactInformation.name = "t1137"
+telephoneFavorites[0].contactInformation.lastName = "t1138"
+telephoneFavorites[0].contactInformation.firstName = "t1139"
+telephoneFavorites[0].contactInformation.organization = "t1140"
+telephoneFavorites[0].contactInformation.adbEntryID = -114103424
+telephoneFavorites[0].contactInformation.adbPictureID.id = 103923
+telephoneFavorites[0].contactInformation.adbPictureID.url = "t1143"
+telephoneFavorites[0].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1144"
+telephoneFavorites[0].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = -42366
+telephoneFavorites[0].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1146"
+telephoneFavorites[0].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = -42440
+telephoneFavorites[0].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1148"
+telephoneFavorites[0].contactInformation.adbPhoneDataCount = -42514
+telephoneFavorites[0].contactInformation.entryType = 104651
+telephoneFavorites[0].contactInformation.generalDescription1 = "t1151"
+telephoneFavorites[0].contactInformation.generalDescription2 = "t1152"
+telephoneFavorites[0].contactInformation.probNavigable = -42662
+telephoneFavorites[0].contactInformation.navigable = 105015
+telephoneFavorites[0].contactInformation.webAddressCount = -42736
+telephoneFavorites[0].contactInformation.emailCount = 105197
+telephoneFavorites[1].entryID = -42810
+telephoneFavorites[1].contactInformation.name = "t1158"
+telephoneFavorites[1].contactInformation.lastName = "t1159"
+telephoneFavorites[1].contactInformation.firstName = "t1160"
+telephoneFavorites[1].contactInformation.organization = "t1161"
+telephoneFavorites[1].contactInformation.adbEntryID = 34860000022079
+telephoneFavorites[1].contactInformation.adbPictureID.id = -43032
+telephoneFavorites[1].contactInformation.adbPictureID.url = "t1164"
+telephoneFavorites[1].contactInformation.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1165"
+telephoneFavorites[1].contactInformation.adbPictureID.cdnAccess.cdnInternalPort = 106107
+telephoneFavorites[1].contactInformation.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1167"
+telephoneFavorites[1].contactInformation.adbPictureID.cdnAccess.cdnExternalPort = 106289
+telephoneFavorites[1].contactInformation.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1169"
+telephoneFavorites[1].contactInformation.adbPhoneDataCount = 106471
+telephoneFavorites[1].contactInformation.entryType = -43328
+telephoneFavorites[1].contactInformation.generalDescription1 = "t1172"
+telephoneFavorites[1].contactInformation.generalDescription2 = "t1173"
+telephoneFavorites[1].contactInformation.probNavigable = 106835
+telephoneFavorites[1].contactInformation.navigable = -43476
+telephoneFavorites[1].contactInformation.webAddressCount = 107017
+telephoneFavorites[1].contactInformation.emailCount = -43550
+validFlag = 107199
+[DSIMobileEquipment.updateTelephoneFavoritesAvailable]
+available = 1
+validFlag = 107381
+[DSIMobileEquipment.updateInbandRingingActive]
+inbandRingingActive = 1
+validFlag = 107563
+[DSIMobileEquipment.updateAudioConnectionVolumeLevels]
+audioConnections[0].id = -43772
+audioConnections[0].volumeLevel = 107745
+audioConnections[1].id = -43846
+audioConnections[1].volumeLevel = 107927
+validFlag = -43920
+[DSIMobileEquipment.updateVoLTEEnabled]
+userSwitchable = 1
+enabled = 1
+validFlag = 108291
+[DSIMobileEquipment.updateArtificialWidebandSpeech]
+active = 1
+validFlag = 108473
+[DSIMobileEquipment.updatePhoneTtsReminderSetting]
+active = 1
+validFlag = 108655
+[DSIMobileEquipment.responseAbortNetworkRegistration]
+result = -44216
+[DSIMobileEquipment.responseAbortNetworkSearch]
+result = 108837
+[DSIMobileEquipment.responseAcceptCall]
+result = -44290
+[DSIMobileEquipment.responseCallForward]
+telCFResponseData[0].telCFStatus = 109019
+telCFResponseData[0].telCFCondition = -44364
+telCFResponseData[0].telCFNumber = "t1200"
+telCFResponseData[0].telClass = -44438
+telCFResponseData[0].telNumType = 109383
+telCFResponseData[0].telCFTime = -44512
+telCFResponseData[0].result = 109565
+telCFResponseData[1].telCFStatus = -44586
+telCFResponseData[1].telCFCondition = 109747
+telCFResponseData[1].telCFNumber = "t1207"
+telCFResponseData[1].telClass = 109929
+telCFResponseData[1].telNumType = -44734
+telCFResponseData[1].telCFTime = 110111
+telCFResponseData[1].result = -44808
+result = 110293
+[DSIMobileEquipment.responseCallWaiting]
+telCWStatus = -44882
+result = 110475
+[DSIMobileEquipment.responseChangeSIMCode]
+telLockCode = -44956
+result = 110657
+[DSIMobileEquipment.responseCLIR]
+telCLIRState = -45030
+telCLIRNWState = 110839
+result = -45104
+[DSIMobileEquipment.responseDialNumber]
+result = 111021
+telSuppServResult.telCWStatus = -45178
+telSuppServResult.telCFResponseData[0].telCFStatus = 111203
+telSuppServResult.telCFResponseData[0].telCFCondition = -45252
+telSuppServResult.telCFResponseData[0].telCFNumber = "t1224"
+telSuppServResult.telCFResponseData[0].telClass = -45326
+telSuppServResult.telCFResponseData[0].telNumType = 111567
+telSuppServResult.telCFResponseData[0].telCFTime = -45400
+telSuppServResult.telCFResponseData[0].result = 111749
+telSuppServResult.telCFResponseData[1].telCFStatus = -45474
+telSuppServResult.telCFResponseData[1].telCFCondition = 111931
+telSuppServResult.telCFResponseData[1].telCFNumber = "t1231"
+telSuppServResult.telCFResponseData[1].telClass = 112113
+telSuppServResult.telCFResponseData[1].telNumType = -45622
+telSuppServResult.telCFResponseData[1].telCFTime = 112295
+telSuppServResult.telCFResponseData[1].result = -45696
+telSuppServResult.simPINRequired = 1
+telSuppServResult.telCLIRState = -45770
+telSuppServResult.telCLIRNWState = 112659
+telSuppServResult.telServiceState = -45844
+telSuppServResult.telResponseText = "t1240"
+[DSIMobileEquipment.responseSendDTMF]
+result = -45918
+[DSIMobileEquipment.responseSIMPINRequired]
+result = 113023
+[DSIMobileEquipment.responseHangupCall]
+result = -45992
+[DSIMobileEquipment.responseJoinCalls]
+result = 113205
+[DSIMobileEquipment.responseNetworkRegistration]
+result = -46066
+[DSIMobileEquipment.responseNetworkSearch]
+telNetworkProviders[0].telLongProviderName = "aspas \" barra \\ é 1246"
+telNetworkProviders[0].telNumProviderName = "t1247"
+telNetworkProviders[0].telProviderState = 113569
+telNetworkProviders[1].telLongProviderName = "t1249"
+telNetworkProviders[1].telNumProviderName = "t1250"
+telNetworkProviders[1].telProviderState = -46288
+result = 113933
+[DSIMobileEquipment.responseUnlockSIM]
+result = -46362
+[DSIMobileEquipment.responseCheckSIMPINCode]
+result = 114115
+[DSIMobileEquipment.responseRestoreFactorySettings]
+result = -46436
+[DSIMobileEquipment.responseSetHandsFreeMode]
+result = 114297
+[DSIMobileEquipment.responseSetAutomaticPinEntryActive]
+result = -46510
+[DSIMobileEquipment.responseSetAutomaticRedialActive]
+result = 114479
+[DSIMobileEquipment.responseServiceCodeAbort]
+result = -46584
+[DSIMobileEquipment.responseSplitCall]
+result = 114661
+[DSIMobileEquipment.responseSwapCalls]
+result = -46658
+[DSIMobileEquipment.responseTelPower]
+result = 114843
+[DSIMobileEquipment.responseSetCDMAThreeWayCallingSetting]
+result = -46732
+[DSIMobileEquipment.responseSetAutomaticEmergencyCallActive]
+result = 115025
+[DSIMobileEquipment.responseSetMailboxContent]
+result = -46806
+[DSIMobileEquipment.responseSetPrivacyMode]
+result = 115207
+[DSIMobileEquipment.responseSetMICMuteState]
+result = -46880
+[DSIMobileEquipment.responseSetOptimizationMode]
+optMode = 115389
+result = -46954
+[DSIMobileEquipment.responseSetNADMode]
+nadMode = 115571
+result = -47028
+[DSIMobileEquipment.responseUnlockOtherSIM]
+result = 115753
+[DSIMobileEquipment.responseSetSIMAliases]
+result = -47102
+[DSIMobileEquipment.responseRemoveOtherSIM]
+result = 115935
+[DSIMobileEquipment.responseDialOperator]
+result = -47176
+telSuppServResult.telCWStatus = 116117
+telSuppServResult.telCFResponseData[0].telCFStatus = -47250
+telSuppServResult.telCFResponseData[0].telCFCondition = 116299
+telSuppServResult.telCFResponseData[0].telCFNumber = "t1279"
+telSuppServResult.telCFResponseData[0].telClass = 116481
+telSuppServResult.telCFResponseData[0].telNumType = -47398
+telSuppServResult.telCFResponseData[0].telCFTime = 116663
+telSuppServResult.telCFResponseData[0].result = -47472
+telSuppServResult.telCFResponseData[1].telCFStatus = 116845
+telSuppServResult.telCFResponseData[1].telCFCondition = -47546
+telSuppServResult.telCFResponseData[1].telCFNumber = "t1286"
+telSuppServResult.telCFResponseData[1].telClass = -47620
+telSuppServResult.telCFResponseData[1].telNumType = 117209
+telSuppServResult.telCFResponseData[1].telCFTime = -47694
+telSuppServResult.telCFResponseData[1].result = 117391
+telSuppServResult.simPINRequired = 1
+telSuppServResult.telCLIRState = 117573
+telSuppServResult.telCLIRNWState = -47842
+telSuppServResult.telServiceState = 117755
+telSuppServResult.telResponseText = "aspas \" barra \\ é 1295"
+[DSIMobileEquipment.responseSetPrefixContent]
+result = 117937
+[DSIMobileEquipment.responseSetPhoneReminderSetting]
+result = -47990
+[DSIMobileEquipment.responseSetPrefixActivated]
+result = 118119
+[DSIMobileEquipment.responseSetPhoneRingtone]
+result = -48064
+[DSIMobileEquipment.responseSetFavorites]
+result = 118301
+[DSIMobileEquipment.responseSetSIMName]
+result = -48138
+[DSIMobileEquipment.responseSetESIMActive]
+result = 118483
+[DSIMobileEquipment.responseStartSpeechRecognition]
+result = -48212
+[DSIMobileEquipment.responseStopSpeechRecognition]
+result = 118665
+[DSIMobileEquipment.responseSetConfidentialMode]
+result = -48286
+[DSIMobileEquipment.responseSetRejectCallWithSMS]
+result = 118847
+[DSIMobileEquipment.responseSetAutomaticAccept]
+result = -48360
+[DSIMobileEquipment.responseSetIntelligentCallStatisticsConfiguration]
+result = 119029
+[DSIMobileEquipment.responseSetVoLTEEnabled]
+result = -48434
+[DSIMobileEquipment.responseSetAudioConnectionVolume]
+result = 119211
+[DSIMobileEquipment.responseSetArtificialWidebandSpeech]
+result = -48508
+[DSIMobileEquipment.responseSetPhoneTtsReminderSetting]
+result = 119393
+[DSIMobileEquipmentTopology.updateTopology]
+slots[0] = -48582
+slots[1] = 119575
+validFlag = -48656
+[DSIMobileEquipmentTopology.updateUsage]
+usage[0] = 119757
+usage[1] = -48730
+validFlag = 119939
+[DSIMobileEquipmentTopology.responseChangeTopology]
+result = -48804
+[DSIMessaging.updateSynchInProgress]
+active = 1
+validFlag = -48878
+[DSIMessaging.updateMessagingAccounts]
+accounts[0].accountID = 120303
+accounts[0].accountName = "aspas \" barra \\ é 1323"
+accounts[0].accountType = 120485
+accounts[0].supportsSMS = -49026
+accounts[0].supportsEMail = 1
+accounts[0].offeredFolderTypes = -49100
+accounts[0].memoryStatus = 120849
+accounts[0].unreadMessageCount = -49174
+accounts[0].btDeviceAddress = "aspas \" barra \\ é 1330"
+accounts[0].btUserFriendlyName = "t1331"
+accounts[0].simCardId = "t1332"
+accounts[1].accountID = -49322
+accounts[1].accountName = "t1334"
+accounts[1].accountType = -49396
+accounts[1].supportsSMS = 121577
+accounts[1].supportsEMail = 1
+accounts[1].offeredFolderTypes = 121759
+accounts[1].memoryStatus = -49544
+accounts[1].unreadMessageCount = 121941
+accounts[1].btDeviceAddress = "t1341"
+accounts[1].btUserFriendlyName = "t1342"
+accounts[1].simCardId = "t1343"
+validFlag = 122305
+[DSIMessaging.updateTemplates]
+templates[0].id = -49766
+templates[0].textID = 122487
+templates[0].body = "t1347"
+templates[0].readOnly = 1
+templates[1].id = -49914
+templates[1].textID = 122851
+templates[1].body = "aspas \" barra \\ é 1351"
+templates[1].readOnly = 1
+validFlag = -50062
+[DSIMessaging.updateMessagingAccountServices]
+messagingAccountServices.conversationalView = 1
+messagingAccountServices.conversationalViewSupportedByDevice = 1
+messagingAccountServices.emailService = 1
+messagingAccountServices.smsService = 1
+messagingAccountServices.imService = 1
+validFlag = -50284
+[DSIMessaging.updateUseProfile]
+deviceID = "t1360"
+validFlag = -50358
+[DSIMessaging.updateActivateRejectCallWithSMS]
+currentStateRejectCallWithSMS = 1
+validFlag = -50432
+[DSIMessaging.listEntriesResponse]
+requestId = 124125
+result = -50506
+entries[0].listEntryId = 40980000025955
+entries[0].type = -50580
+entries[0].folderEntry.folderID = 124489
+entries[0].folderEntry.parentFolderID = -50654
+entries[0].folderEntry.folderType = 124671
+entries[0].folderEntry.folderName = "t1371"
+entries[0].folderEntry.unreadMessageCount = 124853
+entries[0].messageListEntry.matchedAddress.address = "t1373"
+entries[0].messageListEntry.matchedAddress.name = "t1374"
+entries[0].messageListEntry.matchedAddress.adbEntryID = -137504126
+entries[0].messageListEntry.matchedAddress.adbPictureID.id = 125217
+entries[0].messageListEntry.matchedAddress.adbPictureID.url = "t1377"
+entries[0].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1378"
+entries[0].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnInternalPort = -51024
+entries[0].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1380"
+entries[0].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnExternalPort = -51098
+entries[0].messageListEntry.matchedAddress.adbPictureID.cdnAccess.imageResourcePath = "t1382"
+entries[0].messageListEntry.matchedAddress.hasPhoneNumbers = 1
+entries[0].messageListEntry.matchedAddress.hasEmailAddresses = 1
+entries[0].messageListEntry.matchedAddress.hasNavAddresses = 1
+entries[0].messageListEntry.messageID = "aspas \" barra \\ é 1386"
+entries[0].messageListEntry.messagingAccountID = -51320
+entries[0].messageListEntry.sender = "t1388"
+entries[0].messageListEntry.recipients[0] = "t1389"
+entries[0].messageListEntry.recipients[1] = "t1390"
+entries[0].messageListEntry.dateTime = -139104174
+entries[0].messageListEntry.messageStatus = 126673
+entries[0].messageListEntry.subject = "aspas \" barra \\ é 1393"
+entries[0].messageListEntry.attachmentSize = 126855
+entries[0].messageListEntry.priority = -51616
+entries[0].messageListEntry.type = 127037
+entries[0].messageListEntry.storageLocation = -51690
+entries[1].listEntryId = 41940000026563
+entries[1].type = -51764
+entries[1].folderEntry.folderID = 127401
+entries[1].folderEntry.parentFolderID = -51838
+entries[1].folderEntry.folderType = 127583
+entries[1].folderEntry.folderName = "t1403"
+entries[1].folderEntry.unreadMessageCount = 127765
+entries[1].messageListEntry.matchedAddress.address = "t1405"
+entries[1].messageListEntry.matchedAddress.name = "t1406"
+entries[1].messageListEntry.matchedAddress.adbEntryID = -140704222
+entries[1].messageListEntry.matchedAddress.adbPictureID.id = 128129
+entries[1].messageListEntry.matchedAddress.adbPictureID.url = "t1409"
+entries[1].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1410"
+entries[1].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnInternalPort = -52208
+entries[1].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1412"
+entries[1].messageListEntry.matchedAddress.adbPictureID.cdnAccess.cdnExternalPort = -52282
+entries[1].messageListEntry.matchedAddress.adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1414"
+entries[1].messageListEntry.matchedAddress.hasPhoneNumbers = 1
+entries[1].messageListEntry.matchedAddress.hasEmailAddresses = 1
+entries[1].messageListEntry.matchedAddress.hasNavAddresses = 1
+entries[1].messageListEntry.messageID = "t1418"
+entries[1].messageListEntry.messagingAccountID = -52504
+entries[1].messageListEntry.sender = "t1420"
+entries[1].messageListEntry.recipients[0] = "aspas \" barra \\ é 1421"
+entries[1].messageListEntry.recipients[1] = "t1422"
+entries[1].messageListEntry.dateTime = -142304270
+entries[1].messageListEntry.messageStatus = 129585
+entries[1].messageListEntry.subject = "t1425"
+entries[1].messageListEntry.attachmentSize = 129767
+entries[1].messageListEntry.priority = -52800
+entries[1].messageListEntry.type = 129949
+entries[1].messageListEntry.storageLocation = -52874
+accountId = 130131
+folderId = -52948
+offset = 130313
+[DSIMessaging.changeFolderResponse]
+activeFolder.folderID = -53022
+activeFolder.parentFolderID = 130495
+activeFolder.folderType = -53096
+activeFolder.folderName = "t1436"
+activeFolder.unreadMessageCount = -53170
+result = 130859
+[DSIMessaging.deleteMessageResponse]
+result = -53244
+deleted = 131041
+num = -53318
+[DSIMessaging.sendMessageResponse]
+result = 131223
+requestId = -53392
+[DSIMessaging.getMessageContentsResponse]
+result = 131405
+messageDetails.messagingAccountID = -53466
+messageDetails.messageID = "t1446"
+messageDetails.type = -53540
+messageDetails.sender.address = "t1448"
+messageDetails.sender.name = "aspas \" barra \\ é 1449"
+messageDetails.sender.adbEntryID = 43500000027551
+messageDetails.sender.adbPictureID.id = -53688
+messageDetails.sender.adbPictureID.url = "t1452"
+messageDetails.sender.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1453"
+messageDetails.sender.adbPictureID.cdnAccess.cdnInternalPort = 132315
+messageDetails.sender.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1455"
+messageDetails.sender.adbPictureID.cdnAccess.cdnExternalPort = 132497
+messageDetails.sender.adbPictureID.cdnAccess.imageResourcePath = "t1457"
+messageDetails.sender.hasPhoneNumbers = 1
+messageDetails.sender.hasEmailAddresses = 1
+messageDetails.sender.hasNavAddresses = 1
+messageDetails.recipientsTo[0].address = "t1461"
+messageDetails.recipientsTo[0].name = "t1462"
+messageDetails.recipientsTo[0].adbEntryID = -146304390
+messageDetails.recipientsTo[0].adbPictureID.id = 133225
+messageDetails.recipientsTo[0].adbPictureID.url = "t1465"
+messageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1466"
+messageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalPort = -54280
+messageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1468"
+messageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalPort = -54354
+messageDetails.recipientsTo[0].adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1470"
+messageDetails.recipientsTo[0].hasPhoneNumbers = 1
+messageDetails.recipientsTo[0].hasEmailAddresses = 1
+messageDetails.recipientsTo[0].hasNavAddresses = 1
+messageDetails.recipientsTo[1].address = "t1474"
+messageDetails.recipientsTo[1].name = "t1475"
+messageDetails.recipientsTo[1].adbEntryID = 44280000028045
+messageDetails.recipientsTo[1].adbPictureID.id = -54650
+messageDetails.recipientsTo[1].adbPictureID.url = "t1478"
+messageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1479"
+messageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalPort = 134681
+messageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1481"
+messageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalPort = 134863
+messageDetails.recipientsTo[1].adbPictureID.cdnAccess.imageResourcePath = "t1483"
+messageDetails.recipientsTo[1].hasPhoneNumbers = 1
+messageDetails.recipientsTo[1].hasEmailAddresses = 1
+messageDetails.recipientsTo[1].hasNavAddresses = 1
+messageDetails.recipientsCc[0].address = "t1487"
+messageDetails.recipientsCc[0].name = "t1488"
+messageDetails.recipientsCc[0].adbEntryID = -148904468
+messageDetails.recipientsCc[0].adbPictureID.id = 135591
+messageDetails.recipientsCc[0].adbPictureID.url = "aspas \" barra \\ é 1491"
+messageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1492"
+messageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalPort = -55242
+messageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1494"
+messageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalPort = -55316
+messageDetails.recipientsCc[0].adbPictureID.cdnAccess.imageResourcePath = "t1496"
+messageDetails.recipientsCc[0].hasPhoneNumbers = 1
+messageDetails.recipientsCc[0].hasEmailAddresses = 1
+messageDetails.recipientsCc[0].hasNavAddresses = 1
+messageDetails.recipientsCc[1].address = "t1500"
+messageDetails.recipientsCc[1].name = "t1501"
+messageDetails.recipientsCc[1].adbEntryID = 45060000028539
+messageDetails.recipientsCc[1].adbPictureID.id = -55612
+messageDetails.recipientsCc[1].adbPictureID.url = "t1504"
+messageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1505"
+messageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalPort = 137047
+messageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1507"
+messageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalPort = 137229
+messageDetails.recipientsCc[1].adbPictureID.cdnAccess.imageResourcePath = "t1509"
+messageDetails.recipientsCc[1].hasPhoneNumbers = 1
+messageDetails.recipientsCc[1].hasEmailAddresses = 1
+messageDetails.recipientsCc[1].hasNavAddresses = 1
+messageDetails.recipientsBcc[0].address = "t1513"
+messageDetails.recipientsBcc[0].name = "t1514"
+messageDetails.recipientsBcc[0].adbEntryID = -151504546
+messageDetails.recipientsBcc[0].adbPictureID.id = 137957
+messageDetails.recipientsBcc[0].adbPictureID.url = "t1517"
+messageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1518"
+messageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalPort = -56204
+messageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1520"
+messageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalPort = -56278
+messageDetails.recipientsBcc[0].adbPictureID.cdnAccess.imageResourcePath = "t1522"
+messageDetails.recipientsBcc[0].hasPhoneNumbers = 1
+messageDetails.recipientsBcc[0].hasEmailAddresses = 1
+messageDetails.recipientsBcc[0].hasNavAddresses = 1
+messageDetails.recipientsBcc[1].address = "aspas \" barra \\ é 1526"
+messageDetails.recipientsBcc[1].name = "t1527"
+messageDetails.recipientsBcc[1].adbEntryID = 45840000029033
+messageDetails.recipientsBcc[1].adbPictureID.id = -56574
+messageDetails.recipientsBcc[1].adbPictureID.url = "t1530"
+messageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1531"
+messageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalPort = 139413
+messageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1533"
+messageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalPort = 139595
+messageDetails.recipientsBcc[1].adbPictureID.cdnAccess.imageResourcePath = "t1535"
+messageDetails.recipientsBcc[1].hasPhoneNumbers = 1
+messageDetails.recipientsBcc[1].hasEmailAddresses = 1
+messageDetails.recipientsBcc[1].hasNavAddresses = 1
+messageDetails.subject = "t1539"
+messageDetails.dateTime = 46200000029261
+messageDetails.messageStatus = -57018
+messageDetails.replyTo = "t1542"
+messageDetails.body = "t1543"
+messageDetails.attachments[0].attachmentID = 140505
+messageDetails.attachments[0].name = "t1545"
+messageDetails.attachments[0].mimeType = "t1546"
+messageDetails.attachments[0].size = -57240
+messageDetails.attachments[0].entryID = 140869
+messageDetails.attachments[0].attachmentPath.id = -57314
+messageDetails.attachments[0].attachmentPath.url = "t1550"
+messageDetails.attachments[0].attachmentPath.cdnAccess.cdnInternalIpv6 = "t1551"
+messageDetails.attachments[0].attachmentPath.cdnAccess.cdnInternalPort = 141233
+messageDetails.attachments[0].attachmentPath.cdnAccess.cdnExternalIpv6 = "t1553"
+messageDetails.attachments[0].attachmentPath.cdnAccess.cdnExternalPort = 141415
+messageDetails.attachments[0].attachmentPath.cdnAccess.imageResourcePath = "t1555"
+messageDetails.attachments[1].attachmentID = 141597
+messageDetails.attachments[1].name = "t1557"
+messageDetails.attachments[1].mimeType = "t1558"
+messageDetails.attachments[1].size = -57684
+messageDetails.attachments[1].entryID = 141961
+messageDetails.attachments[1].attachmentPath.id = -57758
+messageDetails.attachments[1].attachmentPath.url = "t1562"
+messageDetails.attachments[1].attachmentPath.cdnAccess.cdnInternalIpv6 = "t1563"
+messageDetails.attachments[1].attachmentPath.cdnAccess.cdnInternalPort = 142325
+messageDetails.attachments[1].attachmentPath.cdnAccess.cdnExternalIpv6 = "t1565"
+messageDetails.attachments[1].attachmentPath.cdnAccess.cdnExternalPort = 142507
+messageDetails.attachments[1].attachmentPath.cdnAccess.imageResourcePath = "t1567"
+messageDetails.priority = 142689
+messageDetails.segmentLengths[0] = -58054
+messageDetails.segmentLengths[1] = 142871
+messageDetails.storageLocation = -58128
+messageDetails.extractedItems[0].type = 143053
+messageDetails.extractedItems[0].value = "t1573"
+messageDetails.extractedItems[0].offset = 143235
+messageDetails.extractedItems[0].length = -58276
+messageDetails.extractedItems[1].type = 143417
+messageDetails.extractedItems[1].value = "t1577"
+messageDetails.extractedItems[1].offset = 143599
+messageDetails.extractedItems[1].length = -58424
+[DSIMessaging.setMessageReadStatusResponse]
+result = 143781
+[DSIMessaging.parseVCardResponse]
+result = -58498
+adbEntry = "aspas \" barra \\ é 1582"
+[DSIMessaging.saveAsDraftResponse]
+result = -58572
+messageID = "t1584"
+[DSIMessaging.extractInformationResponse]
+result = -58646
+items[0].type = 144327
+items[0].value = "t1587"
+items[0].offset = 144509
+items[0].length = -58794
+items[1].type = 144691
+items[1].value = "t1591"
+items[1].offset = 144873
+items[1].length = -58942
+[DSIMessaging.deleteTemplateResponse]
+result = 145055
+[DSIMessaging.getTemplatesResponse]
+result = -59016
+templates[0].id = 145237
+templates[0].textID = -59090
+templates[0].body = "t1598"
+templates[0].readOnly = 1
+templates[1].id = 145601
+templates[1].textID = -59238
+templates[1].body = "t1602"
+templates[1].readOnly = 1
+[DSIMessaging.getTemplateResponse]
+result = 145965
+templateContent.id = -59386
+templateContent.textID = 146147
+templateContent.body = "t1607"
+templateContent.readOnly = 1
+[DSIMessaging.changeTemplateResponse]
+result = -59534
+templateID = 146511
+[DSIMessaging.getPositionOfMessageResponse]
+result = -59608
+position = 146693
+[DSIMessaging.getPositionOfFolderResponse]
+result = -59682
+position = 146875
+[DSIMessaging.deleteSimCardMessagesResponse]
+result = -59756
+[DSIMessaging.decodeAttachmentResponse]
+result = 147057
+destLoc.id = -59830
+destLoc.url = "t1618"
+destLoc.cdnAccess.cdnInternalIpv6 = "t1619"
+destLoc.cdnAccess.cdnInternalPort = 147421
+destLoc.cdnAccess.cdnExternalIpv6 = "t1621"
+destLoc.cdnAccess.cdnExternalPort = 147603
+destLoc.cdnAccess.imageResourcePath = "t1623"
+[DSIMessaging.responseMeasureMessageLength]
+result = 147785
+requestId = -60126
+totalCharactersUsed = 147967
+totalCharactersLimit = -60200
+currentSegmentCharactersUsed = 148149
+currentSegmentCharactersLimit = -60274
+segmentsUsed = 148331
+segmentsLimit = -60348
+[DSIMessaging.responseInboxSync]
+result = 148513
+[DSIMessaging.responseExchangeTemplate]
+result = -60422
+[DSIMessaging.responseSetTemplatePosition]
+result = 148695
+[DSIMessaging.forwardMessageResponse]
+result = -60496
+requestId = 148877
+[DSIMessaging.responseGetConversations]
+requestId = -60570
+result = 149059
+accountID = -60644
+conversationID = 149241
+entries[0].type = -60718
+entries[0].conversationMessageDetails.messagingAccountID = 149423
+entries[0].conversationMessageDetails.messageID = "t1643"
+entries[0].conversationMessageDetails.type = 149605
+entries[0].conversationMessageDetails.sender.address = "aspas \" barra \\ é 1645"
+entries[0].conversationMessageDetails.sender.name = "t1646"
+entries[0].conversationMessageDetails.sender.adbEntryID = -164704942
+entries[0].conversationMessageDetails.sender.adbPictureID.id = 149969
+entries[0].conversationMessageDetails.sender.adbPictureID.url = "t1649"
+entries[0].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1650"
+entries[0].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnInternalPort = -61088
+entries[0].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1652"
+entries[0].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnExternalPort = -61162
+entries[0].conversationMessageDetails.sender.adbPictureID.cdnAccess.imageResourcePath = "t1654"
+entries[0].conversationMessageDetails.sender.hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.sender.hasEmailAddresses = 1
+entries[0].conversationMessageDetails.sender.hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsTo[0].address = "t1658"
+entries[0].conversationMessageDetails.recipientsTo[0].name = "aspas \" barra \\ é 1659"
+entries[0].conversationMessageDetails.recipientsTo[0].adbEntryID = 49800000031541
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.id = -61458
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.url = "t1662"
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1663"
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalPort = 151425
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1665"
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalPort = 151607
+entries[0].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.imageResourcePath = "t1667"
+entries[0].conversationMessageDetails.recipientsTo[0].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsTo[0].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsTo[0].hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsTo[1].address = "t1671"
+entries[0].conversationMessageDetails.recipientsTo[1].name = "t1672"
+entries[0].conversationMessageDetails.recipientsTo[1].adbEntryID = -167305020
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.id = 152335
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.url = "t1675"
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1676"
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalPort = -62050
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1678"
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalPort = -62124
+entries[0].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1680"
+entries[0].conversationMessageDetails.recipientsTo[1].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsTo[1].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsTo[1].hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsCc[0].address = "t1684"
+entries[0].conversationMessageDetails.recipientsCc[0].name = "t1685"
+entries[0].conversationMessageDetails.recipientsCc[0].adbEntryID = 50580000032035
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.id = -62420
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.url = "t1688"
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1689"
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalPort = 153791
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1691"
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalPort = 153973
+entries[0].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.imageResourcePath = "t1693"
+entries[0].conversationMessageDetails.recipientsCc[0].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsCc[0].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsCc[0].hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsCc[1].address = "t1697"
+entries[0].conversationMessageDetails.recipientsCc[1].name = "t1698"
+entries[0].conversationMessageDetails.recipientsCc[1].adbEntryID = -169905098
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.id = 154701
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.url = "aspas \" barra \\ é 1701"
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1702"
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalPort = -63012
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1704"
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalPort = -63086
+entries[0].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.imageResourcePath = "t1706"
+entries[0].conversationMessageDetails.recipientsCc[1].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsCc[1].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsCc[1].hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsBcc[0].address = "t1710"
+entries[0].conversationMessageDetails.recipientsBcc[0].name = "t1711"
+entries[0].conversationMessageDetails.recipientsBcc[0].adbEntryID = 51360000032529
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.id = -63382
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.url = "t1714"
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1715"
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalPort = 156157
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1717"
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalPort = 156339
+entries[0].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.imageResourcePath = "t1719"
+entries[0].conversationMessageDetails.recipientsBcc[0].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsBcc[0].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsBcc[0].hasNavAddresses = 1
+entries[0].conversationMessageDetails.recipientsBcc[1].address = "t1723"
+entries[0].conversationMessageDetails.recipientsBcc[1].name = "t1724"
+entries[0].conversationMessageDetails.recipientsBcc[1].adbEntryID = -172505176
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.id = 157067
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.url = "t1727"
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1728"
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalPort = -63974
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1730"
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalPort = -64048
+entries[0].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.imageResourcePath = "t1732"
+entries[0].conversationMessageDetails.recipientsBcc[1].hasPhoneNumbers = 1
+entries[0].conversationMessageDetails.recipientsBcc[1].hasEmailAddresses = 1
+entries[0].conversationMessageDetails.recipientsBcc[1].hasNavAddresses = 1
+entries[0].conversationMessageDetails.subject = "aspas \" barra \\ é 1736"
+entries[0].conversationMessageDetails.dateTime = -173705212
+entries[0].conversationMessageDetails.messageStatus = 158159
+entries[0].conversationMessageDetails.body = "t1739"
+entries[0].conversationMessageDetails.priority = 158341
+entries[0].conversationMessageDetails.segmentLengths[0] = -64418
+entries[0].conversationMessageDetails.segmentLengths[1] = 158523
+entries[0].conversationMessageDetails.attachmentAvailable = 1
+entries[0].conversationListing.conversationID = "t1744"
+entries[0].conversationListing.sender.address = "t1745"
+entries[0].conversationListing.sender.name = "t1746"
+entries[0].conversationListing.sender.adbEntryID = -174705242
+entries[0].conversationListing.sender.adbPictureID.id = 159069
+entries[0].conversationListing.sender.adbPictureID.url = "t1749"
+entries[0].conversationListing.sender.adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1750"
+entries[0].conversationListing.sender.adbPictureID.cdnAccess.cdnInternalPort = -64788
+entries[0].conversationListing.sender.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1752"
+entries[0].conversationListing.sender.adbPictureID.cdnAccess.cdnExternalPort = -64862
+entries[0].conversationListing.sender.adbPictureID.cdnAccess.imageResourcePath = "t1754"
+entries[0].conversationListing.sender.hasPhoneNumbers = 1
+entries[0].conversationListing.sender.hasEmailAddresses = 1
+entries[0].conversationListing.sender.hasNavAddresses = 1
+entries[0].conversationListing.recipients[0].address = "t1758"
+entries[0].conversationListing.recipients[0].name = "t1759"
+entries[0].conversationListing.recipients[0].adbEntryID = 52800000033441
+entries[0].conversationListing.recipients[0].adbPictureID.id = -65158
+entries[0].conversationListing.recipients[0].adbPictureID.url = "t1762"
+entries[0].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1763"
+entries[0].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnInternalPort = 160525
+entries[0].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1765"
+entries[0].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnExternalPort = 160707
+entries[0].conversationListing.recipients[0].adbPictureID.cdnAccess.imageResourcePath = "t1767"
+entries[0].conversationListing.recipients[0].hasPhoneNumbers = 1
+entries[0].conversationListing.recipients[0].hasEmailAddresses = 1
+entries[0].conversationListing.recipients[0].hasNavAddresses = 1
+entries[0].conversationListing.recipients[1].address = "aspas \" barra \\ é 1771"
+entries[0].conversationListing.recipients[1].name = "t1772"
+entries[0].conversationListing.recipients[1].adbEntryID = -177305320
+entries[0].conversationListing.recipients[1].adbPictureID.id = 161435
+entries[0].conversationListing.recipients[1].adbPictureID.url = "t1775"
+entries[0].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1776"
+entries[0].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnInternalPort = -65750
+entries[0].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1778"
+entries[0].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnExternalPort = -65824
+entries[0].conversationListing.recipients[1].adbPictureID.cdnAccess.imageResourcePath = "t1780"
+entries[0].conversationListing.recipients[1].hasPhoneNumbers = 1
+entries[0].conversationListing.recipients[1].hasEmailAddresses = 1
+entries[0].conversationListing.recipients[1].hasNavAddresses = 1
+entries[0].conversationListing.dateTime = 53520000033897
+entries[0].conversationListing.messageStatus = -66046
+entries[0].conversationListing.subject = "t1786"
+entries[0].conversationListing.type = -66120
+entries[1].type = 162709
+entries[1].conversationMessageDetails.messagingAccountID = -66194
+entries[1].conversationMessageDetails.messageID = "t1790"
+entries[1].conversationMessageDetails.type = -66268
+entries[1].conversationMessageDetails.sender.address = "aspas \" barra \\ é 1792"
+entries[1].conversationMessageDetails.sender.name = "t1793"
+entries[1].conversationMessageDetails.sender.adbEntryID = 53820000034087
+entries[1].conversationMessageDetails.sender.adbPictureID.id = -66416
+entries[1].conversationMessageDetails.sender.adbPictureID.url = "t1796"
+entries[1].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnInternalIpv6 = "t1797"
+entries[1].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnInternalPort = 163619
+entries[1].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1799"
+entries[1].conversationMessageDetails.sender.adbPictureID.cdnAccess.cdnExternalPort = 163801
+entries[1].conversationMessageDetails.sender.adbPictureID.cdnAccess.imageResourcePath = "t1801"
+entries[1].conversationMessageDetails.sender.hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.sender.hasEmailAddresses = 1
+entries[1].conversationMessageDetails.sender.hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsTo[0].address = "t1805"
+entries[1].conversationMessageDetails.recipientsTo[0].name = "aspas \" barra \\ é 1806"
+entries[1].conversationMessageDetails.recipientsTo[0].adbEntryID = -180705422
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.id = 164529
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.url = "t1809"
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1810"
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnInternalPort = -67008
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1812"
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.cdnExternalPort = -67082
+entries[1].conversationMessageDetails.recipientsTo[0].adbPictureID.cdnAccess.imageResourcePath = "t1814"
+entries[1].conversationMessageDetails.recipientsTo[0].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsTo[0].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsTo[0].hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsTo[1].address = "t1818"
+entries[1].conversationMessageDetails.recipientsTo[1].name = "t1819"
+entries[1].conversationMessageDetails.recipientsTo[1].adbEntryID = 54600000034581
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.id = -67378
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.url = "t1822"
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1823"
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnInternalPort = 165985
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1825"
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.cdnExternalPort = 166167
+entries[1].conversationMessageDetails.recipientsTo[1].adbPictureID.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1827"
+entries[1].conversationMessageDetails.recipientsTo[1].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsTo[1].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsTo[1].hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsCc[0].address = "t1831"
+entries[1].conversationMessageDetails.recipientsCc[0].name = "t1832"
+entries[1].conversationMessageDetails.recipientsCc[0].adbEntryID = -183305500
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.id = 166895
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.url = "t1835"
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1836"
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnInternalPort = -67970
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1838"
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.cdnExternalPort = -68044
+entries[1].conversationMessageDetails.recipientsCc[0].adbPictureID.cdnAccess.imageResourcePath = "t1840"
+entries[1].conversationMessageDetails.recipientsCc[0].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsCc[0].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsCc[0].hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsCc[1].address = "t1844"
+entries[1].conversationMessageDetails.recipientsCc[1].name = "t1845"
+entries[1].conversationMessageDetails.recipientsCc[1].adbEntryID = 55380000035075
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.id = -68340
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.url = "aspas \" barra \\ é 1848"
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1849"
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnInternalPort = 168351
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1851"
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.cdnExternalPort = 168533
+entries[1].conversationMessageDetails.recipientsCc[1].adbPictureID.cdnAccess.imageResourcePath = "t1853"
+entries[1].conversationMessageDetails.recipientsCc[1].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsCc[1].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsCc[1].hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsBcc[0].address = "t1857"
+entries[1].conversationMessageDetails.recipientsBcc[0].name = "t1858"
+entries[1].conversationMessageDetails.recipientsBcc[0].adbEntryID = -185905578
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.id = 169261
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.url = "t1861"
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1862"
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnInternalPort = -68932
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1864"
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.cdnExternalPort = -69006
+entries[1].conversationMessageDetails.recipientsBcc[0].adbPictureID.cdnAccess.imageResourcePath = "t1866"
+entries[1].conversationMessageDetails.recipientsBcc[0].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsBcc[0].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsBcc[0].hasNavAddresses = 1
+entries[1].conversationMessageDetails.recipientsBcc[1].address = "t1870"
+entries[1].conversationMessageDetails.recipientsBcc[1].name = "t1871"
+entries[1].conversationMessageDetails.recipientsBcc[1].adbEntryID = 56160000035569
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.id = -69302
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.url = "t1874"
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1875"
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnInternalPort = 170717
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1877"
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.cdnExternalPort = 170899
+entries[1].conversationMessageDetails.recipientsBcc[1].adbPictureID.cdnAccess.imageResourcePath = "t1879"
+entries[1].conversationMessageDetails.recipientsBcc[1].hasPhoneNumbers = 1
+entries[1].conversationMessageDetails.recipientsBcc[1].hasEmailAddresses = 1
+entries[1].conversationMessageDetails.recipientsBcc[1].hasNavAddresses = 1
+entries[1].conversationMessageDetails.subject = "aspas \" barra \\ é 1883"
+entries[1].conversationMessageDetails.dateTime = 56520000035797
+entries[1].conversationMessageDetails.messageStatus = -69746
+entries[1].conversationMessageDetails.body = "t1886"
+entries[1].conversationMessageDetails.priority = -69820
+entries[1].conversationMessageDetails.segmentLengths[0] = 171809
+entries[1].conversationMessageDetails.segmentLengths[1] = -69894
+entries[1].conversationMessageDetails.attachmentAvailable = 1
+entries[1].conversationListing.conversationID = "t1891"
+entries[1].conversationListing.sender.address = "t1892"
+entries[1].conversationListing.sender.name = "t1893"
+entries[1].conversationListing.sender.adbEntryID = 56820000035987
+entries[1].conversationListing.sender.adbPictureID.id = -70116
+entries[1].conversationListing.sender.adbPictureID.url = "t1896"
+entries[1].conversationListing.sender.adbPictureID.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1897"
+entries[1].conversationListing.sender.adbPictureID.cdnAccess.cdnInternalPort = 172719
+entries[1].conversationListing.sender.adbPictureID.cdnAccess.cdnExternalIpv6 = "t1899"
+entries[1].conversationListing.sender.adbPictureID.cdnAccess.cdnExternalPort = 172901
+entries[1].conversationListing.sender.adbPictureID.cdnAccess.imageResourcePath = "t1901"
+entries[1].conversationListing.sender.hasPhoneNumbers = 1
+entries[1].conversationListing.sender.hasEmailAddresses = 1
+entries[1].conversationListing.sender.hasNavAddresses = 1
+entries[1].conversationListing.recipients[0].address = "t1905"
+entries[1].conversationListing.recipients[0].name = "t1906"
+entries[1].conversationListing.recipients[0].adbEntryID = -190705722
+entries[1].conversationListing.recipients[0].adbPictureID.id = 173629
+entries[1].conversationListing.recipients[0].adbPictureID.url = "t1909"
+entries[1].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1910"
+entries[1].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnInternalPort = -70708
+entries[1].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnExternalIpv6 = "t1912"
+entries[1].conversationListing.recipients[0].adbPictureID.cdnAccess.cdnExternalPort = -70782
+entries[1].conversationListing.recipients[0].adbPictureID.cdnAccess.imageResourcePath = "t1914"
+entries[1].conversationListing.recipients[0].hasPhoneNumbers = 1
+entries[1].conversationListing.recipients[0].hasEmailAddresses = 1
+entries[1].conversationListing.recipients[0].hasNavAddresses = 1
+entries[1].conversationListing.recipients[1].address = "aspas \" barra \\ é 1918"
+entries[1].conversationListing.recipients[1].name = "t1919"
+entries[1].conversationListing.recipients[1].adbEntryID = 57600000036481
+entries[1].conversationListing.recipients[1].adbPictureID.id = -71078
+entries[1].conversationListing.recipients[1].adbPictureID.url = "t1922"
+entries[1].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnInternalIpv6 = "t1923"
+entries[1].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnInternalPort = 175085
+entries[1].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1925"
+entries[1].conversationListing.recipients[1].adbPictureID.cdnAccess.cdnExternalPort = 175267
+entries[1].conversationListing.recipients[1].adbPictureID.cdnAccess.imageResourcePath = "t1927"
+entries[1].conversationListing.recipients[1].hasPhoneNumbers = 1
+entries[1].conversationListing.recipients[1].hasEmailAddresses = 1
+entries[1].conversationListing.recipients[1].hasNavAddresses = 1
+entries[1].conversationListing.dateTime = -193105794
+entries[1].conversationListing.messageStatus = 175813
+entries[1].conversationListing.subject = "t1933"
+entries[1].conversationListing.type = 175995
+[DSIMessaging.responseUseProfile]
+deviceID = "t1935"
+result = 176177
+[DSIMessaging.responseUseConversationalView]
+result = -71670
+[DSIMessaging.responseActivateRejectCallWithSMS]
+result = 176359
+[DSIMessaging.indicateNewMessage]
+newMessage = 1
+messageID = "t1940"
+messagingAccount = -71818
+messageType = 176723
+folderId = -71892
+[DSIMessaging.indicateListChanged]
+information.reason = 176905
+information.listSize = -71966
+[DSIMessaging.indicateMessageStatus]
+statusInformation.messageId = "aspas \" barra \\ é 1946"
+statusInformation.status = -72040
+[DSIMessaging.indicatePushMessageFailed]
+accountId = 177269
+folderId = -72114
+messageType = 177451
+messageID = "t1951"
+[DSIMessaging.indicateSendMessage]
+result[0] = 177633
+result[1] = -72262
+requestId = 177815
+type = -72336
+recipients.to[0] = "t1956"
+recipients.to[1] = "t1957"
+recipients.cc[0] = "t1958"
+recipients.cc[1] = "t1959"
+recipients.bcc[0] = "aspas \" barra \\ é 1960"
+recipients.bcc[1] = "t1961"
+subject = "t1962"
+message = "t1963"
+attachments[0].attachmentID = 178725
+attachments[0].name = "t1965"
+attachments[0].mimeType = "t1966"
+attachments[0].size = -72780
+attachments[0].entryID = 179089
+attachments[0].attachmentPath.id = -72854
+attachments[0].attachmentPath.url = "t1970"
+attachments[0].attachmentPath.cdnAccess.cdnInternalIpv6 = "t1971"
+attachments[0].attachmentPath.cdnAccess.cdnInternalPort = 179453
+attachments[0].attachmentPath.cdnAccess.cdnExternalIpv6 = "t1973"
+attachments[0].attachmentPath.cdnAccess.cdnExternalPort = 179635
+attachments[0].attachmentPath.cdnAccess.imageResourcePath = "t1975"
+attachments[1].attachmentID = 179817
+attachments[1].name = "t1977"
+attachments[1].mimeType = "t1978"
+attachments[1].size = -73224
+attachments[1].entryID = 180181
+attachments[1].attachmentPath.id = -73298
+attachments[1].attachmentPath.url = "t1982"
+attachments[1].attachmentPath.cdnAccess.cdnInternalIpv6 = "t1983"
+attachments[1].attachmentPath.cdnAccess.cdnInternalPort = 180545
+attachments[1].attachmentPath.cdnAccess.cdnExternalIpv6 = "t1985"
+attachments[1].attachmentPath.cdnAccess.cdnExternalPort = 180727
+attachments[1].attachmentPath.cdnAccess.imageResourcePath = "t1987"
+messagingAccountID = 180909
+[DSIMessaging.indicateFolderInformation]
+folderEntry.folderID = -73594
+folderEntry.parentFolderID = 181091
+folderEntry.folderType = -73668
+folderEntry.folderName = "t1992"
+folderEntry.unreadMessageCount = -73742
+[DSIMessagingServiceConfiguration.updateSMSCNumber]
+smscNumber = "t1994"
+validFlag = -73816
+[DSIMessagingServiceConfiguration.updateSmsDeliveryReport]
+deliveryReport = 1
+validFlag = -73890
+[DSIMessagingServiceConfiguration.updateStoreSmsOnSent]
+store = 1
+validFlag = -73964
+[DSIMessagingServiceConfiguration.updateShortMessageValidityPeriod]
+validityPeriod = 182001
+validFlag = -74038
+[DSIMessagingServiceConfiguration.updatePhoneSystemRingingVolume]
+volume = 182183
+validFlag = -74112
+[DSIMessagingServiceConfiguration.updatePhoneSystemRingingType]
+type = 182365
+validFlag = -74186
+[DSIMessagingServiceConfiguration.updateEmailIncludeOldMailInReply]
+includeOldEmail = 1
+validFlag = -74260
+[DSIMessagingServiceConfiguration.updateEmailEmptySubjectNotification]
+notify = 1
+validFlag = -74334
+[DSIMessagingServiceConfiguration.updateFolderViewMode]
+viewmode = 182911
+validFlag = -74408
+[DSIMessagingServiceConfiguration.updateAccountPreferences]
+accountID = 183093
+accountName = "t2013"
+validFlag = 183275
+[DSIMessagingServiceConfiguration.updateSmsIndications]
+smsIndications = 1
+validFlag = 183457
+[DSIMessagingServiceConfiguration.updateEmailIndications]
+emailIndications = 1
+validFlag = 183639
+[DSIMessagingServiceConfiguration.updatePushSms]
+pushSms = 1
+validFlag = 183821
+[DSIMessagingServiceConfiguration.setSMSCNumberResponse]
+result = -74778
+[DSIMessagingServiceConfiguration.activateSMSDeliveryReportResponse]
+result = 184003
+[DSIMessagingServiceConfiguration.activateStoreSmsOnSentResponse]
+result = -74852
+[DSIMessagingServiceConfiguration.setShortMessageValidityPeriodResponse]
+result = 184185
+[DSIMessagingServiceConfiguration.setPhoneSystemRingingVolumeResponse]
+result = -74926
+[DSIMessagingServiceConfiguration.setPhoneSystemRingingTypeResponse]
+result = 184367
+[DSIMessagingServiceConfiguration.activateEmailIncludeOldMailInReplyResponse]
+result = -75000
+[DSIMessagingServiceConfiguration.activateEmailEmptySubjectNotificationResponse]
+result = 184549
+[DSIMessagingServiceConfiguration.changeFolderViewModeResponse]
+result = -75074
+[DSIMessagingServiceConfiguration.restoreFactorySettingsResponse]
+result = 184731
+[DSIMessagingServiceConfiguration.responseSetSmsIndications]
+result = -75148
+[DSIMessagingServiceConfiguration.responseSetEmailIndications]
+result = 184913
+[DSIMessagingServiceConfiguration.responseSetPushSms]
+result = -75222
+[DSIMessagingServiceConfiguration.responseSetAccountService]
+requestId = 185095
+result = -75296
+[DSIAdb.updateAdbState]
+adbState = 185277
+validFlag = -75370
+[DSIAdb.updateProfileInfo]
+profileInfo[0].num = 185459
+profileInfo[0].name = "t2039"
+profileInfo[0].publicProfileVisibility = 1
+profileInfo[0].active = 1
+profileInfo[0].deviceID = "t2042"
+profileInfo[1].num = -75592
+profileInfo[1].name = "aspas \" barra \\ é 2044"
+profileInfo[1].publicProfileVisibility = 1
+profileInfo[1].active = 1
+profileInfo[1].deviceID = "t2047"
+validFlag = 186369
+[DSIAdb.updateDeviceConnected]
+deviceConnected = 1
+profileID = 186551
+validFlag = -75888
+[DSIAdb.updateDownloadCountSim]
+downloadInfoSim.count = 186733
+downloadInfoSim.numberOfItems = -75962
+profileID = 186915
+deviceID = "t2055"
+validFlag = 187097
+[DSIAdb.updateDownloadCountMe]
+downloadInfoMe.count = -76110
+downloadInfoMe.numberOfItems = 187279
+profileID = -76184
+deviceID = "t2060"
+validFlag = -76258
+[DSIAdb.updateDownloadCountOpp]
+downloadInfoOpp.count = 187643
+downloadInfoOpp.numberOfItems = -76332
+profileID = 187825
+deviceID = "aspas \" barra \\ é 2065"
+validFlag = 188007
+[DSIAdb.updateDownloadState]
+downloadState = -76480
+failureReason = 188189
+profileID = -76554
+validFlag = 188371
+[DSIAdb.setLanguageResult]
+success = -76628
+[DSIAdb.resetToFactorySettingsResult]
+success = 188553
+[DSIAdb.createBackupFileResult]
+success = -76702
+fullPath = "t2074"
+[DSIAdb.importBackupFileResult]
+success = -76776
+fullPath = "t2076"
+[DSIAdb.restartDownloadResult]
+success = -76850
+[DSIAdb.deleteProfilesResult]
+success = 189099
+[DSIAdbDataResolution.resolveMailAddressResult]
+success = -76924
+locatedEMails[0].entryId = 62400000039521
+locatedEMails[0].entryPosition = -76998
+locatedEMails[0].entryType = 189463
+locatedEMails[0].generalDescription1 = "t2083"
+locatedEMails[0].generalDescription2 = "t2084"
+locatedEMails[0].phoneCount = -77146
+locatedEMails[0].probNavigable = 189827
+locatedEMails[0].navigable = -77220
+locatedEMails[0].topDestination = 190009
+locatedEMails[0].contactPicture.id = -77294
+locatedEMails[0].contactPicture.url = "t2090"
+locatedEMails[0].contactPicture.cdnAccess.cdnInternalIpv6 = "t2091"
+locatedEMails[0].contactPicture.cdnAccess.cdnInternalPort = 190373
+locatedEMails[0].contactPicture.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 2093"
+locatedEMails[0].contactPicture.cdnAccess.cdnExternalPort = 190555
+locatedEMails[0].contactPicture.cdnAccess.imageResourcePath = "t2095"
+locatedEMails[0].webAddressCount = 190737
+locatedEMails[0].emailCount = -77590
+locatedEMails[0].numberType = 190919
+locatedEMails[1].entryId = -209906298
+locatedEMails[1].entryPosition = 191101
+locatedEMails[1].entryType = -77738
+locatedEMails[1].generalDescription1 = "t2102"
+locatedEMails[1].generalDescription2 = "t2103"
+locatedEMails[1].phoneCount = 191465
+locatedEMails[1].probNavigable = -77886
+locatedEMails[1].navigable = 191647
+locatedEMails[1].topDestination = -77960
+locatedEMails[1].contactPicture.id = 191829
+locatedEMails[1].contactPicture.url = "t2109"
+locatedEMails[1].contactPicture.cdnAccess.cdnInternalIpv6 = "t2110"
+locatedEMails[1].contactPicture.cdnAccess.cdnInternalPort = -78108
+locatedEMails[1].contactPicture.cdnAccess.cdnExternalIpv6 = "t2112"
+locatedEMails[1].contactPicture.cdnAccess.cdnExternalPort = -78182
+locatedEMails[1].contactPicture.cdnAccess.imageResourcePath = "aspas \" barra \\ é 2114"
+locatedEMails[1].webAddressCount = -78256
+locatedEMails[1].emailCount = 192557
+locatedEMails[1].numberType = -78330
+[DSIAdbDataResolution.resolvePhoneNumbersResult]
+success = 192739
+resolvedNumbers[0].entryId = -211906358
+resolvedNumbers[0].entryPosition = 192921
+resolvedNumbers[0].entryType = -78478
+resolvedNumbers[0].generalDescription1 = "t2122"
+resolvedNumbers[0].generalDescription2 = "t2123"
+resolvedNumbers[0].phoneCount = 193285
+resolvedNumbers[0].probNavigable = -78626
+resolvedNumbers[0].navigable = 193467
+resolvedNumbers[0].topDestination = -78700
+resolvedNumbers[0].contactPicture.id = 193649
+resolvedNumbers[0].contactPicture.url = "t2129"
+resolvedNumbers[0].contactPicture.cdnAccess.cdnInternalIpv6 = "t2130"
+resolvedNumbers[0].contactPicture.cdnAccess.cdnInternalPort = -78848
+resolvedNumbers[0].contactPicture.cdnAccess.cdnExternalIpv6 = "t2132"
+resolvedNumbers[0].contactPicture.cdnAccess.cdnExternalPort = -78922
+resolvedNumbers[0].contactPicture.cdnAccess.imageResourcePath = "t2134"
+resolvedNumbers[0].webAddressCount = -78996
+resolvedNumbers[0].emailCount = 194377
+resolvedNumbers[0].numberType = -79070
+resolvedNumbers[1].entryId = 64140000040623
+resolvedNumbers[1].entryPosition = -79144
+resolvedNumbers[1].entryType = 194741
+resolvedNumbers[1].generalDescription1 = "t2141"
+resolvedNumbers[1].generalDescription2 = "aspas \" barra \\ é 2142"
+resolvedNumbers[1].phoneCount = -79292
+resolvedNumbers[1].probNavigable = 195105
+resolvedNumbers[1].navigable = -79366
+resolvedNumbers[1].topDestination = 195287
+resolvedNumbers[1].contactPicture.id = -79440
+resolvedNumbers[1].contactPicture.url = "t2148"
+resolvedNumbers[1].contactPicture.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 2149"
+resolvedNumbers[1].contactPicture.cdnAccess.cdnInternalPort = 195651
+resolvedNumbers[1].contactPicture.cdnAccess.cdnExternalIpv6 = "t2151"
+resolvedNumbers[1].contactPicture.cdnAccess.cdnExternalPort = 195833
+resolvedNumbers[1].contactPicture.cdnAccess.imageResourcePath = "t2153"
+resolvedNumbers[1].webAddressCount = 196015
+resolvedNumbers[1].emailCount = -79736
+resolvedNumbers[1].numberType = 196197
+[DSIAdbEdit.updateNewPublicProfileEntryAvailable]
+newPublicProfileEntryAvailable = 1
+validFlag = 196379
+[DSIAdbEdit.updateSpeedDials]
+speedDialList[0].lastName = "t2159"
+speedDialList[0].firstName = "t2160"
+speedDialList[0].combinedName = "t2161"
+speedDialList[0].contactPicture.id = 196743
+speedDialList[0].contactPicture.url = "aspas \" barra \\ é 2163"
+speedDialList[0].contactPicture.cdnAccess.cdnInternalIpv6 = "t2164"
+speedDialList[0].contactPicture.cdnAccess.cdnInternalPort = -80106
+speedDialList[0].contactPicture.cdnAccess.cdnExternalIpv6 = "t2166"
+speedDialList[0].contactPicture.cdnAccess.cdnExternalPort = -80180
+speedDialList[0].contactPicture.cdnAccess.imageResourcePath = "t2168"
+speedDialList[0].phoneData.number = "t2169"
+speedDialList[0].phoneData.numberType = 197471
+speedDialList[0].phoneData.speedDialKey = -80328
+speedDialList[0].speedDialIndex = 197653
+speedDialList[1].lastName = "t2173"
+speedDialList[1].firstName = "t2174"
+speedDialList[1].combinedName = "t2175"
+speedDialList[1].contactPicture.id = 198017
+speedDialList[1].contactPicture.url = "aspas \" barra \\ é 2177"
+speedDialList[1].contactPicture.cdnAccess.cdnInternalIpv6 = "t2178"
+speedDialList[1].contactPicture.cdnAccess.cdnInternalPort = -80624
+speedDialList[1].contactPicture.cdnAccess.cdnExternalIpv6 = "t2180"
+speedDialList[1].contactPicture.cdnAccess.cdnExternalPort = -80698
+speedDialList[1].contactPicture.cdnAccess.imageResourcePath = "t2182"
+speedDialList[1].phoneData.number = "t2183"
+speedDialList[1].phoneData.numberType = 198745
+speedDialList[1].phoneData.speedDialKey = -80846
+speedDialList[1].speedDialIndex = 198927
+validFlag = -80920
+[DSIAdbEdit.insertEntryResult]
+success = 199109
+entry.entryId = -218906568
+entry.entryType = 199291
+entry.combinedName = "aspas \" barra \\ é 2191"
+entry.phoneData[0].number = "t2192"
+entry.phoneData[0].numberType = -81142
+entry.phoneData[0].speedDialKey = 199655
+entry.phoneData[1].number = "t2195"
+entry.phoneData[1].numberType = 199837
+entry.phoneData[1].speedDialKey = -81290
+entry.addressData[0].addressType = 200019
+entry.addressData[0].street = "t2199"
+entry.addressData[0].locality = "t2200"
+entry.addressData[0].country = "t2201"
+entry.addressData[0].region = "t2202"
+entry.addressData[0].postalCode = "t2203"
+entry.addressData[0].geoPosition = "t2204"
+entry.addressData[1].addressType = -81586
+entry.addressData[1].street = "t2206"
+entry.addressData[1].locality = "t2207"
+entry.addressData[1].country = "t2208"
+entry.addressData[1].region = "t2209"
+entry.addressData[1].postalCode = "t2210"
+entry.addressData[1].geoPosition = "t2211"
+entry.emailData[0].preferred = 1
+entry.emailData[0].emailType = -81882
+entry.emailData[0].emailAddr = "t2214"
+entry.emailData[1].preferred = 1
+entry.emailData[1].emailType = 201657
+entry.emailData[1].emailAddr = "t2217"
+entry.urlData[0] = "t2218"
+entry.urlData[1] = "aspas \" barra \\ é 2219"
+entry.personalData.lastName = "t2220"
+entry.personalData.lastNameSound = "t2221"
+entry.personalData.firstName = "t2222"
+entry.personalData.firstNameSound = "t2223"
+entry.personalData.birthday.time = 66720000042257
+entry.personalData.organization = "t2225"
+entry.personalData.organizationSound = "aspas \" barra \\ é 2226"
+entry.personalData.contactPicture.id = -82400
+entry.personalData.contactPicture.url = "t2228"
+entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2229"
+entry.personalData.contactPicture.cdnAccess.cdnInternalPort = 202931
+entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2231"
+entry.personalData.contactPicture.cdnAccess.cdnExternalPort = 203113
+entry.personalData.contactPicture.cdnAccess.imageResourcePath = "aspas \" barra \\ é 2233"
+entry.referenceId = "t2234"
+[DSIAdbEdit.getEntriesResult]
+success = -82696
+entryList[0].entryId = 67080000042485
+entryList[0].entryType = -82770
+entryList[0].combinedName = "t2238"
+entryList[0].phoneData[0].number = "t2239"
+entryList[0].phoneData[0].numberType = 203841
+entryList[0].phoneData[0].speedDialKey = -82918
+entryList[0].phoneData[1].number = "t2242"
+entryList[0].phoneData[1].numberType = -82992
+entryList[0].phoneData[1].speedDialKey = 204205
+entryList[0].addressData[0].addressType = -83066
+entryList[0].addressData[0].street = "t2246"
+entryList[0].addressData[0].locality = "aspas \" barra \\ é 2247"
+entryList[0].addressData[0].country = "t2248"
+entryList[0].addressData[0].region = "t2249"
+entryList[0].addressData[0].postalCode = "t2250"
+entryList[0].addressData[0].geoPosition = "t2251"
+entryList[0].addressData[1].addressType = 204933
+entryList[0].addressData[1].street = "t2253"
+entryList[0].addressData[1].locality = "aspas \" barra \\ é 2254"
+entryList[0].addressData[1].country = "t2255"
+entryList[0].addressData[1].region = "t2256"
+entryList[0].addressData[1].postalCode = "t2257"
+entryList[0].addressData[1].geoPosition = "t2258"
+entryList[0].emailData[0].preferred = 1
+entryList[0].emailData[0].emailType = 205661
+entryList[0].emailData[0].emailAddr = "aspas \" barra \\ é 2261"
+entryList[0].emailData[1].preferred = 1
+entryList[0].emailData[1].emailType = -83732
+entryList[0].emailData[1].emailAddr = "t2264"
+entryList[0].urlData[0] = "t2265"
+entryList[0].urlData[1] = "t2266"
+entryList[0].personalData.lastName = "t2267"
+entryList[0].personalData.lastNameSound = "aspas \" barra \\ é 2268"
+entryList[0].personalData.firstName = "t2269"
+entryList[0].personalData.firstNameSound = "t2270"
+entryList[0].personalData.birthday.time = -227106814
+entryList[0].personalData.organization = "t2272"
+entryList[0].personalData.organizationSound = "t2273"
+entryList[0].personalData.contactPicture.id = 206935
+entryList[0].personalData.contactPicture.url = "aspas \" barra \\ é 2275"
+entryList[0].personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2276"
+entryList[0].personalData.contactPicture.cdnAccess.cdnInternalPort = -84250
+entryList[0].personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2278"
+entryList[0].personalData.contactPicture.cdnAccess.cdnExternalPort = -84324
+entryList[0].personalData.contactPicture.cdnAccess.imageResourcePath = "t2280"
+entryList[0].referenceId = "t2281"
+entryList[1].entryId = 68460000043359
+entryList[1].entryType = -84472
+entryList[1].combinedName = "t2284"
+entryList[1].phoneData[0].number = "t2285"
+entryList[1].phoneData[0].numberType = 208027
+entryList[1].phoneData[0].speedDialKey = -84620
+entryList[1].phoneData[1].number = "t2288"
+entryList[1].phoneData[1].numberType = -84694
+entryList[1].phoneData[1].speedDialKey = 208391
+entryList[1].addressData[0].addressType = -84768
+entryList[1].addressData[0].street = "t2292"
+entryList[1].addressData[0].locality = "t2293"
+entryList[1].addressData[0].country = "t2294"
+entryList[1].addressData[0].region = "t2295"
+entryList[1].addressData[0].postalCode = "aspas \" barra \\ é 2296"
+entryList[1].addressData[0].geoPosition = "t2297"
+entryList[1].addressData[1].addressType = 209119
+entryList[1].addressData[1].street = "t2299"
+entryList[1].addressData[1].locality = "t2300"
+entryList[1].addressData[1].country = "t2301"
+entryList[1].addressData[1].region = "t2302"
+entryList[1].addressData[1].postalCode = "aspas \" barra \\ é 2303"
+entryList[1].addressData[1].geoPosition = "t2304"
+entryList[1].emailData[0].preferred = 1
+entryList[1].emailData[0].emailType = 209847
+entryList[1].emailData[0].emailAddr = "t2307"
+entryList[1].emailData[1].preferred = 1
+entryList[1].emailData[1].emailType = -85434
+entryList[1].emailData[1].emailAddr = "aspas \" barra \\ é 2310"
+entryList[1].urlData[0] = "t2311"
+entryList[1].urlData[1] = "t2312"
+entryList[1].personalData.lastName = "t2313"
+entryList[1].personalData.lastNameSound = "t2314"
+entryList[1].personalData.firstName = "t2315"
+entryList[1].personalData.firstNameSound = "t2316"
+entryList[1].personalData.birthday.time = -231706952
+entryList[1].personalData.organization = "t2318"
+entryList[1].personalData.organizationSound = "t2319"
+entryList[1].personalData.contactPicture.id = 211121
+entryList[1].personalData.contactPicture.url = "t2321"
+entryList[1].personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2322"
+entryList[1].personalData.contactPicture.cdnAccess.cdnInternalPort = -85952
+entryList[1].personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 2324"
+entryList[1].personalData.contactPicture.cdnAccess.cdnExternalPort = -86026
+entryList[1].personalData.contactPicture.cdnAccess.imageResourcePath = "t2326"
+entryList[1].referenceId = "t2327"
+[DSIAdbEdit.getEntryDataSetsResult]
+success = 211849
+entryDataSetList[0].entryId = -232906988
+entryDataSetList[0].entryPosition = 212031
+entryDataSetList[0].entryType = -86248
+entryDataSetList[0].generalDescription1 = "t2332"
+entryDataSetList[0].generalDescription2 = "t2333"
+entryDataSetList[0].phoneCount = 212395
+entryDataSetList[0].probNavigable = -86396
+entryDataSetList[0].navigable = 212577
+entryDataSetList[0].topDestination = -86470
+entryDataSetList[0].contactPicture.id = 212759
+entryDataSetList[0].contactPicture.url = "t2339"
+entryDataSetList[0].contactPicture.cdnAccess.cdnInternalIpv6 = "t2340"
+entryDataSetList[0].contactPicture.cdnAccess.cdnInternalPort = -86618
+entryDataSetList[0].contactPicture.cdnAccess.cdnExternalIpv6 = "t2342"
+entryDataSetList[0].contactPicture.cdnAccess.cdnExternalPort = -86692
+entryDataSetList[0].contactPicture.cdnAccess.imageResourcePath = "t2344"
+entryDataSetList[0].webAddressCount = -86766
+entryDataSetList[0].emailCount = 213487
+entryDataSetList[0].numberType = -86840
+entryDataSetList[1].entryId = 70440000044613
+entryDataSetList[1].entryPosition = -86914
+entryDataSetList[1].entryType = 213851
+entryDataSetList[1].generalDescription1 = "t2351"
+entryDataSetList[1].generalDescription2 = "aspas \" barra \\ é 2352"
+entryDataSetList[1].phoneCount = -87062
+entryDataSetList[1].probNavigable = 214215
+entryDataSetList[1].navigable = -87136
+entryDataSetList[1].topDestination = 214397
+entryDataSetList[1].contactPicture.id = -87210
+entryDataSetList[1].contactPicture.url = "t2358"
+entryDataSetList[1].contactPicture.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 2359"
+entryDataSetList[1].contactPicture.cdnAccess.cdnInternalPort = 214761
+entryDataSetList[1].contactPicture.cdnAccess.cdnExternalIpv6 = "t2361"
+entryDataSetList[1].contactPicture.cdnAccess.cdnExternalPort = 214943
+entryDataSetList[1].contactPicture.cdnAccess.imageResourcePath = "t2363"
+entryDataSetList[1].webAddressCount = 215125
+entryDataSetList[1].emailCount = -87506
+entryDataSetList[1].numberType = 215307
+[DSIAdbEdit.changeEntryResult]
+success = -87580
+entry.entryId = 71040000044993
+entry.entryType = -87654
+entry.combinedName = "t2370"
+entry.phoneData[0].number = "t2371"
+entry.phoneData[0].numberType = 215853
+entry.phoneData[0].speedDialKey = -87802
+entry.phoneData[1].number = "t2374"
+entry.phoneData[1].numberType = -87876
+entry.phoneData[1].speedDialKey = 216217
+entry.addressData[0].addressType = -87950
+entry.addressData[0].street = "t2378"
+entry.addressData[0].locality = "t2379"
+entry.addressData[0].country = "aspas \" barra \\ é 2380"
+entry.addressData[0].region = "t2381"
+entry.addressData[0].postalCode = "t2382"
+entry.addressData[0].geoPosition = "t2383"
+entry.addressData[1].addressType = 216945
+entry.addressData[1].street = "t2385"
+entry.addressData[1].locality = "t2386"
+entry.addressData[1].country = "aspas \" barra \\ é 2387"
+entry.addressData[1].region = "t2388"
+entry.addressData[1].postalCode = "t2389"
+entry.addressData[1].geoPosition = "t2390"
+entry.emailData[0].preferred = 1
+entry.emailData[0].emailType = 217673
+entry.emailData[0].emailAddr = "t2393"
+entry.emailData[1].preferred = 1
+entry.emailData[1].emailType = -88616
+entry.emailData[1].emailAddr = "t2396"
+entry.urlData[0] = "t2397"
+entry.urlData[1] = "t2398"
+entry.personalData.lastName = "t2399"
+entry.personalData.lastNameSound = "t2400"
+entry.personalData.firstName = "aspas \" barra \\ é 2401"
+entry.personalData.firstNameSound = "t2402"
+entry.personalData.birthday.time = -240307210
+entry.personalData.organization = "t2404"
+entry.personalData.organizationSound = "t2405"
+entry.personalData.contactPicture.id = 218947
+entry.personalData.contactPicture.url = "t2407"
+entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 2408"
+entry.personalData.contactPicture.cdnAccess.cdnInternalPort = -89134
+entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2410"
+entry.personalData.contactPicture.cdnAccess.cdnExternalPort = -89208
+entry.personalData.contactPicture.cdnAccess.imageResourcePath = "t2412"
+entry.referenceId = "t2413"
+[DSIAdbEdit.deleteEntriesResult]
+success = 219675
+[DSIAdbEdit.setSpeedDialResult]
+success = -89356
+[DSIAdbEdit.deleteSpeedDialResult]
+success = 219857
+[DSIAdbEdit.getEntryByReferenceIdResult]
+success = -89430
+entry.entryId = 72540000045943
+entry.entryType = -89504
+entry.combinedName = "t2420"
+entry.phoneData[0].number = "t2421"
+entry.phoneData[0].numberType = 220403
+entry.phoneData[0].speedDialKey = -89652
+entry.phoneData[1].number = "t2424"
+entry.phoneData[1].numberType = -89726
+entry.phoneData[1].speedDialKey = 220767
+entry.addressData[0].addressType = -89800
+entry.addressData[0].street = "t2428"
+entry.addressData[0].locality = "aspas \" barra \\ é 2429"
+entry.addressData[0].country = "t2430"
+entry.addressData[0].region = "t2431"
+entry.addressData[0].postalCode = "t2432"
+entry.addressData[0].geoPosition = "t2433"
+entry.addressData[1].addressType = 221495
+entry.addressData[1].street = "t2435"
+entry.addressData[1].locality = "aspas \" barra \\ é 2436"
+entry.addressData[1].country = "t2437"
+entry.addressData[1].region = "t2438"
+entry.addressData[1].postalCode = "t2439"
+entry.addressData[1].geoPosition = "t2440"
+entry.emailData[0].preferred = 1
+entry.emailData[0].emailType = 222223
+entry.emailData[0].emailAddr = "aspas \" barra \\ é 2443"
+entry.emailData[1].preferred = 1
+entry.emailData[1].emailType = -90466
+entry.emailData[1].emailAddr = "t2446"
+entry.urlData[0] = "t2447"
+entry.urlData[1] = "t2448"
+entry.personalData.lastName = "t2449"
+entry.personalData.lastNameSound = "aspas \" barra \\ é 2450"
+entry.personalData.firstName = "t2451"
+entry.personalData.firstNameSound = "t2452"
+entry.personalData.birthday.time = -245307360
+entry.personalData.organization = "t2454"
+entry.personalData.organizationSound = "t2455"
+entry.personalData.contactPicture.id = 223497
+entry.personalData.contactPicture.url = "aspas \" barra \\ é 2457"
+entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2458"
+entry.personalData.contactPicture.cdnAccess.cdnInternalPort = -90984
+entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2460"
+entry.personalData.contactPicture.cdnAccess.cdnExternalPort = -91058
+entry.personalData.contactPicture.cdnAccess.imageResourcePath = "t2462"
+entry.referenceId = "t2463"
+[DSIAdbEdit.getEntryNamesResult]
+success = 224225
+entryNameList[0].entryId = -246507396
+entryNameList[0].firstName = "t2466"
+entryNameList[0].lastName = "t2467"
+entryNameList[0].firstNameSound = "t2468"
+entryNameList[0].lastNameSound = "t2469"
+entryNameList[1].entryId = 74100000046931
+entryNameList[1].firstName = "aspas \" barra \\ é 2471"
+entryNameList[1].lastName = "t2472"
+entryNameList[1].firstNameSound = "t2473"
+entryNameList[1].lastNameSound = "t2474"
+[DSIAdbList.updateAlphabeticalIndex]
+indexInfos[0].viewtype = -91576
+indexInfos[0].characterInfo[0].value = 225317
+indexInfos[0].characterInfo[0].index = -91650
+indexInfos[0].characterInfo[0].characters = "aspas \" barra \\ é 2478"
+indexInfos[0].characterInfo[1].value = -91724
+indexInfos[0].characterInfo[1].index = 225681
+indexInfos[0].characterInfo[1].characters = "t2481"
+indexInfos[1].viewtype = 225863
+indexInfos[1].characterInfo[0].value = -91872
+indexInfos[1].characterInfo[0].index = 226045
+indexInfos[1].characterInfo[0].characters = "aspas \" barra \\ é 2485"
+indexInfos[1].characterInfo[1].value = 226227
+indexInfos[1].characterInfo[1].index = -92020
+indexInfos[1].characterInfo[1].characters = "t2488"
+validFlag = -92094
+[DSIAdbList.getViewWindowResult]
+success = 226591
+dataSetList[0].entryId = -249107474
+dataSetList[0].entryPosition = 226773
+dataSetList[0].entryType = -92242
+dataSetList[0].generalDescription1 = "t2494"
+dataSetList[0].generalDescription2 = "t2495"
+dataSetList[0].phoneCount = 227137
+dataSetList[0].probNavigable = -92390
+dataSetList[0].navigable = 227319
+dataSetList[0].topDestination = -92464
+dataSetList[0].contactPicture.id = 227501
+dataSetList[0].contactPicture.url = "t2501"
+dataSetList[0].contactPicture.cdnAccess.cdnInternalIpv6 = "t2502"
+dataSetList[0].contactPicture.cdnAccess.cdnInternalPort = -92612
+dataSetList[0].contactPicture.cdnAccess.cdnExternalIpv6 = "t2504"
+dataSetList[0].contactPicture.cdnAccess.cdnExternalPort = -92686
+dataSetList[0].contactPicture.cdnAccess.imageResourcePath = "aspas \" barra \\ é 2506"
+dataSetList[0].webAddressCount = -92760
+dataSetList[0].emailCount = 228229
+dataSetList[0].numberType = -92834
+dataSetList[1].entryId = 75300000047691
+dataSetList[1].entryPosition = -92908
+dataSetList[1].entryType = 228593
+dataSetList[1].generalDescription1 = "aspas \" barra \\ é 2513"
+dataSetList[1].generalDescription2 = "t2514"
+dataSetList[1].phoneCount = -93056
+dataSetList[1].probNavigable = 228957
+dataSetList[1].navigable = -93130
+dataSetList[1].topDestination = 229139
+dataSetList[1].contactPicture.id = -93204
+dataSetList[1].contactPicture.url = "aspas \" barra \\ é 2520"
+dataSetList[1].contactPicture.cdnAccess.cdnInternalIpv6 = "t2521"
+dataSetList[1].contactPicture.cdnAccess.cdnInternalPort = 229503
+dataSetList[1].contactPicture.cdnAccess.cdnExternalIpv6 = "t2523"
+dataSetList[1].contactPicture.cdnAccess.cdnExternalPort = 229685
+dataSetList[1].contactPicture.cdnAccess.imageResourcePath = "t2525"
+dataSetList[1].webAddressCount = 229867
+dataSetList[1].emailCount = -93500
+dataSetList[1].numberType = 230049
+totalEntries = -93574
+[DSIAdbList.setListStyleResult]
+success = 230231
+[DSIAdbList.invalidData]
+reason = -93648
+viewSize.all = 230413
+viewSize.phone = -93722
+viewSize.navi = 230595
+viewSize.email = -93796
+[DSIAdbUserProfile.updateSOSButton]
+visiblity = 1
+validFlag = -93870
+[DSIAdbUserProfile.updateSortOrder]
+sortOrder = 230959
+validFlag = -93944
+[DSIAdbUserProfile.updatePictureVisibility]
+visibility = 1
+validFlag = -94018
+[DSIAdbUserProfile.updateContextSpecificVisibility]
+visibility = 1
+validFlag = -94092
+[DSIAdbUserProfile.updateActiveProfile]
+profileInfo.num = 231505
+profileInfo.name = "t2545"
+profileInfo.publicProfileVisibility = 1
+profileInfo.active = 1
+profileInfo.deviceID = "aspas \" barra \\ é 2548"
+validFlag = -94314
+[DSIAdbUserProfile.setProfileNameResult]
+success = 232051
+[DSIAdbUserProfile.setSOSButtonResult]
+success = -94388
+[DSIAdbUserProfile.useProfileResult]
+deviceID = "t2552"
+success = -94462
+[DSIAdbUserProfile.setSortOrderResult]
+success = 232415
+[DSIAdbUserProfile.setPublicProfileVisibilityResult]
+success = -94536
+[DSIAdbUserProfile.setContextSpecificVisibilityResult]
+success = 232597
+[DSIAdbVCardExchange.updateExportCount]
+exportCount.count = -94610
+exportCount.numberOfItems = 232779
+validFlag = -94684
+[DSIAdbVCardExchange.updateImportCount]
+importCount.count = 232961
+importCount.numberOfItems = -94758
+validFlag = 233143
+[DSIAdbVCardExchange.importVCardResult]
+success = -94832
+countSuccess = 233325
+countFailure = -94906
+failureReason = 233507
+[DSIAdbVCardExchange.exportVCardResult]
+success = -94980
+countSuccess = 233689
+countFailure = -95054
+failureReason = 233871
+[DSIAdbVCardExchange.createVCardResult]
+success = -95128
+entryIdList[0] = 77160000048869
+entryIdList[1] = -257307720
+listMode = 234235
+fullPathToVCards = "t2575"
+[DSIAdbVCardExchange.parseVCardResult]
+success = 234417
+entries[0].entryId = -257707732
+entries[0].entryType = 234599
+entries[0].combinedName = "t2579"
+entries[0].phoneData[0].number = "t2580"
+entries[0].phoneData[0].numberType = -95498
+entries[0].phoneData[0].speedDialKey = 234963
+entries[0].phoneData[1].number = "aspas \" barra \\ é 2583"
+entries[0].phoneData[1].numberType = 235145
+entries[0].phoneData[1].speedDialKey = -95646
+entries[0].addressData[0].addressType = 235327
+entries[0].addressData[0].street = "t2587"
+entries[0].addressData[0].locality = "t2588"
+entries[0].addressData[0].country = "t2589"
+entries[0].addressData[0].region = "aspas \" barra \\ é 2590"
+entries[0].addressData[0].postalCode = "t2591"
+entries[0].addressData[0].geoPosition = "t2592"
+entries[0].addressData[1].addressType = -95942
+entries[0].addressData[1].street = "t2594"
+entries[0].addressData[1].locality = "t2595"
+entries[0].addressData[1].country = "t2596"
+entries[0].addressData[1].region = "aspas \" barra \\ é 2597"
+entries[0].addressData[1].postalCode = "t2598"
+entries[0].addressData[1].geoPosition = "t2599"
+entries[0].emailData[0].preferred = 1
+entries[0].emailData[0].emailType = -96238
+entries[0].emailData[0].emailAddr = "t2602"
+entries[0].emailData[1].preferred = 1
+entries[0].emailData[1].emailType = 236965
+entries[0].emailData[1].emailAddr = "t2605"
+entries[0].urlData[0] = "t2606"
+entries[0].urlData[1] = "t2607"
+entries[0].personalData.lastName = "t2608"
+entries[0].personalData.lastNameSound = "t2609"
+entries[0].personalData.firstName = "t2610"
+entries[0].personalData.firstNameSound = "aspas \" barra \\ é 2611"
+entries[0].personalData.birthday.time = 78360000049629
+entries[0].personalData.organization = "t2613"
+entries[0].personalData.organizationSound = "t2614"
+entries[0].personalData.contactPicture.id = -96756
+entries[0].personalData.contactPicture.url = "t2616"
+entries[0].personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2617"
+entries[0].personalData.contactPicture.cdnAccess.cdnInternalPort = 238239
+entries[0].personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2619"
+entries[0].personalData.contactPicture.cdnAccess.cdnExternalPort = 238421
+entries[0].personalData.contactPicture.cdnAccess.imageResourcePath = "t2621"
+entries[0].referenceId = "t2622"
+entries[1].entryId = -262307870
+entries[1].entryType = 238785
+entries[1].combinedName = "aspas \" barra \\ é 2625"
+entries[1].phoneData[0].number = "t2626"
+entries[1].phoneData[0].numberType = -97200
+entries[1].phoneData[0].speedDialKey = 239149
+entries[1].phoneData[1].number = "t2629"
+entries[1].phoneData[1].numberType = 239331
+entries[1].phoneData[1].speedDialKey = -97348
+entries[1].addressData[0].addressType = 239513
+entries[1].addressData[0].street = "t2633"
+entries[1].addressData[0].locality = "t2634"
+entries[1].addressData[0].country = "t2635"
+entries[1].addressData[0].region = "t2636"
+entries[1].addressData[0].postalCode = "t2637"
+entries[1].addressData[0].geoPosition = "t2638"
+entries[1].addressData[1].addressType = -97644
+entries[1].addressData[1].street = "t2640"
+entries[1].addressData[1].locality = "t2641"
+entries[1].addressData[1].country = "t2642"
+entries[1].addressData[1].region = "t2643"
+entries[1].addressData[1].postalCode = "t2644"
+entries[1].addressData[1].geoPosition = "t2645"
+entries[1].emailData[0].preferred = 1
+entries[1].emailData[0].emailType = -97940
+entries[1].emailData[0].emailAddr = "t2648"
+entries[1].emailData[1].preferred = 1
+entries[1].emailData[1].emailType = 241151
+entries[1].emailData[1].emailAddr = "t2651"
+entries[1].urlData[0] = "t2652"
+entries[1].urlData[1] = "aspas \" barra \\ é 2653"
+entries[1].personalData.lastName = "t2654"
+entries[1].personalData.lastNameSound = "t2655"
+entries[1].personalData.firstName = "t2656"
+entries[1].personalData.firstNameSound = "t2657"
+entries[1].personalData.birthday.time = 79740000050503
+entries[1].personalData.organization = "t2659"
+entries[1].personalData.organizationSound = "aspas \" barra \\ é 2660"
+entries[1].personalData.contactPicture.id = -98458
+entries[1].personalData.contactPicture.url = "t2662"
+entries[1].personalData.contactPicture.cdnAccess.cdnInternalIpv6 = "t2663"
+entries[1].personalData.contactPicture.cdnAccess.cdnInternalPort = 242425
+entries[1].personalData.contactPicture.cdnAccess.cdnExternalIpv6 = "t2665"
+entries[1].personalData.contactPicture.cdnAccess.cdnExternalPort = 242607
+entries[1].personalData.contactPicture.cdnAccess.imageResourcePath = "aspas \" barra \\ é 2667"
+entries[1].referenceId = "t2668"
+[DSIPhoneManager.updateDiscoveredDevices]
+discoveredDevices[0].wlanP2PMacAddress = "t2669"
+discoveredDevices[0].wlanMacAddress = "t2670"
+discoveredDevices[0].btDeviceClass = "t2671"
+discoveredDevices[0].btDeviceAddress = "t2672"
+discoveredDevices[0].deviceName = "t2673"
+discoveredDevices[0].uniqueDeviceID = "aspas \" barra \\ é 2674"
+discoveredDevices[0].productID = "t2675"
+discoveredDevices[0].vendorID = "t2676"
+discoveredDevices[0].version = "t2677"
+discoveredDevices[0].serviceStateHFP = 243699
+discoveredDevices[0].serviceStateMAP = -99124
+discoveredDevices[0].serviceStateA2DP = 243881
+discoveredDevices[0].serviceStateCPWL = -99198
+discoveredDevices[0].serviceStateCPWired = 244063
+discoveredDevices[0].serviceStateMLWL = -99272
+discoveredDevices[0].serviceStateMLWired = 244245
+discoveredDevices[0].serviceStateAAWL = -99346
+discoveredDevices[0].serviceStateAAWired = 244427
+discoveredDevices[0].serviceStateBCLWL = -99420
+discoveredDevices[0].serviceStateBCLWired = 244609
+discoveredDevices[0].serviceStatePBAP = -99494
+discoveredDevices[0].serviceStatePIM = 244791
+discoveredDevices[1].wlanP2PMacAddress = "t2691"
+discoveredDevices[1].wlanMacAddress = "t2692"
+discoveredDevices[1].btDeviceClass = "t2693"
+discoveredDevices[1].btDeviceAddress = "t2694"
+discoveredDevices[1].deviceName = "aspas \" barra \\ é 2695"
+discoveredDevices[1].uniqueDeviceID = "t2696"
+discoveredDevices[1].productID = "t2697"
+discoveredDevices[1].vendorID = "t2698"
+discoveredDevices[1].version = "t2699"
+discoveredDevices[1].serviceStateHFP = 245701
+discoveredDevices[1].serviceStateMAP = -99938
+discoveredDevices[1].serviceStateA2DP = 245883
+discoveredDevices[1].serviceStateCPWL = -12
+discoveredDevices[1].serviceStateCPWired = 246065
+discoveredDevices[1].serviceStateMLWL = -86
+discoveredDevices[1].serviceStateMLWired = 246247
+discoveredDevices[1].serviceStateAAWL = -160
+discoveredDevices[1].serviceStateAAWired = 246429
+discoveredDevices[1].serviceStateBCLWL = -234
+discoveredDevices[1].serviceStateBCLWired = 246611
+discoveredDevices[1].serviceStatePBAP = -308
+discoveredDevices[1].serviceStatePIM = 246793
+validFlag = -382
+[DSIPhoneManager.updateKnownDevices]
+knownDevices[0].wlanP2PMacAddress = "t2714"
+knownDevices[0].wlanMacAddress = "t2715"
+knownDevices[0].btDeviceClass = "aspas \" barra \\ é 2716"
+knownDevices[0].btDeviceAddress = "t2717"
+knownDevices[0].deviceName = "t2718"
+knownDevices[0].uniqueDeviceID = "t2719"
+knownDevices[0].productID = "t2720"
+knownDevices[0].vendorID = "t2721"
+knownDevices[0].version = "t2722"
+knownDevices[0].serviceStateHFP = -752
+knownDevices[0].serviceStateMAP = 247885
+knownDevices[0].serviceStateA2DP = -826
+knownDevices[0].serviceStateCPWL = 248067
+knownDevices[0].serviceStateCPWired = -900
+knownDevices[0].serviceStateMLWL = 248249
+knownDevices[0].serviceStateMLWired = -974
+knownDevices[0].serviceStateAAWL = 248431
+knownDevices[0].serviceStateAAWired = -1048
+knownDevices[0].serviceStateBCLWL = 248613
+knownDevices[0].serviceStateBCLWired = -1122
+knownDevices[0].serviceStatePBAP = 248795
+knownDevices[0].serviceStatePIM = -1196
+knownDevices[1].wlanP2PMacAddress = "t2736"
+knownDevices[1].wlanMacAddress = "aspas \" barra \\ é 2737"
+knownDevices[1].btDeviceClass = "t2738"
+knownDevices[1].btDeviceAddress = "t2739"
+knownDevices[1].deviceName = "t2740"
+knownDevices[1].uniqueDeviceID = "t2741"
+knownDevices[1].productID = "t2742"
+knownDevices[1].vendorID = "t2743"
+knownDevices[1].version = "aspas \" barra \\ é 2744"
+knownDevices[1].serviceStateHFP = -1566
+knownDevices[1].serviceStateMAP = 249887
+knownDevices[1].serviceStateA2DP = -1640
+knownDevices[1].serviceStateCPWL = 250069
+knownDevices[1].serviceStateCPWired = -1714
+knownDevices[1].serviceStateMLWL = 250251
+knownDevices[1].serviceStateMLWired = -1788
+knownDevices[1].serviceStateAAWL = 250433
+knownDevices[1].serviceStateAAWired = -1862
+knownDevices[1].serviceStateBCLWL = 250615
+knownDevices[1].serviceStateBCLWired = -1936
+knownDevices[1].serviceStatePBAP = 250797
+knownDevices[1].serviceStatePIM = -2010
+validFlag = 250979
+[DSIPhoneManager.updateSingleDeviceCoexMode]
+active = 1
+validFlag = 251161
+[DSIPhoneManager.updateEmergencyCallIndicator]
+active = 1
+validFlag = 251343
+[DSIPhoneManager.updateSwapStatus]
+swapOrFod = -2232
+isCarPlayUnlocked = 1
+isAndroidAutoUnlocked = 1
+isMirrorLinkUnlocked = 1
+isCarLifeUnlocked = 1
+validFlag = 251889
+[DSIPhoneManager.responseConnectService]
+result = -2454
+[DSIPhoneManager.responseDisconnectService]
+result = 252071
+[DSIPhoneManager.responseStartDiscovery]
+result = -2528
+[DSIPhoneManager.responseAbortDiscovery]
+result = 252253
+[DSIPhoneManager.responseReconnectSuspend]
+result = -2602
+[DSIPhoneManager.responseRemoveDevice]
+uniqueDeviceID = "t2774"
+result = -2676
+[DSIPhoneManager.responseRejectTechnologySelection]
+uniqueDeviceID = "t2776"
+result = -2750
+[DSIPhoneManager.responseRestoreFactorySettings]
+result = 252799
+[DSIPhoneManager.responseSetPrioritizedDevice]
+result = -2824
+[DSIPhoneManager.responseSetEmergencyCallIndicator]
+result = 252981
+[DSIPhoneManager.responseAbortConnectService]
+result = -2898
+[DSIPhoneManager.indicateDeviceDisconnectionInfo]
+uniqueDeviceID = "t2782"
+serviceType = -2972
+disconnectionInfo = 253345
+[DSIPhoneManager.indicateIncomingServiceRequestLimitExceeded]
+uniqueDeviceID = "t2785"
+serviceType = 253527
+[DSIPhoneManager.indicateGetTechnologySelection]
+uniqueDeviceID = "t2787"
+[DSIPhoneManager.indicateIncomingAAWLConnectionRequest]
+uniqueDeviceID = "t2788"

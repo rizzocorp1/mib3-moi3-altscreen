@@ -1,0 +1,103 @@
+# aparelho-conectado.txt — perfil do telefone de mentira: um aparelho FICTÍCIO conectado.
+# Item 7 do roteiro do simulador (12/10/2026). Estudo num computador; nada daqui vai para o carro.
+#
+# Vai DEPOIS do sem-aparelho.txt, que traz o resto (Bluetooth ligado, as respostas, as regras):
+#   TELEFONE="/stubs/telefone/sem-aparelho.txt /stubs/telefone/aparelho-conectado.txt"
+#
+# SIMULAÇÃO do começo ao fim. Não há aparelho, chamada, agenda nem mensagem, e NENHUM dado é de uma
+# pessoa ou de um aparelho de verdade: o nome, o endereço Bluetooth e a operadora são inventados, e
+# dizem que são. Não há IMEI, IMSI, número de telefone nem contato.
+#
+# As seções do aparelho são POR INSTÂNCIA, [Serviço[0].evento]: valem só para a instância 0 do
+# DSIMobileEquipment, que é o aparelho principal. A 1 (o aparelho associado) e a 2 (a do CarPlay)
+# seguem com o que o sem-aparelho.txt diz: nenhum aparelho conectado.
+#
+# O mesmo aparelho vai na lista de aparelhos conhecidos do gerente de aparelhos (DSIPhoneManager, no
+# fim do arquivo). A HMI liga os dois pelo endereço Bluetooth, que tem de ser igual nas duas seções.
+
+# SIMULAÇÃO. O estado de ativação: 5 = ACTIVATIONSTATE_PHONE_ON, aparelho ligado e pronto. Com ele
+# e o Bluetooth ligado a tela do telefone é a principal. O modo: 3 = TELMODE_HFP, um celular ligado
+# por Bluetooth em mãos-livres (o zero do valor padrão é "SIM interno").
+[DSIMobileEquipment[0].updateActivationState]
+activationState.telActivationState = 5
+activationState.telMode = 3
+
+# FICTÍCIO. Os dados do aparelho: só o nome e o endereço Bluetooth, os dois inventados. Nos campos
+# "telNetIdAvail…", 2 = NETIDAVAIL_AVAIL (o dado existe) e 1 = NETIDAVAIL_NOT_AVAIL (não existe).
+[DSIMobileEquipment[0].updatePhoneInformation]
+phoneInformation.meBtAddress = "00:00:00:00:00:01"        # fictício: não é o endereço de nenhum aparelho
+phoneInformation.meFriendlyName = "Celular fictício"
+phoneInformation.telNetIdAvailIMSI = 1
+phoneInformation.telNetIdAvailSimId = 1
+phoneInformation.telNetIdAvailNadIMEI = 1
+phoneInformation.telNetIdAvailMeIMEI = 1
+phoneInformation.telNetIdAvailMeBtAddress = 2
+phoneInformation.telNetIdAvailMeFriendlyName = 2
+
+# FICTÍCIO. A rede: 1 = REGISTERSTATE_REGISTERED, registrado, numa operadora inventada. É o texto
+# grande da tela principal; nome mais longo que uns doze caracteres sai cortado.
+[DSIMobileEquipment[0].updateRegisterState]
+registerState.telRegisterState = 1
+registerState.telLongProviderName = "Fictícia"
+
+# SIMULAÇÃO. O sinal (as barras do alto da tela) e a bateria do aparelho: 4 =
+# MEBATTERYCHARGELEVEL_60_79. A bateria não pode ficar no zero do valor padrão, que é "vazia" e
+# abre o aviso de bateria do celular.
+[DSIMobileEquipment[0].updateSignalQuality]
+signalQuality = 3
+[DSIMobileEquipment[0].updateBatteryChargeLevel]
+batteryChargeLevel = 4
+
+# FICTÍCIO. A lista de aparelhos conhecidos do gerente de aparelhos, com este aparelho só. É dela
+# que a tela tira o nome da caixa da tela principal e a linha de "Celulares conhecidos"; sem ela a
+# caixa fica vazia e a lista diz "Nenhum celular conhecido disponível" com o aparelho conectado
+# (rodada "kp"). serviceStateHFP = 10 é SERVICESTATE_SUPPORTED (2) mais SERVICESTATE_CONNECTED (8):
+# o mãos-livres suportado e conectado. A HMI testa os dois bits (ServiceStateUtil); até as 9h de
+# 12/10/2026 aqui estava só o 8, que ela também mostrava como conectado (rodadas "k2" e "e10").
+# Com o telefone de mentira com modelo (driver/telefonestub.c) é este valor que diz como o
+# aparelho começa: com o bit 8, conectado; só com o 2, conhecido e não conectado (ver o
+# comeca-desconectado.txt). Os outros serviços ficam no zero, que aqui é
+# SERVICESTATE_NOT_SUPPORTED: o aparelho fictício não tem música por Bluetooth, agenda, mensagens,
+# CarPlay nem Android Auto.
+[DSIPhoneManager.updateKnownDevices]
+knownDevices[0].btDeviceAddress = "00:00:00:00:00:01"      # fictício: o mesmo endereço de exemplo de cima
+knownDevices[0].deviceName = "Celular fictício"
+knownDevices[0].uniqueDeviceID = "aparelho-ficticio-1"    # identificador inventado; a HMI o devolve nos pedidos
+knownDevices[0].serviceStateHFP = 10
+
+# SIMULAÇÃO. Com o aparelho na lista a HMI pede, aos 20 s da partida, que ele seja o prioritário
+# (requestSetPrioritizedDevice) e espera a resposta por 10 s. A seção vazia responde "feito"
+# (resultado 0 = RESULT_OK); a HMI só anota o resultado no registro dela.
+[DSIPhoneManager.responseSetPrioritizedDevice]
+
+# SIMULAÇÃO. A agenda "pronta" (2 = ADBSTATE_READY; o zero do valor padrão é "indefinida"). Sem
+# isto a máquina de chamadas da HMI fica à espera da agenda (StateCallHandlingWaitForAdb) e a
+# tecla verde do teclado não disca. Com o telefone de mentira com modelo, vale só enquanto o
+# aparelho está conectado.
+[DSIAdb.updateAdbState]
+adbState = 2
+
+# FICTÍCIO. Um perfil de agenda, ativo, ligado ao aparelho fictício pelo endereço de exemplo. Não
+# há contato nenhum nele. Sem um perfil ativo na lista a HMI fica com o número do perfil em -1, e a
+# busca de contatos que ela faz a cada dígito digitado estoura antes de guardar o número (rodada
+# "ct"): a tecla verde acha o campo vazio. Também só vale com o aparelho conectado.
+[DSIAdb.updateProfileInfo]
+profileInfo[0].name = "Perfil fictício"
+profileInfo[0].active = true
+profileInfo[0].deviceID = "00:00:00:00:00:01"      # fictício: o endereço de exemplo do aparelho
+[DSIAdbUserProfile.updateActiveProfile]
+profileInfo.name = "Perfil fictício"
+profileInfo.active = true
+profileInfo.deviceID = "00:00:00:00:00:01"         # fictício
+
+# SIMULAÇÃO. Com a agenda pronta a HMI faz quatro pedidos de que espera resposta em 10 s: usar o
+# perfil (na agenda e nas mensagens), o estilo da lista de contatos e uma janela dela. As seções
+# vazias respondem "feito" (0, que nessas respostas é sucesso) e uma janela sem contatos.
+[DSIAdbUserProfile.useProfileResult]
+[DSIMessaging.responseUseProfile]
+[DSIAdbList.setListStyleResult]
+[DSIAdbList.getViewWindowResult]
+
+# SIMULAÇÃO. Durante a chamada o teclado da tela manda tons (sendDTMF) e a HMI espera a resposta
+# por 10 s. A seção vazia responde "feito"; não há tom nenhum.
+[DSIMobileEquipment.responseSendDTMF]

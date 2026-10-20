@@ -1,0 +1,372 @@
+serviços: 12; atributos: 81; eventos: 174; pedidos: 190; mensagens: 422; campos: 1085; vetores: 173 (1586 folhas); constantes: 942
+pedidos com resposta na tabela da HMI: 66; pedidos set… com regra de gravação (dedução): 17; campos devolvidos pelas respostas (dedução): 67
+DSIMediaBase: domínio 8388608, pedidos 200, eventos 201; 11 atributos, 20 eventos (11 de atributo), 16 pedidos
+  evento MBLupdateParentalML (api 1): o nome não casa com ATTR_PARENTALML
+  evento MBLupdateParentalML (api 1): a HMI o entrega pelo método updateParentalML do ouvinte
+  evento MBLupdatePreferredLanguage (api 2): o nome não casa com ATTR_PREFERREDLANGUAGE
+  evento MBLupdatePreferredLanguage (api 2): a HMI o entrega pelo método updatePreferredLanguage do ouvinte
+  evento MBLupdateMediaList (api 3): o nome não casa com ATTR_MEDIALIST
+  evento MBLupdateMediaList (api 3): a HMI o entrega pelo método updateMediaList do ouvinte
+  evento MBLupdateDeviceList (api 4): o nome não casa com ATTR_DEVICELIST
+  evento MBLupdateDeviceList (api 4): a HMI o entrega pelo método updateDeviceList do ouvinte
+  evento MBLupdateCustomerUpdate (api 5): o nome não casa com ATTR_CUSTOMERUPDATE
+  evento MBLupdateCustomerUpdate (api 5): a HMI o entrega pelo método updateCustomerUpdate do ouvinte
+  evento MBLupdateApplicationVersion (api 7): o nome não casa com ATTR_APPLICATIONVERSION
+  evento MBLupdateApplicationVersion (api 7): a HMI o entrega pelo método updateApplicationVersion do ouvinte
+  evento MBLupdateMetadataDBVersion (api 8): o nome não casa com ATTR_METADATADBVERSION
+  evento MBLupdateMetadataDBVersion (api 8): a HMI o entrega pelo método updateMetadataDBVersion do ouvinte
+  evento MBLupdateProfileState (api 9): o nome não casa com ATTR_PROFILESTATE
+  evento MBLupdateProfileState (api 9): a HMI o entrega pelo método updateProfileState do ouvinte
+  evento MBLupdateSearchMedia (api 10): o nome não casa com ATTR_SEARCHMEDIA
+  evento MBLupdateSearchMedia (api 10): a HMI o entrega pelo método updateSearchMedia do ouvinte
+  evento MBLupdateOnlineState (api 11): o nome não casa com ATTR_ONLINESTATE
+  evento MBLupdateOnlineState (api 11): a HMI o entrega pelo método updateOnlineState do ouvinte
+  evento MBLupdateReplayGain (api 12): o nome não casa com ATTR_REPLAYGAIN
+  evento MBLupdateReplayGain (api 12): a HMI o entrega pelo método updateReplayGain do ouvinte
+  evento MBLresponseResetFactorySettings (api 2000): a HMI o entrega pelo método responseResetFactorySettings do ouvinte
+  evento MBLlaunchAppResult (api 2001): a HMI o entrega pelo método launchAppResult do ouvinte
+  evento MBLprofileChanged (api 2002): a HMI o entrega pelo método profileChanged do ouvinte
+  evento MBLprofileCopied (api 2003): a HMI o entrega pelo método profileCopied do ouvinte
+  evento MBLprofileResetR (api 2004): a HMI o entrega pelo método profileReset do ouvinte
+  evento MBLprofileResetAllR (api 2005): a HMI o entrega pelo método profileResetAll do ouvinte
+  evento MBLresponseAuthenticate (api 2006): a HMI o entrega pelo método responseAuthenticate do ouvinte
+  evento MBLresponseRemoveAuthentication (api 2007): a HMI o entrega pelo método responseRemoveAuthentication do ouvinte
+  evento MBLresponseActivationCode (api 2008): a HMI o entrega pelo método asyncException do ouvinte
+  pedidos com resposta: 10 (2 com resposta que a camada da LG não entrega); pedidos set…: 3, dos quais gravam atributo 2 (2 pela regra posicao, 0 pela regra nomes)
+  pedido requestActivationCode (api 1012): a HMI espera responseActivationCode, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido requestReplayGain (api 1013): a HMI espera responseReplayGain, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setSearchMedia (api 1009): o campo deviceID do pedido tem 0 campos de mesmo nome e tipo no evento MBLupdateSearchMedia
+DSIMediaBrowser: domínio 8388608, pedidos 202, eventos 203; 12 atributos, 24 eventos (12 de atributo), 29 pedidos
+  evento MBRLupdateBrowseMode (api 1): o nome não casa com ATTR_BROWSEMODE
+  evento MBRLupdateBrowseMode (api 1): a HMI o entrega pelo método updateBrowseMode do ouvinte
+  evento MBRLupdateContentFilter (api 2): o nome não casa com ATTR_CONTENTFILTER
+  evento MBRLupdateContentFilter (api 2): a HMI o entrega pelo método updateContentFilter do ouvinte
+  evento MBRLupdateBrowseMedia (api 3): o nome não casa com ATTR_BROWSEMEDIA
+  evento MBRLupdateBrowseMedia (api 3): a HMI o entrega pelo método updateBrowseMedia do ouvinte
+  evento MBRLupdateBrowseFolder (api 4): o nome não casa com ATTR_BROWSEFOLDER
+  evento MBRLupdateBrowseFolder (api 4): a HMI o entrega pelo método updateBrowseFolder do ouvinte
+  evento MBRLupdateListSize (api 5): o nome não casa com ATTR_LISTSIZE
+  evento MBRLupdateListSize (api 5): a HMI o entrega pelo método updateListSize do ouvinte
+  evento MBRLupdateSearchSpellerState (api 6): o nome não casa com ATTR_SEARCHSPELLERSTATE
+  evento MBRLupdateSearchSpellerState (api 6): a HMI o entrega pelo método updateSearchSpellerState do ouvinte
+  evento MBRLupdateSearchSize (api 7): o nome não casa com ATTR_SEARCHSIZE
+  evento MBRLupdateSearchSize (api 7): a HMI o entrega pelo método updateSearchSize do ouvinte
+  evento MBRLupdateAlphabeticalIndex (api 8): o nome não casa com ATTR_ALPHABETICALINDEX
+  evento MBRLupdateAlphabeticalIndex (api 8): a HMI o entrega pelo método updateAlphabeticalIndex do ouvinte
+  evento MBRLupdateSearchSourceState (api 9): o nome não casa com ATTR_SEARCHSOURCESTATE
+  evento MBRLupdateSearchSourceState (api 9): a HMI o entrega pelo método updateSearchSourceState do ouvinte
+  evento MBRLupdateGlobalPlaylistSizeExceeded (api 10): o nome não casa com ATTR_GLOBALPLAYLISTSIZEEXCEEDED
+  evento MBRLupdateGlobalPlaylistSizeExceeded (api 10): a HMI o entrega pelo método updateGlobalPlaylistSizeExceeded do ouvinte
+  evento MBRLupdateGlobalPlaylistEmpty (api 11): o nome não casa com ATTR_GLOBALPLAYLISTEMPTY
+  evento MBRLupdateGlobalPlaylistEmpty (api 11): a HMI o entrega pelo método updateGlobalPlaylistEmpty do ouvinte
+  evento MBRLupdateLastPlayedPlaylistEmpty (api 12): o nome não casa com ATTR_LASTPLAYEDLPLAYLISTEMPTY
+  evento MBRLupdateLastPlayedPlaylistEmpty (api 12): a HMI o entrega pelo método updateLastPlayedlPlaylistEmpty do ouvinte
+  evento MBRLresponseList (api 2000): a HMI o entrega pelo método responseList do ouvinte
+  evento MBRLselectionResult (api 2001): a HMI o entrega pelo método selectionResult do ouvinte
+  evento MBRLresponsePickList (api 2002): a HMI o entrega pelo método responsePickList do ouvinte
+  evento MBRLresponseSearchList (api 2003): a HMI o entrega pelo método responseSearchList do ouvinte
+  evento MBRLresponseSetSearchString (api 2004): a HMI o entrega pelo método responseSetSearchString do ouvinte
+  evento MBRLresponseSelectSearchResult (api 2005): a HMI o entrega pelo método responseSelectSearchResult do ouvinte
+  evento MBRLresponseSetSearchCriteria (api 2006): a HMI o entrega pelo método responseSetSearchCriteria do ouvinte
+  evento MBRLresponseSearchListExt (api 2007): a HMI o entrega pelo método responseSearchListExt do ouvinte
+  evento MBRLresponseFullyQualifiedName (api 2008): a HMI o entrega pelo método responseFullyQualifiedName do ouvinte
+  evento MBRLresponseOTG (api 2009): a HMI o entrega pelo método responseOTG do ouvinte
+  evento MBRLresponseBrowsePath (api 2010): a HMI o entrega pelo método responseBrowsePath do ouvinte
+  evento MBRLresponseAddToGlobalPlaylist (api 2011): a HMI o entrega pelo método responseAddToGlobalPlaylist do ouvinte
+  pedidos com resposta: 14; pedidos set…: 5, dos quais gravam atributo 3 (3 pela regra posicao, 0 pela regra nomes)
+  os pedidos addToOTGPlaylist e addToGlobalPlaylist saem com a mesma api 1023 na camada da LG; o esquema fica com o primeiro
+  os pedidos addToOTGPlaylist e addToGlobalPlaylist saem com a mesma api 1023 na camada da LG; o esquema fica com o primeiro
+  a tabela da HMI tem o pedido addToGlobalPlaylist com resposta, mas a camada da LG não o manda por api nenhuma
+  set sem regra de gravação: setSearchString (api 1013): não há atributo ATTR_SEARCHSTRING
+  set sem regra de gravação: setSearchCriteria (api 1016): não há atributo ATTR_SEARCHCRITERIA
+DSIMediaOnline: domínio 8388608, pedidos -1, eventos 205; 4 atributos, 5 eventos (4 de atributo), 0 pedidos
+  evento MOLupdateBufferState (api 1): o nome não casa com ATTR_BUFFERSTATE
+  evento MOLupdateBufferState (api 1): a HMI o entrega pelo método updateBufferState do ouvinte
+  evento MOLupdateBufferFillInfo (api 2): o nome não casa com ATTR_BUFFERFILLINFO
+  evento MOLupdateBufferFillInfo (api 2): a HMI o entrega pelo método updateBufferFillInfo do ouvinte
+  evento MOLupdateAudioSettings (api 3): o nome não casa com ATTR_AUDIOSETTINGS
+  evento MOLupdateAudioSettings (api 3): a HMI o entrega pelo método updateAudioSettings do ouvinte
+  evento MOLupdateActiveCodec (api 4): o nome não casa com ATTR_ACTIVECODEC
+  evento MOLupdateActiveCodec (api 4): a HMI o entrega pelo método updateActiveCodec do ouvinte
+  evento MOLinternalError (api 3000): a HMI o entrega pelo método internalError do ouvinte
+  pedidos com resposta: 0; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIMediaPlayer: domínio 8388608, pedidos 206, eventos 207; 22 atributos, 37 eventos (22 de atributo), 40 pedidos
+  evento MPLupdateVideoFormat (api 1): o nome não casa com ATTR_VIDEOFORMAT
+  evento MPLupdateVideoFormat (api 1): a HMI o entrega pelo método updateVideoFormat do ouvinte
+  evento MPLupdateVideoNorm (api 2): o nome não casa com ATTR_VIDEONORM
+  evento MPLupdateVideoNorm (api 2): a HMI o entrega pelo método updateVideoNorm do ouvinte
+  evento MPLupdateCmdBlockingMask (api 3): o nome não casa com ATTR_CMDBLOCKINGMASK
+  evento MPLupdateCmdBlockingMask (api 3): a HMI o entrega pelo método updateCmdBlockingMask do ouvinte
+  evento MPLupdateNumVideoAngles (api 4): o nome não casa com ATTR_NUMVIDEOANGLES
+  evento MPLupdateNumVideoAngles (api 4): a HMI o entrega pelo método updateNumVideoAngles do ouvinte
+  evento MPLupdatePlaybackModeList (api 5): o nome não casa com ATTR_PLAYBACKMODELIST
+  evento MPLupdatePlaybackModeList (api 5): a HMI o entrega pelo método updatePlaybackModeList do ouvinte
+  evento MPLupdatePlaybackMode (api 6): o nome não casa com ATTR_PLAYBACKMODE
+  evento MPLupdatePlaybackMode (api 6): a HMI o entrega pelo método updatePlaybackMode do ouvinte
+  evento MPLupdatePlaybackState:7 (api 7): o nome não casa com ATTR_PLAYBACKSTATE
+  evento MPLupdatePlaybackState:7 (api 7): a HMI o entrega pelo método updatePlaybackState do ouvinte
+  evento MPLupdateActiveMedia (api 8): o nome não casa com ATTR_ACTIVEMEDIA
+  evento MPLupdateActiveMedia (api 8): a HMI o entrega pelo método updateActiveMedia do ouvinte
+  evento MPLupdatePlaybackFolder (api 9): o nome não casa com ATTR_PLAYBACKFOLDER
+  evento MPLupdatePlaybackFolder (api 9): a HMI o entrega pelo método updatePlaybackFolder do ouvinte
+  evento MPLupdateCapabilities (api 10): o nome não casa com ATTR_CAPABILITIES
+  evento MPLupdateCapabilities (api 10): a HMI o entrega pelo método updateCapabilities do ouvinte
+  evento MPLupdatePlayPosition (api 11): o nome não casa com ATTR_PLAYPOSITION
+  evento MPLupdatePlayPosition (api 11): a HMI o entrega pelo método updatePlayPosition do ouvinte
+  evento MPLupdatePlayViewSize (api 12): o nome não casa com ATTR_PLAYVIEWSIZE
+  evento MPLupdatePlayViewSize (api 12): a HMI o entrega pelo método updatePlayViewSize do ouvinte
+  evento MPLupdateActiveVideoAngle (api 13): o nome não casa com ATTR_ACTIVEVIDEOANGLE
+  evento MPLupdateActiveVideoAngle (api 13): a HMI o entrega pelo método updateActiveVideoAngle do ouvinte
+  evento MPLupdateAudioStreamList (api 14): o nome não casa com ATTR_AUDIOSTREAMLIST
+  evento MPLupdateAudioStreamList (api 14): a HMI o entrega pelo método updateAudioStreamList do ouvinte
+  evento MPLupdateActiveAudioStream (api 15): o nome não casa com ATTR_ACTIVEAUDIOSTREAM
+  evento MPLupdateActiveAudioStream (api 15): a HMI o entrega pelo método updateActiveAudioStream do ouvinte
+  evento MPLupdateSubtitleList (api 16): o nome não casa com ATTR_SUBTITLELIST
+  evento MPLupdateSubtitleList (api 16): a HMI o entrega pelo método updateSubtitleList do ouvinte
+  evento MPLupdateActiveSubtitle (api 17): o nome não casa com ATTR_ACTIVESUBTITLE
+  evento MPLupdateActiveSubtitle (api 17): a HMI o entrega pelo método updateActiveSubtitle do ouvinte
+  evento MPLupdatePlaybackContentFolder (api 18): o nome não casa com ATTR_PLAYBACKCONTENTFOLDER
+  evento MPLupdatePlaybackContentFolder (api 18): a HMI o entrega pelo método updatePlaybackContentFolder do ouvinte
+  evento MPLupdateDynamicFeaturesInfo (api 19): o nome não casa com ATTR_DYNAMICFEATURESINFO
+  evento MPLupdateDynamicFeaturesInfo (api 19): a HMI o entrega pelo método updateDynamicFeaturesInfo do ouvinte
+  evento MPLupdateVideoResolutionInfo (api 20): o nome não casa com ATTR_VIDEORESOLUTIONINFO
+  evento MPLupdateVideoResolutionInfo (api 20): a HMI o entrega pelo método updateVideoResolutionInfo do ouvinte
+  evento MPLupdateFavoriteList (api 21): o nome não casa com ATTR_FAVORITELIST
+  evento MPLupdateFavoriteList (api 21): a HMI o entrega pelo método updateFavoriteList do ouvinte
+  evento MPLupdatePlaySelectionBasePath (api 22): o nome não casa com ATTR_PLAYSELECTIONBASEPATH
+  evento MPLupdatePlaySelectionBasePath (api 22): a HMI o entrega pelo método updatePlaySelectionBasePath do ouvinte
+  evento MPLresponseRating (api 2001): a HMI o entrega pelo método responseRating do ouvinte
+  evento MPLresponsePlayView (api 2004): a HMI o entrega pelo método responsePlayView do ouvinte
+  evento MPLresponseSetPlaySelection (api 2005): a HMI o entrega pelo método responseSetPlaySelection do ouvinte
+  evento MPLresponseSetPlaybackURL (api 2006): a HMI o entrega pelo método responseSetPlaybackURL do ouvinte
+  evento MPLresponseSetVideoRect (api 2007): a HMI o entrega pelo método responseSetVideoRect do ouvinte
+  evento MPLresponsePlaySimilarEntry (api 2008): a HMI o entrega pelo método responsePlaySimilarEntry do ouvinte
+  evento MPLresponseSetColorParam (api 2014): a HMI o entrega pelo método responseSetColorParam do ouvinte
+  evento MPLresponseAddToOnlinePlaylist (api 2016): a HMI o entrega pelo método responseAddToOnlinePlaylist do ouvinte
+  evento MPLindicationDvdEvent (api 3000): a HMI o entrega pelo método indicationDvdEvent do ouvinte
+  evento MPLtempPMLRequest (api 3001): a HMI o entrega pelo método tempPMLRequest do ouvinte
+  evento MPLresponseCmdBlocked (api 3002): a HMI o entrega pelo método responseCmdBlocked do ouvinte
+  evento MPLresponseDetailInfo (api 3003): a HMI o entrega pelo método responseDetailInfo do ouvinte
+  evento MPLresponseCoverArt (api 3004): a HMI o entrega pelo método responseCoverArt do ouvinte
+  evento MPLresponseCustomCommand (api 3005): a HMI o entrega pelo método responseCustomCommand do ouvinte
+  evento MPLupdatePlaybackState:9000 (api 9000): a HMI o entrega pelo método asyncException do ouvinte
+  pedidos com resposta: 13 (5 com resposta que a camada da LG não entrega); pedidos set…: 14, dos quais gravam atributo 4 (3 pela regra posicao, 1 pela regra nomes)
+  pedido requestFullyQualifiedName (api 1004): a HMI espera responseFullyQualifiedName, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido addToOTGPlaylist (api 1029): a HMI espera responseOTG, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido setPlaySelectionAB (api 1026): a HMI espera responseSetPlaySelectionAB, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido requestLocalPlayback (api 1031): a HMI espera responseLocalPlayback, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido requestStreaming (api 1032): a HMI espera responseStreaming, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setRating (api 1002): não há atributo ATTR_RATING
+  set sem regra de gravação: setEntry (api 1005): não há atributo ATTR_ENTRY
+  set sem regra de gravação: setVideoAngle (api 1015): não há atributo ATTR_VIDEOANGLE
+  set sem regra de gravação: setAudioStream (api 1016): não há atributo ATTR_AUDIOSTREAM
+  set sem regra de gravação: setSubtitleLanguage (api 1018): não há atributo ATTR_SUBTITLELANGUAGE
+  set sem regra de gravação: setPlaySelection (api 1021): não há atributo ATTR_PLAYSELECTION
+  set sem regra de gravação: setPlaySelectionAB (api 1026): não há atributo ATTR_PLAYSELECTIONAB
+  set sem regra de gravação: setPlaybackURL (api 1020): não há atributo ATTR_PLAYBACKURL
+  set sem regra de gravação: setVideoRect (api 1022): não há atributo ATTR_VIDEORECT
+  set sem regra de gravação: setColorParam (api 1033): não há atributo ATTR_COLORPARAM
+DSIMediaRecorder: domínio 8388608, pedidos 209, eventos 210; 8 atributos, 10 eventos (8 de atributo), 11 pedidos
+  evento MRLupdateActiveMedia (api 1): o nome não casa com ATTR_ACTIVEMEDIA
+  evento MRLupdateActiveMedia (api 1): a HMI o entrega pelo método updateActiveMedia do ouvinte
+  evento MRLupdateImportSummary (api 2): o nome não casa com ATTR_IMPORTSUMMARY
+  evento MRLupdateImportSummary (api 2): a HMI o entrega pelo método updateImportSummary do ouvinte
+  evento MRLupdateImportProgress (api 3): o nome não casa com ATTR_IMPORTPROGRESS
+  evento MRLupdateImportProgress (api 3): a HMI o entrega pelo método updateImportProgress do ouvinte
+  evento MRLupdateDeletionProgress (api 4): o nome não casa com ATTR_DELETIONPROGRESS
+  evento MRLupdateDeletionProgress (api 4): a HMI o entrega pelo método updateDeletionProgress do ouvinte
+  evento MRLupdateDatabaseSpace (api 5): o nome não casa com ATTR_DATABASESPACE
+  evento MRLupdateDatabaseSpace (api 5): a HMI o entrega pelo método updateDatabaseSpace do ouvinte
+  evento MRLupdateImportStatus (api 6): o nome não casa com ATTR_IMPORTSTATUS
+  evento MRLupdateImportStatus (api 6): a HMI o entrega pelo método updateImportStatus do ouvinte
+  evento MRLupdateDeletionStatus (api 7): o nome não casa com ATTR_DELETIONSTATUS
+  evento MRLupdateDeletionStatus (api 7): a HMI o entrega pelo método updateDeletionStatus do ouvinte
+  evento MRLupdateTargetMedia (api 8): o nome não casa com ATTR_TARGETMEDIA
+  evento MRLupdateTargetMedia (api 8): a HMI o entrega pelo método updateTargetMedia do ouvinte
+  evento MRLresponseSetSelection (api 2000): a HMI o entrega pelo método responseSetSelection do ouvinte
+  evento MRLresponseSetEncodingQuality (api 2001): a HMI o entrega pelo método responseSetEncodingQuality do ouvinte
+  pedidos com resposta: 2; pedidos set…: 4, dos quais gravam atributo 2 (2 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setSelection (api 1001): não há atributo ATTR_SELECTION
+  set sem regra de gravação: setEncodingQuality (api 1007): não há atributo ATTR_ENCODINGQUALITY
+DSIUPNPBase: domínio 8388608, pedidos 250, eventos 251; 9 atributos, 9 eventos (9 de atributo), 12 pedidos
+  evento UBLupdateDeviceList (api 1): o nome não casa com ATTR_DEVICELIST
+  evento UBLupdateDeviceList (api 1): a HMI o entrega pelo método updateDeviceList do ouvinte
+  evento UBLupdateVolume (api 2): o nome não casa com ATTR_VOLUME
+  evento UBLupdateVolume (api 2): a HMI o entrega pelo método updateVolume do ouvinte
+  evento UBLupdateLockState (api 3): o nome não casa com ATTR_LOCKSTATE
+  evento UBLupdateLockState (api 3): a HMI o entrega pelo método updateLockState do ouvinte
+  evento UBLupdatePermissionClass (api 4): o nome não casa com ATTR_PERMISSIONCLASS
+  evento UBLupdatePermissionClass (api 4): a HMI o entrega pelo método updatePermissionClass do ouvinte
+  evento UBLupdateA2LSState (api 5): o nome não casa com ATTR_A2LSSTATE
+  evento UBLupdateA2LSState (api 5): a HMI o entrega pelo método updateA2LSState do ouvinte
+  evento UBLupdateRSEState (api 6): o nome não casa com ATTR_RSESTATE
+  evento UBLupdateRSEState (api 6): a HMI o entrega pelo método updateRSEState do ouvinte
+  evento UBLupdateSyncedPlaybackActive (api 7): o nome não casa com ATTR_SYNCEDPLAYBACKACTIVE
+  evento UBLupdateSyncedPlaybackActive (api 7): a HMI o entrega pelo método updateSyncedPlaybackActive do ouvinte
+  evento UBLupdateFodAvailable (api 8): o nome não casa com ATTR_FODAVAILABLE
+  evento UBLupdateFodAvailable (api 8): a HMI o entrega pelo método updateFodAvailable do ouvinte
+  evento UBLupdateSwapStatus (api 9): o nome não casa com ATTR_SWAPSTATUS
+  evento UBLupdateSwapStatus (api 9): a HMI o entrega pelo método updateSwapStatus do ouvinte
+  pedidos com resposta: 0; pedidos set…: 5, dos quais gravam atributo 4 (4 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setA2LS (api 1006): não há atributo ATTR_A2LS
+DSIUPNPBrowser: domínio 8388608, pedidos 252, eventos 253; 2 atributos, 4 eventos (2 de atributo), 4 pedidos
+  evento UBRLupdateBrowseFolder (api 1): o nome não casa com ATTR_BROWSEFOLDER
+  evento UBRLupdateBrowseFolder (api 1): a HMI o entrega pelo método updateBrowseFolder do ouvinte
+  evento UBRLupdateListSize (api 2): o nome não casa com ATTR_LISTSIZE
+  evento UBRLupdateListSize (api 2): a HMI o entrega pelo método updateListSize do ouvinte
+  evento UBRLresponseList (api 2000): a HMI o entrega pelo método responseList do ouvinte
+  pedidos com resposta: 1; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIUPNPCam: domínio 8388608, pedidos 254, eventos 255; 2 atributos, 2 eventos (2 de atributo), 4 pedidos
+  evento UCLupdateStreamingState (api 1): o nome não casa com ATTR_STREAMINGSTATE
+  evento UCLupdateStreamingState (api 1): a HMI o entrega pelo método updateStreamingState do ouvinte
+  evento UCLupdateStillFrame (api 2): o nome não casa com ATTR_STILLFRAME
+  evento UCLupdateStillFrame (api 2): a HMI o entrega pelo método updateStillFrame do ouvinte
+  pedidos com resposta: 0; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setDevice (api 1000): não há atributo ATTR_DEVICE
+DSIUPNPPlayer: domínio 8388608, pedidos 256, eventos 257; 7 atributos, 7 eventos (7 de atributo), 11 pedidos
+  evento UPLupdateDetailInfo (api 1): o nome não casa com ATTR_DETAILINFO
+  evento UPLupdateDetailInfo (api 1): a HMI o entrega pelo método updateDetailInfo do ouvinte
+  evento UPLupdateDeviceList (api 2): o nome não casa com ATTR_DEVICELIST
+  evento UPLupdateDeviceList (api 2): a HMI o entrega pelo método updateDeviceList do ouvinte
+  evento UPLupdatePlaybackMode (api 3): o nome não casa com ATTR_PLAYBACKMODE
+  evento UPLupdatePlaybackMode (api 3): a HMI o entrega pelo método updatePlaybackMode do ouvinte
+  evento UPLupdatePlaybackModeList (api 4): o nome não casa com ATTR_PLAYBACKMODELIST
+  evento UPLupdatePlaybackModeList (api 4): a HMI o entrega pelo método updatePlaybackModeList do ouvinte
+  evento UPLupdatePlaybackState (api 5): o nome não casa com ATTR_PLAYBACKSTATE
+  evento UPLupdatePlaybackState (api 5): a HMI o entrega pelo método updatePlaybackState do ouvinte
+  evento UPLupdatePlayPosition (api 6): o nome não casa com ATTR_PLAYPOSITION
+  evento UPLupdatePlayPosition (api 6): a HMI o entrega pelo método updatePlayPosition do ouvinte
+  evento UPLupdateVolume (api 7): o nome não casa com ATTR_VOLUME
+  evento UPLupdateVolume (api 7): a HMI o entrega pelo método updateVolume do ouvinte
+  pedidos com resposta: 0; pedidos set…: 3, dos quais gravam atributo 2 (2 pela regra posicao, 0 pela regra nomes)
+  os pedidos pause e forcePause saem com a mesma api 1000 na camada da LG; o esquema fica com o primeiro
+  os pedidos pause e forcePause saem com a mesma api 1000 na camada da LG; o esquema fica com o primeiro
+  set sem regra de gravação: setEntry (api 1002): não há atributo ATTR_ENTRY
+DSIFileBrowser: domínio 8388608, pedidos 1000, eventos 1001; 1 atributos, 19 eventos (1 de atributo), 27 pedidos
+  evento FBLupdateMountPoints (api 1): o nome não casa com ATTR_MOUNTPOINTS
+  evento FBLupdateMountPoints (api 1): a HMI o entrega pelo método updateMountPoints do ouvinte
+  evento FBLstartResult (api 2000): a HMI o entrega pelo método startResult do ouvinte
+  evento FBLgetViewWindowResult (api 2001): a HMI o entrega pelo método getViewWindowResult do ouvinte
+  evento FBLgetSelectedFilesResult (api 2002): a HMI o entrega pelo método getSelectedFilesResult do ouvinte
+  evento FBLchangeFolderResult (api 2003): a HMI o entrega pelo método changeFolderResult do ouvinte
+  evento FBLspellerResult (api 2004): a HMI o entrega pelo método spellerResult do ouvinte
+  evento FBLgetResourceLocatorsResult (api 2005): a HMI o entrega pelo método getResourceLocatorsResult do ouvinte
+  evento FBLgetFileCountResult (api 2006): a HMI o entrega pelo método getFileCountResult do ouvinte
+  evento FBLsetFileExtensionFilterResult (api 2007): a HMI o entrega pelo método setFileExtensionFilterResult do ouvinte
+  evento FBLsetFileTypeFilterResult (api 2008): a HMI o entrega pelo método setFileTypeFilterResult do ouvinte
+  evento FBLgetResourceLocatorWindowResult (api 2009): a HMI o entrega pelo método getResourceLocatorWindowResult do ouvinte
+  evento FBLsetLanguageResult (api 2010): a HMI o entrega pelo método setLanguageResult do ouvinte
+  evento FBLsetFileTypeActiveResult (api 2011): a HMI o entrega pelo método setFileTypeActiveResult do ouvinte
+  evento FBLgetFileCountWithFileTypeFilterResult (api 2012): a HMI o entrega pelo método getFileCountWithFileTypeFilterResult do ouvinte
+  evento FBLvalidateSpellerCharsResult (api 2013): a HMI o entrega pelo método validateSpellerCharsResult do ouvinte
+  evento FBLgetViewWindowWithPreviewsResult (api 2014): a HMI o entrega pelo método getViewWindowWithPreviewsResult do ouvinte
+  evento FBLcreatePreviewImageResult (api 2015): a HMI o entrega pelo método createPreviewImageResult do ouvinte
+  evento FBLcancelPreviewCreationResult (api 2016): a HMI o entrega pelo método cancelPreviewCreationResult do ouvinte
+  evento FBLindicateSelectionResult (api 3000): a HMI o entrega pelo método indicateSelectionResult do ouvinte
+  pedidos com resposta: 21; pedidos set…: 6, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setFileExtensionFilter (api 1007): não há atributo ATTR_FILEEXTENSIONFILTER
+  set sem regra de gravação: setFileTypeFilter (api 1008): não há atributo ATTR_FILETYPEFILTER
+  set sem regra de gravação: setSelectionSingle (api 1004): não há atributo ATTR_SELECTIONSINGLE
+  set sem regra de gravação: setSelection (api 1005): não há atributo ATTR_SELECTION
+  set sem regra de gravação: setLanguage (api 1009): não há atributo ATTR_LANGUAGE
+  set sem regra de gravação: setFileTypeActive (api 1017): não há atributo ATTR_FILETYPEACTIVE
+DSISearch: domínio 8388608, pedidos 1301, eventos 1302; 3 atributos, 31 eventos (3 de atributo), 28 pedidos
+  evento setCarFunctionStatesResult (api 2008): a HMI o entrega pelo método setLanguageResult do ouvinte
+  evento invalidateData (api 3000): entrega por atributo 3000, mas não há constante ATTR_ com o número da api
+  evento sourceDataAvailabilityChanged (api 3001): entrega por atributo 3001, mas não há constante ATTR_ com o número da api
+  pedidos com resposta: 0; pedidos set…: 9, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  os pedidos saem pelo método auxiliar postMessage(api, mensagem), na interface 1301, para os domínios [256, 1048576, 8388608]; pela instância (as que o anúncio liga):
+    instância 0: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 1: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 2: domínio [8388608]
+    instância 3: domínio [1048576] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 4: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 5: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 6: domínio [8388608]
+    instância 7: domínio [8388608]
+    instância 8: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 9: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 10: domínio [256] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+    instância 11: domínio [1048576] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+  set sem regra de gravação: setActiveSearchCountries (api 1002): não há atributo ATTR_ACTIVESEARCHCOUNTRIES
+  set sem regra de gravação: setCurrentPosition (api 1007): não há atributo ATTR_CURRENTPOSITION
+  set sem regra de gravação: setRoutePoints (api 1008): não há atributo ATTR_ROUTEPOINTS
+  set sem regra de gravação: setLanguage (api 1009): não há atributo ATTR_LANGUAGE
+  set sem regra de gravação: setActiveProfile (api 1000): não há atributo ATTR_ACTIVEPROFILE
+  set sem regra de gravação: setCarFunctionStates (api 1010): não há atributo ATTR_CARFUNCTIONSTATES
+  set sem regra de gravação: setRadioStations (api 1011): não há atributo ATTR_RADIOSTATIONS
+  set sem regra de gravação: setSearchFilter (api 1015): não há atributo ATTR_SEARCHFILTER
+  set sem regra de gravação: setEnvironment (api 1021): não há atributo ATTR_ENVIRONMENT
+DSISearchDataProvider: domínio 8388608, pedidos 1303, eventos 1304; 0 atributos, 6 eventos (0 de atributo), 8 pedidos
+  evento activateProviderSource (api 3001): entrega por atributo 3001, mas não há constante ATTR_ com o número da api
+  evento provideData (api 3002): entrega por atributo 3002, mas não há constante ATTR_ com o número da api
+  pedidos com resposta: 5; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+avisos: 68
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.setContentFilter: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.setBrowseMode: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.setBrowseMedia: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.changeFolder: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.requestList: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.enableRecurseSubdirectories: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.addSelection: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.undoLastSelection: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.resetSelection: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.setSearchString: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.setSearchCriteria: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.activateSearchSpeller: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.deactivateSearchSpeller: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.selectSearchResult: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.requestSearchList: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.resetSearchString: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.requestSearchListExt: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.requestFullyQualifiedName: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.addToOTGPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.deleteFromOTGPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.moveEntryInOTGPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.activateSearchSource: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.addToGlobalPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.deleteFromGlobalPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.purgeGlobalPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.moveEntryInGlobalPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaBrowserImpl.requestBrowsePath: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setPlaybackMode: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestCoverArt: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestFullyQualifiedName: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setEntry: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.play: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.resume: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.pause: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.stop: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.seek: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.skip: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setActiveMedia: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setAudioStream: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestDetailInfo: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setPlaySelection: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.setPlaybackURL: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.playSimilarEntry: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestTouchEvent: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.addToOTGPlaylist: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestLocalPlayback: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.media.DSIMediaPlayerImpl.requestStreaming: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPBrowserImpl.changeFolder: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPBrowserImpl.requestList: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.setPlaybackMode: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.setEntry: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.resume: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.pause: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.skip: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.seek: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.upnp.DSIUPNPPlayerImpl.forcePause: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.setNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.setNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.setNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.clearNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.clearNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.clearNotification: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.registerProviderSource: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.sourceDataAvailabilityChanged: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.invalidateAllData: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.storeDataSets: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.storeRawDataSets: pedido vai para o domínio 256, não 8388608
+  com.lge.mib3oi.dsi.search.DSISearchDataProviderImpl.deleteDataSet: pedido vai para o domínio 256, não 8388608

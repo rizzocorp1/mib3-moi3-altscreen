@@ -1,0 +1,169 @@
+# jetta-gli-2021-deducoes.txt — dados de veículo do simulador do Jetta que NÃO foram lidos do carro.
+# Marco 8, 11/10/2026. Estudo num computador; nada daqui vai para o carro.
+#
+# São de dois tipos, e cada linha diz qual:
+#   PALPITE   o que o carro deve ter, pelo que se sabe dele; confirma-se no carro ou no autoscan
+#   SIMULAÇÃO um número qualquer, só para a tela ter o que mostrar; não é medida do carro
+# Quando houver leitura do carro, o valor passa para jetta-gli-2021.txt e sai daqui.
+
+# ---- relógio e unidades: que ajustes existem (PALPITE: o carro tem esses menus na central)
+[DSICarTimeUnitsLanguage.updateClockViewOptions]
+clockViewOptions.timeZone.state = 2
+clockViewOptions.dayLightSaving.state = 2
+clockViewOptions.clockSource.state = 2
+clockViewOptions.clockConfig.timeSourcesInstallation.quartz = 1     # relógio próprio, acertado à mão
+
+[DSICarTimeUnitsLanguage.updateClockSource]
+clockSource = 1                # CLOCKSOURCE_QUARTZ: hora acertada à mão (PALPITE)
+
+[DSICarTimeUnitsLanguage.updateUnitmasterViewOptions]
+unitmasterViewOptions.clockFormat.state = 2
+unitmasterViewOptions.dateFormat.state = 2
+unitmasterViewOptions.temperatureUnit.state = 2
+unitmasterViewOptions.distanceUnit.state = 2
+unitmasterViewOptions.speedUnit.state = 2
+unitmasterViewOptions.pressureUnit.state = 2
+unitmasterViewOptions.volumeUnit.state = 2
+unitmasterViewOptions.consumptionPetrolUnit.state = 2
+
+[DSICarTimeUnitsLanguage.updateVolumeUnit]
+volumeUnit = 2                 # VOLUMEUNIT_LITER (PALPITE; o valor padrão, 0, seria quilo)
+
+[DSICarTimeUnitsLanguage.updateConsumptionPetrolUnit]
+consumptionPetrolUnit = 1      # CONSUMPTIONUNIT_KMPL: km/l, o costume no Brasil (PALPITE: a unidade do painel não aparece na foto)
+
+[DSICarTimeUnitsLanguage.updatePressureUnit]
+pressureUnit = 0               # PRESSUREUNIT_BAR (PALPITE)
+
+[DSICarTimeUnitsLanguage.updateDateFormat]
+dateFormat = 0                 # DATEFORMAT_DAY_MONTH_YEAR (PALPITE: dia, mês e ano, o formato do Brasil)
+
+[DSICarTimeUnitsLanguage.updateMenuLanguage]
+menuLanguage = 26              # MENULANGUAGE_PORTUGUESE_BRAZIL: a central do carro está em português (foto de 07/09/2026); o do painel é PALPITE
+
+# ---- revisão: que dados o painel oferece (PALPITE). Os prazos ficam sem valor: não há leitura
+# do carro, e inventar a quilometragem da próxima revisão enganaria.
+[DSICarKombi.updateSIAViewOptions]
+viewOptions.oilInspection.state = 2
+viewOptions.serviceData.state = 2
+
+# ---- computador de bordo: que dados o painel oferece (PALPITE: o conjunto comum de um carro a
+# gasolina; é o mesmo ponto de partida do emulador da MIB2, conferido campo a campo no esquema)
+[DSICarKombi.updateBCViewOptions]
+viewOptions.currentConsumption1.state = 2
+viewOptions.currentRange1.state = 2
+viewOptions.totalDistance.state = 2
+viewOptions.shortTermAverageConsumption1.state = 2
+viewOptions.shortTermGeneral.state = 2
+viewOptions.longTermAverageConsumption1.state = 2
+viewOptions.longTermGeneral.state = 2
+viewOptions.cycleAverageConsumption1.state = 2
+viewOptions.cycleGeneral.state = 2
+viewOptions.tankLevel1.state = 2
+viewOptions.menue1Config.state = 2
+viewOptions.menue2Config.state = 2
+viewOptions.menue3Config.state = 2
+viewOptions.resetMenue1.state = 2
+viewOptions.resetMenue2.state = 2
+viewOptions.resetMenue3.state = 2
+viewOptions.outsideTemperature.state = 2
+viewOptions.digitalSpeed.state = 2
+# Lista de estados do veículo: com a opção em 2 e a lista vazia (o valor padrão diz zero avisos),
+# a tela "Status do veículo" mostra "Boa viagem!" (rodada lista). Sem a opção ela diz "função
+# indisponível no momento" (rodada men).
+viewOptions.vehicleStateList.state = 2
+viewOptions.configuration.primaryEngineType = 7     # BCENGINETYPE_PETROL_GASOLINE: o motor é 2.0 TSI (ficha); o código que o painel manda é PALPITE
+
+# ---- computador de bordo: valores (SIMULAÇÃO, salvo onde diz)
+[DSICarKombi.updateBCCurrentRange1]
+currentRange.state = 1                     # BCVALUESTATE_VALID
+currentRange.currentRangeValue = 400       # SIMULAÇÃO: autonomia em km
+currentRange.currentRangeUnit = 0          # km
+
+[DSICarKombi.updateBCTankLevel1]
+tankLevel.state = 1
+tankLevel.tankLevelValue = 50              # SIMULAÇÃO: tanque pela metade (a HMI aceita de 0 a 100)
+
+[DSICarKombi.updateBCCurrentConsumption1]
+consumption.state = 1
+consumption.consumptionValue = 0           # carro parado
+consumption.consumptionUnit = 2            # CONSUMPTIONUNIT_LPH: parado, o consumo do momento é por hora (PALPITE)
+
+# O que o indicador multifunções do painel mostra em cada um dos três grupos (desde a partida,
+# longo prazo, desde o abastecimento). PALPITE: os itens de sempre, todos ligados. Na central é
+# a lista de caixas de "Configurações do instrumento combinado".
+[DSICarKombi.updateBCMenue1Config]
+config.cruisingRange = 1
+config.averageConsumption = 1
+config.currentConsumption = 1
+config.averageSpeed = 1
+config.drivingTime = 1
+config.drivenDistance = 1
+
+[DSICarKombi.updateBCMenue2Config]
+config.cruisingRange = 1
+config.averageConsumption = 1
+config.currentConsumption = 1
+config.averageSpeed = 1
+config.drivingTime = 1
+config.drivenDistance = 1
+
+[DSICarKombi.updateBCMenue3Config]
+config.cruisingRange = 1
+config.averageConsumption = 1
+config.currentConsumption = 1
+config.averageSpeed = 1
+config.drivingTime = 1
+config.drivenDistance = 1
+
+# Os três grupos de médias. "Desde a partida" fica zerado (o carro acabou de ser ligado) e os
+# outros dois também: não há medida do carro para pôr aqui. A unidade é a do perfil.
+[DSICarKombi.updateBCShortTermAverageConsumption1]
+averageConsumption.consumptionUnit = 1     # km/l; estado 0: ainda sem média
+
+[DSICarKombi.updateBCLongTermAverageConsumption1]
+averageConsumption.consumptionUnit = 1
+
+[DSICarKombi.updateBCCycleAverageConsumption1]
+averageConsumption.consumptionUnit = 1
+
+[DSICarKombi.updateBCOutsideTemperature]
+temperature.state = 1                      # BCTEMPERATURESTATE_VALID
+temperature.temperatureValue = 35.0        # o que o painel mostrava na foto de 09/10/2026, às 20h28; aqui fica fixo
+temperature.temperatureUnit = 0            # °C
+
+# ---- os números acompanham a unidade escolhida na tela (item 2 do roteiro, 12/10/2026)
+# No carro, quem manda a distância, a velocidade média, o consumo e a autonomia é o painel, e manda
+# com a unidade dentro da mensagem: a central mostra o que recebe. (A temperatura de fora é a
+# exceção: a central converte sozinha.) Quando a tela troca a unidade em Unidades, é o painel que
+# passa a mandar outro número e outra unidade. Aqui o carro de mentira faz esse papel com os
+# marcadores @de e @se (cabeçalho do driver/veiculostub.c), que leem a unidade guardada a cada envio.
+# SIMULAÇÃO: que o painel responde assim é dedução, sem carro para medir. O código da unidade é
+# copiado tal qual, porque as duas pontas usam a mesma tabela do firmware (CarConstants:
+# DISTANCEUNIT_KM 0 e _MI 1; SPEEDUNIT_KMPH 0 e _MPH 1; CONSUMPTIONUNIT_LP100KM 0, _KMPL 1,
+# _MPG_UK 3 e _MPG_US 4). O único número refeito é a autonomia: os 400 km de simulação lá de cima
+# viram 249 mi. Os outros são zero ou não existem (carro parado, médias sem medida).
+[DSICarKombi.updateBCCurrentRange1]
+currentRange.currentRangeValue = @se DSICarTimeUnitsLanguage.updateDistanceUnit.distanceUnit 1:249 senao 400
+currentRange.currentRangeUnit = @de DSICarTimeUnitsLanguage.updateDistanceUnit.distanceUnit
+
+[DSICarKombi.updateBCShortTermGeneral]
+data.distance.distanceUnit = @de DSICarTimeUnitsLanguage.updateDistanceUnit.distanceUnit
+data.speed.speedUnit = @de DSICarTimeUnitsLanguage.updateSpeedUnit.speedUnit
+
+[DSICarKombi.updateBCLongTermGeneral]
+data.distance.distanceUnit = @de DSICarTimeUnitsLanguage.updateDistanceUnit.distanceUnit
+data.speed.speedUnit = @de DSICarTimeUnitsLanguage.updateSpeedUnit.speedUnit
+
+[DSICarKombi.updateBCCycleGeneral]
+data.distance.distanceUnit = @de DSICarTimeUnitsLanguage.updateDistanceUnit.distanceUnit
+data.speed.speedUnit = @de DSICarTimeUnitsLanguage.updateSpeedUnit.speedUnit
+
+[DSICarKombi.updateBCShortTermAverageConsumption1]
+averageConsumption.consumptionUnit = @de DSICarTimeUnitsLanguage.updateConsumptionPetrolUnit.consumptionPetrolUnit
+
+[DSICarKombi.updateBCLongTermAverageConsumption1]
+averageConsumption.consumptionUnit = @de DSICarTimeUnitsLanguage.updateConsumptionPetrolUnit.consumptionPetrolUnit
+
+[DSICarKombi.updateBCCycleAverageConsumption1]
+averageConsumption.consumptionUnit = @de DSICarTimeUnitsLanguage.updateConsumptionPetrolUnit.consumptionPetrolUnit

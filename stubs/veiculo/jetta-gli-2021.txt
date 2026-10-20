@@ -1,0 +1,28 @@
+# jetta-gli-2021.txt — dados de veículo do Jetta GLI 2021 do Lipe: SÓ o que foi lido do carro.
+# Marco 8, 11/10/2026. Estudo num computador; nada daqui vai para o carro.
+#
+# Fontes: a ficha (carros/jetta-gli-2021/README.md) e a foto do painel de instrumentos de
+# 09/10/2026 (carros/jetta-gli-2021/fotos/2026-10-09-painel-digital-mapa/), que mostra o relógio
+# "20:28", "35.0°C", "0 km/h", "trip 2683.0km", a marcha "P" e a luz do freio de estacionamento.
+# Ainda não há autoscan. O que for palpite fica em jetta-gli-2021-deducoes.txt.
+# O chassi do carro não entra aqui: só com pedido do Lipe.
+#
+# Quase tudo abaixo vale 0, que é também o valor padrão: as linhas ficam escritas para dizer de
+# onde vem cada valor. (No protobuf 3 o zero nem vai no fio.)
+
+# ---- unidades e formatos, como o painel os mostra na foto
+[DSICarTimeUnitsLanguage.updateClockFormat]
+clockFormat = 0                # CLOCKFORMAT_24H: o painel mostra "20:28"
+
+[DSICarTimeUnitsLanguage.updateTemperatureUnit]
+temperatureUnit = 0            # TEMPERATUREUNIT_C: "35.0°C"
+
+[DSICarTimeUnitsLanguage.updateSpeedUnit]
+speedUnit = 0                  # SPEEDUNIT_KMPH: "0 km/h"
+
+[DSICarTimeUnitsLanguage.updateDistanceUnit]
+distanceUnit = 0               # DISTANCEUNIT_KM: "trip 2683.0km"
+
+# ---- o estado do carro na hora da foto: parado, em P
+[DSIGeneralVehicleStates.updateAutomaticGearShiftTransMode]
+mode = 1                       # GEARTRANSMISSIONMODE_POSITION_P; o câmbio é DSG (ficha)

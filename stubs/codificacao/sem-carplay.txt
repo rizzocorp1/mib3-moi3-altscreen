@@ -1,0 +1,12 @@
+# stubs/codificacao/sem-carplay.txt — desfaz a dedução "o carro tem CarPlay".
+#
+# Só entra com CARPLAY=0 sh driver/ao_vivo.sh, no fim da lista de codificação, depois do
+# jetta-gli-2021-deducoes.txt (que desde 12/10/2026 marca o CarPlay) e do ajustes.txt. Põe o campo
+# ID_APPLE_DIO (adaptação, DID 0555, byte 1, bits 2 e 3) de volta no zero, o valor padrão da HMI.
+# Com isso a central volta a ser a de antes da decisão do Lipe de 12/10/2026: sem "App-Connect" na
+# grade, com a partida uns 6 s mais curta e com o botão vermelho da tela de chamada sem encerrar
+# a chamada simulada (ela acaba sozinha aos 20 s). O CARPLAY=0 também tira do telefone de mentira
+# o serviço do CarPlay. É do telefone de mentira (Marco 12 do modelagem-soc.md).
+#
+# Formato: <DID> @<byte>.<bit>+<bits> = <valor>   (o mesmo do ajustes.txt)
+0555 @1.2+2 = 0      # ID_APPLE_DIO de volta ao valor padrão da HMI

@@ -1,0 +1,2189 @@
+# Esquema dos serviços DSI de PID_MEDIA da HMI do MOI3 (firmware MU0883, HMI H40.272.304).
+# GERADO por driver/m8_esquema.sh (driver/LeEsquemaDSI.java) a partir das classes do próprio
+# firmware, na JVM dele. Não editar à mão. Estudo num computador; nada daqui vai para o carro.
+#
+# Uma coisa por linha, campos separados por espaço:
+#   S <serviço> <domínio> <interface de pedidos> <interface de eventos> <pacote da LG>
+#   W <domínio> <interface org.dsi.ifc> <instância> <atraso em ms>   serviço que a HMI liga ao receber o anúncio (interface 9000)
+#   A <serviço> <número> <constante ATTR_>                          atributo que a HMI pode assinar
+#   E <serviço> <api> <atributo ou -> <entrega ou -> <evento> <mensagem ou ->
+#        mensagem que o serviço manda. Com atributo, é a atualização dele (a api tem o mesmo número).
+#        entrega: o número com que a HMI procura os ouvintes; quando difere do atributo, a
+#        atualização só chega a quem também assinou esse outro (é assim no firmware).
+#   P <serviço> <api> <método> <mensagem ou ->                      pedido que a HMI manda (9999 assina atributos, 9998 desassina)
+#   R <serviço> <api do pedido> <tipo> <prazo em ms> <api da resposta ou -> <método do ouvinte>
+#        pedido de que a HMI espera resposta, pela tabela do proxy DSI dela (Cfg.PT e Cfg.U). Uma linha
+#        por resposta possível. tipo: uma = uma resposta só; escolha = uma dentre as listadas;
+#        sequencia = todas; complexa = quem decide é um analisador da HMI. prazo: quanto ela espera antes
+#        de registrar "DSI timeout occurred" (-1 = sem prazo). "-" = nenhuma api da camada da LG chama o método.
+#   G <serviço> <api do pedido> <api do evento> <regra> <campo do pedido> <campo do evento>
+#        o que o pedido set<X> grava no atributo de nome <X>, campo a campo. DEDUÇÃO do gerador: o firmware
+#        não traz essa ligação. regra posicao = os campos do pedido são os do evento, número a número e
+#        tipo a tipo, fora o validFlag; regra nomes = cada campo do pedido tem um só campo de mesmo nome e
+#        tipo no evento (é a menos segura: conferir antes de ligar o serviço em "grava").
+#   X <serviço> <api do pedido> <api da resposta> <campo do pedido> <campo da resposta>
+#        o que a resposta devolve do pedido: campos de mesmo caminho e tipo nas duas mensagens. DEDUÇÃO.
+#   M <mensagem>                                                    mensagem protobuf; seguem os campos dela
+#   C <número> <nome> <tipo> <um|rep|pac> [<mensagem do campo>]      campo da mensagem da linha M de cima
+#        tipo: sint32 e sint64 vão em zigue-zague; int32, int64, uint32 e enum, em varint comum;
+#        fixed32, fixed64, bool, float, double, string, bytes; msg é outra mensagem.
+#        um = campo simples; rep = repetido, um por vez; pac = repetido empacotado.
+# No barramento: [canal:8][interface:4][instância:4][api:4][protobuf]. O canal é o remetente:
+# os eventos saem com o domínio do serviço; os pedidos da HMI, com 0x8000.
+S DSIMediaBase 8388608 200 201 media
+A DSIMediaBase 1 ATTR_PARENTALML
+A DSIMediaBase 2 ATTR_PREFERREDLANGUAGE
+A DSIMediaBase 3 ATTR_MEDIALIST
+A DSIMediaBase 4 ATTR_DEVICELIST
+A DSIMediaBase 5 ATTR_CUSTOMERUPDATE
+A DSIMediaBase 7 ATTR_APPLICATIONVERSION
+A DSIMediaBase 8 ATTR_METADATADBVERSION
+A DSIMediaBase 9 ATTR_PROFILESTATE
+A DSIMediaBase 10 ATTR_SEARCHMEDIA
+A DSIMediaBase 11 ATTR_ONLINESTATE
+A DSIMediaBase 12 ATTR_REPLAYGAIN
+E DSIMediaBase 1 1 1 MBLupdateParentalML DSIMediaBaseListenerMsg.MBLupdateParentalML
+E DSIMediaBase 2 2 2 MBLupdatePreferredLanguage DSIMediaBaseListenerMsg.MBLupdatePreferredLanguage
+E DSIMediaBase 3 3 3 MBLupdateMediaList DSIMediaBaseListenerMsg.MBLupdateMediaList
+E DSIMediaBase 4 4 4 MBLupdateDeviceList DSIMediaBaseListenerMsg.MBLupdateDeviceList
+E DSIMediaBase 5 5 5 MBLupdateCustomerUpdate DSIMediaBaseListenerMsg.MBLupdateCustomerUpdate
+E DSIMediaBase 7 7 7 MBLupdateApplicationVersion DSIMediaBaseListenerMsg.MBLupdateApplicationVersion
+E DSIMediaBase 8 8 8 MBLupdateMetadataDBVersion DSIMediaBaseListenerMsg.MBLupdateMetadataDBVersion
+E DSIMediaBase 9 9 9 MBLupdateProfileState DSIMediaBaseListenerMsg.MBLupdateProfileState
+E DSIMediaBase 10 10 10 MBLupdateSearchMedia DSIMediaBaseListenerMsg.MBLupdateSearchMedia
+E DSIMediaBase 11 11 11 MBLupdateOnlineState DSIMediaBaseListenerMsg.MBLupdateOnlineState
+E DSIMediaBase 12 12 12 MBLupdateReplayGain DSIMediaBaseListenerMsg.MBLupdateReplayGain
+E DSIMediaBase 2000 - - MBLresponseResetFactorySettings DSIMediaBaseListenerMsg.MBLresponseResetFactorySettings
+E DSIMediaBase 2001 - - MBLlaunchAppResult DSIMediaBaseListenerMsg.MBLlaunchAppResult
+E DSIMediaBase 2002 - - MBLprofileChanged DSIMediaBaseListenerMsg.MBLprofileChanged
+E DSIMediaBase 2003 - - MBLprofileCopied DSIMediaBaseListenerMsg.MBLprofileCopied
+E DSIMediaBase 2004 - - MBLprofileResetR DSIMediaBaseListenerMsg.MBLprofileResetR
+E DSIMediaBase 2005 - - MBLprofileResetAllR DSIMediaBaseListenerMsg.MBLprofileResetAllR
+E DSIMediaBase 2006 - - MBLresponseAuthenticate DSIMediaBaseListenerMsg.MBLresponseAuthenticate
+E DSIMediaBase 2007 - - MBLresponseRemoveAuthentication DSIMediaBaseListenerMsg.MBLresponseRemoveAuthentication
+E DSIMediaBase 2008 - - MBLresponseActivationCode DSIMediaBaseListenerMsg.MBLresponseActivationCode
+P DSIMediaBase 9999 setNotification DSIMediaBaseMsg.MBsetNotification
+P DSIMediaBase 9998 clearNotification DSIMediaBaseMsg.MBclearNotificationBase
+P DSIMediaBase 1000 setPreferredLanguage DSIMediaBaseMsg.MBsetPreferredLanguage
+P DSIMediaBase 1001 setParentalML DSIMediaBaseMsg.MBsetParentalML
+P DSIMediaBase 1002 ejectMedium DSIMediaBaseMsg.MBejectMedium
+P DSIMediaBase 1003 requestResetFactorySettings DSIMediaBaseMsg.MBrequestResetFactorySettings
+P DSIMediaBase 1004 launchApp DSIMediaBaseMsg.MBlaunchApp
+P DSIMediaBase 1005 profileChange DSIMediaBaseMsg.MBprofileChange
+P DSIMediaBase 1006 profileCopy DSIMediaBaseMsg.MBprofileCopy
+P DSIMediaBase 1007 profileReset DSIMediaBaseMsg.MBprofileReset
+P DSIMediaBase 1008 profileResetAll DSIMediaBaseMsg.MBprofileResetAll
+P DSIMediaBase 1009 setSearchMedia DSIMediaBaseMsg.MBsetSearchMedia
+P DSIMediaBase 1010 requestAuthenticate DSIMediaBaseMsg.MBrequestAuthenticate
+P DSIMediaBase 1011 requestRemoveAuthentication DSIMediaBaseMsg.MBrequestRemoveAuthentication
+P DSIMediaBase 1012 requestActivationCode DSIMediaBaseMsg.MBrequestActivationCode
+P DSIMediaBase 1013 requestReplayGain DSIMediaBaseMsg.MBrequestReplayGain
+R DSIMediaBase 1011 uma 10000 2007 responseRemoveAuthentication
+R DSIMediaBase 1005 uma 10000 2002 profileChanged
+R DSIMediaBase 1006 uma 10000 2003 profileCopied
+R DSIMediaBase 1007 uma 10000 2004 profileReset
+R DSIMediaBase 1008 uma 10000 2005 profileResetAll
+R DSIMediaBase 1004 uma 10000 2001 launchAppResult
+R DSIMediaBase 1003 uma 10000 2000 responseResetFactorySettings
+R DSIMediaBase 1010 uma 10000 2006 responseAuthenticate
+R DSIMediaBase 1012 uma 300000 - responseActivationCode
+R DSIMediaBase 1013 uma 10000 - responseReplayGain
+G DSIMediaBase 1000 2 posicao languageCode preferredLanguage
+G DSIMediaBase 1001 1 posicao pml parentalML
+X DSIMediaBase 1005 2002 profile profile
+X DSIMediaBase 1006 2003 fromProfile fromProfile
+X DSIMediaBase 1006 2003 toProfile toProfile
+X DSIMediaBase 1007 2004 profile profile
+X DSIMediaBase 1004 2001 deviceID deviceID
+X DSIMediaBase 1004 2001 mediaID mediaID
+X DSIMediaBase 1004 2001 appName appName
+X DSIMediaBase 1003 2000 resetMode resetMode
+S DSIMediaBrowser 8388608 202 203 media
+A DSIMediaBrowser 1 ATTR_BROWSEMODE
+A DSIMediaBrowser 2 ATTR_CONTENTFILTER
+A DSIMediaBrowser 3 ATTR_BROWSEMEDIA
+A DSIMediaBrowser 4 ATTR_BROWSEFOLDER
+A DSIMediaBrowser 5 ATTR_LISTSIZE
+A DSIMediaBrowser 6 ATTR_SEARCHSPELLERSTATE
+A DSIMediaBrowser 7 ATTR_SEARCHSIZE
+A DSIMediaBrowser 8 ATTR_ALPHABETICALINDEX
+A DSIMediaBrowser 9 ATTR_SEARCHSOURCESTATE
+A DSIMediaBrowser 10 ATTR_GLOBALPLAYLISTSIZEEXCEEDED
+A DSIMediaBrowser 11 ATTR_GLOBALPLAYLISTEMPTY
+A DSIMediaBrowser 12 ATTR_LASTPLAYEDLPLAYLISTEMPTY
+E DSIMediaBrowser 1 1 1 MBRLupdateBrowseMode DSIMediaBrowserListenerMsg.MBRLupdateBrowseMode
+E DSIMediaBrowser 2 2 2 MBRLupdateContentFilter DSIMediaBrowserListenerMsg.MBRLupdateContentFilter
+E DSIMediaBrowser 3 3 3 MBRLupdateBrowseMedia DSIMediaBrowserListenerMsg.MBRLupdateBrowseMedia
+E DSIMediaBrowser 4 4 4 MBRLupdateBrowseFolder DSIMediaBrowserListenerMsg.MBRLupdateBrowseFolder
+E DSIMediaBrowser 5 5 5 MBRLupdateListSize DSIMediaBrowserListenerMsg.MBRLupdateListSize
+E DSIMediaBrowser 6 6 6 MBRLupdateSearchSpellerState DSIMediaBrowserListenerMsg.MBRLupdateSearchSpellerState
+E DSIMediaBrowser 7 7 7 MBRLupdateSearchSize DSIMediaBrowserListenerMsg.MBRLupdateSearchSize
+E DSIMediaBrowser 8 8 8 MBRLupdateAlphabeticalIndex DSIMediaBrowserListenerMsg.MBRLupdateAlphabeticalIndex
+E DSIMediaBrowser 9 9 9 MBRLupdateSearchSourceState DSIMediaBrowserListenerMsg.MBRLupdateSearchSourceState
+E DSIMediaBrowser 10 10 10 MBRLupdateGlobalPlaylistSizeExceeded DSIMediaBrowserListenerMsg.MBRLupdateGlobalPlaylistSizeExceeded
+E DSIMediaBrowser 11 11 11 MBRLupdateGlobalPlaylistEmpty DSIMediaBrowserListenerMsg.MBRLupdateGlobalPlaylistEmpty
+E DSIMediaBrowser 12 12 12 MBRLupdateLastPlayedPlaylistEmpty DSIMediaBrowserListenerMsg.MBRLupdateLastPlayedPlaylistEmpty
+E DSIMediaBrowser 2000 - - MBRLresponseList DSIMediaBrowserListenerMsg.MBRLresponseList
+E DSIMediaBrowser 2001 - - MBRLselectionResult DSIMediaBrowserListenerMsg.MBRLselectionResult
+E DSIMediaBrowser 2002 - - MBRLresponsePickList DSIMediaBrowserListenerMsg.MBRLresponsePickList
+E DSIMediaBrowser 2003 - - MBRLresponseSearchList DSIMediaBrowserListenerMsg.MBRLresponseSearchList
+E DSIMediaBrowser 2004 - - MBRLresponseSetSearchString DSIMediaBrowserListenerMsg.MBRLresponseSetSearchString
+E DSIMediaBrowser 2005 - - MBRLresponseSelectSearchResult DSIMediaBrowserListenerMsg.MBRLresponseSelectSearchResult
+E DSIMediaBrowser 2006 - - MBRLresponseSetSearchCriteria DSIMediaBrowserListenerMsg.MBRLresponseSetSearchCriteria
+E DSIMediaBrowser 2007 - - MBRLresponseSearchListExt DSIMediaBrowserListenerMsg.MBRLresponseSearchListExt
+E DSIMediaBrowser 2008 - - MBRLresponseFullyQualifiedName DSIMediaBrowserListenerMsg.MBRLresponseFullyQualifiedName
+E DSIMediaBrowser 2009 - - MBRLresponseOTG DSIMediaBrowserListenerMsg.MBRLresponseOTG
+E DSIMediaBrowser 2010 - - MBRLresponseBrowsePath DSIMediaBrowserListenerMsg.MBRLresponseBrowsePath
+E DSIMediaBrowser 2011 - - MBRLresponseAddToGlobalPlaylist DSIMediaBrowserListenerMsg.MBRLresponseAddToGlobalPlaylist
+P DSIMediaBrowser 9999 setNotification DSIMediaBrowserMsg.MBRsetNotificationBrowser
+P DSIMediaBrowser 9998 clearNotification DSIMediaBrowserMsg.MBRclearNotificationBrowser
+P DSIMediaBrowser 1004 setContentFilter DSIMediaBrowserMsg.MBRsetContentFilter
+P DSIMediaBrowser 1005 setBrowseMode DSIMediaBrowserMsg.MBRsetBrowseMode
+P DSIMediaBrowser 1006 setBrowseMedia DSIMediaBrowserMsg.MBRsetBrowseMedia
+P DSIMediaBrowser 1007 changeFolder DSIMediaBrowserMsg.MBRchangeFolder
+P DSIMediaBrowser 1008 requestList DSIMediaBrowserMsg.MBRrequestList
+P DSIMediaBrowser 1009 requestPickList DSIMediaBrowserMsg.MBRrequestPickList
+P DSIMediaBrowser 1000 enableRecurseSubdirectories DSIMediaBrowserMsg.MBRenableRecurseSubdirectories
+P DSIMediaBrowser 1001 addSelection DSIMediaBrowserMsg.MBRaddSelection
+P DSIMediaBrowser 1002 undoLastSelection DSIMediaBrowserMsg.MBRundoLastSelection
+P DSIMediaBrowser 1003 resetSelection DSIMediaBrowserMsg.MBRresetSelection
+P DSIMediaBrowser 1013 setSearchString DSIMediaBrowserMsg.MBRsetSearchString
+P DSIMediaBrowser 1016 setSearchCriteria DSIMediaBrowserMsg.MBRsetSearchCriteria
+P DSIMediaBrowser 1010 activateSearchSpeller DSIMediaBrowserMsg.MBRactivateSearchSpeller
+P DSIMediaBrowser 1011 deactivateSearchSpeller DSIMediaBrowserMsg.MBRdeactivateSearchSpeller
+P DSIMediaBrowser 1015 selectSearchResult DSIMediaBrowserMsg.MBRselectSearchResult
+P DSIMediaBrowser 1012 requestSearchList DSIMediaBrowserMsg.MBRrequestSearchList
+P DSIMediaBrowser 1014 resetSearchString DSIMediaBrowserMsg.MBRresetSearchString
+P DSIMediaBrowser 1017 requestSearchListExt DSIMediaBrowserMsg.MBRrequestSearchList
+P DSIMediaBrowser 1018 requestFullyQualifiedName DSIMediaBrowserMsg.MBRrequestFullyQualifiedName
+P DSIMediaBrowser 1023 addToOTGPlaylist DSIMediaBrowserMsg.MBRaddToOTGPlaylist
+P DSIMediaBrowser 1020 deleteFromOTGPlaylist DSIMediaBrowserMsg.MBRdeleteFromOTGPlaylist
+P DSIMediaBrowser 1021 moveEntryInOTGPlaylist DSIMediaBrowserMsg.MBRmoveEntryInOTGPlaylist
+P DSIMediaBrowser 1022 activateSearchSource DSIMediaBrowserMsg.MBRactivateSearchSource
+P DSIMediaBrowser 1024 deleteFromGlobalPlaylist DSIMediaBrowserMsg.MBRdeleteFromGlobalPlaylist
+P DSIMediaBrowser 1025 purgeGlobalPlaylist DSIMediaBrowserMsg.MBRpurgeGlobalPlaylist
+P DSIMediaBrowser 1026 moveEntryInGlobalPlaylist DSIMediaBrowserMsg.MBRmoveEntryInGlobalPlaylist
+P DSIMediaBrowser 1027 requestBrowsePath DSIMediaBrowserMsg.MBRrequestBrowsePath
+R DSIMediaBrowser 1001 escolha 10000 2000 responseList
+R DSIMediaBrowser 1001 escolha 10000 2001 selectionResult
+R DSIMediaBrowser 1008 escolha 10000 2000 responseList
+R DSIMediaBrowser 1008 escolha 10000 2001 selectionResult
+R DSIMediaBrowser 1009 uma 10000 2002 responsePickList
+R DSIMediaBrowser 1002 uma 10000 2001 selectionResult
+R DSIMediaBrowser 1003 uma 10000 2001 selectionResult
+R DSIMediaBrowser 1013 uma 10000 2004 responseSetSearchString
+R DSIMediaBrowser 1016 uma 10000 2006 responseSetSearchCriteria
+R DSIMediaBrowser 1015 uma 10000 2005 responseSelectSearchResult
+R DSIMediaBrowser 1012 uma 10000 2003 responseSearchList
+R DSIMediaBrowser 1017 uma 10000 2007 responseSearchListExt
+R DSIMediaBrowser 1023 uma 10000 2009 responseOTG
+R DSIMediaBrowser 1020 uma 10000 2009 responseOTG
+R DSIMediaBrowser 1021 uma 10000 2009 responseOTG
+R DSIMediaBrowser 1027 uma 10000 2010 responseBrowsePath
+G DSIMediaBrowser 1004 2 posicao contentFilterMask contentFilterMask
+G DSIMediaBrowser 1005 1 posicao browseMode browseMode
+G DSIMediaBrowser 1006 3 posicao deviceID deviceID
+G DSIMediaBrowser 1006 3 posicao mediaID mediaID
+X DSIMediaBrowser 1008 2000 index index
+X DSIMediaBrowser 1013 2004 searchString searchString
+X DSIMediaBrowser 1016 2006 searchCriteriaMask searchCriteriaMask
+X DSIMediaBrowser 1015 2005 searchID searchID
+X DSIMediaBrowser 1012 2003 index index
+X DSIMediaBrowser 1017 2007 index index
+S DSIMediaOnline 8388608 -1 205 media
+A DSIMediaOnline 1 ATTR_BUFFERSTATE
+A DSIMediaOnline 2 ATTR_BUFFERFILLINFO
+A DSIMediaOnline 3 ATTR_AUDIOSETTINGS
+A DSIMediaOnline 4 ATTR_ACTIVECODEC
+E DSIMediaOnline 1 1 1 MOLupdateBufferState DSIMediaOnlineListenerMsg.MOLupdateBufferState
+E DSIMediaOnline 2 2 2 MOLupdateBufferFillInfo DSIMediaOnlineListenerMsg.MOLupdateBufferFillInfo
+E DSIMediaOnline 3 3 3 MOLupdateAudioSettings DSIMediaOnlineListenerMsg.MOLupdateAudioSettings
+E DSIMediaOnline 4 4 4 MOLupdateActiveCodec DSIMediaOnlineListenerMsg.MOLupdateActiveCodec
+E DSIMediaOnline 3000 - - MOLinternalError DSIMediaOnlineListenerMsg.MOLinternalError
+S DSIMediaPlayer 8388608 206 207 media
+A DSIMediaPlayer 1 ATTR_VIDEOFORMAT
+A DSIMediaPlayer 2 ATTR_VIDEONORM
+A DSIMediaPlayer 3 ATTR_CMDBLOCKINGMASK
+A DSIMediaPlayer 4 ATTR_NUMVIDEOANGLES
+A DSIMediaPlayer 5 ATTR_PLAYBACKMODELIST
+A DSIMediaPlayer 6 ATTR_PLAYBACKMODE
+A DSIMediaPlayer 7 ATTR_PLAYBACKSTATE
+A DSIMediaPlayer 8 ATTR_ACTIVEMEDIA
+A DSIMediaPlayer 9 ATTR_PLAYBACKFOLDER
+A DSIMediaPlayer 10 ATTR_CAPABILITIES
+A DSIMediaPlayer 11 ATTR_PLAYPOSITION
+A DSIMediaPlayer 12 ATTR_PLAYVIEWSIZE
+A DSIMediaPlayer 13 ATTR_ACTIVEVIDEOANGLE
+A DSIMediaPlayer 14 ATTR_AUDIOSTREAMLIST
+A DSIMediaPlayer 15 ATTR_ACTIVEAUDIOSTREAM
+A DSIMediaPlayer 16 ATTR_SUBTITLELIST
+A DSIMediaPlayer 17 ATTR_ACTIVESUBTITLE
+A DSIMediaPlayer 18 ATTR_PLAYBACKCONTENTFOLDER
+A DSIMediaPlayer 19 ATTR_DYNAMICFEATURESINFO
+A DSIMediaPlayer 20 ATTR_VIDEORESOLUTIONINFO
+A DSIMediaPlayer 21 ATTR_FAVORITELIST
+A DSIMediaPlayer 22 ATTR_PLAYSELECTIONBASEPATH
+E DSIMediaPlayer 1 1 1 MPLupdateVideoFormat DSIMediaPlayerListenerMsg.MPLupdateVideoFormat
+E DSIMediaPlayer 2 2 2 MPLupdateVideoNorm DSIMediaPlayerListenerMsg.MPLupdateVideoNorm
+E DSIMediaPlayer 3 3 3 MPLupdateCmdBlockingMask DSIMediaPlayerListenerMsg.MPLupdateCmdBlockingMask
+E DSIMediaPlayer 4 4 4 MPLupdateNumVideoAngles DSIMediaPlayerListenerMsg.MPLupdateNumVideoAngles
+E DSIMediaPlayer 5 5 5 MPLupdatePlaybackModeList DSIMediaPlayerListenerMsg.MPLupdatePlaybackModeList
+E DSIMediaPlayer 6 6 6 MPLupdatePlaybackMode DSIMediaPlayerListenerMsg.MPLupdatePlaybackMode
+E DSIMediaPlayer 7 7 7 MPLupdatePlaybackState:7 DSIMediaPlayerListenerMsg.MPLupdatePlaybackState
+E DSIMediaPlayer 8 8 8 MPLupdateActiveMedia DSIMediaPlayerListenerMsg.MPLupdateActiveMedia
+E DSIMediaPlayer 9 9 9 MPLupdatePlaybackFolder DSIMediaPlayerListenerMsg.MPLupdatePlaybackFolder
+E DSIMediaPlayer 10 10 10 MPLupdateCapabilities DSIMediaPlayerListenerMsg.MPLupdateCapabilities
+E DSIMediaPlayer 11 11 11 MPLupdatePlayPosition DSIMediaPlayerListenerMsg.MPLupdatePlayPosition
+E DSIMediaPlayer 12 12 12 MPLupdatePlayViewSize DSIMediaPlayerListenerMsg.MPLupdatePlayViewSize
+E DSIMediaPlayer 13 13 13 MPLupdateActiveVideoAngle DSIMediaPlayerListenerMsg.MPLupdateActiveVideoAngle
+E DSIMediaPlayer 14 14 14 MPLupdateAudioStreamList DSIMediaPlayerListenerMsg.MPLupdateAudioStreamList
+E DSIMediaPlayer 15 15 15 MPLupdateActiveAudioStream DSIMediaPlayerListenerMsg.MPLupdateActiveAudioStream
+E DSIMediaPlayer 16 16 16 MPLupdateSubtitleList DSIMediaPlayerListenerMsg.MPLupdateSubtitleList
+E DSIMediaPlayer 17 17 17 MPLupdateActiveSubtitle DSIMediaPlayerListenerMsg.MPLupdateActiveSubtitle
+E DSIMediaPlayer 18 18 18 MPLupdatePlaybackContentFolder DSIMediaPlayerListenerMsg.MPLupdatePlaybackContentFolder
+E DSIMediaPlayer 19 19 19 MPLupdateDynamicFeaturesInfo DSIMediaPlayerListenerMsg.MPLupdateDynamicFeaturesInfo
+E DSIMediaPlayer 20 20 20 MPLupdateVideoResolutionInfo DSIMediaPlayerListenerMsg.MPLupdateVideoResolutionInfo
+E DSIMediaPlayer 21 21 21 MPLupdateFavoriteList DSIMediaPlayerListenerMsg.MPLupdateFavoriteList
+E DSIMediaPlayer 22 22 22 MPLupdatePlaySelectionBasePath DSIMediaPlayerListenerMsg.MPLupdatePlaySelectionBasePath
+E DSIMediaPlayer 2001 - - MPLresponseRating DSIMediaPlayerListenerMsg.MPLresponseRating
+E DSIMediaPlayer 2004 - - MPLresponsePlayView DSIMediaPlayerListenerMsg.MPLresponsePlayView
+E DSIMediaPlayer 2005 - - MPLresponseSetPlaySelection DSIMediaPlayerListenerMsg.MPLresponseSetPlaySelection
+E DSIMediaPlayer 2006 - - MPLresponseSetPlaybackURL DSIMediaPlayerListenerMsg.MPLresponseSetPlaybackURL
+E DSIMediaPlayer 2007 - - MPLresponseSetVideoRect DSIMediaPlayerListenerMsg.MPLresponseSetVideoRect
+E DSIMediaPlayer 2008 - - MPLresponsePlaySimilarEntry DSIMediaPlayerListenerMsg.MPLresponsePlaySimilarEntry
+E DSIMediaPlayer 2014 - - MPLresponseSetColorParam DSIMediaPlayerListenerMsg.MPLresponseSetColorParam
+E DSIMediaPlayer 2016 - - MPLresponseAddToOnlinePlaylist DSIMediaPlayerListenerMsg.MPLresponseAddToOnlinePlaylist
+E DSIMediaPlayer 3000 - - MPLindicationDvdEvent DSIMediaPlayerListenerMsg.MPLindicationDvdEvent
+E DSIMediaPlayer 3001 - - MPLtempPMLRequest DSIMediaPlayerListenerMsg.MPLtempPMLRequest
+E DSIMediaPlayer 3002 - - MPLresponseCmdBlocked DSIMediaPlayerListenerMsg.MPLresponseCmdBlocked
+E DSIMediaPlayer 3003 - - MPLresponseDetailInfo DSIMediaPlayerListenerMsg.MPLresponseDetailInfo
+E DSIMediaPlayer 3004 - - MPLresponseCoverArt DSIMediaPlayerListenerMsg.MPLresponseCoverArt
+E DSIMediaPlayer 3005 - - MPLresponseCustomCommand DSIMediaPlayerListenerMsg.MPLresponseCustomCommand
+E DSIMediaPlayer 9000 - - MPLupdatePlaybackState:9000 DSIMediaPlayerListenerMsg.MPLupdatePlaybackState
+P DSIMediaPlayer 9999 setNotification DSIMediaPlayerMsg.MPsetNotificationPlayer
+P DSIMediaPlayer 9998 clearNotification DSIMediaPlayerMsg.MPclearNotificationPlayer
+P DSIMediaPlayer 1000 setPlaybackMode DSIMediaPlayerMsg.MPsetPlaybackMode
+P DSIMediaPlayer 1001 setVideoNorm DSIMediaPlayerMsg.MPsetVideoNorm
+P DSIMediaPlayer 1002 setRating DSIMediaPlayerMsg.MPsetRating
+P DSIMediaPlayer 1003 requestCoverArt DSIMediaPlayerMsg.MPrequestCoverArt
+P DSIMediaPlayer 1004 requestFullyQualifiedName DSIMediaPlayerMsg.MPrequestFullyQualifiedNameP
+P DSIMediaPlayer 1005 setEntry DSIMediaPlayerMsg.MPsetEntry
+P DSIMediaPlayer 1006 play DSIMediaPlayerMsg.MPplay
+P DSIMediaPlayer 1007 resume DSIMediaPlayerMsg.MPresume
+P DSIMediaPlayer 1008 pause DSIMediaPlayerMsg.MPpause
+P DSIMediaPlayer 1009 stop DSIMediaPlayerMsg.MPstop
+P DSIMediaPlayer 1010 seek DSIMediaPlayerMsg.MPseek
+P DSIMediaPlayer 1011 skip DSIMediaPlayerMsg.MPskip
+P DSIMediaPlayer 1012 setActiveMedia DSIMediaPlayerMsg.MPsetActiveMedia
+P DSIMediaPlayer 1013 requestPlayView DSIMediaPlayerMsg.MPrequestPlayView
+P DSIMediaPlayer 1014 executeMenuCmd DSIMediaPlayerMsg.MPexecuteMenuCmd
+P DSIMediaPlayer 1015 setVideoAngle DSIMediaPlayerMsg.MPsetVideoAngle
+P DSIMediaPlayer 1016 setAudioStream DSIMediaPlayerMsg.MPsetAudioStream
+P DSIMediaPlayer 1017 setVideoFormat DSIMediaPlayerMsg.MPsetVideoFormat
+P DSIMediaPlayer 1018 setSubtitleLanguage DSIMediaPlayerMsg.MPsetSubtitleLanguage
+P DSIMediaPlayer 1019 requestDetailInfo DSIMediaPlayerMsg.MPrequestDetailInfo
+P DSIMediaPlayer 1021 setPlaySelection DSIMediaPlayerMsg.MPsetPlaySelection
+P DSIMediaPlayer 1026 setPlaySelectionAB DSIMediaPlayerMsg.MPsetPlaySelectionAB
+P DSIMediaPlayer 1020 setPlaybackURL DSIMediaPlayerMsg.MPsetPlaybackURL
+P DSIMediaPlayer 1022 setVideoRect DSIMediaPlayerMsg.MPsetVideoRect
+P DSIMediaPlayer 1023 playSimilarEntry DSIMediaPlayerMsg.MPplaySimilarEntry
+P DSIMediaPlayer 1024 grantTempPMLRequest DSIMediaPlayerMsg.MPgrantTempPMLRequest
+P DSIMediaPlayer 1025 denyTempPMLRequest DSIMediaPlayerMsg.MPdenyTempPMLRequest
+P DSIMediaPlayer 1028 requestTouchEvent DSIMediaPlayerMsg.MPrequestTouchEvent
+P DSIMediaPlayer 1029 addToOTGPlaylist DSIMediaPlayerMsg.MPaddToOTGPlaylistP
+P DSIMediaPlayer 1030 requestCustomCommand DSIMediaPlayerMsg.MPrequestCustomCommand
+P DSIMediaPlayer 1031 requestLocalPlayback DSIMediaPlayerMsg.MPrequestLocalPlayback
+P DSIMediaPlayer 1032 requestStreaming DSIMediaPlayerMsg.MPrequestStreaming
+P DSIMediaPlayer 1033 setColorParam DSIMediaPlayerMsg.MPsetColorParam
+P DSIMediaPlayer 1034 addToFavorites DSIMediaPlayerMsg.MPaddToFavorites
+P DSIMediaPlayer 1035 deleteFromFavorites DSIMediaPlayerMsg.MPdeleteFromFavorites
+P DSIMediaPlayer 1036 like DSIMediaPlayerMsg.MPlike
+P DSIMediaPlayer 1037 dislike DSIMediaPlayerMsg.MPdislike
+P DSIMediaPlayer 1038 addToOnlinePlaylist DSIMediaPlayerMsg.MPaddToOnlinePlaylist
+R DSIMediaPlayer 1004 uma 10000 - responseFullyQualifiedName
+R DSIMediaPlayer 1029 uma 10000 - responseOTG
+R DSIMediaPlayer 1002 uma 10000 2001 responseRating
+R DSIMediaPlayer 1013 uma 10000 2004 responsePlayView
+R DSIMediaPlayer 1021 uma 10000 2005 responseSetPlaySelection
+R DSIMediaPlayer 1026 uma 10000 - responseSetPlaySelectionAB
+R DSIMediaPlayer 1020 uma 20000 2006 responseSetPlaybackURL
+R DSIMediaPlayer 1022 uma 10000 2007 responseSetVideoRect
+R DSIMediaPlayer 1023 uma 10000 2008 responsePlaySimilarEntry
+R DSIMediaPlayer 1031 uma 10000 - responseLocalPlayback
+R DSIMediaPlayer 1032 uma 10000 - responseStreaming
+R DSIMediaPlayer 1033 uma 10000 2014 responseSetColorParam
+R DSIMediaPlayer 1038 uma 10000 2016 responseAddToOnlinePlaylist
+G DSIMediaPlayer 1000 6 posicao modeID playbackMode
+G DSIMediaPlayer 1001 2 posicao norm videoNorm
+G DSIMediaPlayer 1012 8 nomes deviceID deviceID
+G DSIMediaPlayer 1012 8 nomes mediaID mediaID
+G DSIMediaPlayer 1012 8 nomes groupID groupID
+G DSIMediaPlayer 1017 1 posicao format videoFormat
+X DSIMediaPlayer 1002 2001 entryID entryID
+X DSIMediaPlayer 1002 2001 rating rating
+X DSIMediaPlayer 1013 2004 index index
+X DSIMediaPlayer 1013 2004 clientID clientID
+X DSIMediaPlayer 1021 2005 browserID browserID
+X DSIMediaPlayer 1020 2006 url url
+X DSIMediaPlayer 1022 2007 srcX0 srcX0
+X DSIMediaPlayer 1022 2007 srcY0 srcY0
+X DSIMediaPlayer 1022 2007 srcWidth srcWidth
+X DSIMediaPlayer 1022 2007 srcHeight srcHeight
+X DSIMediaPlayer 1022 2007 destX0 destX0
+X DSIMediaPlayer 1022 2007 destY0 destY0
+X DSIMediaPlayer 1022 2007 destWidth destWidth
+X DSIMediaPlayer 1022 2007 destHeight destHeight
+X DSIMediaPlayer 1023 2008 entryID entryID
+X DSIMediaPlayer 1033 2014 type type
+S DSIMediaRecorder 8388608 209 210 media
+A DSIMediaRecorder 1 ATTR_ACTIVEMEDIA
+A DSIMediaRecorder 2 ATTR_IMPORTSUMMARY
+A DSIMediaRecorder 3 ATTR_IMPORTPROGRESS
+A DSIMediaRecorder 4 ATTR_DELETIONPROGRESS
+A DSIMediaRecorder 5 ATTR_DATABASESPACE
+A DSIMediaRecorder 6 ATTR_IMPORTSTATUS
+A DSIMediaRecorder 7 ATTR_DELETIONSTATUS
+A DSIMediaRecorder 8 ATTR_TARGETMEDIA
+E DSIMediaRecorder 1 1 1 MRLupdateActiveMedia DSIMediaRecorderListenerMsg.MRLupdateActiveMedia
+E DSIMediaRecorder 2 2 2 MRLupdateImportSummary DSIMediaRecorderListenerMsg.MRLupdateImportSummary
+E DSIMediaRecorder 3 3 3 MRLupdateImportProgress DSIMediaRecorderListenerMsg.MRLupdateImportProgress
+E DSIMediaRecorder 4 4 4 MRLupdateDeletionProgress DSIMediaRecorderListenerMsg.MRLupdateDeletionProgress
+E DSIMediaRecorder 5 5 5 MRLupdateDatabaseSpace DSIMediaRecorderListenerMsg.MRLupdateDatabaseSpace
+E DSIMediaRecorder 6 6 6 MRLupdateImportStatus DSIMediaRecorderListenerMsg.MRLupdateImportStatus
+E DSIMediaRecorder 7 7 7 MRLupdateDeletionStatus DSIMediaRecorderListenerMsg.MRLupdateDeletionStatus
+E DSIMediaRecorder 8 8 8 MRLupdateTargetMedia DSIMediaRecorderListenerMsg.MRLupdateTargetMedia
+E DSIMediaRecorder 2000 - - MRLresponseSetSelection DSIMediaRecorderListenerMsg.MRLresponseSetSelection
+E DSIMediaRecorder 2001 - - MRLresponseSetEncodingQuality DSIMediaRecorderListenerMsg.MRLresponseSetEncodingQuality
+P DSIMediaRecorder 9999 setNotification DSIMediaRecorderMsg.MRsetNotificationRecorder
+P DSIMediaRecorder 9998 clearNotification DSIMediaRecorderMsg.MRclearNotificationRecorder
+P DSIMediaRecorder 99989 clearNotification DSIMediaRecorderMsg.MRclearNotificationRecorder
+P DSIMediaRecorder 1000 setActiveMedia DSIMediaRecorderMsg.MRsetActiveMedia
+P DSIMediaRecorder 1001 setSelection DSIMediaRecorderMsg.MRsetSelection
+P DSIMediaRecorder 1003 startImport DSIMediaRecorderMsg.MRstartImport
+P DSIMediaRecorder 1004 abortImport DSIMediaRecorderMsg.MRabortImport
+P DSIMediaRecorder 1005 startDelete DSIMediaRecorderMsg.MRstartDelete
+P DSIMediaRecorder 1006 abortDelete DSIMediaRecorderMsg.MRabortDelete
+P DSIMediaRecorder 1002 setTargetMedia DSIMediaRecorderMsg.MRsetTargetMedia
+P DSIMediaRecorder 1007 setEncodingQuality DSIMediaRecorderMsg.MRsetEncodingQuality
+R DSIMediaRecorder 1001 uma 10000 2000 responseSetSelection
+R DSIMediaRecorder 1007 uma 10000 2001 responseSetEncodingQuality
+G DSIMediaRecorder 1000 1 posicao deviceID deviceID
+G DSIMediaRecorder 1000 1 posicao mediaID mediaID
+G DSIMediaRecorder 1002 8 posicao deviceID deviceID
+G DSIMediaRecorder 1002 8 posicao mediaID mediaID
+X DSIMediaRecorder 1001 2000 browserID browserID
+X DSIMediaRecorder 1007 2001 encodingQuality encodingQuality
+S DSIUPNPBase 8388608 250 251 upnp
+A DSIUPNPBase 1 ATTR_DEVICELIST
+A DSIUPNPBase 2 ATTR_VOLUME
+A DSIUPNPBase 3 ATTR_LOCKSTATE
+A DSIUPNPBase 4 ATTR_PERMISSIONCLASS
+A DSIUPNPBase 5 ATTR_A2LSSTATE
+A DSIUPNPBase 6 ATTR_RSESTATE
+A DSIUPNPBase 7 ATTR_SYNCEDPLAYBACKACTIVE
+A DSIUPNPBase 8 ATTR_FODAVAILABLE
+A DSIUPNPBase 9 ATTR_SWAPSTATUS
+E DSIUPNPBase 1 1 1 UBLupdateDeviceList DSIUPNPBaseListenerMsg.UBLupdateDeviceList
+E DSIUPNPBase 2 2 2 UBLupdateVolume DSIUPNPBaseListenerMsg.UBLupdateVolume
+E DSIUPNPBase 3 3 3 UBLupdateLockState DSIUPNPBaseListenerMsg.UBLupdateLockState
+E DSIUPNPBase 4 4 4 UBLupdatePermissionClass DSIUPNPBaseListenerMsg.UBLupdatePermissionClass
+E DSIUPNPBase 5 5 5 UBLupdateA2LSState DSIUPNPBaseListenerMsg.UBLupdateA2LSState
+E DSIUPNPBase 6 6 6 UBLupdateRSEState DSIUPNPBaseListenerMsg.UBLupdateRSEState
+E DSIUPNPBase 7 7 7 UBLupdateSyncedPlaybackActive DSIUPNPBaseListenerMsg.UBLupdateSyncedPlaybackActive
+E DSIUPNPBase 8 8 8 UBLupdateFodAvailable DSIUPNPBaseListenerMsg.UBLupdateFodAvailable
+E DSIUPNPBase 9 9 9 UBLupdateSwapStatus DSIUPNPBaseListenerMsg.UBLupdateSwapStatus
+P DSIUPNPBase 9999 setNotification DSIUPNPBaseMsg.UBsetNotification
+P DSIUPNPBase 9998 clearNotification DSIUPNPBaseMsg.UBclearNotification
+P DSIUPNPBase 1001 setLockState DSIUPNPBaseMsg.UBsetLockState
+P DSIUPNPBase 1002 setpermissionClass DSIUPNPBaseMsg.UBsetpermissionClass
+P DSIUPNPBase 1004 increaseVolume DSIUPNPBaseMsg.UBincreaseVolume
+P DSIUPNPBase 1005 decreaseVolume DSIUPNPBaseMsg.UBdecreaseVolume
+P DSIUPNPBase 1003 setVolume DSIUPNPBaseMsg.UBsetVolume
+P DSIUPNPBase 1006 setA2LS DSIUPNPBaseMsg.UBsetA2LS
+P DSIUPNPBase 1007 setRSEState DSIUPNPBaseMsg.UBsetRSEState
+P DSIUPNPBase 1008 syncPlayback DSIUPNPBaseMsg.UBsyncPlayback
+P DSIUPNPBase 1009 stopSyncedPlayback DSIUPNPBaseMsg.UBstopSyncedPlayback
+P DSIUPNPBase 1010 removeKnownDevice DSIUPNPBaseMsg.UBremoveKnownDevice
+G DSIUPNPBase 1001 3 posicao deviceID deviceID
+G DSIUPNPBase 1001 3 posicao lockState lockState
+G DSIUPNPBase 1002 4 posicao deviceID deviceID
+G DSIUPNPBase 1002 4 posicao permissionClass permissionClass
+G DSIUPNPBase 1003 2 posicao deviceId deviceID
+G DSIUPNPBase 1003 2 posicao volume volume
+G DSIUPNPBase 1007 6 posicao rseState rseState
+S DSIUPNPBrowser 8388608 252 253 upnp
+A DSIUPNPBrowser 1 ATTR_BROWSEFOLDER
+A DSIUPNPBrowser 2 ATTR_LISTSIZE
+E DSIUPNPBrowser 1 1 1 UBRLupdateBrowseFolder DSIUPNPBrowserListenerMsg.UBRLupdateBrowseFolder
+E DSIUPNPBrowser 2 2 2 UBRLupdateListSize DSIUPNPBrowserListenerMsg.UBRLupdateListSize
+E DSIUPNPBrowser 2000 - - UBRLresponseList DSIUPNPBrowserListenerMsg.UBRLresponseList
+E DSIUPNPBrowser 3000 - - invalidBrowsePath -
+P DSIUPNPBrowser 9999 setNotification DSIUPNPBrowserMsg.UBRsetNotification
+P DSIUPNPBrowser 9998 clearNotification DSIUPNPBrowserMsg.UBRclearNotification
+P DSIUPNPBrowser 1000 changeFolder DSIUPNPBrowserMsg.UBRchangeFolder
+P DSIUPNPBrowser 1001 requestList DSIUPNPBrowserMsg.UBRrequestList
+R DSIUPNPBrowser 1001 uma 10000 2000 responseList
+X DSIUPNPBrowser 1001 2000 index index
+S DSIUPNPCam 8388608 254 255 upnp
+A DSIUPNPCam 1 ATTR_STREAMINGSTATE
+A DSIUPNPCam 2 ATTR_STILLFRAME
+E DSIUPNPCam 1 1 1 UCLupdateStreamingState DSIUPNPCamListenerMsg.UCLupdateStreamingState
+E DSIUPNPCam 2 2 2 UCLupdateStillFrame DSIUPNPCamListenerMsg.UCLupdateStillFrame
+P DSIUPNPCam 9999 setNotification DSIUPNPCamMsg.UCsetNotification
+P DSIUPNPCam 9998 clearNotification DSIUPNPCamMsg.UCclearNotification
+P DSIUPNPCam 1000 setDevice DSIUPNPCamMsg.UCsetDevice
+P DSIUPNPCam 1001 stopStream DSIUPNPCamMsg.UCstopStream
+S DSIUPNPPlayer 8388608 256 257 upnp
+A DSIUPNPPlayer 1 ATTR_DETAILINFO
+A DSIUPNPPlayer 2 ATTR_DEVICELIST
+A DSIUPNPPlayer 3 ATTR_PLAYBACKMODE
+A DSIUPNPPlayer 4 ATTR_PLAYBACKMODELIST
+A DSIUPNPPlayer 5 ATTR_PLAYBACKSTATE
+A DSIUPNPPlayer 6 ATTR_PLAYPOSITION
+A DSIUPNPPlayer 7 ATTR_VOLUME
+E DSIUPNPPlayer 1 1 1 UPLupdateDetailInfo DSIUPNPPlayerListenerMsg.UPLupdateDetailInfo
+E DSIUPNPPlayer 2 2 2 UPLupdateDeviceList DSIUPNPPlayerListenerMsg.UPLupdateDeviceList
+E DSIUPNPPlayer 3 3 3 UPLupdatePlaybackMode DSIUPNPPlayerListenerMsg.UPLupdatePlaybackMode
+E DSIUPNPPlayer 4 4 4 UPLupdatePlaybackModeList DSIUPNPPlayerListenerMsg.UPLupdatePlaybackModeList
+E DSIUPNPPlayer 5 5 5 UPLupdatePlaybackState DSIUPNPPlayerListenerMsg.UPLupdatePlaybackState
+E DSIUPNPPlayer 6 6 6 UPLupdatePlayPosition DSIUPNPPlayerListenerMsg.UPLupdatePlayPosition
+E DSIUPNPPlayer 7 7 7 UPLupdateVolume DSIUPNPPlayerListenerMsg.UPLupdateVolume
+P DSIUPNPPlayer 9999 setNotification DSIUPNPPlayerMsg.UPsetNotification
+P DSIUPNPPlayer 9998 clearNotification DSIUPNPPlayerMsg.UPclearNotification
+P DSIUPNPPlayer 1003 setPlaybackMode DSIUPNPPlayerMsg.UPsetPlaybackMode
+P DSIUPNPPlayer 1002 setEntry DSIUPNPPlayerMsg.UPsetEntry
+P DSIUPNPPlayer 1001 resume DSIUPNPPlayerMsg.UPresume
+P DSIUPNPPlayer 1000 pause DSIUPNPPlayerMsg.UPpause
+P DSIUPNPPlayer 1004 skip DSIUPNPPlayerMsg.UPskip
+P DSIUPNPPlayer 1005 seek DSIUPNPPlayerMsg.UPseek
+P DSIUPNPPlayer 1007 increaseVolume DSIUPNPPlayerMsg.UPincreaseVolume
+P DSIUPNPPlayer 1008 decreaseVolume DSIUPNPPlayerMsg.UPdecreaseVolume
+P DSIUPNPPlayer 1006 setVolume DSIUPNPPlayerMsg.UPsetVolume
+G DSIUPNPPlayer 1003 3 posicao deviceId deviceId
+G DSIUPNPPlayer 1003 3 posicao modeID playbackMode
+G DSIUPNPPlayer 1006 7 posicao deviceId deviceID
+G DSIUPNPPlayer 1006 7 posicao volume volume
+S DSIFileBrowser 8388608 1000 1001 filebrowser
+A DSIFileBrowser 1 ATTR_MOUNTPOINTS
+E DSIFileBrowser 1 1 1 FBLupdateMountPoints DSIFileBrowserListenerMsg.FBLupdateMountPoints
+E DSIFileBrowser 2000 - - FBLstartResult DSIFileBrowserListenerMsg.FBLstartResult
+E DSIFileBrowser 2001 - - FBLgetViewWindowResult DSIFileBrowserListenerMsg.FBLgetViewWindowResult
+E DSIFileBrowser 2002 - - FBLgetSelectedFilesResult DSIFileBrowserListenerMsg.FBLgetSelectedFilesResult
+E DSIFileBrowser 2003 - - FBLchangeFolderResult DSIFileBrowserListenerMsg.FBLchangeFolderResult
+E DSIFileBrowser 2004 - - FBLspellerResult DSIFileBrowserListenerMsg.FBLspellerResult
+E DSIFileBrowser 2005 - - FBLgetResourceLocatorsResult DSIFileBrowserListenerMsg.FBLgetResourceLocatorsResult
+E DSIFileBrowser 2006 - - FBLgetFileCountResult DSIFileBrowserListenerMsg.FBLgetFileCountResult
+E DSIFileBrowser 2007 - - FBLsetFileExtensionFilterResult DSIFileBrowserListenerMsg.FBLsetFileExtensionFilterResult
+E DSIFileBrowser 2008 - - FBLsetFileTypeFilterResult DSIFileBrowserListenerMsg.FBLsetFileTypeFilterResult
+E DSIFileBrowser 2009 - - FBLgetResourceLocatorWindowResult DSIFileBrowserListenerMsg.FBLgetResourceLocatorWindowResult
+E DSIFileBrowser 2010 - - FBLsetLanguageResult DSIFileBrowserListenerMsg.FBLsetLanguageResult
+E DSIFileBrowser 2011 - - FBLsetFileTypeActiveResult DSIFileBrowserListenerMsg.FBLsetFileTypeActiveResult
+E DSIFileBrowser 2012 - - FBLgetFileCountWithFileTypeFilterResult DSIFileBrowserListenerMsg.FBLgetFileCountWithFileTypeFilterResult
+E DSIFileBrowser 2013 - - FBLvalidateSpellerCharsResult DSIFileBrowserListenerMsg.FBLvalidateSpellerCharsResult
+E DSIFileBrowser 2014 - - FBLgetViewWindowWithPreviewsResult DSIFileBrowserListenerMsg.FBLgetViewWindowWithPreviewsResult
+E DSIFileBrowser 2015 - - FBLcreatePreviewImageResult DSIFileBrowserListenerMsg.FBLcreatePreviewImageResult
+E DSIFileBrowser 2016 - - FBLcancelPreviewCreationResult DSIFileBrowserListenerMsg.FBLcancelPreviewCreationResult
+E DSIFileBrowser 3000 - - FBLindicateSelectionResult DSIFileBrowserListenerMsg.FBLindicateSelectionResult
+P DSIFileBrowser 9999 setNotification DSIFileBrowserMsg.FBsetNotificationFileBrowser
+P DSIFileBrowser 9998 clearNotification DSIFileBrowserMsg.FBclearNotificationFileBrowser
+P DSIFileBrowser 1000 start DSIFileBrowserMsg.FBstart
+P DSIFileBrowser 1007 setFileExtensionFilter DSIFileBrowserMsg.FBsetFileExtensionFilter
+P DSIFileBrowser 1008 setFileTypeFilter DSIFileBrowserMsg.FBsetFileTypeFilter
+P DSIFileBrowser 1001 stop DSIFileBrowserMsg.FBstopFileBrowser
+P DSIFileBrowser 1002 getViewWindow DSIFileBrowserMsg.FBgetViewWindow
+P DSIFileBrowser 1021 getViewWindowWithPreviews DSIFileBrowserMsg.FBgetViewWindowWithPreviews
+P DSIFileBrowser 1018 getViewWindowFromFile DSIFileBrowserMsg.FBgetViewWindowFromFile
+P DSIFileBrowser 1016 getResourceLocatorWindow DSIFileBrowserMsg.FBgetResourceLocatorWindow
+P DSIFileBrowser 1003 getSelectedFiles DSIFileBrowserMsg.FBgetSelectedFiles
+P DSIFileBrowser 1014 getResourceLocators DSIFileBrowserMsg.FBgetResourceLocators
+P DSIFileBrowser 1015 getFileCount DSIFileBrowserMsg.FBgetFileCount
+P DSIFileBrowser 1019 getFileCountWithFileTypeFilter DSIFileBrowserMsg.FBgetFileCountWithFileTypeFilter
+P DSIFileBrowser 1004 setSelectionSingle DSIFileBrowserMsg.FBsetSelectionSingle
+P DSIFileBrowser 1005 setSelection DSIFileBrowserMsg.FBsetSelection
+P DSIFileBrowser 1006 changeFolder DSIFileBrowserMsg.FBchangeFolderFileBrowser
+P DSIFileBrowser 1009 setLanguage DSIFileBrowserMsg.FBsetLanguage
+P DSIFileBrowser 1011 startSpeller DSIFileBrowserMsg.FBstartSpeller
+P DSIFileBrowser 1010 addSpellerChars DSIFileBrowserMsg.FBaddSpellerChars
+P DSIFileBrowser 1012 removeSpellerChar DSIFileBrowserMsg.FBremoveSpellerChar
+P DSIFileBrowser 1013 stopSpeller DSIFileBrowserMsg.FBstopSpeller
+P DSIFileBrowser 1017 setFileTypeActive DSIFileBrowserMsg.FBsetFileTypeActive
+P DSIFileBrowser 1020 validateSpellerChars DSIFileBrowserMsg.FBvalidateSpellerChars
+P DSIFileBrowser 1022 deleteAllPreviewFiles DSIFileBrowserMsg.FBdeleteAllPreviewFiles
+P DSIFileBrowser 1023 createPreviewImage DSIFileBrowserMsg.FBcreatePreviewImage
+P DSIFileBrowser 1024 cancelPreviewCreation DSIFileBrowserMsg.FBcancelPreviewCreation
+R DSIFileBrowser 1002 uma 10000 2001 getViewWindowResult
+R DSIFileBrowser 1007 uma 10000 2007 setFileExtensionFilterResult
+R DSIFileBrowser 1008 uma 10000 2008 setFileTypeFilterResult
+R DSIFileBrowser 1021 uma 10000 2014 getViewWindowWithPreviewsResult
+R DSIFileBrowser 1018 uma 10000 2001 getViewWindowResult
+R DSIFileBrowser 1016 uma 10000 2009 getResourceLocatorWindowResult
+R DSIFileBrowser 1003 uma 10000 2002 getSelectedFilesResult
+R DSIFileBrowser 1014 uma 10000 2005 getResourceLocatorsResult
+R DSIFileBrowser 1015 uma 10000 2006 getFileCountResult
+R DSIFileBrowser 1019 uma 10000 2012 getFileCountWithFileTypeFilterResult
+R DSIFileBrowser 1006 uma 10000 2003 changeFolderResult
+R DSIFileBrowser 1011 uma 10000 2004 spellerResult
+R DSIFileBrowser 1010 uma 10000 2004 spellerResult
+R DSIFileBrowser 1012 uma 10000 2004 spellerResult
+R DSIFileBrowser 1013 uma 10000 2004 spellerResult
+R DSIFileBrowser 1017 uma 10000 2011 setFileTypeActiveResult
+R DSIFileBrowser 1020 uma 10000 2013 validateSpellerCharsResult
+R DSIFileBrowser 1023 uma 10000 2015 createPreviewImageResult
+R DSIFileBrowser 1024 uma 10000 2016 cancelPreviewCreationResult
+R DSIFileBrowser 1000 uma 10000 2000 startResult
+R DSIFileBrowser 1009 uma 10000 2010 setLanguageResult
+X DSIFileBrowser 1002 2001 sessionHandle sessionHandle
+X DSIFileBrowser 1002 2001 offset offset
+X DSIFileBrowser 1007 2007 sessionHandle sessionHandle
+X DSIFileBrowser 1008 2008 sessionHandle sessionHandle
+X DSIFileBrowser 1021 2014 sessionHandle sessionHandle
+X DSIFileBrowser 1021 2014 offset offset
+X DSIFileBrowser 1018 2001 sessionHandle sessionHandle
+X DSIFileBrowser 1016 2009 handle handle
+X DSIFileBrowser 1016 2009 offset offset
+X DSIFileBrowser 1014 2005 callerID callerID
+X DSIFileBrowser 1015 2006 sessionHandle sessionHandle
+X DSIFileBrowser 1019 2012 sessionHandle sessionHandle
+X DSIFileBrowser 1019 2012 fileTypes fileTypes
+X DSIFileBrowser 1006 2003 sessionHandle sessionHandle
+X DSIFileBrowser 1011 2004 sessionHandle sessionHandle
+X DSIFileBrowser 1010 2004 sessionHandle sessionHandle
+X DSIFileBrowser 1012 2004 sessionHandle sessionHandle
+X DSIFileBrowser 1013 2004 sessionHandle sessionHandle
+X DSIFileBrowser 1020 2013 sessionHandle sessionHandle
+X DSIFileBrowser 1023 2015 sourceFile.id sourceFile.id
+X DSIFileBrowser 1023 2015 sourceFile.url sourceFile.url
+X DSIFileBrowser 1023 2015 sourceFile.cdnAccess.cdnInternalIpv6 sourceFile.cdnAccess.cdnInternalIpv6
+X DSIFileBrowser 1023 2015 sourceFile.cdnAccess.cdnInternalPort sourceFile.cdnAccess.cdnInternalPort
+X DSIFileBrowser 1023 2015 sourceFile.cdnAccess.cdnExternalIpv6 sourceFile.cdnAccess.cdnExternalIpv6
+X DSIFileBrowser 1023 2015 sourceFile.cdnAccess.cdnExternalPort sourceFile.cdnAccess.cdnExternalPort
+X DSIFileBrowser 1023 2015 sourceFile.cdnAccess.imageResourcePath sourceFile.cdnAccess.imageResourcePath
+X DSIFileBrowser 1000 2000 path.mountPoint path.mountPoint
+X DSIFileBrowser 1009 2010 language language
+S DSISearch 8388608 1301 1302 search
+A DSISearch 1 ATTR_SEARCHISACTIVE
+A DSISearch 2 ATTR_POTENTIALCONFLICT
+A DSISearch 3 ATTR_PROFILESTATE
+E DSISearch 1 1 1 updateSearchIsActive DSISearchListenerMsg.updateSearchIsActive
+E DSISearch 2 2 2 updatePotentialConflict DSISearchListenerMsg.updatePotentialConflict
+E DSISearch 3 3 3 updateProfileState DSISearchListenerMsg.updateProfileState
+E DSISearch 2000 - - requestSupportedCountriesResult DSISearchListenerMsg.requestSupportedCountriesResult
+E DSISearch 2001 - - searchResult DSISearchListenerMsg.searchResult
+E DSISearch 2002 - - addToHistoryResult DSISearchListenerMsg.addToHistoryResult
+E DSISearch 2004 - - cancelQueryResult DSISearchListenerMsg.cancelQueryResult
+E DSISearch 2005 - - setCurrentPositionResult DSISearchListenerMsg.setCurrentPositionResult
+E DSISearch 2006 - - setRoutePointsResult DSISearchListenerMsg.setRoutePointsResult
+E DSISearch 2007 - - setLanguageResult DSISearchListenerMsg.setLanguageResult
+E DSISearch 2008 - - setCarFunctionStatesResult DSISearchListenerMsg.setCarFunctionStatesResult
+E DSISearch 2009 - - setRadioStationsResult DSISearchListenerMsg.setRadioStationsResult
+E DSISearch 2010 - - setActiveProfileResult DSISearchListenerMsg.setActiveProfileResult
+E DSISearch 2011 - - setActiveSearchCountriesResult DSISearchListenerMsg.setActiveSearchCountriesResult
+E DSISearch 2012 - - resetToFactorySettingsResult DSISearchListenerMsg.resetToFactorySettingsResult
+E DSISearch 2013 - - prepareSourcesResult DSISearchListenerMsg.prepareSourcesResult
+E DSISearch 2014 - - setSearchFilterResult DSISearchListenerMsg.setSearchFilterResult
+E DSISearch 2015 - - removeFromHistoryResult DSISearchListenerMsg.removeFromHistoryResult
+E DSISearch 2016 - - resetAutocompletionResult DSISearchListenerMsg.resetAutocompletionResult
+E DSISearch 2017 - - removeAllFromHistoryResult DSISearchListenerMsg.removeAllFromHistoryResult
+E DSISearch 2018 - - createBackupFileResult DSISearchListenerMsg.createBackupFileResult
+E DSISearch 2019 - - importBackupFileResult DSISearchListenerMsg.importBackupFileResult
+E DSISearch 2020 - - setEnvironmentResult DSISearchListenerMsg.setEnvironmentResult
+E DSISearch 2021 - - requestSuggestionResult DSISearchListenerMsg.requestSuggestionResult
+E DSISearch 2022 - - removeAllFromHistoryBySourceResult DSISearchListenerMsg.removeAllFromHistoryBySourceResult
+E DSISearch 2023 - - profileChanged DSISearchListenerMsg.profileChanged
+E DSISearch 2024 - - profileCopied DSISearchListenerMsg.profileCopied
+E DSISearch 2025 - - profileReset DSISearchListenerMsg.profileReset
+E DSISearch 2026 - - profileResetAll DSISearchListenerMsg.profileResetAll
+E DSISearch 3000 - 3000 invalidateData DSISearchListenerMsg.invalidateData
+E DSISearch 3001 - 3001 sourceDataAvailabilityChanged DSISearchListenerMsg.sourceDataAvailabilityChanged
+P DSISearch 9999 setNotification DSISearchMsg.setNotification
+P DSISearch 9998 clearNotification DSISearchMsg.clearNotification
+P DSISearch 1001 requestSupportedCountries DSISearchMsg.requestSupportedCountries
+P DSISearch 1002 setActiveSearchCountries DSISearchMsg.setActiveSearchCountries
+P DSISearch 1003 search DSISearchMsg.search
+P DSISearch 1004 addToHistory DSISearchMsg.addToHistory
+P DSISearch 1005 requestSuggestion DSISearchMsg.requestSuggestion
+P DSISearch 1006 cancelQuery DSISearchMsg.cancelQuery
+P DSISearch 1007 setCurrentPosition DSISearchMsg.setCurrentPosition
+P DSISearch 1008 setRoutePoints DSISearchMsg.setRoutePoints
+P DSISearch 1009 setLanguage DSISearchMsg.setLanguage
+P DSISearch 1000 setActiveProfile DSISearchMsg.setActiveProfile
+P DSISearch 1010 setCarFunctionStates DSISearchMsg.setCarFunctionStates
+P DSISearch 1011 setRadioStations DSISearchMsg.setRadioStations
+P DSISearch 1015 setSearchFilter DSISearchMsg.setSearchFilter
+P DSISearch 1014 prepareSources DSISearchMsg.prepareSources
+P DSISearch 1012 resetToFactorySettings DSISearchMsg.resetToFactorySettings
+P DSISearch 1016 removeFromHistory DSISearchMsg.removeFromHistory
+P DSISearch 1018 removeAllFromHistory DSISearchMsg.removeAllFromHistory
+P DSISearch 1022 removeAllFromHistoryBySource DSISearchMsg.removeAllFromHistoryBySource
+P DSISearch 1017 resetAutocompletion DSISearchMsg.resetAutocompletion
+P DSISearch 1019 createBackupFile DSISearchMsg.createBackupFile
+P DSISearch 1020 importBackupFile DSISearchMsg.importBackupFile
+P DSISearch 1021 setEnvironment DSISearchMsg.setEnvironment
+P DSISearch 1023 profileChange DSISearchMsg.profileChange
+P DSISearch 1024 profileCopy DSISearchMsg.profileCopy
+P DSISearch 1025 profileReset DSISearchMsg.profileReset
+P DSISearch 1026 profileResetAll DSISearchMsg.profileResetAll
+S DSISearchDataProvider 8388608 1303 1304 search
+E DSISearchDataProvider 2000 - - registerProviderSourceResult DSISearchDataProviderListenerMsg.registerProviderSourceResult
+E DSISearchDataProvider 2001 - - invalidateAllDataResult DSISearchDataProviderListenerMsg.invalidateAllDataResult
+E DSISearchDataProvider 2002 - - storeDataSetsResult DSISearchDataProviderListenerMsg.storeDataSetsResult
+E DSISearchDataProvider 2003 - - deleteDataSetResult DSISearchDataProviderListenerMsg.deleteDataSetResult
+E DSISearchDataProvider 3001 - 3001 activateProviderSource DSISearchDataProviderListenerMsg.activateProviderSource
+E DSISearchDataProvider 3002 - 3002 provideData DSISearchDataProviderListenerMsg.provideData
+P DSISearchDataProvider 9999 setNotification DSISearchDataProviderMsg.setNotification
+P DSISearchDataProvider 9998 clearNotification DSISearchDataProviderMsg.clearNotification
+P DSISearchDataProvider 1001 registerProviderSource DSISearchDataProviderMsg.registerProviderSource
+P DSISearchDataProvider 1005 sourceDataAvailabilityChanged DSISearchDataProviderMsg.sourceDataAvailabilityChanged
+P DSISearchDataProvider 1002 invalidateAllData DSISearchDataProviderMsg.invalidateAllData
+P DSISearchDataProvider 1003 storeDataSets DSISearchDataProviderMsg.storeDataSets
+P DSISearchDataProvider 1006 storeRawDataSets DSISearchDataProviderMsg.storeRawDataSets
+P DSISearchDataProvider 1004 deleteDataSet DSISearchDataProviderMsg.deleteDataSet
+R DSISearchDataProvider 1002 uma 10000 2001 invalidateAllDataResult
+R DSISearchDataProvider 1006 uma 10000 2002 storeDataSetsResult
+R DSISearchDataProvider 1004 uma 10000 2003 deleteDataSetResult
+R DSISearchDataProvider 1001 uma 10000 2000 registerProviderSourceResult
+R DSISearchDataProvider 1003 uma 10000 2002 storeDataSetsResult
+X DSISearchDataProvider 1002 2001 source source
+X DSISearchDataProvider 1006 2002 source source
+X DSISearchDataProvider 1004 2003 source source
+X DSISearchDataProvider 1004 2003 dataSetId dataSetId
+X DSISearchDataProvider 1001 2000 source source
+X DSISearchDataProvider 1003 2002 source source
+W 8388608 org.dsi.ifc.media.DSIMediaBase 0 0
+W 8388608 org.dsi.ifc.media.DSIMediaPlayer 0 0
+W 8388608 org.dsi.ifc.media.DSIMediaPlayer 1 0
+W 8388608 org.dsi.ifc.media.DSIMediaPlayer 2 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 0 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 1 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 2 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 3 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 4 0
+W 8388608 org.dsi.ifc.media.DSIMediaBrowser 7 0
+W 8388608 org.dsi.ifc.media.DSIMediaOnline 1 0
+W 8388608 org.dsi.ifc.media.DSIMediaOnline 2 0
+W 8388608 org.dsi.ifc.media.DSIMediaRecorder 0 0
+W 8388608 org.dsi.ifc.filebrowser.DSIFileBrowser 0 0
+W 8388608 org.dsi.ifc.upnp.DSIUPNPBase 0 0
+W 8388608 org.dsi.ifc.upnp.DSIUPNPBrowser 0 0
+W 8388608 org.dsi.ifc.upnp.DSIUPNPCam 0 0
+W 8388608 org.dsi.ifc.upnp.DSIUPNPPlayer 0 0
+W 8388608 org.dsi.ifc.search.DSISearch 0 0
+W 8388608 org.dsi.ifc.search.DSISearch 1 0
+W 8388608 org.dsi.ifc.search.DSISearch 2 0
+W 8388608 org.dsi.ifc.search.DSISearch 3 0
+W 8388608 org.dsi.ifc.search.DSISearch 4 0
+W 8388608 org.dsi.ifc.search.DSISearch 5 0
+W 8388608 org.dsi.ifc.search.DSISearch 6 0
+W 8388608 org.dsi.ifc.search.DSISearch 7 0
+W 8388608 org.dsi.ifc.search.DSISearch 8 0
+W 8388608 org.dsi.ifc.search.DSISearch 9 0
+W 8388608 org.dsi.ifc.search.DSISearch 10 0
+W 8388608 org.dsi.ifc.search.DSISearch 11 0
+W 8388608 org.dsi.ifc.search.DSISearchDataProvider 0 0
+M DSIMediaBaseListenerMsg.MBLupdateParentalML
+C 1 parentalML int32 um
+C 2 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdatePreferredLanguage
+C 1 preferredLanguage string um
+C 2 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateMediaList
+C 1 mediaList msg rep DSIMediaDefinedClasses.MMediaInfo
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MMediaInfo
+C 1 activeApp string um
+C 2 deviceID int64 um
+C 3 flags int64 um
+C 4 mediaCaps msg um DSIMediaDefinedClasses.MMediaCapabilities
+C 5 mediaID int64 um
+C 6 mediaType int32 um
+C 7 mountPoint string um
+C 8 name string um
+C 9 providerLogo msg um DSIMediaDefinedClasses.GResourceLocator
+C 10 uniqueMediaID string um
+C 11 providerLogoLarge msg um DSIMediaDefinedClasses.GResourceLocator
+C 12 providerDislike msg um DSIMediaDefinedClasses.GResourceLocator
+C 13 providerLike msg um DSIMediaDefinedClasses.GResourceLocator
+C 14 providerLogoApproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 15 providerLogoNonapproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 16 likeIconApproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 17 likeIconNonapproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 18 unlikeIconApproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 19 unlikeIconNonapproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 20 addToOnlinePlaylistApproximated msg um DSIMediaDefinedClasses.GResourceLocator
+C 21 addToOnlinePlaylistNonapproximated msg um DSIMediaDefinedClasses.GResourceLocator
+M DSIMediaDefinedClasses.MMediaCapabilities
+C 1 albumBrowser bool um
+C 2 authentication bool um
+C 3 browserCoverArt bool um
+C 4 contentBrowser bool um
+C 5 dislike bool um
+C 6 dynamicResourceHandling bool um
+C 7 favorites bool um
+C 8 importData bool um
+C 9 like bool um
+C 10 playbackModes bool um
+C 11 playerCoverArt bool um
+C 12 rawBrowser bool um
+C 13 remoteApps bool um
+C 14 searchEntries bool um
+C 15 videoSupport bool um
+C 16 addToOnlinePlaylist bool um
+M DSIMediaDefinedClasses.GResourceLocator
+C 1 id int32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMediaDefinedClasses.GResourceCDNAccess
+M DSIMediaDefinedClasses.GResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort int32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort int32 um
+C 5 imageResourcePath string um
+M DSIMediaBaseListenerMsg.MBLupdateDeviceList
+C 1 deviceList msg rep DSIMediaDefinedClasses.MDeviceInfo
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MDeviceInfo
+C 1 deviceID int64 um
+C 2 deviceType int32 um
+C 3 flags int32 um
+C 4 numSlots int32 um
+M DSIMediaBaseListenerMsg.MBLupdateCustomerUpdate
+C 1 update int32 um
+C 2 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateApplicationVersion
+C 1 versionInfo string um
+C 2 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateMetadataDBVersion
+C 1 versionInfo string um
+C 2 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateProfileState
+C 1 state int32 um
+C 2 profile int32 um
+C 3 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateSearchMedia
+C 1 deviceID int32 um
+C 2 mediaID int64 um
+C 3 validFlag int32 um
+M DSIMediaBaseListenerMsg.MBLupdateOnlineState
+C 1 onlinestate sint32 um
+C 2 validflag sint32 um
+M DSIMediaBaseListenerMsg.MBLupdateReplayGain
+C 1 replayGain sint32 um
+C 2 validflag sint32 um
+M DSIMediaBaseListenerMsg.MBLresponseResetFactorySettings
+C 1 resetMode int32 um
+C 2 success bool um
+M DSIMediaBaseListenerMsg.MBLlaunchAppResult
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 appName string um
+C 4 success bool um
+M DSIMediaBaseListenerMsg.MBLprofileChanged
+C 1 profile int32 um
+C 2 result int32 um
+M DSIMediaBaseListenerMsg.MBLprofileCopied
+C 1 fromProfile int32 um
+C 2 toProfile int32 um
+C 3 result int32 um
+M DSIMediaBaseListenerMsg.MBLprofileResetR
+C 1 profile int32 um
+C 2 result int32 um
+M DSIMediaBaseListenerMsg.MBLprofileResetAllR
+C 1 result int32 um
+M DSIMediaBaseListenerMsg.MBLresponseAuthenticate
+C 1 deviceId sint64 um
+C 2 mediaId sint64 um
+C 3 result sint32 um
+M DSIMediaBaseListenerMsg.MBLresponseRemoveAuthentication
+C 1 deviceId sint64 um
+C 2 mediaId sint64 um
+C 3 result sint32 um
+M DSIMediaBaseListenerMsg.MBLresponseActivationCode
+C 1 deviceId sint64 um
+C 2 mediaId sint64 um
+C 3 activationCode string um
+C 4 activationUR string um
+M DSIMediaBaseMsg.MBsetNotification
+C 1 attributes int32 rep
+M DSIMediaBaseMsg.MBclearNotificationBase
+C 1 attributes int32 rep
+M DSIMediaBaseMsg.MBsetPreferredLanguage
+C 1 languageCode string um
+M DSIMediaBaseMsg.MBsetParentalML
+C 1 pml int32 um
+M DSIMediaBaseMsg.MBejectMedium
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+M DSIMediaBaseMsg.MBrequestResetFactorySettings
+C 1 resetMode int32 um
+M DSIMediaBaseMsg.MBlaunchApp
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 appName string um
+M DSIMediaBaseMsg.MBprofileChange
+C 1 profile int32 um
+M DSIMediaBaseMsg.MBprofileCopy
+C 1 fromProfile int32 um
+C 2 toProfile int32 um
+M DSIMediaBaseMsg.MBprofileReset
+C 1 profile int32 um
+M DSIMediaBaseMsg.MBprofileResetAll
+M DSIMediaBaseMsg.MBsetSearchMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+M DSIMediaBaseMsg.MBrequestAuthenticate
+C 1 deviceId int64 um
+C 2 mediaId int64 um
+C 3 username string um
+C 4 password string um
+M DSIMediaBaseMsg.MBrequestRemoveAuthentication
+C 1 deviceId int64 um
+C 2 mediaId int64 um
+M DSIMediaBaseMsg.MBrequestActivationCode
+C 1 deviceId int64 um
+C 2 mediaId int64 um
+M DSIMediaBaseMsg.MBrequestReplayGain
+C 1 replayGain int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateBrowseMode
+C 1 browseMode int32 um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateContentFilter
+C 1 contentFilterMask int32 um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateBrowseMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateBrowseFolder
+C 1 activeBrowsingFolder msg rep DSIMediaDefinedClasses.MListEntry
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MListEntry
+C 1 entryID int64 um
+C 2 filename string um
+C 3 title string um
+C 4 contentType int32 um
+C 5 secLength int32 um
+C 6 flags int32 um
+C 7 extInfo msg um DSIMediaDefinedClasses.MListEntryExt
+M DSIMediaDefinedClasses.MListEntryExt
+C 1 album string um
+C 2 albumID int64 um
+C 3 artist string um
+C 4 artistID int64 um
+C 5 coverArtResource msg um DSIMediaDefinedClasses.GResourceLocator
+C 6 titleID int64 um
+C 7 fileCount int32 um
+C 8 folderCount int32 um
+C 9 playlistCount int32 um
+C 10 storageLocationType int32 um
+C 11 storageLocationIndex int32 um
+C 12 singleAccessibleSourceInUse bool um
+M DSIMediaBrowserListenerMsg.MBRLupdateListSize
+C 1 listSizeCount int32 um
+C 2 listSizeFlags int32 um
+C 3 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateSearchSpellerState
+C 1 searchSpellerState int32 um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateSearchSize
+C 1 searchCountTotal int32 um
+C 2 searchCountArtist int32 um
+C 3 searchCountAlbum int32 um
+C 4 searchCountTitle int32 um
+C 5 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateAlphabeticalIndex
+C 1 characterInfos msg rep DSIMediaDefinedClasses.GCharacterInfo
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.GCharacterInfo
+C 1 value int32 um
+C 2 index int32 um
+C 3 characters string um
+M DSIMediaBrowserListenerMsg.MBRLupdateSearchSourceState
+C 1 searchState int32 um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateGlobalPlaylistSizeExceeded
+C 1 sizeExceeded bool um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateGlobalPlaylistEmpty
+C 1 globalplaylistEmpty bool um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLupdateLastPlayedPlaylistEmpty
+C 1 lastplayedplaylistEmpty bool um
+C 2 validFlag int32 um
+M DSIMediaBrowserListenerMsg.MBRLresponseList
+C 1 entrylist msg rep DSIMediaDefinedClasses.MListEntry
+C 2 index int32 um
+M DSIMediaBrowserListenerMsg.MBRLselectionResult
+C 1 result int32 um
+C 2 selectionState int32 um
+C 3 filesExist bool um
+C 4 sizeAvail int64 um
+C 5 sizeSelected int64 um
+C 6 entriesAvail int64 um
+C 7 entriesSelected int64 um
+C 8 playlistsSelected int64 um
+M DSIMediaBrowserListenerMsg.MBRLresponsePickList
+C 1 entrylist msg rep DSIMediaDefinedClasses.MListEntry
+M DSIMediaBrowserListenerMsg.MBRLresponseSearchList
+C 1 searchlist msg rep DSIMediaDefinedClasses.MSearchListEntry
+C 2 index int32 um
+M DSIMediaDefinedClasses.MSearchListEntry
+C 1 description string um
+C 2 entryID int64 um
+C 3 flags int32 um
+C 4 searchID int64 um
+C 5 tagType int32 um
+M DSIMediaBrowserListenerMsg.MBRLresponseSetSearchString
+C 1 searchString string um
+C 2 result bool um
+M DSIMediaBrowserListenerMsg.MBRLresponseSelectSearchResult
+C 1 searchID int64 um
+C 2 entryID int64 um
+C 3 result bool um
+M DSIMediaBrowserListenerMsg.MBRLresponseSetSearchCriteria
+C 1 searchCriteriaMask int32 um
+C 2 result bool um
+M DSIMediaBrowserListenerMsg.MBRLresponseSearchListExt
+C 1 searchlist msg rep DSIMediaDefinedClasses.MSearchListEntryExt
+C 2 index int32 um
+M DSIMediaDefinedClasses.MSearchListEntryExt
+C 1 album string um
+C 2 albumID int64 um
+C 3 artist string um
+C 4 artistID int64 um
+C 5 coverArtResource msg um DSIMediaDefinedClasses.GResourceLocator
+C 6 description string um
+C 7 entryID int64 um
+C 8 flags int32 um
+C 9 searchID int64 um
+C 10 tagType int32 um
+M DSIMediaBrowserListenerMsg.MBRLresponseFullyQualifiedName
+C 1 titleID int64 um
+C 2 path string um
+M DSIMediaBrowserListenerMsg.MBRLresponseOTG
+C 1 count int32 um
+C 2 requestType int32 um
+M DSIMediaBrowserListenerMsg.MBRLresponseBrowsePath
+C 1 path msg rep DSIMediaDefinedClasses.MListEntry
+M DSIMediaBrowserListenerMsg.MBRLresponseAddToGlobalPlaylist
+C 1 result int32 um
+M DSIMediaBrowserMsg.MBRsetNotificationBrowser
+C 1 attributes int32 rep
+M DSIMediaBrowserMsg.MBRclearNotificationBrowser
+C 1 attributes int32 rep
+M DSIMediaBrowserMsg.MBRsetContentFilter
+C 1 contentFilterMask int32 um
+M DSIMediaBrowserMsg.MBRsetBrowseMode
+C 1 browseMode int32 um
+M DSIMediaBrowserMsg.MBRsetBrowseMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+M DSIMediaBrowserMsg.MBRchangeFolder
+C 1 folderpath msg rep DSIMediaDefinedClasses.MListEntry
+M DSIMediaBrowserMsg.MBRrequestList
+C 1 entryID int64 um
+C 2 contentType int32 um
+C 3 index int32 um
+C 4 count int32 um
+M DSIMediaBrowserMsg.MBRrequestPickList
+C 1 entryIDList int64 rep
+M DSIMediaBrowserMsg.MBRenableRecurseSubdirectories
+C 1 enable bool um
+M DSIMediaBrowserMsg.MBRaddSelection
+C 1 selection bool um
+C 2 range int32 um
+C 3 entryID int64 um
+C 4 contentType int32 um
+C 5 sizeCheck bool um
+M DSIMediaBrowserMsg.MBRundoLastSelection
+M DSIMediaBrowserMsg.MBRresetSelection
+M DSIMediaBrowserMsg.MBRsetSearchString
+C 1 searchString string um
+M DSIMediaBrowserMsg.MBRsetSearchCriteria
+C 1 searchCriteriaMask int32 um
+M DSIMediaBrowserMsg.MBRactivateSearchSpeller
+M DSIMediaBrowserMsg.MBRdeactivateSearchSpeller
+M DSIMediaBrowserMsg.MBRselectSearchResult
+C 1 searchID int64 um
+M DSIMediaBrowserMsg.MBRrequestSearchList
+C 1 searchID int64 um
+C 2 index int32 um
+C 3 count int32 um
+M DSIMediaBrowserMsg.MBRresetSearchString
+M DSIMediaBrowserMsg.MBRrequestFullyQualifiedName
+C 1 titleID int64 um
+M DSIMediaBrowserMsg.MBRaddToOTGPlaylist
+C 1 type int32 um
+C 2 entryID int64 um
+C 3 index int64 um
+M DSIMediaBrowserMsg.MBRdeleteFromOTGPlaylist
+C 1 entries int64 rep
+M DSIMediaBrowserMsg.MBRmoveEntryInOTGPlaylist
+C 1 oldIndex int64 um
+C 2 newIndex int64 um
+M DSIMediaBrowserMsg.MBRactivateSearchSource
+M DSIMediaBrowserMsg.MBRdeleteFromGlobalPlaylist
+C 1 entries int64 rep
+M DSIMediaBrowserMsg.MBRpurgeGlobalPlaylist
+M DSIMediaBrowserMsg.MBRmoveEntryInGlobalPlaylist
+C 1 oldIndex int64 um
+C 2 newIndex int64 um
+M DSIMediaBrowserMsg.MBRrequestBrowsePath
+C 1 entryId int64 um
+C 2 contentType int32 um
+C 3 includingTrack bool um
+M DSIMediaOnlineListenerMsg.MOLupdateBufferState
+C 1 state int32 um
+C 2 validFlag int32 um
+M DSIMediaOnlineListenerMsg.MOLupdateBufferFillInfo
+C 1 downloaded int32 um
+C 2 total int32 um
+C 3 validFlag int32 um
+M DSIMediaOnlineListenerMsg.MOLupdateAudioSettings
+C 1 audioType int32 um
+C 2 value int32 um
+C 3 validFlag int32 um
+M DSIMediaOnlineListenerMsg.MOLupdateActiveCodec
+C 1 codec int32 um
+C 2 bitrateKbps int32 um
+C 3 validFlag int32 um
+M DSIMediaOnlineListenerMsg.MOLinternalError
+C 1 error int32 um
+C 2 httpcode int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateVideoFormat
+C 1 videoFormat int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateVideoNorm
+C 1 videoNorm int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateCmdBlockingMask
+C 1 cmdBlockingMask int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateNumVideoAngles
+C 1 numVideoAngles int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaybackModeList
+C 1 playbackModeList msg rep DSIMediaDefinedClasses.MPlaybackMode
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MPlaybackMode
+C 1 modeFlag int32 um
+C 2 modeID int32 um
+C 3 scope int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaybackMode
+C 1 playbackMode int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaybackState
+C 1 playbackState int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateActiveMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 groupID int32 um
+C 4 physicalPlayerID int32 um
+C 5 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaybackFolder
+C 1 activePlayingFolder msg rep DSIMediaDefinedClasses.MListEntry
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateCapabilities
+C 1 capabilities msg um DSIMediaDefinedClasses.MCapabilities
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MCapabilities
+C 1 browseWhilePlay bool um
+C 2 detailInfos bool um
+C 3 extendedPlayView bool um
+C 4 fastBwd bool um
+C 5 fastFwd bool um
+C 6 pause bool um
+C 7 play bool um
+C 8 playbackModes bool um
+C 9 playbackModeTakeOver bool um
+C 10 playbackModeToggle bool um
+C 11 playSimilarEntries bool um
+C 12 playTime bool um
+C 13 playView bool um
+C 14 resume bool um
+C 15 setEntry bool um
+C 16 setTimePos bool um
+C 17 skipBwd bool um
+C 18 skipFwd bool um
+C 19 sloMoBwd bool um
+C 20 sloMoFwd bool um
+C 21 stillBwd bool um
+C 22 stillFwd bool um
+C 23 stop bool um
+C 24 supportedCustomCommandMask int32 um
+C 25 totalPlaytime bool um
+M DSIMediaPlayerListenerMsg.MPLupdatePlayPosition
+C 1 entryID int64 um
+C 2 timePosition int32 um
+C 3 totalPlayTime int32 um
+C 4 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlayViewSize
+C 1 pvCount int32 um
+C 2 pvFlags int32 um
+C 3 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateActiveVideoAngle
+C 1 activeVideoAngle int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateAudioStreamList
+C 1 audioStreamList msg rep DSIMediaDefinedClasses.MAudioStream
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MAudioStream
+C 1 audioCoding int32 um
+C 2 audioLanguageExtension int32 um
+C 3 languageCode int32 um
+C 4 numChannels int32 um
+C 5 samplingRate int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateActiveAudioStream
+C 1 activeAudioStream int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateSubtitleList
+C 1 subtitleList int32 rep
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateActiveSubtitle
+C 1 activeSubtitle int32 um
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaybackContentFolder
+C 1 activePlayingFolder msg rep DSIMediaDefinedClasses.MListEntry
+C 2 validFlag int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateDynamicFeaturesInfo
+C 1 featureInfoArray msg rep DSIMediaDefinedClasses.MDynamicFeatureInfo
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MDynamicFeatureInfo
+C 1 feature int32 um
+C 2 status int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateVideoResolutionInfo
+C 1 resolutionInfo msg um DSIMediaDefinedClasses.MVideoResolutionInfo
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MVideoResolutionInfo
+C 1 height int32 um
+C 2 width int32 um
+M DSIMediaPlayerListenerMsg.MPLupdateFavoriteList
+C 1 favoriteList msg rep DSIMediaDefinedClasses.MFavoriteEntry
+C 2 validFlag sint32 um
+M DSIMediaDefinedClasses.MFavoriteEntry
+C 1 path msg rep DSIMediaDefinedClasses.MListEntry
+C 2 index sint32 um
+M DSIMediaPlayerListenerMsg.MPLupdatePlaySelectionBasePath
+C 1 baseDirectory msg rep DSIMediaDefinedClasses.MListEntry
+C 2 recursive bool um
+C 3 validFlag sint32 um
+M DSIMediaPlayerListenerMsg.MPLresponseRating
+C 1 entryID int64 um
+C 2 rating int32 um
+M DSIMediaPlayerListenerMsg.MPLresponsePlayView
+C 1 activePlayingFolder msg rep DSIMediaDefinedClasses.MListEntry
+C 2 orderCriteria int32 um
+C 3 index int32 um
+C 4 clientID int32 um
+M DSIMediaPlayerListenerMsg.MPLresponseSetPlaySelection
+C 1 browserID int32 um
+C 2 selectionResult int32 um
+M DSIMediaPlayerListenerMsg.MPLresponseSetPlaybackURL
+C 1 url string um
+M DSIMediaPlayerListenerMsg.MPLresponseSetVideoRect
+C 1 srcX0 int32 um
+C 2 srcY0 int32 um
+C 3 srcWidth int32 um
+C 4 srcHeight int32 um
+C 5 destX0 int32 um
+C 6 destY0 int32 um
+C 7 destWidth int32 um
+C 8 destHeight int32 um
+M DSIMediaPlayerListenerMsg.MPLresponsePlaySimilarEntry
+C 1 entryID int64 um
+C 2 result bool um
+M DSIMediaPlayerListenerMsg.MPLresponseSetColorParam
+C 1 type int32 um
+C 2 result bool um
+M DSIMediaPlayerListenerMsg.MPLresponseAddToOnlinePlaylist
+C 1 result sint32 um
+M DSIMediaPlayerListenerMsg.MPLindicationDvdEvent
+C 1 dvdEvent int32 um
+M DSIMediaPlayerListenerMsg.MPLtempPMLRequest
+C 1 tempPml int32 um
+M DSIMediaPlayerListenerMsg.MPLresponseCmdBlocked
+C 1 command int32 um
+M DSIMediaPlayerListenerMsg.MPLresponseDetailInfo
+C 1 entryinfo msg um DSIMediaDefinedClasses.MEntryInfo
+M DSIMediaDefinedClasses.MEntryInfo
+C 1 album string um
+C 2 albumID int64 um
+C 3 artist string um
+C 4 artistID int64 um
+C 5 avgBitrate int64 um
+C 6 chapterInfo msg um DSIMediaDefinedClasses.MChapterInfo
+C 7 comments string um
+C 8 contentType int32 um
+C 9 entryID int64 um
+C 10 filename string um
+C 11 flags int32 um
+C 12 genre string um
+C 13 genreID int64 um
+C 14 numTracks int64 um
+C 15 rating int32 um
+C 16 samplingrate int64 um
+C 17 title string um
+C 18 trackNo int64 um
+C 19 year string um
+C 20 titleID int64 um
+M DSIMediaDefinedClasses.MChapterInfo
+C 1 activeChapter int32 um
+C 2 activeChapterFirstTimePos int64 um
+C 3 activeChapterLastTimePos int64 um
+C 4 numChapters int32 um
+M DSIMediaPlayerListenerMsg.MPLresponseCoverArt
+C 1 entryID int64 um
+C 2 res msg um DSIMediaDefinedClasses.GResourceLocator
+M DSIMediaPlayerListenerMsg.MPLresponseCustomCommand
+C 1 command int32 um
+C 2 commandResponse int32 um
+C 3 success bool um
+M DSIMediaPlayerMsg.MPsetNotificationPlayer
+C 1 attributes int32 rep
+M DSIMediaPlayerMsg.MPclearNotificationPlayer
+C 1 attributes int32 rep
+M DSIMediaPlayerMsg.MPsetPlaybackMode
+C 1 modeID int32 um
+M DSIMediaPlayerMsg.MPsetVideoNorm
+C 1 norm int32 um
+M DSIMediaPlayerMsg.MPsetRating
+C 1 entryID int64 um
+C 2 rating int32 um
+M DSIMediaPlayerMsg.MPrequestCoverArt
+C 1 entryID int64 um
+M DSIMediaPlayerMsg.MPrequestFullyQualifiedNameP
+C 1 titleID int64 um
+M DSIMediaPlayerMsg.MPsetEntry
+C 1 entryID int64 um
+C 2 timePosition int32 um
+M DSIMediaPlayerMsg.MPplay
+M DSIMediaPlayerMsg.MPresume
+M DSIMediaPlayerMsg.MPpause
+M DSIMediaPlayerMsg.MPstop
+M DSIMediaPlayerMsg.MPseek
+C 1 seekdirection int32 um
+C 2 playbackRate int32 um
+M DSIMediaPlayerMsg.MPskip
+C 1 skipMode int32 um
+C 2 count int32 um
+M DSIMediaPlayerMsg.MPsetActiveMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 groupID int32 um
+M DSIMediaPlayerMsg.MPrequestPlayView
+C 1 entryID int64 um
+C 2 index int32 um
+C 3 count int32 um
+C 4 clientID int32 um
+M DSIMediaPlayerMsg.MPexecuteMenuCmd
+C 1 menuCmd int32 um
+M DSIMediaPlayerMsg.MPsetVideoAngle
+C 1 angle int32 um
+M DSIMediaPlayerMsg.MPsetAudioStream
+C 1 stream int32 um
+M DSIMediaPlayerMsg.MPsetVideoFormat
+C 1 format int32 um
+M DSIMediaPlayerMsg.MPsetSubtitleLanguage
+C 1 languageCode int32 um
+M DSIMediaPlayerMsg.MPrequestDetailInfo
+C 1 entryID int64 um
+M DSIMediaPlayerMsg.MPsetPlaySelection
+C 1 browserID int32 um
+C 2 entryID int64 um
+C 3 seamless bool um
+M DSIMediaPlayerMsg.MPsetPlaySelectionAB
+C 1 browserID sint32 um
+M DSIMediaPlayerMsg.MPsetPlaybackURL
+C 1 url string um
+C 2 type int32 um
+C 3 flags int32 um
+M DSIMediaPlayerMsg.MPsetVideoRect
+C 1 srcX0 int32 um
+C 2 srcY0 int32 um
+C 3 srcWidth int32 um
+C 4 srcHeight int32 um
+C 5 destX0 int32 um
+C 6 destY0 int32 um
+C 7 destWidth int32 um
+C 8 destHeight int32 um
+M DSIMediaPlayerMsg.MPplaySimilarEntry
+C 1 entryID int64 um
+C 2 count int32 um
+M DSIMediaPlayerMsg.MPgrantTempPMLRequest
+M DSIMediaPlayerMsg.MPdenyTempPMLRequest
+M DSIMediaPlayerMsg.MPrequestTouchEvent
+C 1 touchEvent int32 um
+C 2 destX int32 um
+C 3 destY int32 um
+M DSIMediaPlayerMsg.MPaddToOTGPlaylistP
+C 1 type int32 um
+C 2 entryId int64 um
+C 3 index int64 um
+M DSIMediaPlayerMsg.MPrequestCustomCommand
+C 1 command int32 um
+M DSIMediaPlayerMsg.MPrequestLocalPlayback
+C 1 enable bool um
+M DSIMediaPlayerMsg.MPrequestStreaming
+C 1 enable bool um
+C 2 uplink int32 um
+M DSIMediaPlayerMsg.MPsetColorParam
+C 1 type int32 um
+C 2 value int32 um
+M DSIMediaPlayerMsg.MPaddToFavorites
+C 1 path msg rep DSIMediaDefinedClasses.MListEntry
+C 2 index int32 um
+M DSIMediaPlayerMsg.MPdeleteFromFavorites
+C 1 index int32 um
+M DSIMediaPlayerMsg.MPlike
+M DSIMediaPlayerMsg.MPdislike
+M DSIMediaPlayerMsg.MPaddToOnlinePlaylist
+C 1 entryId int64 um
+M DSIMediaRecorderListenerMsg.MRLupdateActiveMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateImportSummary
+C 1 numberOfImportedFiles int64 um
+C 2 numberOfErroneousFiles int64 um
+C 3 numberOfProtectedFiles int64 um
+C 4 numberOfFilesTotalToImport int64 um
+C 5 numberOfImportedPlaylists int64 um
+C 6 numberOfPlaylistsTotalToImport int64 um
+C 7 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateImportProgress
+C 1 importProgress int64 um
+C 2 listEntry msg um DSIMediaDefinedClasses.MListEntry
+C 3 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateDeletionProgress
+C 1 deletionProgress int64 um
+C 2 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateDatabaseSpace
+C 1 databasespace msg um DSIMediaDefinedClasses.MDatabaseSpace
+C 2 validFlag int32 um
+M DSIMediaDefinedClasses.MDatabaseSpace
+C 1 maxEntries int64 um
+C 2 numEntries int64 um
+C 3 size int64 um
+C 4 sizeAvail int64 um
+C 5 sizeApps int64 um
+M DSIMediaRecorderListenerMsg.MRLupdateImportStatus
+C 1 status int32 um
+C 2 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateDeletionStatus
+C 1 status int32 um
+C 2 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLupdateTargetMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+C 3 validFlag int32 um
+M DSIMediaRecorderListenerMsg.MRLresponseSetSelection
+C 1 browserID int32 um
+C 2 result bool um
+M DSIMediaRecorderListenerMsg.MRLresponseSetEncodingQuality
+C 1 encodingQuality int32 um
+M DSIMediaRecorderMsg.MRsetNotificationRecorder
+C 1 attributes int32 rep
+M DSIMediaRecorderMsg.MRclearNotificationRecorder
+C 1 attributes int32 rep
+M DSIMediaRecorderMsg.MRsetActiveMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+M DSIMediaRecorderMsg.MRsetSelection
+C 1 browserID int32 um
+M DSIMediaRecorderMsg.MRstartImport
+C 1 overwrite bool um
+M DSIMediaRecorderMsg.MRabortImport
+M DSIMediaRecorderMsg.MRstartDelete
+M DSIMediaRecorderMsg.MRabortDelete
+M DSIMediaRecorderMsg.MRsetTargetMedia
+C 1 deviceID int64 um
+C 2 mediaID int64 um
+M DSIMediaRecorderMsg.MRsetEncodingQuality
+C 1 encodingQuality int32 um
+M DSIUPNPBaseListenerMsg.UBLupdateDeviceList
+C 1 deviceList msg rep DSIUPNPDefinedClassesMsg.UDeviceInfo
+C 2 validFlag sint32 um
+M DSIUPNPDefinedClassesMsg.UDeviceInfo
+C 1 deviceName string um
+C 2 deviceID string um
+C 3 deviceType sint32 um
+C 4 deviceDistributedPlaybackURL string um
+C 5 devicePermissionClass sint32 um
+C 6 deviceLockState sint32 um
+C 7 deviceVolume sint32 um
+C 8 deviceA2LSState sint32 um
+C 9 deviceCamAvailable sint32 um
+C 10 deviceConnectionState sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateVolume
+C 1 deviceID string um
+C 2 volume sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateLockState
+C 1 deviceID string um
+C 2 lockState sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdatePermissionClass
+C 1 deviceID string um
+C 2 permissionClass sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateA2LSState
+C 1 deviceID string um
+C 2 a2LsState sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateRSEState
+C 1 rseState sint32 um
+C 2 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateSyncedPlaybackActive
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateFodAvailable
+C 1 available bool um
+C 2 validFlag sint32 um
+M DSIUPNPBaseListenerMsg.UBLupdateSwapStatus
+C 1 swapOrFod bool um
+C 2 unlocked bool um
+C 3 validFlag sint32 um
+M DSIUPNPBaseMsg.UBsetNotification
+C 1 attributes sint32 rep
+M DSIUPNPBaseMsg.UBclearNotification
+C 1 attributes sint32 rep
+M DSIUPNPBaseMsg.UBsetLockState
+C 1 deviceID string um
+C 2 lockState sint32 um
+M DSIUPNPBaseMsg.UBsetpermissionClass
+C 1 deviceID string um
+C 2 permissionClass sint32 um
+M DSIUPNPBaseMsg.UBincreaseVolume
+C 1 deviceId string um
+M DSIUPNPBaseMsg.UBdecreaseVolume
+C 1 deviceId string um
+M DSIUPNPBaseMsg.UBsetVolume
+C 1 deviceId string um
+C 2 volume sint32 um
+M DSIUPNPBaseMsg.UBsetA2LS
+C 1 deviceId string um
+C 2 a2LsState sint32 um
+M DSIUPNPBaseMsg.UBsetRSEState
+C 1 rseState sint32 um
+M DSIUPNPBaseMsg.UBsyncPlayback
+C 1 deviceID string um
+M DSIUPNPBaseMsg.UBstopSyncedPlayback
+C 1 deviceID string um
+M DSIUPNPBaseMsg.UBremoveKnownDevice
+C 1 deviceID string um
+M DSIUPNPBrowserListenerMsg.UBRLupdateBrowseFolder
+C 1 activeBrowsingFolder msg rep DSIUPNPDefinedClassesMsg.UListEntry
+C 2 validFlag sint32 um
+M DSIUPNPDefinedClassesMsg.UListEntry
+C 1 entryID string um
+C 2 filename string um
+C 3 title string um
+C 4 contentType sint32 um
+C 5 secLength sint32 um
+C 6 flags sint32 um
+C 7 dynamicImage msg um DSIUPNPDefinedClassesMsg.UResourceLocator
+M DSIUPNPDefinedClassesMsg.UResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIUPNPDefinedClassesMsg.UResourceCDNAccess
+M DSIUPNPDefinedClassesMsg.UResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIUPNPBrowserListenerMsg.UBRLupdateListSize
+C 1 listSizeCount sint32 um
+C 2 listSizeFlags sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPBrowserListenerMsg.UBRLresponseList
+C 1 entrylist msg rep DSIUPNPDefinedClassesMsg.UListEntry
+C 2 index sint32 um
+M DSIUPNPBrowserMsg.UBRsetNotification
+C 1 attributes sint32 rep
+M DSIUPNPBrowserMsg.UBRclearNotification
+C 1 attributes sint32 rep
+M DSIUPNPBrowserMsg.UBRchangeFolder
+C 1 folderpath msg rep DSIUPNPDefinedClassesMsg.UListEntry
+M DSIUPNPBrowserMsg.UBRrequestList
+C 1 entryID string um
+C 2 contentType sint32 um
+C 3 index sint32 um
+C 4 count sint32 um
+M DSIUPNPCamListenerMsg.UCLupdateStreamingState
+C 1 deviceID string um
+C 2 streamingState sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPCamListenerMsg.UCLupdateStillFrame
+C 1 deviceID string um
+C 2 stillFrame msg um DSIUPNPDefinedClassesMsg.UResourceLocator
+C 3 validFlag sint32 um
+M DSIUPNPCamMsg.UCsetNotification
+C 1 attributes sint32 rep
+M DSIUPNPCamMsg.UCclearNotification
+C 1 attributes sint32 rep
+M DSIUPNPCamMsg.UCsetDevice
+C 1 deviceId string um
+M DSIUPNPCamMsg.UCstopStream
+M DSIUPNPPlayerListenerMsg.UPLupdateDetailInfo
+C 1 deviceID string um
+C 2 entryInfo msg um DSIUPNPDefinedClassesMsg.UEntryInfo
+C 3 coverArt msg um DSIUPNPDefinedClassesMsg.UResourceLocator
+C 4 validFlag sint32 um
+M DSIUPNPDefinedClassesMsg.UEntryInfo
+C 1 entryID string um
+C 2 filename string um
+C 3 contentType sint32 um
+C 4 title string um
+C 5 trackNo sint64 um
+C 6 numTracks sint64 um
+C 7 album string um
+C 8 artist string um
+C 9 genre string um
+C 10 year string um
+C 11 comments string um
+C 12 avgBitrate sint64 um
+C 13 samplingrate sint64 um
+C 14 rating sint32 um
+C 15 flags sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdateDeviceList
+C 1 deviceList msg rep DSIUPNPDefinedClassesMsg.UDeviceInfo
+C 2 validFlag sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdatePlaybackMode
+C 1 deviceId string um
+C 2 playbackMode sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdatePlaybackModeList
+C 1 deviceId string um
+C 2 playbackModeList msg rep DSIUPNPDefinedClassesMsg.UPlaybackMode
+C 3 validFlag sint32 um
+M DSIUPNPDefinedClassesMsg.UPlaybackMode
+C 1 modeID sint32 um
+C 2 scope sint32 um
+C 3 modeFlag sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdatePlaybackState
+C 1 deviceId string um
+C 2 playbackState sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdatePlayPosition
+C 1 deviceID string um
+C 2 entryID string um
+C 3 timePosition sint32 um
+C 4 totalPlayTime sint32 um
+C 5 validFlag sint32 um
+M DSIUPNPPlayerListenerMsg.UPLupdateVolume
+C 1 deviceID string um
+C 2 volume sint32 um
+C 3 validFlag sint32 um
+M DSIUPNPPlayerMsg.UPsetNotification
+C 1 attributes sint32 rep
+M DSIUPNPPlayerMsg.UPclearNotification
+C 1 attributes sint32 rep
+M DSIUPNPPlayerMsg.UPsetPlaybackMode
+C 1 deviceId string um
+C 2 modeID sint32 um
+M DSIUPNPPlayerMsg.UPsetEntry
+C 1 deviceId string rep
+C 2 entryID string um
+C 3 path msg rep DSIUPNPDefinedClassesMsg.UListEntry
+C 4 timePosition sint32 um
+M DSIUPNPPlayerMsg.UPresume
+C 1 deviceId string um
+M DSIUPNPPlayerMsg.UPpause
+C 1 deviceId string um
+M DSIUPNPPlayerMsg.UPskip
+C 1 deviceId string um
+C 2 skipMode sint32 um
+C 3 count sint32 um
+M DSIUPNPPlayerMsg.UPseek
+C 1 deviceId string um
+C 2 seekdirection sint32 um
+C 3 playbackRate sint32 um
+M DSIUPNPPlayerMsg.UPincreaseVolume
+C 1 deviceId string um
+M DSIUPNPPlayerMsg.UPdecreaseVolume
+C 1 deviceId string um
+M DSIUPNPPlayerMsg.UPsetVolume
+C 1 deviceId string um
+C 2 volume sint32 um
+M DSIFileBrowserListenerMsg.FBLupdateMountPoints
+C 1 mountPoints msg rep DSIFileBrowserDefinedClasses.FMountPoint
+C 2 validFlag sint32 um
+M DSIFileBrowserDefinedClasses.FMountPoint
+C 1 mountPoint string um
+C 2 name string um
+C 3 sourceType sint32 um
+C 4 slot sint32 um
+M DSIFileBrowserListenerMsg.FBLstartResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 path msg um DSIFileBrowserDefinedClasses.FPath
+M DSIFileBrowserDefinedClasses.FPath
+C 1 mountPoint string um
+C 2 folderNames string rep
+M DSIFileBrowserListenerMsg.FBLgetViewWindowResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 offset sint32 um
+C 4 files msg um DSIFileBrowserDefinedClasses.FBrowsedFileSet
+C 5 totalEntryCount sint32 um
+M DSIFileBrowserDefinedClasses.FBrowsedFileSet
+C 1 path msg um DSIFileBrowserDefinedClasses.FPath
+C 2 files msg rep DSIFileBrowserDefinedClasses.FBrowsedFile
+M DSIFileBrowserDefinedClasses.FBrowsedFile
+C 1 id sint64 um
+C 2 selected bool um
+C 3 filename string um
+C 4 fileType sint32 um
+C 5 fileSize sint64 um
+M DSIFileBrowserListenerMsg.FBLgetSelectedFilesResult
+C 1 handle sint32 um
+C 2 newSelectionHandle sint32 um
+C 3 success sint32 um
+M DSIFileBrowserListenerMsg.FBLchangeFolderResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 newPath msg um DSIFileBrowserDefinedClasses.FPath
+M DSIFileBrowserListenerMsg.FBLspellerResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 uniqueChars string um
+C 4 validChars string um
+M DSIFileBrowserListenerMsg.FBLgetResourceLocatorsResult
+C 1 callerID sint32 um
+C 2 success sint32 um
+C 3 rls msg rep DSIFileBrowserDefinedClasses.FResourceLocator
+M DSIFileBrowserDefinedClasses.FResourceLocator
+C 1 id int32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIFileBrowserDefinedClasses.FResourceCDNAccess
+M DSIFileBrowserDefinedClasses.FResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort int32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort int32 um
+C 5 imageResourcePath string um
+M DSIFileBrowserListenerMsg.FBLgetFileCountResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 fileCount sint32 um
+M DSIFileBrowserListenerMsg.FBLsetFileExtensionFilterResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+M DSIFileBrowserListenerMsg.FBLsetFileTypeFilterResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+M DSIFileBrowserListenerMsg.FBLgetResourceLocatorWindowResult
+C 1 handle sint32 um
+C 2 success sint32 um
+C 3 offset sint32 um
+C 4 rls msg rep DSIFileBrowserDefinedClasses.FResourceLocator
+C 5 totalEntryCount sint32 um
+M DSIFileBrowserListenerMsg.FBLsetLanguageResult
+C 1 success sint32 um
+C 2 language string um
+M DSIFileBrowserListenerMsg.FBLsetFileTypeActiveResult
+C 1 success sint32 um
+M DSIFileBrowserListenerMsg.FBLgetFileCountWithFileTypeFilterResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 fileTypes sint32 um
+C 4 fileCount sint32 um
+M DSIFileBrowserListenerMsg.FBLvalidateSpellerCharsResult
+C 1 success sint32 um
+C 2 sessionHandle sint32 um
+C 3 testedChars string um
+C 4 validChars string um
+M DSIFileBrowserListenerMsg.FBLgetViewWindowWithPreviewsResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 offset sint32 um
+C 4 files msg um DSIFileBrowserDefinedClasses.FBrowsedFileSet
+C 5 previewInfo msg rep DSIFileBrowserDefinedClasses.FPreviewInfo
+C 6 totalEntryCount sint32 um
+M DSIFileBrowserDefinedClasses.FPreviewInfo
+C 1 previewRL msg um DSIFileBrowserDefinedClasses.FResourceLocator
+C 2 utcTimestampCreatedOn sint64 um
+C 3 gpsInfo msg um DSIFileBrowserDefinedClasses.FGPSInfo
+C 4 headline string um
+C 5 imageDescription string um
+C 6 copyright string um
+M DSIFileBrowserDefinedClasses.FGPSInfo
+C 1 latitudeDecimalDegrees float um
+C 2 longitudeDecimalDegrees float um
+C 3 altitudeMetersAboveSeaLevel float um
+M DSIFileBrowserListenerMsg.FBLcreatePreviewImageResult
+C 1 sourceFile msg um DSIFileBrowserDefinedClasses.FResourceLocator
+C 2 previewImage msg um DSIFileBrowserDefinedClasses.FResourceLocator
+C 3 success sint32 um
+M DSIFileBrowserListenerMsg.FBLcancelPreviewCreationResult
+C 1 success sint32 um
+M DSIFileBrowserListenerMsg.FBLindicateSelectionResult
+C 1 sessionHandle sint32 um
+C 2 success sint32 um
+C 3 selectedFileCount sint32 um
+M DSIFileBrowserMsg.FBsetNotificationFileBrowser
+C 1 attributes sint32 rep
+M DSIFileBrowserMsg.FBclearNotificationFileBrowser
+C 1 attributes sint32 rep
+M DSIFileBrowserMsg.FBstart
+C 1 path msg um DSIFileBrowserDefinedClasses.FPath
+M DSIFileBrowserMsg.FBsetFileExtensionFilter
+C 1 sessionHandle sint32 um
+C 2 allowedFileExtensions string rep
+M DSIFileBrowserMsg.FBsetFileTypeFilter
+C 1 sessionHandle sint32 um
+C 2 allowedFileTypes sint32 um
+M DSIFileBrowserMsg.FBstopFileBrowser
+C 1 handle sint32 um
+M DSIFileBrowserMsg.FBgetViewWindow
+C 1 sessionHandle sint32 um
+C 2 windowSize sint32 um
+C 3 offset sint32 um
+M DSIFileBrowserMsg.FBgetViewWindowWithPreviews
+C 1 sessionHandle sint32 um
+C 2 windowSize sint32 um
+C 3 offset sint32 um
+M DSIFileBrowserMsg.FBgetViewWindowFromFile
+C 1 sessionHandle sint32 um
+C 2 windowSize sint32 um
+C 3 f msg um DSIFileBrowserDefinedClasses.FBrowsedFile
+C 4 numFilesBeforeWanted sint32 um
+M DSIFileBrowserMsg.FBgetResourceLocatorWindow
+C 1 handle sint32 um
+C 2 windowSize sint32 um
+C 3 offset sint32 um
+M DSIFileBrowserMsg.FBgetSelectedFiles
+C 1 sessionHandle sint32 um
+M DSIFileBrowserMsg.FBgetResourceLocators
+C 1 callerID sint32 um
+C 2 files msg um DSIFileBrowserDefinedClasses.FBrowsedFileSet
+M DSIFileBrowserMsg.FBgetFileCount
+C 1 sessionHandle sint32 um
+M DSIFileBrowserMsg.FBgetFileCountWithFileTypeFilter
+C 1 sessionHandle sint32 um
+C 2 fileTypes sint32 um
+M DSIFileBrowserMsg.FBsetSelectionSingle
+C 1 sessionHandle sint32 um
+C 2 f msg um DSIFileBrowserDefinedClasses.FBrowsedFile
+C 3 selected bool um
+M DSIFileBrowserMsg.FBsetSelection
+C 1 sessionHandle sint32 um
+C 2 selectionType sint32 um
+M DSIFileBrowserMsg.FBchangeFolderFileBrowser
+C 1 sessionHandle sint32 um
+C 2 path msg um DSIFileBrowserDefinedClasses.FPath
+M DSIFileBrowserMsg.FBsetLanguage
+C 1 language string um
+M DSIFileBrowserMsg.FBstartSpeller
+C 1 sessionHandle sint32 um
+C 2 windowSize sint32 um
+M DSIFileBrowserMsg.FBaddSpellerChars
+C 1 sessionHandle sint32 um
+C 2 spellerChars string um
+M DSIFileBrowserMsg.FBremoveSpellerChar
+C 1 sessionHandle sint32 um
+M DSIFileBrowserMsg.FBstopSpeller
+C 1 sessionHandle sint32 um
+M DSIFileBrowserMsg.FBsetFileTypeActive
+C 1 active bool um
+M DSIFileBrowserMsg.FBvalidateSpellerChars
+C 1 sessionHandle sint32 um
+C 2 searchChars string um
+M DSIFileBrowserMsg.FBdeleteAllPreviewFiles
+M DSIFileBrowserMsg.FBcreatePreviewImage
+C 1 sourceFile msg um DSIFileBrowserDefinedClasses.FResourceLocator
+C 2 desiredWidth sint32 um
+C 3 desiredHeight sint32 um
+M DSIFileBrowserMsg.FBcancelPreviewCreation
+M DSISearchListenerMsg.updateSearchIsActive
+C 1 queryId sint32 um
+C 2 isActive bool um
+C 3 validFlag sint32 um
+M DSISearchListenerMsg.updatePotentialConflict
+C 1 queryId sint32 um
+C 2 isConflict bool um
+C 3 conflictMatch msg um DSISearchListenerMsg.updatePotentialConflict_ConflictMatch
+C 4 validFlag sint32 um
+M DSISearchListenerMsg.updatePotentialConflict_ConflictMatch
+C 1 token msg um DSISearchListenerMsg.Token
+C 2 country msg um DSISearchListenerMsg.Country
+C 3 type sint32 um
+M DSISearchListenerMsg.Token
+C 1 wordType sint32 um
+C 2 token string um
+C 3 highlights msg rep DSISearchListenerMsg.Highlight
+C 4 externalType sint32 um
+M DSISearchListenerMsg.Highlight
+C 1 highlightStart sint32 um
+C 2 highlightEnd sint32 um
+C 3 type sint32 um
+C 4 needleIndex sint32 um
+M DSISearchListenerMsg.Country
+C 1 countryID sint32 um
+C 2 name string um
+C 3 code string um
+C 4 houseNumberFormatting sint32 um
+C 5 stateName string um
+C 6 stateAbbreviation string um
+M DSISearchListenerMsg.updateProfileState
+C 1 state sint32 um
+C 2 profile sint32 um
+C 3 validFlag sint32 um
+M DSISearchListenerMsg.requestSupportedCountriesResult
+C 1 success sint32 um
+C 2 countries msg rep DSISearchListenerMsg.requestSupportedCountriesResult_Country
+M DSISearchListenerMsg.requestSupportedCountriesResult_Country
+C 1 countryID sint32 um
+C 2 name string um
+C 3 code string um
+C 4 houseNumberFormatting sint32 um
+C 5 stateName string um
+C 6 stateAbbreviation string um
+M DSISearchListenerMsg.searchResult
+C 1 success sint32 um
+C 2 searchResult msg um DSISearchListenerMsg.searchResult_SearchResult
+M DSISearchListenerMsg.searchResult_SearchResult
+C 1 queryId sint32 um
+C 2 source sint32 um
+C 3 listPosition sint32 um
+C 4 entryType sint32 um
+C 5 entryFlags sint32 um
+C 6 poiType sint32 um
+C 7 iconID sint32 um
+C 8 position msg um DSISearchListenerMsg.NavPosition
+C 9 distanceMeters sint32 um
+C 10 dataId sint64 um
+C 11 tokens msg rep DSISearchListenerMsg.Token
+C 12 suggestion msg um DSISearchListenerMsg.Suggestion
+C 13 suggestions msg rep DSISearchListenerMsg.Suggestion
+C 14 country msg um DSISearchListenerMsg.Country
+C 15 applicationData sint32 rep
+C 16 supplementalId sint64 um
+C 17 additionalListPositions msg rep DSISearchListenerMsg.ListPosition
+C 18 coveredNeedleIndexes sint32 rep
+C 19 numAddresses sint32 um
+C 20 numTelnumbers sint32 um
+C 21 numEMailAddresses sint32 um
+C 22 supplementalProviderName string um
+C 23 categoryIds sint32 rep
+M DSISearchListenerMsg.NavPosition
+C 1 lat float um
+C 2 lon float um
+M DSISearchListenerMsg.Suggestion
+C 1 query string um
+C 2 suggestion string um
+C 3 fullSuggestion string um
+C 4 rank sint32 um
+C 5 needleIndex sint32 um
+C 6 keywordTriggered bool um
+C 7 categoryId sint32 um
+M DSISearchListenerMsg.ListPosition
+C 1 sortCriteriaID sint32 um
+C 2 listPosition sint32 um
+M DSISearchListenerMsg.addToHistoryResult
+C 1 success sint32 um
+M DSISearchListenerMsg.cancelQueryResult
+C 1 queryId sint32 um
+C 2 success sint32 um
+M DSISearchListenerMsg.setCurrentPositionResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setRoutePointsResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setLanguageResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setCarFunctionStatesResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setRadioStationsResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchListenerMsg.setActiveProfileResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setActiveSearchCountriesResult
+C 1 success sint32 um
+M DSISearchListenerMsg.resetToFactorySettingsResult
+C 1 success sint32 um
+M DSISearchListenerMsg.prepareSourcesResult
+C 1 success sint32 um
+M DSISearchListenerMsg.setSearchFilterResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchListenerMsg.removeFromHistoryResult
+C 1 success sint32 um
+M DSISearchListenerMsg.resetAutocompletionResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchListenerMsg.removeAllFromHistoryResult
+C 1 success sint32 um
+M DSISearchListenerMsg.createBackupFileResult
+C 1 success sint32 um
+C 2 fullPath string um
+M DSISearchListenerMsg.importBackupFileResult
+C 1 success sint32 um
+C 2 fullPath string um
+M DSISearchListenerMsg.setEnvironmentResult
+C 1 success sint32 um
+M DSISearchListenerMsg.requestSuggestionResult
+C 1 success sint32 um
+C 2 queryID sint32 um
+C 3 suggestions msg rep DSISearchListenerMsg.requestSuggestionResult_Suggestion
+M DSISearchListenerMsg.requestSuggestionResult_Suggestion
+C 1 query string um
+C 2 suggestion string um
+C 3 fullSuggestion string um
+C 4 rank sint32 um
+C 5 needleIndex sint32 um
+C 6 keywordTriggered bool um
+C 7 categoryId sint32 um
+M DSISearchListenerMsg.removeAllFromHistoryBySourceResult
+C 1 success sint32 um
+M DSISearchListenerMsg.profileChanged
+C 1 profile sint32 um
+C 2 result sint32 um
+M DSISearchListenerMsg.profileCopied
+C 1 fromProfile sint32 um
+C 2 toProfile sint32 um
+C 3 result sint32 um
+M DSISearchListenerMsg.profileReset
+C 1 profile sint32 um
+C 2 result sint32 um
+M DSISearchListenerMsg.profileResetAll
+C 1 result sint32 um
+M DSISearchListenerMsg.invalidateData
+C 1 sources sint32 rep
+M DSISearchListenerMsg.sourceDataAvailabilityChanged
+C 1 source sint32 um
+C 2 dataAvailable bool um
+M DSISearchMsg.setNotification
+C 1 attributes sint32 rep
+M DSISearchMsg.clearNotification
+C 1 attributes sint32 rep
+M DSISearchMsg.requestSupportedCountries
+M DSISearchMsg.setActiveSearchCountries
+C 1 countryCodes string rep
+M DSISearchMsg.search
+C 1 query msg um DSISearchMsg.search_SearchQuery
+M DSISearchMsg.search_SearchQuery
+C 1 queryId sint32 um
+C 2 sources sint32 rep
+C 3 needle string um
+C 4 alternativeNeedles string rep
+C 5 offset sint32 um
+C 6 count sint32 um
+C 7 conflictMode bool um
+C 8 conflictModeTypes sint32 um
+C 9 matchingMode sint32 um
+C 10 maxCountPerSource sint32 rep
+C 11 withOnlineResults bool um
+C 12 maxDistanceMeters sint32 um
+C 13 sortCriteria sint32 um
+M DSISearchMsg.addToHistory
+C 1 entry msg um DSISearchMsg.addToHistory_SearchResult
+M DSISearchMsg.addToHistory_SearchResult
+C 1 queryId sint32 um
+C 2 source sint32 um
+C 3 listPosition sint32 um
+C 4 entryType sint32 um
+C 5 entryFlags sint32 um
+C 6 poiType sint32 um
+C 7 iconID sint32 um
+C 8 position msg um DSISearchMsg.NavPosition
+C 9 distanceMeters sint32 um
+C 10 dataId sint64 um
+C 11 tokens msg rep DSISearchMsg.Token
+C 12 suggestion msg um DSISearchMsg.Suggestion
+C 13 suggestions msg rep DSISearchMsg.Suggestion
+C 14 country msg um DSISearchMsg.Country
+C 15 applicationData sint32 rep
+C 16 supplementalId sint64 um
+C 17 additionalListPositions msg rep DSISearchMsg.ListPosition
+C 18 coveredNeedleIndexes sint32 rep
+C 19 numAddresses sint32 um
+C 20 numTelnumbers sint32 um
+C 21 numEMailAddresses sint32 um
+C 22 supplementalProviderName string um
+C 23 categoryIds sint32 rep
+M DSISearchMsg.NavPosition
+C 1 lat float um
+C 2 lon float um
+M DSISearchMsg.Token
+C 1 wordType sint32 um
+C 2 token string um
+C 3 highlights msg rep DSISearchMsg.Highlight
+C 4 externalType sint32 um
+M DSISearchMsg.Highlight
+C 1 highlightStart sint32 um
+C 2 highlightEnd sint32 um
+C 3 type sint32 um
+C 4 needleIndex sint32 um
+M DSISearchMsg.Suggestion
+C 1 query string um
+C 2 suggestion string um
+C 3 fullSuggestion string um
+C 4 rank sint32 um
+C 5 needleIndex sint32 um
+C 6 keywordTriggered bool um
+C 7 categoryId sint32 um
+M DSISearchMsg.Country
+C 1 countryID sint32 um
+C 2 name string um
+C 3 code string um
+C 4 houseNumberFormatting sint32 um
+C 5 stateName string um
+C 6 stateAbbreviation string um
+M DSISearchMsg.ListPosition
+C 1 sortCriteriaID sint32 um
+C 2 listPosition sint32 um
+M DSISearchMsg.requestSuggestion
+C 1 query msg um DSISearchMsg.requestSuggestion_SearchQuery
+M DSISearchMsg.requestSuggestion_SearchQuery
+C 1 queryId sint32 um
+C 2 sources sint32 rep
+C 3 needle string um
+C 4 alternativeNeedles string rep
+C 5 offset sint32 um
+C 6 count sint32 um
+C 7 conflictMode bool um
+C 8 conflictModeTypes sint32 um
+C 9 matchingMode sint32 um
+C 10 maxCountPerSource sint32 rep
+C 11 withOnlineResults bool um
+C 12 maxDistanceMeters sint32 um
+C 13 sortCriteria sint32 um
+M DSISearchMsg.cancelQuery
+C 1 queryId sint32 um
+M DSISearchMsg.setCurrentPosition
+C 1 pos msg um DSISearchMsg.setCurrentPosition_NavPosition
+M DSISearchMsg.setCurrentPosition_NavPosition
+C 1 lat float um
+C 2 lon float um
+M DSISearchMsg.setRoutePoints
+C 1 routePoints msg rep DSISearchMsg.setRoutePoints_NavPosition
+M DSISearchMsg.setRoutePoints_NavPosition
+C 1 lat float um
+C 2 lon float um
+M DSISearchMsg.setLanguage
+C 1 lang string um
+M DSISearchMsg.setActiveProfile
+C 1 profileNumber sint32 um
+M DSISearchMsg.setCarFunctionStates
+C 1 carfunctions msg rep DSISearchMsg.setCarFunctionStates_CarFunction
+M DSISearchMsg.setCarFunctionStates_CarFunction
+C 1 id sint32 um
+C 2 enabled bool um
+M DSISearchMsg.setRadioStations
+C 1 source sint32 um
+C 2 radioStations msg rep DSISearchMsg.setRadioStations_RadioStation
+M DSISearchMsg.setRadioStations_RadioStation
+C 1 id sint64 um
+C 2 data1 string um
+C 3 data2 string um
+C 4 data3 string um
+M DSISearchMsg.setSearchFilter
+C 1 source sint32 um
+C 2 searchFilter msg um DSISearchMsg.setSearchFilter_SearchFilter
+M DSISearchMsg.setSearchFilter_SearchFilter
+C 1 matchInTokens sint32 rep
+C 2 tokenBasedFilters msg rep DSISearchMsg.Token
+C 3 tokenBasedFiltersOperator sint32 um
+C 4 entryFlagMask sint32 um
+C 5 entryTypeFilter sint32 rep
+C 6 excludedTokenBasedFilters msg rep DSISearchMsg.Token
+C 7 excludedEntryFlagMask sint32 um
+C 8 excludedEntryTypeFilter sint32 rep
+C 9 fullResultsForFirstNeedleOnly bool um
+M DSISearchMsg.prepareSources
+C 1 sources sint32 rep
+M DSISearchMsg.resetToFactorySettings
+M DSISearchMsg.removeFromHistory
+C 1 id sint64 um
+M DSISearchMsg.removeAllFromHistory
+M DSISearchMsg.removeAllFromHistoryBySource
+C 1 source sint32 um
+M DSISearchMsg.resetAutocompletion
+C 1 source sint32 um
+M DSISearchMsg.createBackupFile
+C 1 path string um
+M DSISearchMsg.importBackupFile
+C 1 fullPath string um
+M DSISearchMsg.setEnvironment
+C 1 environment msg um DSISearchMsg.setEnvironment_Environment
+M DSISearchMsg.setEnvironment_Environment
+C 1 oem string um
+C 2 region string um
+C 3 countryCoding string um
+C 4 dealer string um
+M DSISearchMsg.profileChange
+C 1 profile sint32 um
+M DSISearchMsg.profileCopy
+C 1 fromProfile sint32 um
+C 2 toProfile sint32 um
+M DSISearchMsg.profileReset
+C 1 profile sint32 um
+M DSISearchMsg.profileResetAll
+M DSISearchDataProviderListenerMsg.registerProviderSourceResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchDataProviderListenerMsg.invalidateAllDataResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchDataProviderListenerMsg.storeDataSetsResult
+C 1 success sint32 um
+C 2 source sint32 um
+M DSISearchDataProviderListenerMsg.deleteDataSetResult
+C 1 success sint32 um
+C 2 source sint32 um
+C 3 dataSetId sint64 um
+M DSISearchDataProviderListenerMsg.activateProviderSource
+C 1 source sint32 um
+M DSISearchDataProviderListenerMsg.provideData
+C 1 source sint32 um
+C 2 offset sint32 um
+C 3 count sint32 um
+M DSISearchDataProviderMsg.setNotification
+C 1 attributes sint32 rep
+M DSISearchDataProviderMsg.clearNotification
+C 1 attributes sint32 rep
+M DSISearchDataProviderMsg.registerProviderSource
+C 1 source sint32 um
+M DSISearchDataProviderMsg.sourceDataAvailabilityChanged
+C 1 source sint32 um
+C 2 dataAvailable bool um
+M DSISearchDataProviderMsg.invalidateAllData
+C 1 source sint32 um
+M DSISearchDataProviderMsg.storeDataSets
+C 1 source sint32 um
+C 2 dataSets msg rep DSISearchDataProviderMsg.storeDataSets_DataSet
+C 3 totalCount sint32 um
+M DSISearchDataProviderMsg.storeDataSets_DataSet
+C 1 id sint64 um
+C 2 entryType sint32 um
+C 3 entryFlags sint32 um
+C 4 data msg rep DSISearchDataProviderMsg.Searchable
+C 5 supplementalId sint64 um
+C 6 categoryIds sint32 rep
+C 7 position msg um DSISearchDataProviderMsg.NavPosition
+C 8 supplementalProviderName string um
+M DSISearchDataProviderMsg.Searchable
+C 1 wordType sint32 um
+C 2 token string um
+C 3 tokenPostProcessing sint32 um
+C 4 phonetic bool um
+C 5 externalType sint32 um
+M DSISearchDataProviderMsg.NavPosition
+C 1 lat float um
+C 2 lon float um
+M DSISearchDataProviderMsg.storeRawDataSets
+C 1 source sint32 um
+C 2 dataSets msg rep DSISearchDataProviderMsg.storeRawDataSets_RawDataSet
+C 3 totalCount sint32 um
+M DSISearchDataProviderMsg.storeRawDataSets_RawDataSet
+C 1 id sint64 um
+C 2 entryType sint32 um
+C 3 entryFlags sint32 um
+C 4 data sint32 rep
+C 5 supplementalId sint64 um
+C 6 categoryIds sint32 rep
+M DSISearchDataProviderMsg.deleteDataSet
+C 1 source sint32 um
+C 2 dataSetId sint64 um

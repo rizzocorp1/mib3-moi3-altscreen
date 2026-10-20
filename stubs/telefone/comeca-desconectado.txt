@@ -1,0 +1,15 @@
+# comeca-desconectado.txt — o aparelho FICTÍCIO começa conhecido e NÃO conectado.
+# Item 7 do roteiro do simulador (12/10/2026). Estudo num computador; nada daqui vai para o carro.
+#
+# Vai DEPOIS dos outros dois, e só faz sentido com o telefone de mentira com modelo
+# (driver/telefonestub.c):
+#   TELEFONE="/stubs/telefone/sem-aparelho.txt /stubs/telefone/aparelho-conectado.txt /stubs/telefone/comeca-desconectado.txt"
+#
+# SIMULAÇÃO. Muda uma coisa só: na lista de aparelhos conhecidos o mãos-livres do aparelho fictício
+# sai como "suportado" (2 = SERVICESTATE_SUPPORTED), sem o bit de conectado. O modelo lê isso e
+# começa com o aparelho desconectado: a tecla Telefone abre a tela "Conecte o telefone celular…",
+# a barra do alto fica sem os ícones do aparelho, e "Selecionar celular" mostra o aparelho como um
+# botão. Tocar nele conecta (a tela passa à principal do telefone); desligar o Bluetooth pela tela
+# desconecta.
+[DSIPhoneManager.updateKnownDevices]
+knownDevices[0].serviceStateHFP = 2

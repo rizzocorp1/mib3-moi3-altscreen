@@ -1,0 +1,65 @@
+# stubs/codificacao/jetta-gli-2021.txt — o Jetta GLI 2021 do Lipe no simulador: o que se SABE.
+#
+# Só entra aqui valor LIDO do próprio carro. Desde 14/10/2026 o carro tem autoscan e a leitura do
+# módulo 5F (ODIS-Engineering 19.0.0 + VAS6154A, projeto VW37X): a codificação e as adaptações
+# abaixo são REAIS, do autoscan em carros/jetta-gli-2021/autoscans/5F-mib3-2026-10-14/
+# (arquivo 5F-codificacao-e-adaptacoes.tsv). Antes disso elas eram desconhecidas e os palpites
+# ficavam em jetta-gli-2021-deducoes.txt, agora APOSENTADO (16/10/2026: o autoscan confirmou todas
+# as deduções e trouxe os valores reais). Nome (ODIS) -> DID@byte.bit+bits pela tabela-campos.tsv.
+# É estudo no computador. Nada daqui vai para o carro.
+#
+# Desde 11/10/2026, por decisão do Lipe, o modo ao vivo (sh driver/ao_vivo.sh) já lê este arquivo.
+
+# --- Identificação: tela "Informações do sistema" (ficha + autoscan, seção "Identificação 001") -
+# Part number 3G5035832C, HW H56, SW 0803 — batem com o autoscan de 14/10.
+F187 = 33 47 35 30 33 35 38 33 32 43 20      # "3G5035832C "  ID_VW_SPARE_PART_NUMBER
+F189 = 30 38 30 33                           # "0803"         ID_VW_APPLICATION_SOFTWARE_VERSION_NUMBER
+F1A3 = 48 35 36                              # "H56"          ID_VW_ECU_HARDWARE_VERSION_NUMBER
+
+# --- Codificação da unidade 5F (25 bytes), LIDA DO CARRO em 14/10/2026 --------------------------
+# Autoscan, seção "Codificação (25 bytes)". Byte0=23, Byte1=71 -> marca VW, classe A, geração 7,
+# carroceria sedã; Byte5=02 -> power stage 1 (versão esportiva; linha do título e barra de rolagem
+# em vermelho). Confirma todas as deduções anteriores de tipo de veículo e de cor de destaque.
+0600 = 23 71 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+# --- Adaptações do 5F, LIDAS DO CARRO em 14/10/2026 ---------------------------------------------
+
+# Navegação: ligada, região MSA (América do Sul / Mercosul).
+0558 @1.7+1 = 1      # ID_NAVIGATION_SYSTEM = active ("Navigation_System [VN]_active")
+0558 @0.0+8 = 3      # ID_COUNTRY_NAVIGATION = MSA (0x03) ("Country_Navigation [VO]_MSA")
+
+# Mapa no cluster por IP: é o coding que liga o stream do mapa para o painel (a nossa cluster-map).
+0B5A @0.0+8 = 1      # ID_NAVIGATION_MAP_TRANSMISSION_MODE = IP Streaming (0x01)
+
+# Rádio: faixa de FM do Brasil (confirma a dedução anterior).
+0559 @1.4+4 = 6      # ID_BAND_SETTINGS_FM_TUNER = Brasil ("band_settings_fm_tuner [VO]_BRA")
+# AM no autoscan = NAR; o numérico do campo AM (0559 @2.4+4) não foi mapeado aqui — a HMI usa o
+# padrão. Conferir o código de AM se a tela do rádio AM for montada.
+
+# App-Connect: CarPlay e Android Auto, os DOIS ligados no carro.
+0555 @1.2+2 = 1      # ID_APPLE_DIO: CarPlay on ("apple_car_play [VN]_on"). A HMI só olha se é != 0;
+                     # o valor cru exato (1 ou 2) o autoscan não dá no modo por nome.
+0555 @1.4+2 = 1      # ID_GOOGLE_ANDROID_AUTO: on ("google_android_auto [VN]_on"). CORRIGE a dedução
+                     # anterior, que o deixava em 0 porque a foto não o mostrava.
+
+# País de mídia (Verkaufsland): Brasil.
+0B49 = 42 52         # ID_MEDIA_COUNTRY_CODE_MULTIMEDIA = "BR" (ASCII). Autoscan: Media_Country_Code
+                     # = BR. Encoding como ASCII de 2 letras (convenção); o cru não foi reconferido.
+
+# Menus do carro (DID 0B1B, bit 7 "Menu display") — os quatro activated no autoscan.
+0B1B @10.7+1 = 1     # ID_DISPLAY_BOARD_COMPUTER: Board computer menu display (activated)
+0B1B @13.7+1 = 1     # ID_DISPLAY_SIA: Service interval menu display (activated)
+0B1B @20.7+1 = 1     # ID_DISPLAY_CLOCK: Clock menu display (activated)
+0B1B @23.7+1 = 1     # ID_DISPLAY_CENTRAL_UNIT_MASTER: Central unit master menu display (activated)
+
+# Aparelhos da rede do carro (DID 0B1D, "Availability") — os quatro activated no autoscan.
+0B1D @15.6+2 = 1     # ID_MFA_0X0F: Board computer / MFA (0x0F) (activated)
+0B1D @17.6+2 = 1     # ID_CLOCK_0X11: Clock (0x11) (activated)
+0B1D @18.6+2 = 1     # ID_SERVICE_INTERVAL_DISPLAY_0X12: Service interval display (0x12) (activated)
+0B1D @19.6+2 = 1     # ID_UNIT_MASTER_0X13: Unit master (0x13) (activated)
+
+# --- NÃO ligados no carro (autoscan): ficam no padrão (0), não setar ----------------------------
+# Lane Assist / LDW (0B1D @25.6 ID_LDW_HCA_0X19) e reconhecimento de placas (0B1D @33.6
+# ID_TRAFFIC_SIGN_RECOGNITION_0X21) = not_activated (CAN_Extended); os menus de Lane Departure e
+# lane_assistant = not_activated. Confere com o carro não ter Lane Assist ativo (projeto 01).
+# TPEG (0558 @1.1 ID_TPEG_AVAILABILITY) = off. TV tuner (0x2C) = not_activated.

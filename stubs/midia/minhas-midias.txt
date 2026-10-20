@@ -1,0 +1,110 @@
+# minhas-midias.txt — perfil da mídia de mentira (Marco 15, 12/10/2026).
+# SIMULAÇÃO do começo ao fim: nenhum valor daqui foi lido do carro, de um pendrive ou de um celular.
+# Não há aparelho, não há arquivo de música e não sai som. As faixas são inventadas, e os nomes
+# dizem "TESTE" para ninguém as tomar por músicas de verdade.
+# Formato: o do carro de mentira (stubs/veiculo/README.md), com os nomes do gerado/esquema.txt
+# desta pasta. O que cada seção faz e o que a HMI espera estão no README.md desta pasta.
+
+# Os pedidos set… que o motor atende sozinho, pela regra do esquema: o idioma da base
+# (setPreferredLanguage) e a mídia e o modo do navegador (setBrowseMedia, setBrowseMode). Os do
+# tocador e os outros do navegador quem atende é o modelo (driver/midiastub.c).
+grava = DSIMediaBase DSIMediaBrowser
+
+# --- A fonte --------------------------------------------------------------------------------------
+# SIMULAÇÃO. Um aparelho do tipo 0 (DEVICETYPE_JUKEBOX), que a tela chama de "Minhas mídias". É um
+# dos cinco tipos que esta HMI aceita como fonte de mídia (0, 4, 8, 10 e 15: DeviceFilter.MEDIA);
+# pendrive (tipo 2) e cartão (tipo 1) ela não põe na lista "Fontes". Sem aparelho nenhum a HMI nem
+# liga as fontes, e a tela fica no aviso "função indisponível".
+[DSIMediaBase.MBLupdateDeviceList]
+deviceList[0].deviceID = 1
+deviceList[0].deviceType = 0
+deviceList[0].numSlots = 1
+
+# SIMULAÇÃO. A mídia desse aparelho: tipo 7 (MEDIATYPE_FILESYSTEM, arquivos), sem marca de erro.
+[DSIMediaBase.MBLupdateMediaList]
+mediaList[0].deviceID = 1
+mediaList[0].mediaID = 11
+mediaList[0].mediaType = 7
+mediaList[0].name = "MÍDIAS DE TESTE"
+mediaList[0].uniqueMediaID = "SIMULACAO-0001"
+mediaList[0].mediaCaps.contentBrowser = 1
+mediaList[0].mediaCaps.rawBrowser = 1
+mediaList[0].mediaCaps.playbackModes = 1
+
+# --- O tocador ------------------------------------------------------------------------------------
+# SIMULAÇÃO. O que o tocador diz saber fazer. Com detailInfos a HMI pede os dados de cada faixa.
+[DSIMediaPlayer.MPLupdateCapabilities]
+capabilities.browseWhilePlay = 1
+capabilities.detailInfos = 1
+capabilities.pause = 1
+capabilities.play = 1
+capabilities.playbackModes = 1
+capabilities.playTime = 1
+capabilities.resume = 1
+capabilities.setEntry = 1
+capabilities.skipBwd = 1
+capabilities.skipFwd = 1
+capabilities.stop = 1
+capabilities.totalPlaytime = 1
+
+# SIMULAÇÃO. Um modo de reprodução só, sem repetição nem ordem aleatória: os botões de repetir e
+# de embaralhar aparecem e não mudam nada.
+[DSIMediaPlayer.MPLupdatePlaybackModeList]
+playbackModeList[0].modeID = 1
+
+[DSIMediaPlayer.MPLupdatePlaybackMode]
+playbackMode = 1
+
+# --- A pasta e as faixas --------------------------------------------------------------------------
+# SIMULAÇÃO. Há uma pasta só. contentType 4 = CONTENTTYPE_FOLDER.
+[DSIMediaBrowser.MBRLupdateBrowseFolder]
+activeBrowsingFolder[0].entryID = 1
+activeBrowsingFolder[0].filename = "/"
+activeBrowsingFolder[0].title = "MÍDIAS DE TESTE"
+activeBrowsingFolder[0].contentType = 4
+
+# SIMULAÇÃO. As faixas da pasta, na ordem em que a lista as mostra. entryID é o número pelo qual a
+# HMI pede a faixa e tem de ser diferente em cada uma; contentType 1 = CONTENTTYPE_AUDIO; secLength
+# é a duração em segundos. Artista e álbum vão em extInfo.
+[DSIMediaBrowser.MBRLresponseList]
+entrylist[0].entryID = 101
+entrylist[0].filename = "faixa-de-teste-1.mp3"
+entrylist[0].title = "FAIXA DE TESTE 1"
+entrylist[0].contentType = 1
+entrylist[0].secLength = 180
+entrylist[0].extInfo.artist = "ARTISTA DE TESTE"
+entrylist[0].extInfo.album = "ÁLBUM DE TESTE"
+entrylist[1].entryID = 102
+entrylist[1].filename = "faixa-de-teste-2.mp3"
+entrylist[1].title = "FAIXA DE TESTE 2"
+entrylist[1].contentType = 1
+entrylist[1].secLength = 200
+entrylist[1].extInfo.artist = "ARTISTA DE TESTE"
+entrylist[1].extInfo.album = "ÁLBUM DE TESTE"
+entrylist[2].entryID = 103
+entrylist[2].filename = "faixa-de-teste-3.mp3"
+entrylist[2].title = "FAIXA DE TESTE 3"
+entrylist[2].contentType = 1
+entrylist[2].secLength = 240
+entrylist[2].extInfo.artist = "ARTISTA DE TESTE"
+entrylist[2].extInfo.album = "ÁLBUM DE TESTE"
+entrylist[3].entryID = 104
+entrylist[3].filename = "faixa-de-teste-4.mp3"
+entrylist[3].title = "FAIXA DE TESTE 4"
+entrylist[3].contentType = 1
+entrylist[3].secLength = 150
+entrylist[3].extInfo.artist = "OUTRO ARTISTA DE TESTE"
+entrylist[3].extInfo.album = "OUTRO ÁLBUM DE TESTE"
+entrylist[4].entryID = 105
+entrylist[4].filename = "faixa-de-teste-5.mp3"
+entrylist[4].title = "FAIXA DE TESTE 5"
+entrylist[4].contentType = 1
+entrylist[4].secLength = 210
+entrylist[4].extInfo.artist = "OUTRO ARTISTA DE TESTE"
+entrylist[4].extInfo.album = "OUTRO ÁLBUM DE TESTE"
+
+# --- O navegador de arquivos ----------------------------------------------------------------------
+# As duas respostas que a HMI espera do DSIFileBrowser na partida (idioma e tipo de arquivo), em
+# até 10 s cada. As seções vão vazias: a resposta devolve o que veio no pedido.
+[DSIFileBrowser.FBLsetLanguageResult]
+[DSIFileBrowser.FBLsetFileTypeActiveResult]

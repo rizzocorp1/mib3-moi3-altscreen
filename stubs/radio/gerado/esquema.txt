@@ -1,0 +1,703 @@
+# Esquema dos serviços DSI do sintonizador da HMI do MOI3 (firmware MU0883, HMI H40.272.304).
+# GERADO por driver/m8_esquema.sh (driver/LeEsquemaDSI.java) a partir das classes do próprio
+# firmware, na JVM dele. Não editar à mão. Estudo num computador; nada daqui vai para o carro.
+#
+# Uma coisa por linha, campos separados por espaço:
+#   S <serviço> <domínio> <interface de pedidos> <interface de eventos> <pacote da LG>
+#   W <domínio> <interface org.dsi.ifc> <instância> <atraso em ms>   serviço que a HMI liga ao receber o anúncio (interface 9000)
+#   A <serviço> <número> <constante ATTR_>                          atributo que a HMI pode assinar
+#   E <serviço> <api> <atributo ou -> <entrega ou -> <evento> <mensagem ou ->
+#        mensagem que o serviço manda. Com atributo, é a atualização dele (a api tem o mesmo número).
+#        entrega: o número com que a HMI procura os ouvintes; quando difere do atributo, a
+#        atualização só chega a quem também assinou esse outro (é assim no firmware).
+#   P <serviço> <api> <método> <mensagem ou ->                      pedido que a HMI manda (9999 assina atributos, 9998 desassina)
+#   R <serviço> <api do pedido> <tipo> <prazo em ms> <api da resposta ou -> <método do ouvinte>
+#        pedido de que a HMI espera resposta, pela tabela do proxy DSI dela (Cfg.PT e Cfg.U). Uma linha
+#        por resposta possível. tipo: uma = uma resposta só; escolha = uma dentre as listadas;
+#        sequencia = todas; complexa = quem decide é um analisador da HMI. prazo: quanto ela espera antes
+#        de registrar "DSI timeout occurred" (-1 = sem prazo). "-" = nenhuma api da camada da LG chama o método.
+#   G <serviço> <api do pedido> <api do evento> <regra> <campo do pedido> <campo do evento>
+#        o que o pedido set<X> grava no atributo de nome <X>, campo a campo. DEDUÇÃO do gerador: o firmware
+#        não traz essa ligação. regra posicao = os campos do pedido são os do evento, número a número e
+#        tipo a tipo, fora o validFlag; regra nomes = cada campo do pedido tem um só campo de mesmo nome e
+#        tipo no evento (é a menos segura: conferir antes de ligar o serviço em "grava").
+#   X <serviço> <api do pedido> <api da resposta> <campo do pedido> <campo da resposta>
+#        o que a resposta devolve do pedido: campos de mesmo caminho e tipo nas duas mensagens. DEDUÇÃO.
+#   M <mensagem>                                                    mensagem protobuf; seguem os campos dela
+#   C <número> <nome> <tipo> <um|rep|pac> [<mensagem do campo>]      campo da mensagem da linha M de cima
+#        tipo: sint32 e sint64 vão em zigue-zague; int32, int64, uint32 e enum, em varint comum;
+#        fixed32, fixed64, bool, float, double, string, bytes; msg é outra mensagem.
+#        um = campo simples; rep = repetido, um por vez; pac = repetido empacotado.
+# No barramento: [canal:8][interface:4][instância:4][api:4][protobuf]. O canal é o remetente:
+# os eventos saem com o domínio do serviço; os pedidos da HMI, com 0x8000.
+S DSIUnifiedTuner 70368744177664 400 401 radio
+A DSIUnifiedTuner 1 ATTR_DETECTEDDEVICE
+A DSIUnifiedTuner 2 ATTR_AUDIOSTATUS
+A DSIUnifiedTuner 3 ATTR_SELECTEDSTATION
+A DSIUnifiedTuner 4 ATTR_STATIONLIST
+A DSIUnifiedTuner 5 ATTR_RADIOTEXT
+A DSIUnifiedTuner 6 ATTR_ENHANCEDRADIOTEXT
+A DSIUnifiedTuner 7 ATTR_RADIOTEXTPLUS
+A DSIUnifiedTuner 8 ATTR_ENHANCEDRADIOTEXTPLUS
+A DSIUnifiedTuner 9 ATTR_SLIDESHOWINFO
+A DSIUnifiedTuner 10 ATTR_SOFTLINKSWITCHSTATUS
+A DSIUnifiedTuner 11 ATTR_REGMODESTATUS
+A DSIUnifiedTuner 12 ATTR_DEVICEUSAGESTATUS
+A DSIUnifiedTuner 13 ATTR_PROFILESTATE
+A DSIUnifiedTuner 14 ATTR_RDSIGNORESWITCHSTATUS
+A DSIUnifiedTuner 15 ATTR_HDMODE
+A DSIUnifiedTuner 16 ATTR_HDSTATUS
+A DSIUnifiedTuner 17 ATTR_HDSTATIONINFO
+A DSIUnifiedTuner 18 ATTR_RADIOUSAGESTATUS
+E DSIUnifiedTuner 1 1 1 updateDetectedDevice DSIUnifiedTunerListenerMsg.updateDetectedDevice
+E DSIUnifiedTuner 2 2 2 updateAudioStatus DSIUnifiedTunerListenerMsg.updateAudioStatus
+E DSIUnifiedTuner 3 3 3 updateSelectedStation DSIUnifiedTunerListenerMsg.updateSelectedStation
+E DSIUnifiedTuner 4 4 4 updateStationList DSIUnifiedTunerListenerMsg.updateStationList
+E DSIUnifiedTuner 5 5 5 updateRadioText DSIUnifiedTunerListenerMsg.updateRadioText
+E DSIUnifiedTuner 6 6 6 updateEnhancedRadioText DSIUnifiedTunerListenerMsg.updateEnhancedRadioText
+E DSIUnifiedTuner 7 7 7 updateRadioTextPlus DSIUnifiedTunerListenerMsg.updateRadioTextPlus
+E DSIUnifiedTuner 8 8 8 updateEnhancedRadioTextPlus DSIUnifiedTunerListenerMsg.updateEnhancedRadioTextPlus
+E DSIUnifiedTuner 9 9 9 updateSlideShowInfo DSIUnifiedTunerListenerMsg.updateSlideShowInfo
+E DSIUnifiedTuner 10 10 10 updateSoftLinkSwitchStatus DSIUnifiedTunerListenerMsg.updateSoftLinkSwitchStatus
+E DSIUnifiedTuner 11 11 11 updateRegModeStatus DSIUnifiedTunerListenerMsg.updateRegModeStatus
+E DSIUnifiedTuner 12 12 12 updateDeviceUsageStatus DSIUnifiedTunerListenerMsg.updateDeviceUsageStatus
+E DSIUnifiedTuner 13 13 13 updateProfileState DSIUnifiedTunerListenerMsg.updateProfileState
+E DSIUnifiedTuner 14 14 14 updateRDSIgnoreSwitchStatus DSIUnifiedTunerListenerMsg.updateRDSIgnoreSwitchStatus
+E DSIUnifiedTuner 15 15 15 updateHdMode DSIUnifiedTunerListenerMsg.updateHdMode
+E DSIUnifiedTuner 16 16 16 updateHdStatus DSIUnifiedTunerListenerMsg.updateHdStatus
+E DSIUnifiedTuner 17 17 17 updateHdStationInfo DSIUnifiedTunerListenerMsg.updateHdStationInfo
+E DSIUnifiedTuner 18 18 18 updateRadioUsageStatus DSIUnifiedTunerListenerMsg.updateRadioUsageStatus
+E DSIUnifiedTuner 2000 - - selectStationStatus DSIUnifiedTunerListenerMsg.selectStationStatus
+E DSIUnifiedTuner 2001 - - listMode DSIUnifiedTunerListenerMsg.listMode
+E DSIUnifiedTuner 2002 - - stationFollowingMode DSIUnifiedTunerListenerMsg.stationFollowingMode
+E DSIUnifiedTuner 2003 - - profileChanged DSIUnifiedTunerListenerMsg.profileChanged
+E DSIUnifiedTuner 2004 - - profileCopied DSIUnifiedTunerListenerMsg.profileCopied
+E DSIUnifiedTuner 2005 - - profileResetListener DSIUnifiedTunerListenerMsg.profileResetListener
+E DSIUnifiedTuner 2006 - - profileResetAllListener DSIUnifiedTunerListenerMsg.profileResetAllListener
+E DSIUnifiedTuner 2007 - - forceUpdateStationListStatus DSIUnifiedTunerListenerMsg.forceUpdateStationListStatus
+E DSIUnifiedTuner 2008 - - seekStationStatus DSIUnifiedTunerListenerMsg.seekStationStatus
+E DSIUnifiedTuner 3000 - - indicateEmergencyAlerts DSIUnifiedTunerListenerMsg.indicateEmergencyAlerts
+P DSIUnifiedTuner 9999 setNotification DSIUnifiedTunerMsg.setNotiUnifiedTuner
+P DSIUnifiedTuner 9998 clearNotification DSIUnifiedTunerMsg.clearNotiUnifiedTuner
+P DSIUnifiedTuner 1001 setStationFollowingMode DSIUnifiedTunerMsg.setStationFollowingMode
+P DSIUnifiedTuner 1002 setListMode DSIUnifiedTunerMsg.setListMode
+P DSIUnifiedTuner 1003 enableRadioTextPlus DSIUnifiedTunerMsg.enableRadioTextPlus
+P DSIUnifiedTuner 1004 setSoftLinkSwitch DSIUnifiedTunerMsg.setSoftLinkSwitch
+P DSIUnifiedTuner 1005 setRegMode DSIUnifiedTunerMsg.setRegMode
+P DSIUnifiedTuner 1006 switchDeviceUsage DSIUnifiedTunerMsg.switchDeviceUsage
+P DSIUnifiedTuner 1011 forceUpdateStationList DSIUnifiedTunerMsg.forceUpdateStationList
+P DSIUnifiedTuner 1014 seekStation DSIUnifiedTunerMsg.seekStation
+P DSIUnifiedTuner 1015 isOnPreset DSIUnifiedTunerMsg.isOnPreset
+P DSIUnifiedTuner 1013 freePreset DSIUnifiedTunerMsg.freePreset
+P DSIUnifiedTuner 1012 switchRDSIgnore DSIUnifiedTunerMsg.switchRDSIgnore
+P DSIUnifiedTuner 1016 setModeHD DSIUnifiedTunerMsg.setModeHD
+P DSIUnifiedTuner 1017 setERTPrefered DSIUnifiedTunerMsg.setERTPrefered
+P DSIUnifiedTuner 1018 setERTDisplayable DSIUnifiedTunerMsg.setERTDisplayable
+P DSIUnifiedTuner 1007 profileChange DSIUnifiedTunerMsg.profileChange
+P DSIUnifiedTuner 1009 profileReset DSIUnifiedTunerMsg.profileResetProvider
+P DSIUnifiedTuner 1010 profileResetAll DSIUnifiedTunerMsg.profileResetAllProvider
+P DSIUnifiedTuner 1019 switchRadioUsage DSIUnifiedTunerMsg.switchRadioUsage
+P DSIUnifiedTuner 1020 reset DSIUnifiedTunerMsg.reset
+P DSIUnifiedTuner 1000 selectStation DSIUnifiedTunerMsg.selectStation
+S DSITunerAnnouncement 70368744177664 402 403 radio
+A DSITunerAnnouncement 1 ATTR_FILTER
+A DSITunerAnnouncement 2 ATTR_AVAILABILITY
+A DSITunerAnnouncement 3 ATTR_STATUS
+A DSITunerAnnouncement 4 ATTR_STATIONNAME
+A DSITunerAnnouncement 5 ATTR_ALARMWARNINGMESSAGE
+E DSITunerAnnouncement 1 1 1 updateFilter DSITunerAnnouncementListenerMsg.updateFilter
+E DSITunerAnnouncement 2 2 2 updateAvailability DSITunerAnnouncementListenerMsg.updateAvailability
+E DSITunerAnnouncement 3 3 3 updateStatus DSITunerAnnouncementListenerMsg.updateStatus
+E DSITunerAnnouncement 4 4 4 updateStationName DSITunerAnnouncementListenerMsg.updateStationName
+E DSITunerAnnouncement 5 5 5 updateAlarmWarningMessage DSITunerAnnouncementListenerMsg.updateAlarmWarningMessage
+E DSITunerAnnouncement 3000 - - indicateAlarmWarningMessage DSITunerAnnouncementListenerMsg.indicateAlarmWarningMessage
+P DSITunerAnnouncement 9999 setNotification DSITunerAnnouncementMsg.setNotiTunerAnnouncement
+P DSITunerAnnouncement 9998 clearNotification DSITunerAnnouncementMsg.clearNotiTunerAnnouncement
+P DSITunerAnnouncement 1000 setFilter DSITunerAnnouncementMsg.setFilter
+P DSITunerAnnouncement 1001 abort DSITunerAnnouncementMsg.abort
+G DSITunerAnnouncement 1000 1 posicao filter filter
+S DSIRadioData 70368744177664 420 421 radio
+A DSIRadioData 1 ATTR_DATABASESTATE
+A DSIRadioData 2 ATTR_RADIOSTATIONLOGOS
+A DSIRadioData 3 ATTR_PROFILESTATE
+A DSIRadioData 4 ATTR_PERSISTSTATIONLOGOSWITHCHANGEDURLS
+E DSIRadioData 1 1 1 updateDatabaseState DSIRadioDataListenerMsg.updateDatabaseState
+E DSIRadioData 2 2 2 updateRadioStationLogos DSIRadioDataListenerMsg.updateRadioStationLogos
+E DSIRadioData 3 3 3 updateProfileStateRadioData DSIRadioDataListenerMsg.updateProfileStateRadioData
+E DSIRadioData 4 4 4 updatePersistStationLogosWithChangedUrls DSIRadioDataListenerMsg.updatePersistStationLogosWithChangedUrls
+E DSIRadioData 2000 - - responseRadioStationData DSIRadioDataListenerMsg.responseRadioStationData
+E DSIRadioData 2001 - - responseRadioStationLogos DSIRadioDataListenerMsg.responseRadioStationLogos
+E DSIRadioData 2002 - - responseDynamicDatabaseAlteration DSIRadioDataListenerMsg.responseDynamicDatabaseAlteration
+E DSIRadioData 2003 - - responseCountryList DSIRadioDataListenerMsg.responseCountryList
+E DSIRadioData 2004 - - responseDatabaseVersionInfo DSIRadioDataListenerMsg.responseDatabaseVersionInfo
+E DSIRadioData 2006 - - responseCountryRegionData DSIRadioDataListenerMsg.responseCountryRegionData
+E DSIRadioData 2007 - - responseCountryRegionTranslationData DSIRadioDataListenerMsg.responseCountryRegionTranslationData
+E DSIRadioData 2008 - - responsePersistStationLogosWithChangedUrls DSIRadioDataListenerMsg.responsePersistStationLogosWithChangedUrls
+E DSIRadioData 2009 - - profileChangedRadioData DSIRadioDataListenerMsg.profileChangedRadioData
+E DSIRadioData 2010 - - profileCopiedRadioData DSIRadioDataListenerMsg.profileCopiedRadioData
+E DSIRadioData 2011 - - profileResetRadioDataListener DSIRadioDataListenerMsg.profileResetRadioDataListener
+E DSIRadioData 2012 - - profileResetAllRadioDataListener DSIRadioDataListenerMsg.profileResetAllRadioDataListener
+E DSIRadioData 2013 - - responseDatabaseVersionInfoUdb DSIRadioDataListenerMsg.responseDatabaseVersionInfoUdb
+E DSIRadioData 2014 - - responsePersistStationLogosInDatabase DSIRadioDataListenerMsg.responsePersistStationLogosInDatabase
+E DSIRadioData 3000 - - indicateRadioStationDatabaseLogos DSIRadioDataListenerMsg.indicateRadioStationDatabaseLogos
+P DSIRadioData 9999 setNotification DSIRadioDataMsg.setNotiRadioData
+P DSIRadioData 9998 clearNotification DSIRadioDataMsg.clearNotiRadioData
+P DSIRadioData 1000 requestRadioStationData DSIRadioDataMsg.requestRadioStationData
+P DSIRadioData 1001 requestRadioStationLogos DSIRadioDataMsg.requestRadioStationLogos
+P DSIRadioData 1002 requestDynamicDatabaseAlteration DSIRadioDataMsg.requestDynamicDatabaseAlteration
+P DSIRadioData 1003 requestCountryListUpdate DSIRadioDataMsg.requestCountryListUpdate
+P DSIRadioData 1004 requestDatabaseVersionInfo DSIRadioDataMsg.requestDatabaseVersionInfo
+P DSIRadioData 1012 requestDatabaseVersionInfoUdb DSIRadioDataMsg.requestDatabaseVersionInfoUdb
+P DSIRadioData 1005 requestPersistStationLogos DSIRadioDataMsg.requestPersistStationLogos
+P DSIRadioData 1006 requestCountryRegionData DSIRadioDataMsg.requestCountryRegionData
+P DSIRadioData 1007 requestCountryRegionTranslationData DSIRadioDataMsg.requestCountryRegionTranslationData
+P DSIRadioData 1008 profileChange DSIRadioDataMsg.profileChangeRadioData
+P DSIRadioData 1009 profileCopy DSIRadioDataMsg.profileCopyRadioData
+P DSIRadioData 1010 profileReset DSIRadioDataMsg.profileResetRadioDataProvider
+P DSIRadioData 1011 profileResetAll DSIRadioDataMsg.profileResetAllRadioDataProvider
+P DSIRadioData 1013 requestRadioStationDatabaseLogos DSIRadioDataMsg.requestRadioStationDatabaseLogos
+P DSIRadioData 1014 requestPersistStationLogosInDatabase DSIRadioDataMsg.requestPersistStationLogosInDatabase
+R DSIRadioData 1008 uma 10000 2009 profileChanged
+R DSIRadioData 1009 uma 10000 2010 profileCopied
+R DSIRadioData 1010 uma 10000 2011 profileReset
+R DSIRadioData 1011 uma 10000 2012 profileResetAll
+R DSIRadioData 1000 uma 10000 2000 responseRadioStationData
+R DSIRadioData 1001 uma 10000 2001 responseRadioStationLogos
+R DSIRadioData 1002 uma 10000 2002 responseDynamicDatabaseAlteration
+R DSIRadioData 1003 uma 10000 2003 responseCountryList
+R DSIRadioData 1004 uma 10000 2004 responseDatabaseVersionInfo
+R DSIRadioData 1012 uma 10000 2013 responseDatabaseVersionInfoUdb
+R DSIRadioData 1005 uma 10000 - responsePersistStationLogos
+R DSIRadioData 1006 uma 10000 2006 responseCountryRegionData
+R DSIRadioData 1007 uma 10000 2007 responseCountryRegionTranslationData
+R DSIRadioData 1014 uma 10000 2014 responsePersistStationLogosInDatabase
+X DSIRadioData 1008 2009 profile profile
+X DSIRadioData 1009 2010 fromProfile fromProfile
+X DSIRadioData 1009 2010 toProfile toProfile
+X DSIRadioData 1010 2011 profile profile
+X DSIRadioData 1000 2000 sessionId sessionId
+X DSIRadioData 1001 2001 sessionId sessionId
+X DSIRadioData 1002 2002 sessionId sessionId
+X DSIRadioData 1003 2003 sessionId sessionId
+X DSIRadioData 1004 2004 sessionId sessionId
+X DSIRadioData 1012 2013 sessionId sessionId
+X DSIRadioData 1006 2006 sessionId sessionId
+X DSIRadioData 1007 2007 sessionId sessionId
+X DSIRadioData 1014 2014 sessionId sessionId
+W 70368744177664 org.dsi.ifc.radiodata.DSIRadioData 0 0
+W 70368744177664 org.dsi.ifc.radio.DSIUnifiedTuner 0 0
+W 70368744177664 org.dsi.ifc.radio.DSITunerAnnouncement 0 0
+M DSIUnifiedTunerListenerMsg.updateDetectedDevice
+C 1 detectedDevice int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateAudioStatus
+C 1 audioStatus int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateSelectedStation
+C 1 selectedStation msg um DSIRadioCommon.UnifiedStationProto
+C 2 validFlag int32 um
+M DSIRadioCommon.UnifiedStationProto
+C 1 waveBand int32 um
+C 2 shortName string um
+C 3 longName string um
+C 4 frequency int64 um
+C 5 piSId int32 um
+C 6 ensId int32 um
+C 7 ecc int32 um
+C 8 sCIDI int32 um
+C 9 primaryService bool um
+C 10 scrollingPS int32 um
+C 11 rds bool um
+C 12 audioQuality int32 um
+C 13 tpAvailability int32 um
+C 14 ptyCodes bytes um
+C 15 radioText bool um
+C 16 radioTextPlus bool um
+C 17 enhancedRadioText bool um
+C 18 slideshow bool um
+C 19 coChannel bool um
+C 20 receptionQuality int32 um
+C 21 hd bool um
+C 22 fullDigital bool um
+C 23 serviceId int32 um
+C 24 subscription int32 um
+C 25 tmc bool um
+C 26 hdStruceture int32 um
+C 27 broadcastId string um
+M DSIUnifiedTunerListenerMsg.updateStationList
+C 1 stationList msg rep DSIRadioCommon.UnifiedStationProto
+C 2 bandType int32 um
+C 3 validFlag int32 um
+C 4 startIdx int32 um
+C 5 max int32 um
+C 6 session string um
+M DSIUnifiedTunerListenerMsg.updateRadioText
+C 1 radioText msg um DSIRadioCommon.UnifiedRadioText
+C 2 validFlag int32 um
+M DSIRadioCommon.UnifiedRadioText
+C 1 piSId int32 um
+C 2 ensId int32 um
+C 3 ecc int32 um
+C 4 sCIDI int32 um
+C 5 radioText string um
+C 6 source int32 um
+M DSIUnifiedTunerListenerMsg.updateEnhancedRadioText
+C 1 radioText msg um DSIRadioCommon.UnifiedRadioText
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateRadioTextPlus
+C 1 radioText msg um DSIRadioCommon.UnifiedRadioTextPlus
+C 2 validFlag int32 um
+M DSIRadioCommon.UnifiedRadioTextPlus
+C 1 piSId int32 um
+C 2 ensId int32 um
+C 3 ecc int32 um
+C 4 sCIDI int32 um
+C 5 tags int32 rep
+C 6 content string rep
+C 7 source int32 um
+M DSIUnifiedTunerListenerMsg.updateEnhancedRadioTextPlus
+C 1 radioText msg um DSIRadioCommon.UnifiedRadioTextPlus
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateSlideShowInfo
+C 1 slideshow msg um DSIRadioCommon.DABSlideShowInfo
+C 2 validFlag int32 um
+M DSIRadioCommon.DABSlideShowInfo
+C 1 ensID int32 um
+C 2 ensEcc int32 um
+C 3 sID int32 um
+C 4 sCIDI int32 um
+C 5 slideshowImage msg um DSIRadioCommon.ResourceLocator
+C 6 category int32 um
+M DSIRadioCommon.ResourceLocator
+C 1 id int32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIRadioCommon.ResourceCDNAccess
+M DSIRadioCommon.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort int32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort int32 um
+C 5 imageResourcePath string um
+M DSIUnifiedTunerListenerMsg.updateSoftLinkSwitchStatus
+C 1 softLinkSwitch int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateRegModeStatus
+C 1 regMode int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateDeviceUsageStatus
+C 1 deviceUsage int32 um
+C 2 bandType int32 um
+C 3 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateProfileState
+C 1 state int32 um
+C 2 profile int32 um
+C 3 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateRDSIgnoreSwitchStatus
+C 1 rDSIgnoreSwitchStatus bool um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateHdMode
+C 1 hdMode int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateHdStatus
+C 1 hdStatus int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.updateHdStationInfo
+C 1 hdStationInfo msg um DSIRadioCommon.HdStationInfo
+C 2 validFlag int32 um
+M DSIRadioCommon.HdStationInfo
+C 1 artistName string um
+C 2 albumTitle string um
+C 3 songTitle string um
+C 4 genre string um
+C 5 stationArt msg um DSIRadioCommon.ResourceLocator
+C 6 coverArt msg um DSIRadioCommon.ResourceLocator
+C 7 language string um
+C 8 shortDescription string um
+C 9 contentField string um
+C 10 price string um
+C 11 validUntil string um
+C 12 contactURL string um
+C 13 receivedAs int32 um
+C 14 nameOfSeller string um
+C 15 comrDescription string um
+C 16 mimeType string um
+C 17 binaryData bytes um
+C 18 affiliateID string um
+C 19 iTunesID string um
+C 20 iTunesFrontID int32 um
+C 21 podcastFeedURL int32 um
+C 22 unknownData string um
+C 23 frequency int32 um
+C 24 pi int32 um
+C 25 serviceId int32 um
+C 26 stationURL string um
+C 27 shortNameHD string um
+M DSIUnifiedTunerListenerMsg.updateRadioUsageStatus
+C 1 deviceUsage int32 um
+C 2 validFlag int32 um
+M DSIUnifiedTunerListenerMsg.selectStationStatus
+C 1 status int32 um
+M DSIUnifiedTunerListenerMsg.listMode
+C 1 listMode int32 um
+M DSIUnifiedTunerListenerMsg.stationFollowingMode
+C 1 followingMode int32 um
+M DSIUnifiedTunerListenerMsg.profileChanged
+C 1 profile int32 um
+C 2 result int32 um
+M DSIUnifiedTunerListenerMsg.profileCopied
+C 1 fromProfile int32 um
+C 2 toProfile int32 um
+C 3 result int32 um
+M DSIUnifiedTunerListenerMsg.profileResetListener
+C 1 profile int32 um
+C 2 result int32 um
+M DSIUnifiedTunerListenerMsg.profileResetAllListener
+C 1 result int32 um
+M DSIUnifiedTunerListenerMsg.forceUpdateStationListStatus
+C 1 forceUpdateListStatus int32 um
+C 2 bandType int32 um
+M DSIUnifiedTunerListenerMsg.seekStationStatus
+C 1 seekStationStatus int32 um
+C 2 bandType int32 um
+C 3 sessionId int32 um
+M DSIUnifiedTunerListenerMsg.indicateEmergencyAlerts
+C 1 emergencyAlerts msg rep DSIRadioCommon.EmergencyAlert
+M DSIRadioCommon.EmergencyAlert
+C 1 alertId int32 um
+C 2 operationId int32 um
+C 3 subjectId int32 um
+C 4 message string um
+C 5 dateDay int32 um
+C 6 dateMonth int32 um
+C 7 dateYear int32 um
+C 8 timeHours int32 um
+C 9 timeMinutes int32 um
+C 10 timeSeconds int32 um
+M DSIUnifiedTunerMsg.setNotiUnifiedTuner
+C 1 attributes int32 rep
+M DSIUnifiedTunerMsg.clearNotiUnifiedTuner
+C 1 attributes int32 rep
+M DSIUnifiedTunerMsg.setStationFollowingMode
+C 1 followingMode int32 um
+M DSIUnifiedTunerMsg.setListMode
+C 1 listMode int32 um
+M DSIUnifiedTunerMsg.enableRadioTextPlus
+C 2 tags int32 rep
+M DSIUnifiedTunerMsg.setSoftLinkSwitch
+C 1 softLinkSwitch int32 um
+M DSIUnifiedTunerMsg.setRegMode
+C 1 regMode int32 um
+M DSIUnifiedTunerMsg.switchDeviceUsage
+C 1 deviceUsage int32 um
+C 2 bandType int32 um
+M DSIUnifiedTunerMsg.forceUpdateStationList
+C 1 updateMode int32 um
+C 2 bandType int32 um
+M DSIUnifiedTunerMsg.seekStation
+C 1 seekStationMode int32 um
+C 2 bandType int32 um
+C 3 sessionId int32 um
+M DSIUnifiedTunerMsg.isOnPreset
+C 1 stationOnPreset msg um DSIRadioCommon.UnifiedStationProto
+C 2 location int32 um
+M DSIUnifiedTunerMsg.freePreset
+C 1 location int32 um
+M DSIUnifiedTunerMsg.switchRDSIgnore
+C 1 enable bool um
+M DSIUnifiedTunerMsg.setModeHD
+C 1 hdMode int32 um
+M DSIUnifiedTunerMsg.setERTPrefered
+C 1 ertPrefered bool um
+M DSIUnifiedTunerMsg.setERTDisplayable
+C 1 ertDisplayable bool um
+M DSIUnifiedTunerMsg.profileChange
+C 1 profile int32 um
+M DSIUnifiedTunerMsg.profileResetProvider
+C 1 profile int32 um
+M DSIUnifiedTunerMsg.profileResetAllProvider
+M DSIUnifiedTunerMsg.switchRadioUsage
+C 1 deviceUsage int32 um
+M DSIUnifiedTunerMsg.reset
+C 1 resetType int32 um
+M DSIUnifiedTunerMsg.selectStation
+C 1 mode int32 um
+C 2 frequency int64 um
+C 3 piSId int32 um
+C 4 ensId int32 um
+C 5 ecc int32 um
+C 6 sCIDI int32 um
+C 7 subChannel int32 um
+C 8 shortName string um
+C 9 broadcastId string um
+M DSITunerAnnouncementListenerMsg.updateFilter
+C 1 filter int32 um
+C 2 validFlag int32 um
+M DSITunerAnnouncementListenerMsg.updateAvailability
+C 1 availability int32 um
+C 2 validFlag int32 um
+M DSITunerAnnouncementListenerMsg.updateStatus
+C 1 status int32 um
+C 2 validFlag int32 um
+M DSITunerAnnouncementListenerMsg.updateStationName
+C 1 stationName string um
+C 2 pi int32 um
+C 3 frequency int64 um
+C 4 validFlag int32 um
+M DSITunerAnnouncementListenerMsg.updateAlarmWarningMessage
+C 1 alarmStation msg um DSIRadioCommon.UnifiedStationProto
+C 2 warningMessage string um
+C 3 status int32 um
+C 4 validFlag int32 um
+M DSITunerAnnouncementListenerMsg.indicateAlarmWarningMessage
+C 1 alarmStation msg um DSIRadioCommon.UnifiedStationProto
+C 2 warningMessage string um
+C 3 status int32 um
+M DSITunerAnnouncementMsg.setNotiTunerAnnouncement
+C 1 attributes int32 rep
+M DSITunerAnnouncementMsg.clearNotiTunerAnnouncement
+C 1 attributes int32 rep
+M DSITunerAnnouncementMsg.setFilter
+C 1 filter int32 um
+M DSITunerAnnouncementMsg.abort
+C 1 typeToAbort int32 um
+M DSIRadioDataListenerMsg.updateDatabaseState
+C 1 databaseState int32 um
+C 2 validFlag int32 um
+M DSIRadioDataListenerMsg.updateRadioStationLogos
+C 1 stationLogosResponse msg rep DSIRadioCommon.RadioStationLogoResponseProto
+C 2 validFlag int32 um
+M DSIRadioCommon.RadioStationLogoResponseProto
+C 1 totalItemCount int32 um
+C 2 resourceLocators msg rep DSIRadioCommon.ResourceLocator
+C 3 radioStationData msg rep DSIRadioCommon.RadioStationDataProto
+M DSIRadioCommon.RadioStationDataProto
+C 1 stationId int32 um
+C 2 country int32 um
+C 3 extendedCountryCode int32 um
+C 4 piSid int32 um
+C 5 linkedPiSid int32 um
+C 6 ensembleId int32 um
+C 7 scidi int32 um
+C 8 longName string um
+C 9 shortName string um
+C 10 frequency int64 um
+C 11 subChannelId int32 um
+C 12 stationType string um
+C 13 radioSdsId int64 um
+C 14 logoId int32 um
+M DSIRadioDataListenerMsg.updateProfileStateRadioData
+C 1 state int32 um
+C 2 profile int32 um
+C 3 validFlag int32 um
+M DSIRadioDataListenerMsg.updatePersistStationLogosWithChangedUrls
+C 1 radioStationData msg rep DSIRadioCommon.RadioStationDataProto
+C 2 resourceLocator msg rep DSIRadioCommon.ResourceLocator
+C 3 successCode int32 um
+C 4 validFlag int32 um
+M DSIRadioDataListenerMsg.responseRadioStationData
+C 1 stationDataResponse msg rep DSIRadioCommon.RadioStationDataResponseProto
+C 2 sessionId int32 um
+M DSIRadioCommon.RadioStationDataResponseProto
+C 1 totalItemCount int32 um
+C 2 radioStationData msg rep DSIRadioCommon.RadioStationDataProto
+M DSIRadioDataListenerMsg.responseRadioStationLogos
+C 1 stationLogosResponse msg rep DSIRadioCommon.RadioStationLogoResponseProto
+C 2 sessionId int32 um
+M DSIRadioDataListenerMsg.responseDynamicDatabaseAlteration
+C 1 successCode int32 um
+C 2 sessionId int32 um
+M DSIRadioDataListenerMsg.responseCountryList
+C 1 countryList int32 rep
+C 2 sessionId int32 um
+M DSIRadioDataListenerMsg.responseDatabaseVersionInfo
+C 1 versionMajor int32 um
+C 2 versionMinor int32 um
+C 3 versionRevision int32 um
+C 4 creationDate string um
+C 5 regionCode int32 um
+C 6 successCode int32 um
+C 7 sessionId int32 um
+M DSIRadioDataListenerMsg.responseCountryRegionData
+C 1 countryRegionData msg rep DSIRadioCommon.CountryRegionDataProto
+C 2 sessionId int32 um
+M DSIRadioCommon.CountryRegionDataProto
+C 1 crId int32 um
+C 2 macroRegionId int32 um
+C 3 ioc string um
+C 4 countryId int32 um
+C 5 countryNameInternational string um
+C 6 countryNameOriginal string um
+C 7 iocCountryNameInternational string um
+C 8 countryEcc int32 um
+C 9 countryPi int32 um
+C 10 countryNeigborPi int32 rep
+C 11 gpsMode string um
+C 12 gpsp string rep
+C 13 flagId int32 um
+C 14 amSupprot int32 um
+C 15 fmSupport int32 um
+C 16 dabSupport int32 um
+C 17 speechSupport int32 um
+C 18 nurGenehmigteLogos int32 um
+C 19 requestStrategy int32 um
+C 20 useDatabaseNameInHmi int32 um
+C 21 nativeLanguage string um
+C 22 extraString string rep
+C 23 extraInt int32 rep
+M DSIRadioDataListenerMsg.responseCountryRegionTranslationData
+C 1 countryRegionTranslationData msg rep DSIRadioCommon.CountryRegionTranslationDataProto
+C 2 sessionId int32 um
+M DSIRadioCommon.CountryRegionTranslationDataProto
+C 1 countryId int32 um
+C 2 guiLanguageId int32 um
+C 3 guiLanguage string um
+C 4 countryRegionTranslation string um
+C 5 guiListItemPosition int32 um
+M DSIRadioDataListenerMsg.responsePersistStationLogosWithChangedUrls
+C 1 radioStationData msg rep DSIRadioCommon.RadioStationDataProto
+C 2 resourceLocator msg rep DSIRadioCommon.ResourceLocator
+C 3 successCode int32 um
+C 4 sessionId int32 um
+M DSIRadioDataListenerMsg.profileChangedRadioData
+C 1 profile int32 um
+C 2 result int32 um
+M DSIRadioDataListenerMsg.profileCopiedRadioData
+C 1 fromProfile int32 um
+C 2 toProfile int32 um
+C 3 result int32 um
+M DSIRadioDataListenerMsg.profileResetRadioDataListener
+C 1 profile int32 um
+C 2 result int32 um
+M DSIRadioDataListenerMsg.profileResetAllRadioDataListener
+C 1 result int32 um
+M DSIRadioDataListenerMsg.responseDatabaseVersionInfoUdb
+C 1 versionMajor int32 um
+C 2 versionMinor int32 um
+C 3 versionRevision int32 um
+C 4 creationDate string um
+C 5 regionCode int32 um
+C 6 successCode int32 um
+C 7 sessionId int32 um
+M DSIRadioDataListenerMsg.responsePersistStationLogosInDatabase
+C 1 successCode int32 um
+C 2 sessionId int32 um
+M DSIRadioDataListenerMsg.indicateRadioStationDatabaseLogos
+C 1 stationLogosResponse msg rep DSIRadioCommon.RadioStationLogoDatabaseResponseProto
+C 2 requestType int32 um
+C 3 sessionId int32 um
+M DSIRadioCommon.RadioStationLogoDatabaseResponseProto
+C 1 totalItemCount int32 um
+C 2 radioStationDataRequest msg um DSIRadioCommon.RadioStationDatabaseProto
+C 3 radioStationDataResponse msg rep DSIRadioCommon.RadioStationDatabaseProto
+M DSIRadioCommon.RadioStationDatabaseProto
+C 1 wavebandId int32 um
+C 2 stationId int32 um
+C 3 country int32 um
+C 4 extendedCountryCode int32 um
+C 5 piSid int32 um
+C 6 linkedPiSid int32 um
+C 7 ensembleId int32 um
+C 8 scidi int32 um
+C 9 longName string um
+C 10 shortName string um
+C 11 frequency int64 um
+C 12 subChannelId int32 um
+C 13 stationType string um
+C 14 radioSdsId int64 um
+C 15 isoCountryCode string um
+C 16 logoId int32 um
+C 17 stationLogos msg rep DSIRadioCommon.StationLogoProto
+M DSIRadioCommon.StationLogoProto
+C 1 resourceLocator msg um DSIRadioCommon.ResourceLocator
+C 2 width int32 um
+C 3 height int32 um
+C 4 logoResolution int32 um
+C 5 typeOfLogo int32 um
+M DSIRadioDataMsg.setNotiRadioData
+C 1 attributes int32 rep
+M DSIRadioDataMsg.clearNotiRadioData
+C 1 attributes int32 rep
+M DSIRadioDataMsg.requestRadioStationData
+C 1 stationDataRequest msg rep DSIRadioCommon.RadioStationDataRequestProto
+C 2 sessionId int32 um
+M DSIRadioCommon.RadioStationDataRequestProto
+C 1 maxItemCount int32 um
+C 2 stationId int32 um
+C 3 useStationId bool um
+C 4 country int32 um
+C 5 useCountry bool um
+C 6 extendedCountryCode int32 um
+C 7 useExtendedCountryCode bool um
+C 8 piSid int32 um
+C 9 usePiSid bool um
+C 10 linkedPiSid int32 um
+C 11 useLinkedPiSid bool um
+C 12 ensembleId int32 um
+C 13 useEnsembleId bool um
+C 14 scidi int32 um
+C 15 useScidi bool um
+C 16 longName string um
+C 17 useLongName bool um
+C 18 shortName string um
+C 19 useShortName bool um
+C 20 frequency int64 um
+C 21 useFrequency bool um
+C 22 subChannelId int32 um
+C 23 useSubChannelId bool um
+C 24 stationType string um
+C 25 useStationType bool um
+C 26 logoId int32 um
+C 27 useLogoId bool um
+C 28 broadcastId string um
+C 29 useBroadcastId bool um
+C 30 isoCountryCode string um
+C 31 useIsoCountryCode bool um
+M DSIRadioDataMsg.requestRadioStationLogos
+C 1 stationLogosRequest msg rep DSIRadioCommon.RadioStationLogoRequestProto
+C 2 sessionId int32 um
+M DSIRadioCommon.RadioStationLogoRequestProto
+C 1 radioStationDataRequest msg um DSIRadioCommon.RadioStationDataRequestProto
+C 2 priorities int32 rep
+M DSIRadioDataMsg.requestDynamicDatabaseAlteration
+C 1 radioStationData msg um DSIRadioCommon.RadioStationDataProto
+C 2 resourceLocator msg um DSIRadioCommon.ResourceLocator
+C 3 alterationType int32 um
+C 4 sessionId int32 um
+M DSIRadioDataMsg.requestCountryListUpdate
+C 1 sessionId int32 um
+M DSIRadioDataMsg.requestDatabaseVersionInfo
+C 1 sessionId int32 um
+M DSIRadioDataMsg.requestDatabaseVersionInfoUdb
+C 1 sessionId int32 um
+M DSIRadioDataMsg.requestPersistStationLogos
+C 1 radioStationData msg rep DSIRadioCommon.RadioStationDataProto
+C 2 resourceLocator msg rep DSIRadioCommon.ResourceLocator
+C 3 requestType int32 um
+C 4 sessionId int32 um
+M DSIRadioDataMsg.requestCountryRegionData
+C 1 sessionId int32 um
+M DSIRadioDataMsg.requestCountryRegionTranslationData
+C 1 guiLanguageId int32 um
+C 2 guiLanguage string um
+C 3 sessionId int32 um
+M DSIRadioDataMsg.profileChangeRadioData
+C 1 profile int32 um
+M DSIRadioDataMsg.profileCopyRadioData
+C 1 fromProfile int32 um
+C 2 toProfile int32 um
+M DSIRadioDataMsg.profileResetRadioDataProvider
+C 1 profile int32 um
+M DSIRadioDataMsg.profileResetAllRadioDataProvider
+M DSIRadioDataMsg.requestRadioStationDatabaseLogos
+C 1 stationLogosRequest msg rep DSIRadioCommon.RadioStationLogoDatabaseRequestProto
+C 2 requestType int32 um
+C 3 sessionId int32 um
+M DSIRadioCommon.RadioStationLogoDatabaseRequestProto
+C 1 radioStationDataRequest msg um DSIRadioCommon.RadioStationDataRequestProto
+C 2 radioStation msg um DSIRadioCommon.RadioStationDatabaseProto
+C 3 priorities int32 rep
+M DSIRadioDataMsg.requestPersistStationLogosInDatabase
+C 1 radioStationData msg rep DSIRadioCommon.RadioStationDatabaseProto
+C 2 storageId int32 um
+C 3 operationType int32 um
+C 4 sessionId int32 um

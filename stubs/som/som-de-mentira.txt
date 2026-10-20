@@ -1,0 +1,49 @@
+# som-de-mentira.txt — o perfil de som da bancada (12/10/2026)
+#
+# SIMULAÇÃO. Nenhum valor daqui foi lido do carro. É estudo num computador; nada vai para o carro.
+#
+# O que NÃO está neste arquivo vem do firmware: nomes, faixas e valores de fábrica são os que o
+# gerente de áudio da central serve em repouso (stubs/som/gerado/, feito por driver/som_tabela.sh).
+# O volume de entretenimento nasce em 5 de 30 e grave, médio, agudo, balanço e fader nascem em 0
+# porque é assim na tabela de áudio do firmware, não por escolha daqui.
+#
+# Este arquivo diz só o que no carro viria do amplificador e da última sessão:
+#
+# 1. A fonte que toca ao ligar. No carro é a última fonte usada. A HMI pede o rádio na partida
+#    (ENT_AMP_TUNER, visto no registro dela), e é ela que fica aqui até a HMI pedir outra.
+entretenimento = ENT_AMP_TUNER
+
+# O volante abre a barra de volume? SIMULAÇÃO, ligada por decisão do Lipe em 12/10/2026. No carro
+# dele (firmware MU0803), mudar o volume pelas teclas do volante faz a barra aparecer na tela da
+# central: foi dito por ele, de memória, sem foto. No firmware estudado (MU0883) a HMI não faz isso
+# sozinha: a chave de recurso que faria (isMFLVolumePopup) vem desligada e é constante, e ali quem
+# mostra o volume do volante é o painel de instrumentos. Com "sim", o som de mentira faz Vol +,
+# Vol − e o rolete do volante girarem também o botão da central: a barra abre e o valor muda um
+# passo. Com "nao" fica como a HMI faz sozinha: o volume muda e a barra não abre. Para desligar
+# sem editar este arquivo, passar um segundo perfil só com a linha "volante_abre_a_barra = nao".
+volante_abre_a_barra = sim
+
+# 2. A saída de som e o amplificador. No carro quem preenche isto é o lado do amplificador, na
+#    partida; sem placa de som a saída fica "disconnected" e a HMI não libera ajuste nenhum.
+#    SIMULAÇÃO: um amplificador interno básico, o caso mais simples que a HMI conhece.
+#    - amplifierId: a HMI só lê as letras 3 a 5 (BAS = básico, BTS = Beats, DYN, FND, CAN, HAK;
+#      SoundUtil.getAmpIdentifierASL) e usa as cinco primeiras como prefixo das predefinições.
+#      "VWBAS000" NÃO é um identificador de verdade: o do carro não é conhecido.
+#    - availableSoundFunctions: com eq1, eq3 e eq5 (sem eq2 e eq4) a HMI mostra grave, médio e
+#      agudo; com balance e fader, a tela "Posição"; noisecompensation é o ajuste do volume pela
+#      velocidade. Nomes da especificação do serviço (viwi.service.audiomanagement-1.2.2).
+#    - eqFrequencies: as frequências centrais das três faixas, em Hz. Número inventado.
+#    PALPITE SOBRE O CARRO, que este perfil NÃO segue: a ficha traz "Som Beats, a confirmar"
+#    (amplificador separado, módulo 47). Se o autoscan confirmar, a tela do carro é outra
+#    (predefinições do Beats e subwoofer), e o perfil certo para ele ainda está por fazer.
+[sinks.entertainment]
+connectStatus = "connected"
+audioStatus = "audible"
+amplifierId = "VWBAS000"
+availableSoundFunctions = ["balance","fader","eq1","eq3","eq5","noisecompensation"]
+eqFrequencies = [100,1000,10000]
+
+# 3. Volumes destravados. Em repouso, sem saída de som, o gerente de áudio marca todos como
+#    "locked". A HMI não lê esse campo; fica destravado só para o estado não se contradizer.
+[volumesettings.*]
+locked = false

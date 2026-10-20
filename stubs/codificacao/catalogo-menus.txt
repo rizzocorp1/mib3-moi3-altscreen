@@ -1,0 +1,66 @@
+# catalogo-menus.txt — CATÁLOGO, NÃO É O CARRO: os outros menus do carro, do lado da codificação.
+# Marco 14, 12/10/2026. Estudo num computador; nada daqui vai para o carro, e nada foi lido dele.
+#
+# ESTE ARQUIVO NÃO ENTRA EM NENHUMA PARTIDA POR PADRÃO. Ele liga, na lista de funções do carro da
+# adaptação do 5F (DID 0B1B; em cada byte o bit 7 é "Menu display"), as funções de cinco menus de
+# "Configurações do veículo" e dos assistentes do app "Assistentes". Que funções a adaptação do
+# Jetta traz, só a leitura do carro diz (está pedida na ficha). É o par do
+# stubs/veiculo/catalogo-menus.txt, e o comando para ver está no cabeçalho de lá.
+#
+# A lista de aparelhos (DID 0B1D) não entra: para estes menus a HMI só consulta a função (medido
+# com e sem o aparelho, rodadas pn1, l2 e l3 de 12/10/2026).
+#
+# GERADO por driver/m14_catalogo_menus.py da tabela de campos (tabela-campos.tsv); não editar à
+# mão. O byte e o bit de cada linha são os da tabela, que saiu do firmware; a numeração dos bytes
+# é a do DID nesta bancada, e o nome com que cada função aparece no ODIS não foi conferido.
+
+# ================================================================================================
+# Configurações do veículo: itens da lista que abre em Veículo > Config.
+# ================================================================================================
+
+# ---- "Pneus" (indicador de controle dos pneus, com o botão SET)
+0B1B @11.7+1 = 1     # ID_DISPLAY_RDK: "Tyre pressure monitoring: Menu display"
+
+# ---- "Luz", pela iluminação externa (assistência de luzes, horário para ligar, luz de circulação diurna, modo de viagem…)
+0B1B @6.7+1 = 1      # ID_DISPLAY_EXTERIOR_ILLUMINATION: "Exterior illumination: Menu display"
+
+# ---- "Luz", pela iluminação do interior (o mesmo item; é a parte de baixo da mesma tela)
+0B1B @1.7+1 = 1      # ID_DISPLAY_AMBIENT_ILLUMINATION: "Ambient illumination: Menu display"
+
+# ---- "Estacionar e manobrar" (auxílio de estacionamento: ativar automaticamente, volumes…)
+0B1B @2.7+1 = 1      # ID_DISPLAY_PDC: "Park distance control: Menu display"
+
+# ---- "Espelho e limpador", pelos espelhos
+0B1B @33.7+1 = 1     # ID_DISPLAY_CAR_MIRROR: "Car mirror: Menu display"
+
+# ---- "Espelho e limpador", pelo limpador (o mesmo item)
+# sozinho, faz aparecer também "Abrir e fechar": a opção easyEntrySteeringColumn do limpador é mostrada lá (OpenCloseViewOptionListenerImpl.updateWiperViewOptions)
+0B1B @12.7+1 = 1     # ID_DISPLAY_WIPER: "Windscreen wipers: Menu display"
+
+# ---- "Abrir e fechar" (acionamento das janelas e travamento central)
+# sozinho, faz aparecer também o item "Luz": a opção turnIndRepeat das travas alimenta uma linha da tela de luz, a do pisca de conforto, pelo nome do método (LightDevice.addMappingComfortBlinking)
+0B1B @15.7+1 = 1     # ID_DISPLAY_CENTRAL_LOCKING: "Central locking: Menu display"
+
+# ================================================================================================
+# Assistentes: o app "Assistentes" da grade de menus (tela IQ.DRIVE) e a lista "Configurações da assistência ao condutor" dele
+# ================================================================================================
+
+# ---- "ACC (contr. autom. de dist.)"
+0B1B @0.7+1 = 1      # ID_DISPLAY_ACC: "ACC: Menu display"
+
+# ---- "Front Assist"
+0B1B @3.7+1 = 1      # ID_DISPLAY_AWV: "AWV: Menu display"
+
+# ---- "Ass. perm. faixa (Lane Assist)" e "Emergency Assist"
+# é o campo que o LaneAssistService consulta (isDeviceCoded); sem as opções o app aparece e a lista fica vazia
+0B1B @4.7+1 = 1      # ID_DISPLAY_LANE_DEPARTURE_WARNING: "Lane Departure Warning: Menu display"
+
+# ---- "Side Assist"
+# as opções exitAssist e rcta deste serviço fazem aparecer também "Estacionar e manobrar" na lista de configurações do veículo (ParkingDevice.updateSWAViewOptions)
+0B1B @5.7+1 = 1      # ID_DISPLAY_LANE_ASSISTANT: "Lane asssistant: Menu display"
+
+# ---- "Sist. reconh. sinaliz. trânsito" e "Reconhecimento de reboque"
+0B1B @30.7+1 = 1     # ID_DISPLAY_ROAD_SIGN_IDENTIFICATION: "Road sign identification: Menu display"
+
+# ---- "Sistema reconh. de cansaço"
+0B1B @35.7+1 = 1     # ID_DISPLAY_WEARINESS_RECOGNITION: "Weariness recognition: Menu display"

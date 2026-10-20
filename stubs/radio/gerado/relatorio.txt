@@ -1,0 +1,26 @@
+serviços: 3; atributos: 27; eventos: 53; pedidos: 43; mensagens: 115; campos: 399; vetores: 53 (948 folhas); constantes: 453
+pedidos com resposta na tabela da HMI: 14; pedidos set… com regra de gravação (dedução): 1; campos devolvidos pelas respostas (dedução): 13
+DSIUnifiedTuner: domínio 70368744177664, pedidos 400, eventos 401; 18 atributos, 28 eventos (18 de atributo), 22 pedidos
+  evento profileResetListener (api 2005): a HMI o entrega pelo método profileReset do ouvinte
+  evento profileResetAllListener (api 2006): a HMI o entrega pelo método profileResetAll do ouvinte
+  pedidos com resposta: 0; pedidos set…: 7, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  os pedidos profileChange e profileCopy saem com a mesma api 1007 na camada da LG; o esquema fica com o primeiro
+  set sem regra de gravação: setStationFollowingMode (api 1001): não há atributo ATTR_STATIONFOLLOWINGMODE
+  set sem regra de gravação: setListMode (api 1002): não há atributo ATTR_LISTMODE
+  set sem regra de gravação: setSoftLinkSwitch (api 1004): não há atributo ATTR_SOFTLINKSWITCH
+  set sem regra de gravação: setRegMode (api 1005): não há atributo ATTR_REGMODE
+  set sem regra de gravação: setModeHD (api 1016): não há atributo ATTR_MODEHD
+  set sem regra de gravação: setERTPrefered (api 1017): não há atributo ATTR_ERTPREFERED
+  set sem regra de gravação: setERTDisplayable (api 1018): não há atributo ATTR_ERTDISPLAYABLE
+DSITunerAnnouncement: domínio 70368744177664, pedidos 402, eventos 403; 5 atributos, 6 eventos (5 de atributo), 4 pedidos
+  pedidos com resposta: 0; pedidos set…: 1, dos quais gravam atributo 1 (1 pela regra posicao, 0 pela regra nomes)
+DSIRadioData: domínio 70368744177664, pedidos 420, eventos 421; 4 atributos, 19 eventos (4 de atributo), 17 pedidos
+  evento updateProfileStateRadioData (api 3): o nome não casa com ATTR_PROFILESTATE
+  evento updateProfileStateRadioData (api 3): a HMI o entrega pelo método updateProfileState do ouvinte
+  evento profileChangedRadioData (api 2009): a HMI o entrega pelo método profileChanged do ouvinte
+  evento profileCopiedRadioData (api 2010): a HMI o entrega pelo método profileCopied do ouvinte
+  evento profileResetRadioDataListener (api 2011): a HMI o entrega pelo método profileReset do ouvinte
+  evento profileResetAllRadioDataListener (api 2012): a HMI o entrega pelo método profileResetAll do ouvinte
+  pedidos com resposta: 14 (1 com resposta que a camada da LG não entrega); pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  pedido requestPersistStationLogos (api 1005): a HMI espera responsePersistStationLogos, e nenhuma api da camada da LG chama esse método do ouvinte
+avisos: 0

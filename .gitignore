@@ -1,0 +1,39 @@
+# ─── Binários extraídos do firmware (propriedade VW/LG/Apple) ─────────────────
+extracted_libs/
+backup_factory_original/
+
+# ─── Toolchain / sysroot cross-compilation ────────────────────────────────────
+sysroot/
+
+# ─── Dados de deploy específicos do carro do projeto ─────────────────────────
+deploy-usb/factory/
+deploy-usb/logs/
+
+# ─── Logs e dados de sessão de RE (específicos do hardware do Lipe) ──────────
+traces/
+ao-vivo/frames/
+ao-vivo/log/
+ao-vivo/entrada/
+ao-vivo/memoria/
+
+# ─── Screenshots das sessões de engenharia reversa ───────────────────────────
+quadros/
+
+# ─── Binários locais compilados (não-versionáveis) ───────────────────────────
+janela/build/
+scratch/test_ts_mux
+driver/*.o
+driver/*.so
+camada3/__pycache__/
+driver/__pycache__/
+*.pyc
+
+# ─── Artefatos de firmware e toolchain ───────────────────────────────────────
+*.img
+*.7z
+*.squashfs
+
+# ─── IDEs e OS ───────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+*.swp

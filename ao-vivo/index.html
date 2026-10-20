@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HMI do MOI3 ao vivo</title>
+<style>
+  /* Um painel de carro: fundo de ardósia, vidro preto, e as três cores das luzes-espia
+     (verde = funcionando, âmbar = atenção, vermelho = sem sinal) só para o estado. */
+  :root {
+    --painel: #20262b;
+    --vidro: #050608;
+    --texto: #e8ebed;
+    --apagado: #8b959c;
+    --verde: #5fd08a;
+    --ambar: #f0b23c;
+    --vermelho: #e0655c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    display: grid;
+    place-items: center;
+    background: var(--painel);
+    color: var(--texto);
+    font: 16px/1.45 "Avenir Next", Avenir, system-ui, sans-serif;
+  }
+  /* a tela inteira, as teclas (as da moldura e as do volante) e a linha de estado cabem na janela, sem rolar */
+  main { width: min(100%, 1248px, calc((100dvh - 335px) * 800 / 480)); min-width: min(100%, 320px); }
+
+  .aparelho {
+    background: var(--vidro);
+    border-radius: 14px;
+    padding: clamp(8px, 1.8vw, 22px);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 28px 48px -28px rgba(0, 0, 0, .75);
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 800 / 480;
+    background: #000;
+    border-radius: 3px;
+    touch-action: none;          /* o gesto é da central, não da página */
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* a moldura da central: o botão de volume, as teclas e o botão de seleção, numa linha só */
+  .moldura {
+    display: flex;
+    align-items: center;
+    gap: 6px 10px;
+    margin-top: clamp(8px, 1.4vw, 16px);
+  }
+  /* as teclas: legenda clara sobre o vidro, sem contorno */
+  .teclas {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 2px;
+  }
+  .teclas button, .giratorio button {
+    border: 0;
+    border-radius: 5px;
+    padding: 7px 11px;
+    background: none;
+    color: #b9c2c8;
+    font-size: .875rem;
+    letter-spacing: .03em;
+  }
+  .teclas button:hover, .giratorio button:hover { color: #fff; background: #12161a; }
+  .teclas button[data-apertada] { color: #fff; background: #242c32; }
+
+  /* os botões giratórios: rolar em cima gira, clicar aperta; − e + giram um passo */
+  .giratorio { display: flex; align-items: center; gap: 2px; flex: none; }
+  .giratorio .passo { padding: 4px 7px; font-size: 1rem; line-height: 1; }
+  .giratorio .botao {
+    --giro: 0deg;
+    position: relative;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, #333c43, #181d21 68%);
+    box-shadow: 0 0 0 1px #3d474e, 0 3px 6px rgba(0, 0, 0, .6);
+    font-size: 0;                /* o nome fica no rótulo acessível e na dica */
+  }
+  .giratorio .botao:hover { background: radial-gradient(circle at 50% 38%, #3d474e, #1d2327 68%); }
+  .giratorio .botao::after {     /* a marca que mostra quanto girou */
+    content: "";
+    position: absolute;
+    left: calc(50% - 1.5px);
+    top: 5px;
+    width: 3px;
+    height: 11px;
+    border-radius: 2px;
+    background: #cfd6da;
+    transform-origin: 1.5px 18px;
+    transform: rotate(var(--giro));
+    transition: transform .12s ease-out;
+  }
+  .giratorio .botao[data-apertada] { box-shadow: 0 0 0 1px #6b7780, 0 1px 2px rgba(0, 0, 0, .6); }
+  @media (prefers-reduced-motion: reduce) { .giratorio .botao::after { transition: none; } }
+
+  /* o volante: uma faixa à parte, embaixo do aparelho, com o nome e as teclas dele */
+  .volante {
+    display: flex;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: 10px;
+    padding: 8px clamp(8px, 1.8vw, 22px);
+    background: var(--vidro);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 28px 48px -28px rgba(0, 0, 0, .75);
+  }
+  .volante .nome { color: var(--apagado); font-size: .875rem; letter-spacing: .03em; }
+
+  [data-estado="vazio"] canvas { cursor: default; }
+  [data-estado="vazio"] .moldura, [data-estado="vazio"] .volante { visibility: hidden; }
+  @media (max-width: 620px) {
+    .moldura { flex-wrap: wrap; justify-content: space-between; }
+    .moldura .teclas { order: 3; flex-basis: 100%; }
+    .volante { flex-wrap: wrap; justify-content: center; }
+    .volante .teclas { flex-basis: 100%; }
+  }
+
+  .rodape {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 28px;
+    margin: 16px 6px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .estado { display: flex; align-items: center; gap: 10px; margin-right: auto; font-weight: 600; }
+  .luz { width: 10px; height: 10px; border-radius: 50%; background: var(--vermelho); flex: none; }
+  [data-estado="vivo"] .luz { background: var(--verde); }
+  [data-estado="quieto"] .luz { background: var(--ambar); }
+  .leitura { color: var(--apagado); }
+  .dica { margin: 10px 6px 0; color: var(--apagado); max-width: 62ch; }
+  .dica code { color: var(--texto); font: inherit; overflow-wrap: anywhere; }
+  [data-estado="vivo"] #dica, [data-estado="quieto"] #dica { display: none; }
+  [data-estado="vazio"] #uso { display: none; }
+  #entrada[data-falhou] { color: var(--ambar); }
+
+  button {
+    font: inherit;
+    color: var(--texto);
+    background: none;
+    border: 1px solid #4a545c;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--texto); }
+  button:focus-visible { outline: 2px solid var(--verde); outline-offset: 2px; }
+  button[disabled] { color: var(--apagado); cursor: default; border-color: #353d43; }
+</style>
+</head>
+<body>
+<main id="raiz" data-estado="vazio">
+  <div class="aparelho">
+    <canvas id="tela" width="800" height="480" role="img" aria-label="Tela da central MOI3"></canvas>
+    <div class="moldura">
+      <!-- códigos de org.dsi.ifc.keypanel.Constants; só o que a HMI atende nesta bancada -->
+      <div class="giratorio" role="group" aria-label="Botão de volume" data-tecla="17" data-rolar="-1">
+        <button type="button" class="passo" data-passo="-1" aria-label="Diminuir o volume">−</button>
+        <button type="button" class="botao" aria-label="Botão de volume: role para girar, clique para apertar" title="Volume: role para girar">Volume</button>
+        <button type="button" class="passo" data-passo="1" aria-label="Aumentar o volume">+</button>
+      </div>
+      <div class="teclas" role="group" aria-label="Teclas da central">
+        <button type="button" data-tecla="78">Menu</button>
+        <button type="button" data-tecla="15">Rádio</button>
+        <button type="button" data-tecla="1">Mídia</button>
+        <button type="button" data-tecla="3">Telefone</button>
+        <button type="button" data-tecla="6">Carro</button>
+        <button type="button" data-tecla="79">Clima</button>
+        <button type="button" data-tecla="86">Som</button>
+        <button type="button" data-tecla="4">Navegação</button>
+        <button type="button" data-tecla="7">Ajustes</button>
+        <button type="button" data-tecla="114">App</button>
+      </div>
+      <div class="giratorio" role="group" aria-label="Botão de seleção" data-tecla="16" data-rolar="1">
+        <button type="button" class="passo" data-passo="-1" aria-label="Item anterior">−</button>
+        <button type="button" class="botao" aria-label="Botão de seleção: role para girar, clique para apertar" title="Seleção: role para girar, clique para escolher">Seleção</button>
+        <button type="button" class="passo" data-passo="1" aria-label="Próximo item">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="volante">
+    <!-- o volante multifunção (teclado 4, KBD_MFW): as onze teclas que a tabela de teclas da HMI tem
+         para ele; os códigos são os KEY_MFW_* das mesmas constantes -->
+    <span class="nome" id="volante">Volante</span>
+    <div class="teclas" role="group" aria-labelledby="volante" data-teclado="4">
+      <button type="button" data-tecla="43" title="Volante: diminuir o volume">Vol −</button>
+      <button type="button" data-tecla="42" title="Volante: aumentar o volume">Vol +</button>
+      <button type="button" data-tecla="44" title="Volante: rolete da direita">Rolete</button>
+      <button type="button" data-tecla="57" title="Volante: mudo">Mudo</button>
+      <button type="button" data-tecla="47" title="Volante: faixa ou emissora anterior">Anterior</button>
+      <button type="button" data-tecla="46" title="Volante: próxima faixa ou emissora">Próxima</button>
+      <button type="button" data-tecla="49" title="Volante: seta para baixo" aria-label="Seta para baixo">▼</button>
+      <button type="button" data-tecla="48" title="Volante: seta para cima" aria-label="Seta para cima">▲</button>
+      <button type="button" data-tecla="45" title="Volante: fonte de áudio">Fonte</button>
+      <button type="button" data-tecla="50" title="Volante: comando de voz">Voz</button>
+      <button type="button" data-tecla="53" title="Volante: telefone">Telefone</button>
+    </div>
+  </div>
+  <div class="rodape">
+    <span class="estado"><span class="luz" aria-hidden="true"></span><span id="estado">Nenhum quadro ainda</span></span>
+    <span class="leitura" id="tamanho"></span>
+    <span class="leitura" id="ritmo"></span>
+    <span class="leitura" id="numero"></span>
+    <button id="salvar" type="button" disabled>Salvar quadro em PNG</button>
+  </div>
+  <p class="dica" id="uso">Use a tela com o mouse: clique para tocar, arraste para rolar.
+    Nos botões redondos, role para girar e clique para apertar.
+    <span id="entrada" aria-live="polite"></span></p>
+  <p class="dica" id="dica">Inicie a HMI no terminal, na pasta do projeto:
+    <code>sh referencia/ferramentas/mib3-sandbox/driver/ao_vivo.sh</code>.
+    A primeira tela aparece em cerca de um minuto.</p>
+</main>
+<script>
+  // O glhost grava frames/latest.ppm a cada troca de buffers e frames/seq.txt com
+  // "<número do quadro> <largura> <altura>". A página só busca o quadro quando o número muda.
+  const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
+  const el = id => document.getElementById(id);
+  let numero = -1, mudouEm = 0, recentes = [];
+
+  function desenha(buf) {
+    let p = 0;
+    const palavra = () => {
+      while (buf[p] <= 32) p++;
+      let s = '';
+      while (p < buf.length && buf[p] > 32) s += String.fromCharCode(buf[p++]);
+      return s;
+    };
+    if (palavra() !== 'P6') return false;
+    const w = +palavra(), h = +palavra();
+    palavra(); p++;
+    if (!w || !h || buf.length < p + w * h * 3) return false;
+    if (tela.width !== w || tela.height !== h) {
+      tela.width = w; tela.height = h;
+      tela.style.aspectRatio = w + ' / ' + h;
+    }
+    const img = ctx.createImageData(w, h), d = img.data;
+    for (let i = 0, j = p; i < d.length; i += 4, j += 3) {
+      d[i] = buf[j]; d[i + 1] = buf[j + 1]; d[i + 2] = buf[j + 2]; d[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    return true;
+  }
+
+  function mostra(estado, texto) {
+    el('raiz').dataset.estado = estado;
+    el('estado').textContent = texto;
+  }
+
+  async function passo() {
+    try {
+      const r = await fetch('frames/seq.txt?' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) {
+        mostra('vazio', 'Nenhum quadro ainda');
+      } else {
+        const [n, w, h] = (await r.text()).trim().split(/\s+/).map(Number);
+        const agora = performance.now();
+        if (n !== numero) {
+          const q = await fetch('frames/latest.ppm?' + n, { cache: 'no-store' });
+          if (q.ok && desenha(new Uint8Array(await q.arrayBuffer()))) {
+            if (n < numero) recentes = [];
+            recentes.push([agora, n]);
+            // idade real do quadro, pelo horário do arquivo no servidor: ao abrir a página com a
+            // HMI já parada numa tela, o estado certo é "sem quadro novo", não "ao vivo"
+            const gravado = Date.parse(r.headers.get('Last-Modified') || '');
+            const idade = isNaN(gravado) ? 0 : Math.max(0, Date.now() - gravado);
+            numero = n; mudouEm = agora - idade;
+            el('tamanho').textContent = w + ' × ' + h;
+            el('numero').textContent = 'quadro ' + n.toLocaleString('pt-BR');
+            el('salvar').disabled = false;
+          }
+        }
+        recentes = recentes.filter(x => agora - x[0] < 3000);
+        const parado = Math.round((agora - mudouEm) / 1000);
+        if (numero < 0) mostra('vazio', 'Nenhum quadro ainda');
+        else if (parado < 3) mostra('vivo', 'Ao vivo');
+        else mostra('quieto', 'Sem quadro novo há ' + parado + ' s');
+        if (recentes.length > 1 && parado < 3) {
+          const a = recentes[0], b = recentes[recentes.length - 1];
+          const fps = (b[1] - a[1]) / ((b[0] - a[0]) / 1000);
+          el('ritmo').textContent = fps.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' quadros/s';
+        } else el('ritmo').textContent = '';
+      }
+    } catch (e) {
+      mostra('vazio', 'Sem resposta do servidor local');
+    }
+    setTimeout(passo, numero < 0 ? 1000 : 80);   // sem quadro, pergunta devagar; ao vivo, 12 vezes por segundo
+  }
+
+  el('salvar').addEventListener('click', () => {
+    tela.toBlob(b => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'hmi-moi3-quadro-' + numero + '.png';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  });
+
+  // ---- Entrada: toque e teclas ----
+  // Cada evento vira uma linha de comando (formato no cabeçalho do driver/dsistub.c). A página
+  // manda ao servidor local, que acrescenta em entrada/comandos.txt; o dsistub, no container,
+  // lê o arquivo e publica o evento no barramento da central, como o controlador de toque faria.
+  const TECLADO = 13;                                 // KBD_TOUCHSCREEN_FRONT: a tela e as teclas ao redor dela
+  const SOLTA = 3, ENCOSTA = 4, ARRASTA = 5, TOQUE = 1;   // gestos que a HMI entende
+  const FOLGA = 8;         // o dedo treme: antes disso não é arrasto
+  const LIMITE = 25;       // além disso a HMI não aceita como clique (CLICK_THRESHOLD dela)
+  let fila = [], mandando = false;
+
+  async function manda(linha, rotulo) {
+    fila.push(linha);
+    delete el('entrada').dataset.falhou;
+    el('entrada').textContent = 'Último: ' + rotulo + '.';
+    if (mandando) return;
+    mandando = true;
+    while (fila.length) {
+      const lote = fila.splice(0).join('\n');      // o que acumulou vai junto, na ordem
+      try {
+        const r = await fetch('entrada', { method: 'POST', headers: { 'X-Moi3-Entrada': '1' }, body: lote });
+        if (!r.ok) throw new Error(r.status);
+      } catch (e) {
+        fila = [];
+        el('entrada').dataset.falhou = '';
+        el('entrada').textContent = 'A entrada não chegou à HMI. Encerre e rode o ao_vivo.sh de novo.';
+      }
+    }
+    mandando = false;
+  }
+
+  function ponto(ev) {
+    const r = tela.getBoundingClientRect();
+    const x = Math.round((ev.clientX - r.left) * tela.width / r.width);
+    const y = Math.round((ev.clientY - r.top) * tela.height / r.height);
+    return [Math.max(0, Math.min(tela.width - 1, x)), Math.max(0, Math.min(tela.height - 1, y))];
+  }
+
+  let dedo = null;
+  tela.addEventListener('pointerdown', ev => {
+    if (ev.button !== 0 || dedo || numero < 0) return;
+    ev.preventDefault();
+    tela.setPointerCapture(ev.pointerId);
+    const [x, y] = ponto(ev);
+    dedo = { id: ev.pointerId, x0: x, y0: y, x, y, arrastou: false, longe: false, ultimo: performance.now() };
+    manda(`gesto ${ENCOSTA} ${x} ${y}`, `toque em ${x}, ${y}`);
+  });
+  tela.addEventListener('pointermove', ev => {
+    if (!dedo || ev.pointerId !== dedo.id) return;
+    const [x, y] = ponto(ev), agora = performance.now();
+    const anda = Math.max(Math.abs(x - dedo.x0), Math.abs(y - dedo.y0));
+    if (anda > FOLGA) dedo.arrastou = true;
+    if (anda > LIMITE) dedo.longe = true;
+    if (!dedo.arrastou || (x === dedo.x && y === dedo.y) || agora - dedo.ultimo < 40) return;
+    dedo.x = x; dedo.y = y; dedo.ultimo = agora;
+    manda(`gesto ${ARRASTA} ${x} ${y}`, `arrastando em ${x}, ${y}`);
+  });
+  function levanta(ev, cancelado) {
+    if (!dedo || ev.pointerId !== dedo.id) return;
+    const [x, y] = ponto(ev);
+    // parado, o gesto termina como "toque" (a HMI trata como clique); se o dedo andou, só solta
+    if (!cancelado && !dedo.longe) manda(`gesto ${TOQUE} ${x} ${y} 1`, `toque em ${x}, ${y}`);
+    else manda(`gesto ${SOLTA} ${x} ${y}`, `arrasto até ${x}, ${y}`);
+    dedo = null;
+  }
+  tela.addEventListener('pointerup', ev => levanta(ev, false));
+  tela.addEventListener('pointercancel', ev => levanta(ev, true));
+
+  // As teclas ficam apertadas enquanto o botão estiver apertado, para a HMI ver o toque longo.
+  function tecla(b, codigo, nome, teclado = TECLADO) {
+    const aperta = () => {
+      if ('apertada' in b.dataset) return;
+      b.dataset.apertada = '';
+      manda(`tecla ${teclado} ${codigo} 1`, nome);
+    };
+    const larga = () => {
+      if (!('apertada' in b.dataset)) return;
+      delete b.dataset.apertada;
+      manda(`tecla ${teclado} ${codigo} 0`, nome);
+    };
+    b.addEventListener('pointerdown', ev => { if (ev.button === 0) { b.setPointerCapture(ev.pointerId); aperta(); } });
+    b.addEventListener('pointerup', larga);
+    b.addEventListener('pointercancel', larga);
+    b.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && !ev.repeat) { ev.preventDefault(); aperta(); } });
+    b.addEventListener('keyup', ev => { if (ev.key === 'Enter' || ev.key === ' ') larga(); });
+    b.addEventListener('blur', larga);
+  }
+  for (const b of document.querySelectorAll('.moldura .teclas button')) tecla(b, b.dataset.tecla, `tecla ${b.textContent}`);
+  // as do volante saem pelo teclado dele (4, KBD_MFW)
+  for (const b of document.querySelectorAll('.volante .teclas button'))
+    tecla(b, b.dataset.tecla, `tecla ${b.textContent} do volante`, b.parentElement.dataset.teclado);
+
+  // Os botões giratórios: girar manda o número de passos (negativo é para trás); apertar é uma
+  // tecla como as outras. Rolar em cima do botão gira; as setas do teclado e o − e o + também.
+  for (const g of document.querySelectorAll('.giratorio')) {
+    const codigo = g.dataset.tecla, botao = g.querySelector('.botao'), nome = botao.textContent.toLowerCase();
+    const sentido = +g.dataset.rolar;       // no volume, rolar para cima aumenta; na seleção, rolar para baixo avança
+    let angulo = 0, resto = 0, pendente = 0, relogio = null;
+    const gira = passos => {
+      if (!passos || numero < 0) return;
+      angulo += passos * 18;
+      botao.style.setProperty('--giro', angulo + 'deg');
+      pendente += passos;
+      if (relogio) return;                  // junta os passos de uma rolada rápida num evento só
+      relogio = setTimeout(() => {
+        manda(`encoder ${TECLADO} ${codigo} ${pendente}`, `botão de ${nome} ${pendente > 0 ? '+' : '−'}${Math.abs(pendente)}`);
+        pendente = 0; relogio = null;
+      }, 60);
+    };
+    tecla(botao, codigo, `botão de ${nome} apertado`);
+    botao.addEventListener('wheel', ev => {
+      ev.preventDefault();
+      resto += ev.deltaMode === 1 ? ev.deltaY * 40 : ev.deltaY;     // em linhas ou em pontos
+      const passos = Math.trunc(resto / 40);
+      resto -= passos * 40;
+      gira(passos * sentido);
+    }, { passive: false });
+    botao.addEventListener('keydown', ev => {
+      if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { ev.preventDefault(); gira(1); }
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { ev.preventDefault(); gira(-1); }
+    });
+    for (const p of g.querySelectorAll('.passo')) p.addEventListener('click', () => gira(+p.dataset.passo));
+  }
+
+  passo();
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+serviços: 19; atributos: 154; eventos: 347; pedidos: 235; mensagens: 732; campos: 1844; vetores: 338 (2887 folhas); constantes: 1016
+pedidos com resposta na tabela da HMI: 168; pedidos set… com regra de gravação (dedução): 7; campos devolvidos pelas respostas (dedução): 73
+DSIBluetooth: domínio 256, pedidos 1, eventos 2; 15 atributos, 36 eventos (15 de atributo), 21 pedidos
+  pedidos com resposta: 18; pedidos set…: 2, dos quais gravam atributo 2 (1 pela regra posicao, 1 pela regra nomes)
+DSIBluetoothLEDataChannel: domínio 256, pedidos 3, eventos 4; 0 atributos, 4 eventos (0 de atributo), 5 pedidos
+  pedidos com resposta: 3; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIBluetoothLE: domínio 256, pedidos 5, eventos 6; 7 atributos, 15 eventos (7 de atributo), 10 pedidos
+  pedidos com resposta: 7; pedidos set…: 1, dos quais gravam atributo 1 (1 pela regra posicao, 0 pela regra nomes)
+DSIObexAuthentication: domínio 256, pedidos 7, eventos 8; 0 atributos, 2 eventos (0 de atributo), 3 pedidos
+  pedidos com resposta: 0; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setAuthenticationInfo (api 1000): não há atributo ATTR_AUTHENTICATIONINFO
+DSIObjectPush: domínio 256, pedidos 9, eventos 10; 2 atributos, 7 eventos (2 de atributo), 7 pedidos
+  pedidos com resposta: 4; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSINFC: domínio 256, pedidos 11, eventos 12; 2 atributos, 3 eventos (2 de atributo), 3 pedidos
+  pedidos com resposta: 1; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIMobileEquipment: domínio 256, pedidos 1001, eventos 1002; 70 atributos, 122 eventos (70 de atributo), 63 pedidos
+  pedidos com resposta: 52; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  os pedidos saem pelo método auxiliar messageToBytes(api, mensagem), na interface 1001, para os domínios [256, 512]; pela instância (as que o anúncio liga):
+    instância 0: domínio [256]; em parte dos pedidos também [512] (desvio que não é pela instância)
+    instância 1: domínio [256]
+    instância 2: domínio [512] — NÃO é deste domínio: no carro quem responde por ela é outro processo
+  a tabela da HMI tem o pedido requestSetAudioConnectionVolume com resposta, mas a camada da LG não o manda por api nenhuma
+DSIMobileEquipmentTopology: domínio 256, pedidos 1003, eventos 1004; 2 atributos, 3 eventos (2 de atributo), 3 pedidos
+  pedidos com resposta: 1; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIMessaging: domínio 256, pedidos 1101, eventos 1102; 6 atributos, 38 eventos (6 de atributo), 28 pedidos
+  pedidos com resposta: 26; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setMessageReadStatusRequest (api 1005): não há atributo ATTR_MESSAGEREADSTATUSREQUEST
+DSIMessagingServiceConfiguration: domínio 256, pedidos 1103, eventos 1104; 13 atributos, 27 eventos (13 de atributo), 17 pedidos
+  evento setPhoneSystemRingingVolumeResponse (api 2005): a HMI o entrega pelo método setShortMessageValidityPeriodResponse do ouvinte
+  pedidos com resposta: 14 (1 com resposta que a camada da LG não entrega); pedidos set…: 5, dos quais gravam atributo 1 (1 pela regra posicao, 0 pela regra nomes)
+  pedido setPhoneSystemRingingVolumeRequest (api 1005): a HMI espera setPhoneSystemRingingVolumeResponse, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setPhoneSystemRingingVolumeRequest (api 1005): não há atributo ATTR_PHONESYSTEMRINGINGVOLUMEREQUEST
+  set sem regra de gravação: setPhoneSystemRingingTypeRequest (api 1006): não há atributo ATTR_PHONESYSTEMRINGINGTYPEREQUEST
+  set sem regra de gravação: setSMSCNumberRequest (api 1001): não há atributo ATTR_SMSCNUMBERREQUEST
+  set sem regra de gravação: setShortMessageValidityPeriodRequest (api 1004): não há atributo ATTR_SHORTMESSAGEVALIDITYPERIODREQUEST
+DSIAdb: domínio 256, pedidos 1201, eventos 1202; 7 atributos, 13 eventos (7 de atributo), 8 pedidos
+  pedidos com resposta: 6; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setLanguage (api 1000): não há atributo ATTR_LANGUAGE
+DSIAdbDataResolution: domínio 256, pedidos 1203, eventos 1204; 0 atributos, 2 eventos (0 de atributo), 4 pedidos
+  pedidos com resposta: 2; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIAdbEdit: domínio 256, pedidos 1205, eventos 1206; 2 atributos, 11 eventos (2 de atributo), 11 pedidos
+  pedidos com resposta: 9; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setSpeedDial (api 1005): não há atributo ATTR_SPEEDDIAL
+DSIAdbList: domínio 256, pedidos 1207, eventos 1208; 1 atributos, 4 eventos (1 de atributo), 4 pedidos
+  pedidos com resposta: 2; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setListStyle (api 1005): não há atributo ATTR_LISTSTYLE
+DSIAdbUserProfile: domínio 256, pedidos 1209, eventos 1210; 5 atributos, 11 eventos (5 de atributo), 8 pedidos
+  pedidos com resposta: 6; pedidos set…: 5, dos quais gravam atributo 3 (3 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setProfileName (api 1000): não há atributo ATTR_PROFILENAME
+  set sem regra de gravação: setPublicProfileVisibility (api 1005): não há atributo ATTR_PUBLICPROFILEVISIBILITY
+DSIAdbVCardExchange: domínio 256, pedidos 1211, eventos 1212; 2 atributos, 6 eventos (2 de atributo), 6 pedidos
+  evento updateExportCount (api 4): a HMI o entrega pelo método updateImportCount do ouvinte
+  pedidos com resposta: 4; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSIPhoneManager: domínio 4096, pedidos 600, eventos 600; 5 atributos, 20 eventos (5 de atributo), 13 pedidos
+  evento indicateDeviceDisconnectionInfo (api 3000): entrega por atributo 3000, mas não há constante ATTR_ com o número da api
+  evento indicateIncomingServiceRequestLimitExceeded (api 3001): entrega por atributo 3001, mas não há constante ATTR_ com o número da api
+  evento indicateGetTechnologySelection (api 3002): entrega por atributo 3002, mas não há constante ATTR_ com o número da api
+  evento indicateIncomingAAWLConnectionRequest (api 3003): entrega por atributo 3003, mas não há constante ATTR_ com o número da api
+  pedidos com resposta: 11; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+DSISmartphoneIntegration: domínio 4096, pedidos 600, eventos 602; 4 atributos, 5 eventos (0 de atributo), 1 pedidos
+  atributo 1 ATTR_DISCOVEREDDEVICES: sem evento que o atualize
+  atributo 2 ATTR_DEVICECONNECTIONSTATE: sem evento que o atualize
+  atributo 3 ATTR_SWAPSTATUS: sem evento que o atualize
+  atributo 4 ATTR_USBRESETACTIVE: sem evento que o atualize
+  pedidos com resposta: 0; pedidos set…: 1, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  os pedidos setNotification e clearNotification saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e clearNotification saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e clearNotification saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e connectDevice saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e connectDevice2 saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e disconnectDevice saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  os pedidos setNotification e requestFactorySettings saem com a mesma api -1 na camada da LG; o esquema fica com o primeiro
+  a tabela da HMI tem o pedido requestFactorySettings com resposta, mas a camada da LG não o manda por api nenhuma
+  set sem regra de gravação: setNotification (api -1): não há atributo ATTR_NOTIFICATION
+DSICarplay2: domínio 512, pedidos 606, eventos 606; 11 atributos, 18 eventos (11 de atributo), 20 pedidos
+  pedidos com resposta: 2; pedidos set…: 0, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  o despacho entrega os eventos deste serviço também pela interface 607 (o mesmo trecho da 606); o esquema usa a 606
+fora do esquema: 10 serviço(s) de que o despacho do domínio entrega eventos e que o anúncio dele não liga (são de outro dono)
+  DSIMediaBase: eventos na interface 201, pelo domínio 256
+  DSIMediaBrowser: eventos na interface 203, pelo domínio 256
+  DSIMediaOnline: eventos na interface 205, pelo domínio 256
+  DSIMediaPlayer: eventos na interface 207, pelo domínio 256
+  DSIMediaRecorder: eventos na interface 210, pelo domínio 256
+  DSIUPNPBrowser: eventos na interface 253, pelo domínio 256
+  DSIUPNPPlayer: eventos na interface 257, pelo domínio 256
+  DSISearch: eventos na interface 1302, pelo domínio 256
+  DSISearchDataProvider: eventos na interface 1304, pelo domínio 256
+  DSIMobileEquipment: eventos na interface 1002, pelo domínio 512
+avisos: 4
+  com.lge.mib3oi.dsi.smartphoneintegration.DSISmartphoneIntegrationImpl.connectDevice: interface 602, diferente de 600
+  com.lge.mib3oi.dsi.smartphoneintegration.DSISmartphoneIntegrationImpl.connectDevice2: interface 602, diferente de 600
+  com.lge.mib3oi.dsi.smartphoneintegration.DSISmartphoneIntegrationImpl.disconnectDevice: interface 602, diferente de 600
+  com.lge.mib3oi.dsi.smartphoneintegration.DSISmartphoneIntegrationImpl.requestFactorySettings: interface 602, diferente de 600

@@ -1,0 +1,19 @@
+# Imagem da bancada do sandbox MOI3 (sessão de modelagem do SoC, 11/10/2026).
+# Tudo vem do repositório oficial do Ubuntu (ports.ubuntu.com); nada é instalado no macOS.
+# Download autorizado pelo Lipe em 11/10/2026 ("Tudo no container").
+#   gcc/binutils/strace  compilar e observar os shims (kipc, GL)
+#   Mesa llvmpipe        OpenGL ES 3.2 por software, pro glhost do Marco 3
+#   qemu-system-arm      Marco 1: qemu-system-aarch64 -M virt (sem KVM no OrbStack = TCG)
+#   linux-image-virtual  kernel arm64 genérico do Ubuntu, pro Marco 1
+#   busybox-static/cpio/zstd/kmod  montar o initramfs do Marco 1
+# Build (sem contexto):  docker build -t moi3-bancada:1 - < driver/Dockerfile.bancada
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      gcc libc6-dev binutils file strace \
+      libegl1 libgles2 libgl1-mesa-dri libegl-dev libgles-dev \
+      qemu-system-arm \
+      linux-image-virtual \
+      busybox-static cpio zstd kmod \
+ && rm -rf /var/lib/apt/lists/*

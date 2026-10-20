@@ -1,0 +1,7 @@
+# moi3-bancada:rsi = a imagem da bancada do mss + python3, só pra rodar o mock VIWI (rsi_mock.py)
+# dentro do MESMO container/netns do mss, no 127.0.0.1 que o cliente RSI do mss procura.
+# O build usa rede (baixa o python3 do Ubuntu); o `docker run` da bancada segue --network none.
+FROM moi3-bancada:1
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3 \
+ && rm -rf /var/lib/apt/lists/*

@@ -1,0 +1,65 @@
+# sem-aparelho.txt — perfil do telefone de mentira: Bluetooth ligado, NENHUM aparelho conectado.
+# Item 7 do roteiro do simulador (12/10/2026). Estudo num computador; nada daqui vai para o carro.
+#
+# SIMULAÇÃO do começo ao fim: a bancada não tem rádio Bluetooth, aparelho pareado, agenda nem
+# mensagens. Nenhum valor daqui foi lido do carro, e não há nome, número nem contato de ninguém.
+# São só os estados que a tela mostra.
+#
+# Formato: o do carro de mentira (../veiculo/README.md). Os nomes de serviço, de evento e de campo
+# são os do gerado/esquema.txt desta pasta, e os números, os do gerado/constantes.txt. O que não
+# está aqui vai com o valor padrão: zero, lista vazia ou texto vazio, marcado como válido.
+
+# SIMULAÇÃO. O que a tela grava no serviço do Bluetooth é aceito e volta para ela, até a central
+# desligar: o estado ligado ou desligado (pela regra mais abaixo), o nome da central e o modo de
+# visibilidade (pelas regras do esquema, linhas G). Não há rádio Bluetooth: muda só o que a tela mostra.
+grava = DSIBluetooth
+
+# SIMULAÇÃO. O estado do Bluetooth da central: 0 = BTSTATE_ON, ligado. É o valor padrão, e está
+# escrito para ficar à vista. Com 2 (não funcional) ou 5 a HMI dá o telefone por inexistente e a
+# tecla Telefone mostra "Telefone indisponível." (AslTargetSystemFeaturesAndCoding.dsiBluetoothUpdateBTState).
+[DSIBluetooth.updateBTState]
+bTState = 0
+
+# SIMULAÇÃO. Ligar e desligar o Bluetooth pela tela ("Configurações do Bluetooth"): o pedido leva o
+# estado pedido (0 ligado, 1 desligado), que vai para o atributo de cima, e a resposta diz "feito".
+# Sem isto a HMI fica até 60 s no aviso "Aguarde…". Desligado, a tela do telefone passa a dizer que
+# o Bluetooth está desligado; a troca é instantânea, sem os estados "ligando" e "desligando".
+[DSIBluetooth.requestSwitchBTState -> updateBTState]
+bTState = btStateTarget
+[DSIBluetooth.responseSwitchBTState]
+
+# SIMULAÇÃO. O estado de ativação do aparelho: 1 = ACTIVATIONSTATE_NOT_ATTACHED, nenhum aparelho
+# conectado. Vale para as três instâncias do serviço (0 o aparelho principal, 1 o associado, 2 a do
+# CarPlay). O zero (INIT) a HMI ignora, e a tela do telefone não sai do lugar
+# (HsmPhonePhoneAvailability.setPrimaryActivationState).
+[DSIMobileEquipment.updateActivationState]
+activationState.telActivationState = 1
+
+# SIMULAÇÃO. Dois atributos em que o zero do valor padrão não é neutro.
+# O nível de bateria do aparelho: 255 = MEBATTERYCHARGELEVEL_UNKNOWN, sem informação. Com 0, que é
+# bateria vazia, a HMI abre o aviso de bateria do celular 13 s depois da partida, sem haver celular
+# (TargetASLPhoneGetter; visto na série "s" de 12/10/2026).
+[DSIMobileEquipment.updateBatteryChargeLevel]
+batteryChargeLevel = 255
+# O mudo do microfone: 1 = MICMUTESTATE_OFF, sem mudo (0 é mudo ligado). É o que a HMI pede na
+# partida (requestSetMICMuteState), e a resposta daqui diz "feito".
+[DSIMobileEquipment.updateMICMuteState]
+mICMuteState = 1
+
+# SIMULAÇÃO. Cinco pedidos de que a HMI espera resposta em até 10 s, na partida e ao andar pelas
+# telas do telefone. A seção de cada resposta, mesmo vazia, é o que faz o pedido ser respondido;
+# vazia quer dizer resultado 0, que nos quatro serviços é "feito" (RESULT_OK; no idioma da agenda a
+# HMI lê sucesso == 0). Sem elas fica um "DSI timeout occurred" por pedido no registro da HMI.
+# setAccessibleMode: a HMI põe a central visível para os celulares ao abrir a tela "nenhum aparelho
+# conectado". Aqui só a resposta sai; o atributo de visibilidade não muda (não há rádio Bluetooth).
+[DSIBluetooth.responseSetAccessibleMode]
+# requestSetMICMuteState: o mudo do microfone, que a HMI acerta na partida.
+[DSIMobileEquipment.responseSetMICMuteState]
+# requestSetIntelligentCallStatisticsConfiguration: como agrupar as listas de chamadas.
+[DSIMobileEquipment.responseSetIntelligentCallStatisticsConfiguration]
+# setLanguage: o idioma da agenda. A HMI espera por esta resposta para dar por feita a troca de
+# idioma da central (TargetASLOrganizerBaseFunctionality.dsiAdbSetLanguageResult).
+[DSIAdb.setLanguageResult]
+# requestReconnectSuspend: ao abrir e ao fechar a lista "Celulares conhecidos" a HMI manda o gerente
+# de aparelhos suspender e retomar a reconexão automática.
+[DSIPhoneManager.responseReconnectSuspend]

@@ -1,0 +1,32 @@
+[
+	{
+		"id":"9ca52bd5-02a1-4b50-b20d-28002da40557",
+		"name":"vehicle",
+		"activeUser": {
+			"id":"480d582b-5a55-47cc-a61b-ad078f19ca42",
+			"name":"level2 user",
+			"uri": "/usermanagement/users/480d582b-5a55-47cc-a61b-ad078f19ca42",
+			"authenticationLevel":"level2",
+			"idpUserId":"idpuser2",
+			"isLocked":false,
+			"isSpinReset":false,
+			"lastSync":"2018-03-07T12:01:42.123+09:00",
+			"securityMode":false,
+			"tokenStatus":"ok",
+			"userRole":"secondaryUser"
+		},
+		"identifiedUser": {
+			"id":"480d582b-5a55-47cc-a61b-ad078f19ca42",
+			"name":"level2 user",
+			"uri": "/usermanagement/users/480d582b-5a55-47cc-a61b-ad078f19ca42",
+			"authenticationLevel":"level2",
+			"idpUserId":"idpuser2",
+			"isLocked":false,
+			"isSpinReset":false,
+			"lastSync":"2018-03-07T12:01:42.123+09:00",
+			"securityMode":false,
+			"tokenStatus":"ok",
+			"userRole":"secondaryUser"
+		}
+	}
+]

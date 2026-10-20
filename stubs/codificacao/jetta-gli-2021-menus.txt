@@ -1,0 +1,35 @@
+# jetta-gli-2021-menus.txt — as funções dos menus do carro que o Lipe disse que a central dele tem.
+# Marco 14, 12/10/2026, à tarde. Estudo num computador; nada daqui vai para o carro.
+#
+# NÃO É LEITURA DO CARRO, e não serve de codificação para ele: é a lista de funções do carro da
+# adaptação do 5F (DID 0B1B; em cada byte o bit 7 é "Menu display") como o simulador a usa para
+# mostrar os menus que o Lipe citou de memória em 12/10/2026, às 17h31 (as perguntas e as respostas
+# estão no cabeçalho do stubs/veiculo/jetta-gli-2021-menus.txt, que é o par deste arquivo). O que a
+# adaptação do carro traz, só a leitura dela diz (pedida na ficha). O byte de cada função é o da
+# tabela-campos.tsv, tirada do firmware; a numeração é a do DID nesta bancada.
+# Que função faz cada menu existir foi medido no Marco 14 (modelagem-soc.md): a ligação entre o
+# menu que ele citou e a função desta lista é palpite do simulador, não leitura.
+# Pneus e Lane Assist ficam de fora (o primeiro ele não citou; o segundo depende da câmera).
+#
+# Entra no padrão do modo ao vivo (driver/ao_vivo.sh). Para desligar:  MENUS=0 sh driver/ao_vivo.sh
+
+# ---- "Luz" (dito pelo Lipe em 12/10/2026, de memória)
+0B1B @6.7+1 = 1      # ID_DISPLAY_EXTERIOR_ILLUMINATION: "Exterior illumination: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- "Estacionar e manobrar" (dito pelo Lipe em 12/10/2026, de memória)
+0B1B @2.7+1 = 1      # ID_DISPLAY_PDC: "Park distance control: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- "Espelho e limpador" (dito pelo Lipe em 12/10/2026, de memória), pelo limpador
+0B1B @12.7+1 = 1     # ID_DISPLAY_WIPER: "Windscreen wipers: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- "Abrir e fechar" (dito pelo Lipe em 12/10/2026, de memória)
+0B1B @15.7+1 = 1     # ID_DISPLAY_CENTRAL_LOCKING: "Central locking: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- ACC, no bloco "Assistentes" (dito pelo Lipe em 12/10/2026, de memória; o bloco foi visto na foto de 09/10/2026)
+0B1B @0.7+1 = 1      # ID_DISPLAY_ACC: "ACC: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- Front Assist, no bloco "Assistentes" (dito pelo Lipe em 12/10/2026, de memória)
+0B1B @3.7+1 = 1      # ID_DISPLAY_AWV: "AWV: Menu display"; a função é palpite do simulador para o menu existir
+
+# ---- detector de fadiga, no bloco "Assistentes" (dito pelo Lipe em 12/10/2026, de memória)
+0B1B @35.7+1 = 1     # ID_DISPLAY_WEARINESS_RECOGNITION: "Weariness recognition: Menu display"; a função é palpite do simulador para o menu existir

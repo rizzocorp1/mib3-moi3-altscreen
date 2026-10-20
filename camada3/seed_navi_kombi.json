@@ -1,0 +1,39 @@
+{
+  "_comment": "Estado que o navsd_app cria no boot (nativo), para o mss ter o que consumir na bancada. CONTRATO VIWI confirmado por RE (Display/RenderingSurface/StreamParameters::fromJSON, extractIds, prepareStreamsList): associacoes entre recursos sao OBJETOS {\"id\": ...}, nao strings; o GATE de prepareStreamsList casa rs.id contra display.renderingSurfaces (nao currentVisibleSurfaces). internalIdentifier=1000 = surface que o ivishare-stub expoe (mesmo id do CLI -m 1000); como name nao e surfaceid://, a fonte cai no internalIdentifier.",
+  "displays": [
+    {
+      "id": "navi-kombi-display",
+      "name": "navi-kombi-display",
+      "uri": "/displaymanagement/displays/navi-kombi-display",
+      "width": 1280,
+      "height": 480,
+      "renderingSurfaces": [{"id": "navi-kombi-renderingsurface"}],
+      "currentVisibleSurfaces": [{"id": "navi-kombi-renderingsurface"}]
+    }
+  ],
+  "renderingSurfaces": [
+    {
+      "id": "navi-kombi-renderingsurface",
+      "name": "navi-kombi-renderingsurface",
+      "uri": "/displaymanagement/renderingSurfaces/navi-kombi-renderingsurface",
+      "internalIdentifier": "1000",
+      "display": {"id": "navi-kombi-display"},
+      "topLeftX": 0,
+      "topLeftY": 0,
+      "width": 1280,
+      "height": 480,
+      "streamParameters": {"id": "navi-kombi-streamparameters"}
+    }
+  ],
+  "streamParameters": [
+    {
+      "id": "navi-kombi-streamparameters",
+      "name": "navi-kombi-streamparameters",
+      "uri": "/displaymanagement/streamParameters/navi-kombi-streamparameters",
+      "ip": "ff14::2:4",
+      "port": 42800,
+      "framerate": 30,
+      "resync": true
+    }
+  ]
+}

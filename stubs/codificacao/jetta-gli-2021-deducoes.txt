@@ -1,0 +1,17 @@
+# stubs/codificacao/jetta-gli-2021-deducoes.txt — APOSENTADO em 16/10/2026.
+#
+# Este arquivo guardava PALPITES de codificação/adaptação do 5F, de quando o carro ainda não tinha
+# autoscan. Em 14/10/2026 o módulo 5F foi lido (ODIS-Engineering + VAS6154A); os valores REAIS
+# foram para jetta-gli-2021.txt e, como o próprio arquivo previa ("quando houver autoscan... este
+# arquivo é apagado"), ele foi esvaziado.
+#
+# O autoscan CONFIRMOU todas as deduções que havia aqui — tipo de veículo (23 71), power stage,
+# navegação, faixa de FM = Brasil, CarPlay, e os menus board computer / serviço / relógio /
+# central unit master (0B1B) e as disponibilidades MFA / clock / serviço / unit master (0B1D).
+# E CORRIGIU uma: o carro TAMBÉM tem Android Auto ligado (a dedução o deixava em 0 porque a foto
+# não o mostrava). Valores reais e fonte em jetta-gli-2021.txt; histórico em
+# referencia/ferramentas/mib3-sandbox/painel-de-instrumentos.md (16/10/2026).
+#
+# Mantido VAZIO (sem linhas de codificação) de propósito: o chain do modo ao vivo
+# (driver/ao_vivo.sh e driver/m3_ao_vivo.sh) ainda lista este caminho; um arquivo vazio é no-op e
+# não quebra o chain. Não voltar a pôr palpite aqui — o que for do carro vai para jetta-gli-2021.txt.

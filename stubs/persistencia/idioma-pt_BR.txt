@@ -1,0 +1,12 @@
+# stubs/persistencia/idioma-pt_BR.txt — a central já nasce com o idioma em português do Brasil.
+#
+# É a linha que a própria HMI gravou na memória de estado (/data/lge/hmi/lsmval) quando o Lipe
+# trocou o idioma pela tela, em 11/10/2026, copiada da central ao vivo:
+#   0            tipo do valor, como o persistence-app grava
+#   1101         namespace do idioma (NamespaceLANG)
+#   10           chave (LANG_HMI)
+#   22 bytes     "pt_BR" (112 116 95 66 82) e 17 espaços (32). Os 5 primeiros são o idioma; o
+#                sexto é o tipo de voz (PersistableLsc)
+# Para outro idioma, trocar os cinco primeiros bytes pelo código dele em ASCII (en_GB, de_DE…);
+# a HMI só aceita idioma que o skin tenha.
+0 1101 10 112 116 95 66 82 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32 32

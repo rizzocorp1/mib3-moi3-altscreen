@@ -1,0 +1,102 @@
+# stubs/radio/fm-de-mentira.txt — o rádio de mentira da bancada: cinco emissoras de FM, três de AM
+# e um texto de rádio, tudo INVENTADO. Marcos 11 e 16, 12/10/2026. Estudo num computador; nada daqui
+# vai para o carro.
+#
+# SIMULAÇÃO do começo ao fim. Nada neste arquivo foi lido do Jetta nem de um sintonizador: as
+# frequências foram escolhidas à mão, os nomes não são de emissora nenhuma, e não há recepção nem
+# som. O sintonizador do carro mostraria as emissoras que a antena pega onde o carro está.
+#
+# Formato: o do perfil do carro de mentira (stubs/veiculo/README.md). Quem lê é o driver/radiostub.c,
+# com o esquema de stubs/radio/gerado/esquema.txt. Os números de faixa e de estado são constantes de
+# org.dsi.ifc.radio.DSIUnifiedTuner e estão em stubs/radio/gerado/constantes.txt.
+
+# O único serviço em que o que a HMI pede fica gravado, e só pela regra logo abaixo.
+grava = DSIUnifiedTuner
+
+# A HMI só manda sintonizar depois de o sintonizador confirmar que o rádio está em uso (lido em
+# StationSelectionManager e StateTopMainUnifiedRadio; medido na rodada b2). O pedido leva 1 = em
+# uso (DEVICEUSAGE_USED) ou 0 = livre, e o atributo devolve o mesmo número.
+[DSIUnifiedTuner.switchRadioUsage -> updateRadioUsageStatus]
+deviceUsage = deviceUsage
+
+# Som analógico (AUDIOSTATUS_ANALOG). SIMULAÇÃO: o zero do valor padrão não é nenhum dos estados.
+[DSIUnifiedTuner.updateAudioStatus]
+audioStatus = 1
+
+# A emissora em que o sintonizador diz estar ao ligar: a primeira da lista. Na prática quem escolhe
+# é a HMI, que logo na partida manda sintonizar a emissora que ela guardou (numa central sem
+# memória, o começo da faixa: 87,5 MHz, ou 76,1 MHz com a faixa "Brasil" na adaptação); daí em
+# diante vale o que for sintonizado pela tela.
+[DSIUnifiedTuner.updateSelectedStation]
+selectedStation.waveBand = 3                # WAVEBAND_FM
+selectedStation.frequency = 89100           # em kHz
+selectedStation.shortName = "TESTE 1"
+selectedStation.longName = "TESTE 1"
+selectedStation.piSId = 45057
+selectedStation.rds = 1
+
+# O texto de rádio (Marco 16). SIMULAÇÃO: um texto só, INVENTADO, que se diz de teste. O rádio de
+# mentira o manda, com o PI da emissora de agora, quando ela tem "radioText = 1" na lista abaixo; nas
+# outras manda o texto vazio, e a tela "Emissora" diz que não há texto. A origem 1 é
+# RADIOTEXTSOURCE_FM. No carro o texto vem da emissora, pelo RDS, e muda o tempo todo.
+[DSIUnifiedTuner.updateRadioText]
+radioText.radioText = "TEXTO DE RÁDIO DE TESTE"
+radioText.source = 1
+
+# A lista de emissoras de FM. SIMULAÇÃO: cinco frequências escolhidas à mão, em ordem, todas em
+# canal da faixa que a HMI chama de Brasil (de 76,1 a 107,9 MHz, de 200 em 200 kHz; valem também
+# na faixa padrão, de 87,5 a 108,0 MHz). Três têm nome, como as emissoras que transmitem RDS, e
+# duas não, como muitas no Brasil; essas a central mostra pela frequência.
+#
+# Para a central mostrar o nome na lista são precisas três coisas juntas, medidas na rodada c3 de
+# 12/10/2026: o nome no longName, rds = 1 e um PI que não seja -1. Só com o shortName, sem RDS ou
+# sem PI, a lista mostra a frequência. O nome vai nos dois campos porque o shortName é o que a
+# HMI usa quando só ele existe. Os PIs (0xB001 a 0xB003) são INVENTADOS, como os nomes.
+#
+# max TEM de ser o número de emissoras da lista: a camada da LG lê "max" emissoras desta mensagem
+# (UnifiedListControl.AddList) e só entrega a lista quando a conta fecha. Aqui é o das de FM.
+#
+# As emissoras de AM (Marco 16) vão nesta mesma lista, com waveBand = 1, depois das de FM. A HMI
+# recebe a lista de cada faixa numa mensagem à parte: quem separa é o rádio de mentira, na partida,
+# e ele acerta o "max" de cada uma. SIMULAÇÃO: três frequências escolhidas à mão, na grade que a
+# HMI usa na bancada (de 531 a 1602 kHz, de 9 em 9 kHz, a da Europa, porque a adaptação de AM da
+# identidade provisória está "sem ajuste"). Não têm nome nem PI: AM não tem RDS. Se o Jetta do
+# Brasil tem AM, e com que grade, não foi lido de lugar nenhum.
+[DSIUnifiedTuner.updateStationList]
+bandType = 2                                # BANDTYPE_FM
+max = 5
+stationList[0].waveBand = 3
+stationList[0].frequency = 89100
+stationList[0].shortName = "TESTE 1"
+stationList[0].longName = "TESTE 1"
+stationList[0].piSId = 45057
+stationList[0].rds = 1
+stationList[0].radioText = 1                # tem texto de rádio (o de cima)
+stationList[1].waveBand = 3
+stationList[1].frequency = 93700
+stationList[1].shortName = "TESTE 2"
+stationList[1].longName = "TESTE 2"
+stationList[1].piSId = 45058
+stationList[1].rds = 1
+stationList[2].waveBand = 3
+stationList[2].frequency = 98500
+stationList[2].piSId = -1
+stationList[3].waveBand = 3
+stationList[3].frequency = 102900
+stationList[3].shortName = "TESTE 3"
+stationList[3].longName = "TESTE 3"
+stationList[3].piSId = 45059
+stationList[3].rds = 1
+stationList[3].radioText = 1
+stationList[4].waveBand = 3
+stationList[4].frequency = 105300
+stationList[4].piSId = -1
+stationList[5].waveBand = 1                 # WAVEBAND_AM
+stationList[5].frequency = 594              # em kHz
+stationList[5].piSId = -1
+stationList[6].waveBand = 1
+stationList[6].frequency = 1008
+stationList[6].piSId = -1
+stationList[7].waveBand = 1
+stationList[7].frequency = 1305
+stationList[7].piSId = -1

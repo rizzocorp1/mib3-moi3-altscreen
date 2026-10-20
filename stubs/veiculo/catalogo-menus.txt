@@ -1,0 +1,336 @@
+# catalogo-menus.txt — CATÁLOGO, NÃO É O CARRO: os outros menus do carro, do lado do veículo.
+# Marco 14, 12/10/2026. Estudo num computador; nada daqui vai para o carro.
+#
+# ESTE ARQUIVO NÃO ENTRA EM NENHUMA PARTIDA POR PADRÃO. Ele diz "esta opção existe" para TODAS as
+# opções que o firmware conhece em cinco menus de "Configurações do veículo" e nos assistentes do
+# app "Assistentes", para se ver na tela o que a HMI sabe mostrar. Nenhuma linha é palpite sobre
+# o Jetta: há aqui farol a laser, cortina elétrica e ACC, e a ficha do carro não diz quais destas
+# opções ele tem. O valor de cada coisa fica no padrão do carro de mentira, que é zero ("Off",
+# "Cedo", caixas desmarcadas): isso também não é ajuste de carro nenhum.
+#
+# Serve para comparar a tela do simulador com a do carro, item por item, e para tirar daqui,
+# para o jetta-gli-2021-deducoes.txt, só as linhas das opções que o carro tiver.
+# Precisa do par dele na codificação (stubs/codificacao/catalogo-menus.txt): a HMI só pede estas
+# opções ao carro quando a função está na adaptação, e a função sem as opções não cria o menu.
+#
+# Para ver, numa central de teste à parte (não toca na central ao vivo):
+#   sh driver/m14_menus.sh             sobe a central "menus" com este catálogo
+#   sh janela/abre.sh --container moi3-m8-menus
+#   sh driver/m14_menus.sh desce
+#
+# GERADO por driver/m14_catalogo_menus.py do esquema (gerado/esquema.txt); não editar à mão. Os
+# nomes das opções são os do firmware. 2 = VIEWOPTIONSTATE_NORMAL_OPERATION: existe e pode ser usada.
+
+# ================================================================================================
+# Configurações do veículo: itens da lista que abre em Veículo > Config.
+# ================================================================================================
+
+# ---- "Pneus" (indicador de controle dos pneus, com o botão SET)
+[DSICarComfort.updateRDKViewOptions]
+viewOptions.tireDisplay.state = 2
+viewOptions.tireChanged.state = 2
+viewOptions.pressureChanged.state = 2
+viewOptions.systemOnOff.state = 2
+viewOptions.speedLimit.state = 2
+viewOptions.tireSetup.state = 2
+viewOptions.pressureLevel.state = 2
+viewOptions.differentialPressure.state = 2
+viewOptions.residualBatteryLifetime.state = 2
+viewOptions.actualState.state = 2
+viewOptions.actualPressure.state = 2
+viewOptions.requiredPressure.state = 2
+viewOptions.actualTemperature.state = 2
+viewOptions.setFactoryDefault.state = 2
+viewOptions.selectedWheelType.state = 2
+
+# ---- "Luz", pela iluminação externa (assistência de luzes, horário para ligar, luz de circulação diurna, modo de viagem…)
+[DSICarLight.updateExtLightViewOptions]
+extLightViewOptions.comingHome.state = 2
+extLightViewOptions.leavingHome.state = 2
+extLightViewOptions.switchOnSensitivity.state = 2
+extLightViewOptions.dayLight.state = 2
+extLightViewOptions.touristLight.state = 2
+extLightViewOptions.motorwayBlinking.state = 2
+extLightViewOptions.adaptiveLightSystem.state = 2
+extLightViewOptions.headlightSystem.state = 2
+extLightViewOptions.glidingLightSystem.state = 2
+extLightViewOptions.maskedHighBeam.state = 2
+extLightViewOptions.automaticLight.state = 2
+extLightViewOptions.extLightSetFactoryDefault.state = 2
+extLightViewOptions.extLightSetFactoryDefault2.state = 2
+extLightViewOptions.laserLight.state = 2
+extLightViewOptions.signatureLight.state = 2
+extLightViewOptions.headlightRange.state = 2
+extLightViewOptions.advancedLeavingHome.state = 2
+extLightViewOptions.advancedComingHome.state = 2
+extLightViewOptions.lightGuidance.state = 2
+extLightViewOptions.guidanceProjection.state = 2
+extLightViewOptions.lightAssistance.state = 2
+extLightViewOptions.assistProjection.state = 2
+extLightViewOptions.extLightAmbientLight.state = 2
+extLightViewOptions.extLightManuelActivationCHO.state = 2
+extLightViewOptions.animationRearLight.state = 2
+extLightViewOptions.animationTurnLight.state = 2
+
+# ---- "Luz", pela iluminação do interior (o mesmo item; é a parte de baixo da mesma tela)
+[DSICarLight.updateIntLightViewOptions]
+intLightViewOptions.intLightState.state = 2
+intLightViewOptions.intLightColour.state = 2
+intLightViewOptions.intLightEnvironment.state = 2
+intLightViewOptions.intLightTemperature.state = 2
+intLightViewOptions.intLightSpeed.state = 2
+intLightViewOptions.intLightBrightness.state = 2
+intLightViewOptions.intLightIlluminationSet1.state = 2
+intLightViewOptions.intLightIlluminationSet2.state = 2
+intLightViewOptions.intLightIlluminationSet3.state = 2
+intLightViewOptions.intLightIlluminationSet4.state = 2
+intLightViewOptions.intLightIlluminationSet5.state = 2
+intLightViewOptions.intLightIlluminationSet6.state = 2
+intLightViewOptions.intLightIlluminationSet7.state = 2
+intLightViewOptions.intLightIlluminationSet8.state = 2
+intLightViewOptions.intLightIlluminationProfile1.state = 2
+intLightViewOptions.intLightIlluminationProfile2.state = 2
+intLightViewOptions.intLightIlluminationProfile3.state = 2
+intLightViewOptions.intLightIlluminationProfile4.state = 2
+intLightViewOptions.intLightIlluminationProfile5.state = 2
+intLightViewOptions.intLightIlluminationProfile6.state = 2
+intLightViewOptions.intLightIlluminationProfile7.state = 2
+intLightViewOptions.intLightIlluminationProfile8.state = 2
+intLightViewOptions.intLightActiveProfile.state = 2
+intLightViewOptions.intLightAmbientLightColor.state = 2
+intLightViewOptions.intLightContourLightColor.state = 2
+# intLightViewOptions.intLightRGBColorList.state fica de fora: com ela a HMI pede a lista de cores da luz ambiente (requestIntLightRGBColorList), que o carro de mentira não sabe responder: tempos esgotados de 10 s
+intLightViewOptions.intLightFollowUpTime.state = 2
+intLightViewOptions.intLightSetFactoryDefault.state = 2
+intLightViewOptions.intLightSetFactoryDefault2.state = 2
+intLightViewOptions.intLightDoorContact.state = 2
+intLightViewOptions.intLightReadingLightSpecialPos.state = 2
+intLightViewOptions.intLightReadingLightSwitch.state = 2
+intLightViewOptions.intLightReadingLightSetupZoneLeft.state = 2
+intLightViewOptions.intLightReadingLightSetupZoneRight.state = 2
+intLightViewOptions.intLightFunctionalAmbianceLightingList.state = 2
+intLightViewOptions.intLightColorScheme.state = 2
+intLightViewOptions.intLightSchemeControl.state = 2
+
+# ---- "Estacionar e manobrar" (auxílio de estacionamento: ativar automaticamente, volumes…)
+[DSICarParkingSystem.updateParkingSystemViewOptions]
+parkingSystemViewOptions.pdcSystemOnOff.state = 2
+parkingSystemViewOptions.pdcVolumeFront.state = 2
+parkingSystemViewOptions.pdcFrequencyFront.state = 2
+parkingSystemViewOptions.pdcVolumeRear.state = 2
+parkingSystemViewOptions.pdcFrequencyRear.state = 2
+parkingSystemViewOptions.pdcVolumeRight.state = 2
+parkingSystemViewOptions.pdcFrequencyRight.state = 2
+parkingSystemViewOptions.pdcVolumeLeft.state = 2
+parkingSystemViewOptions.pdcFrequencyLeft.state = 2
+parkingSystemViewOptions.pdcDefaultParkingMode.state = 2
+parkingSystemViewOptions.pdcMute.state = 2
+parkingSystemViewOptions.pdcAutoActivation.state = 2
+parkingSystemViewOptions.pdcSoundReproduction.state = 2
+parkingSystemViewOptions.pdcFlankGuard.state = 2
+parkingSystemViewOptions.pdcSoundFront.state = 2
+parkingSystemViewOptions.pdcSoundRear.state = 2
+parkingSystemViewOptions.pdcSoundLeft.state = 2
+parkingSystemViewOptions.pdcSoundRight.state = 2
+parkingSystemViewOptions.pdcOffroadMode.state = 2
+parkingSystemViewOptions.pdcParkboxVisualisation.state = 2
+parkingSystemViewOptions.pdcOPSVisualisationPosition.state = 2
+parkingSystemViewOptions.pdcPLAStatus.state = 2
+parkingSystemViewOptions.pdcPLABargraph.state = 2
+parkingSystemViewOptions.pdcPLAParkmodeSelection.state = 2
+parkingSystemViewOptions.pdcPLASystemState.state = 2
+parkingSystemViewOptions.vpsSystemOnOff.state = 2
+parkingSystemViewOptions.vpsColor.state = 2
+parkingSystemViewOptions.vpsBrightness.state = 2
+parkingSystemViewOptions.vpsContrast.state = 2
+parkingSystemViewOptions.vpsFollowUpTime.state = 2
+parkingSystemViewOptions.vpsOPSOverlay.state = 2
+parkingSystemViewOptions.vpsDynamicParkingMode.state = 2
+parkingSystemViewOptions.vpsDefaultView.state = 2
+parkingSystemViewOptions.vpsDefaultModeRV.state = 2
+parkingSystemViewOptions.vpsDefaultModeFV.state = 2
+parkingSystemViewOptions.vpsDefaultModeSV.state = 2
+parkingSystemViewOptions.vpsDefaultModeBV.state = 2
+parkingSystemViewOptions.vpsExtCamConfig.state = 2
+parkingSystemViewOptions.vpsExtCamManActivation.state = 2
+parkingSystemViewOptions.vps3DBirdview.state = 2
+parkingSystemViewOptions.vpsSystemState.state = 2
+parkingSystemViewOptions.pdcSetFactoryDefault.state = 2
+parkingSystemViewOptions.vpsSetFactoryDefault.state = 2
+parkingSystemViewOptions.araCurrentTrailerAngle.state = 2
+parkingSystemViewOptions.araTargetTrailerAngle.state = 2
+parkingSystemViewOptions.pdcManeuverAssistConfig.state = 2
+parkingSystemViewOptions.pdcManeuverAssist.state = 2
+parkingSystemViewOptions.pdcContinueDrivingAssist.state = 2
+parkingSystemViewOptions.pdcIpaConfig.state = 2
+parkingSystemViewOptions.pdcPiloPaSystemStatePP.state = 2
+parkingSystemViewOptions.pdcPiloPaSystemStateGP.state = 2
+parkingSystemViewOptions.vpsCameraCleaning.state = 2
+parkingSystemViewOptions.vpsRimProtection.state = 2
+parkingSystemViewOptions.araSystemState.state = 2
+parkingSystemViewOptions.pdcSystemState.state = 2
+parkingSystemViewOptions.pdcPLAParksideSelection.state = 2
+parkingSystemViewOptions.vpsGuidelines.state = 2
+parkingSystemViewOptions.vpsSwitch2D3D.state = 2
+parkingSystemViewOptions.vpsFavoriteList.state = 2
+parkingSystemViewOptions.araRemoteARASystemState.state = 2
+
+# ---- "Espelho e limpador", pelos espelhos
+[DSICarComfort.updateMirrorViewOptions]
+viewOptions.mirrorLowering.state = 2
+viewOptions.mirrorSyncAdjust.state = 2
+viewOptions.mirrorFolding.state = 2
+viewOptions.mirrorDimming.state = 2
+viewOptions.mirrorHeating.state = 2
+viewOptions.mirrorSetFactoryDefault.state = 2
+
+# ---- "Espelho e limpador", pelo limpador (o mesmo item)
+# sozinho, faz aparecer também "Abrir e fechar": a opção easyEntrySteeringColumn do limpador é mostrada lá (OpenCloseViewOptionListenerImpl.updateWiperViewOptions)
+[DSICarComfort.updateWiperViewOptions]
+wiperViewOptions.wiperServicePosition.state = 2
+wiperViewOptions.wiperRainSensorOnOff.state = 2
+wiperViewOptions.wiperRainSensorConfig.state = 2
+wiperViewOptions.wiperRearWiping.state = 2
+wiperViewOptions.wiperTearsWiping.state = 2
+wiperViewOptions.wiperWinterPosition.state = 2
+wiperViewOptions.easyEntrySteeringColumn.state = 2
+wiperViewOptions.wiperSetFactoryDefault.state = 2
+wiperViewOptions.wiperCameraCleaning.state = 2
+
+# ---- "Abrir e fechar" (acionamento das janelas e travamento central)
+# sozinho, faz aparecer também o item "Luz": a opção turnIndRepeat das travas alimenta uma linha da tela de luz, a do pisca de conforto, pelo nome do método (LightDevice.addMappingComfortBlinking)
+[DSICarComfort.updateDoorLockingViewOptions]
+doorLockingViewOptions.message.state = 2
+doorLockingViewOptions.lockStatus.state = 2
+doorLockingViewOptions.windowStatus.state = 2
+doorLockingViewOptions.unlockingMode.state = 2
+doorLockingViewOptions.autoLock.state = 2
+doorLockingViewOptions.clBootLock.state = 2
+doorLockingViewOptions.mirrorProtection.state = 2
+doorLockingViewOptions.lockingConfirmation.state = 2
+doorLockingViewOptions.comfortOpen.state = 2
+doorLockingViewOptions.rainClosing.state = 2
+doorLockingViewOptions.rearBlind.state = 2
+doorLockingViewOptions.theftWarning.state = 2
+doorLockingViewOptions.autoUnlock.state = 2
+doorLockingViewOptions.doorLockingSetFactoryDefault.state = 2
+doorLockingViewOptions.clBootOpen.state = 2
+doorLockingViewOptions.bootOpen.state = 2
+doorLockingViewOptions.bootClose.state = 2
+doorLockingViewOptions.remoteLockUnlock.state = 2
+doorLockingViewOptions.remoteBlinking.state = 2
+doorLockingViewOptions.remoteHorn.state = 2
+doorLockingViewOptions.userList.state = 2
+doorLockingViewOptions.activeUser.state = 2
+doorLockingViewOptions.userProfileOnOff.state = 2
+doorLockingViewOptions.userProfileControl.state = 2
+doorLockingViewOptions.windowAutoClose.state = 2
+doorLockingViewOptions.blindsControl.state = 2
+doorLockingViewOptions.blindsControlExtended.state = 2
+doorLockingViewOptions.leftSideBlindControl.state = 2
+doorLockingViewOptions.rightSideBlindControl.state = 2
+doorLockingViewOptions.prompt.state = 2
+doorLockingViewOptions.turnIndRepeat.state = 2
+doorLockingViewOptions.keyless.state = 2
+doorLockingViewOptions.keylessAdvanced.state = 2
+doorLockingViewOptions.vehicleLockControl.state = 2
+doorLockingViewOptions.vehicleUnLockControl.state = 2
+doorLockingViewOptions.frontHoodControl.state = 2
+doorLockingViewOptions.controlOpen.state = 2
+doorLockingViewOptions.controlClose.state = 2
+doorLockingViewOptions.bootOpenState.state = 2
+doorLockingViewOptions.allWindowAutomatic.state = 2
+
+# ================================================================================================
+# Assistentes: o app "Assistentes" da grade de menus (tela IQ.DRIVE) e a lista "Configurações da assistência ao condutor" dele
+# ================================================================================================
+
+# ---- "ACC (contr. autom. de dist.)"
+[DSICarDriverAssistance.updateACCViewOptions]
+aCCViewOptions.gongState.state = 2
+aCCViewOptions.gongVolume.state = 2
+aCCViewOptions.timegap.state = 2
+aCCViewOptions.drivingProgram.state = 2
+aCCViewOptions.defaultMode.state = 2
+aCCViewOptions.curveAssist.state = 2
+aCCViewOptions.speedLimitAdoption.state = 2
+aCCViewOptions.speedLimitOffset.state = 2
+aCCViewOptions.trafficJamAssist.state = 2
+aCCViewOptions.distanceWarning.state = 2
+aCCViewOptions.setFactoryDefault.state = 2
+aCCViewOptions.paccSensibility.state = 2
+aCCViewOptions.paccMaxSpeed.state = 2
+aCCViewOptions.paccMeanVelocity.state = 2
+aCCViewOptions.paccMeanConsumption.state = 2
+aCCViewOptions.paccCoastingPercentage.state = 2
+aCCViewOptions.paccDrivingProgram.state = 2
+aCCViewOptions.paccSystemState.state = 2
+aCCViewOptions.crossRail.state = 2
+aCCViewOptions.turnAssist.state = 2
+aCCViewOptions.evasiveSteeringSupport.state = 2
+aCCViewOptions.distanceWarningTimeGap.state = 2
+aCCViewOptions.curveAssistExtended.state = 2
+aCCViewOptions.trafficJamAssistControl.state = 2
+aCCViewOptions.trafficJamTailEndAssist.state = 2
+
+# ---- "Front Assist"
+[DSICarDriverAssistance.updateAWVViewOptions]
+aWVViewOptions.system.state = 2
+aWVViewOptions.warning.state = 2
+aWVViewOptions.gong.state = 2
+aWVViewOptions.gongVolume.state = 2
+aWVViewOptions.brakeJerk.state = 2
+aWVViewOptions.emergencyBrake.state = 2
+aWVViewOptions.distanceWarning.state = 2
+aWVViewOptions.warningTimegap.state = 2
+aWVViewOptions.setFactoryDefault.state = 2
+
+# ---- "Ass. perm. faixa (Lane Assist)" e "Emergency Assist"
+# é o campo que o LaneAssistService consulta (isDeviceCoded); sem as opções o app aparece e a lista fica vazia
+[DSICarDriverAssistance.updateLDWHCAViewOptions]
+lDWHCAViewOptions.hCAToleranceLevel.state = 2
+lDWHCAViewOptions.lDWSteeringWheelVibration.state = 2
+lDWHCAViewOptions.hCAInterventionStyle.state = 2
+lDWHCAViewOptions.lDWWarningTime.state = 2
+lDWHCAViewOptions.ldwhcaSetFactoryDefault.state = 2
+lDWHCAViewOptions.ldwhcaSystemOnOff.state = 2
+lDWHCAViewOptions.ldwhcaWarningSound.state = 2
+lDWHCAViewOptions.ldwOnOff.state = 2
+lDWHCAViewOptions.ldwhcaEmergencyAssist.state = 2
+lDWHCAViewOptions.ldwhcaSportDriveRecognition.state = 2
+lDWHCAViewOptions.ldwhcaRequestEmergencyAssist.state = 2
+lDWHCAViewOptions.ldwhcaCutCorner.state = 2
+lDWHCAViewOptions.ldwhcaLaneChange.state = 2
+
+# ---- "Side Assist"
+# as opções exitAssist e rcta deste serviço fazem aparecer também "Estacionar e manobrar" na lista de configurações do veículo (ParkingDevice.updateSWAViewOptions)
+[DSICarDriverAssistance.updateSWAViewOptions]
+sWAViewOptions.brightness.state = 2
+sWAViewOptions.warningTime.state = 2
+sWAViewOptions.frequence.state = 2
+sWAViewOptions.system.state = 2
+sWAViewOptions.gongState.state = 2
+sWAViewOptions.gongVolume.state = 2
+sWAViewOptions.rcta.state = 2
+sWAViewOptions.exitAssist.state = 2
+sWAViewOptions.rctaBrakeIntervention.state = 2
+
+# ---- "Sist. reconh. sinaliz. trânsito" e "Reconhecimento de reboque"
+[DSICarDriverAssistance.updateTSDViewOptions]
+tSDViewOptions.systemOnOff.state = 2
+tSDViewOptions.trailerDetection.state = 2
+tSDViewOptions.roadSign.state = 2
+tSDViewOptions.roadSignFilter.state = 2
+tSDViewOptions.tsdSetFactoryDefault.state = 2
+tSDViewOptions.speedWarningThreshold.state = 2
+tSDViewOptions.trailerSpeedLimit.state = 2
+tSDViewOptions.systemMessages.state = 2
+tSDViewOptions.speedWarnAcoustics.state = 2
+
+# ---- "Sistema reconh. de cansaço"
+[DSICarDriverAssistance.updateMKEViewOptions]
+mKEViewOptions.systemOnOff.state = 2
+mKEViewOptions.mkeSetFactoryDefault.state = 2
+mKEViewOptions.message.state = 2
+mKEViewOptions.restAreaRecommendation.state = 2
+mKEViewOptions.drivingTime.state = 2

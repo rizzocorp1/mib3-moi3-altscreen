@@ -1,0 +1,85 @@
+# carro-parado.txt — o cenário do simulador: um carro ligado e parado.
+# Marco 8, 11/10/2026. Estudo num computador; nada daqui vai para o carro.
+#
+# Aqui só entra o que é escolha do simulador e vale para qualquer carro: a hora de verdade, o
+# carro parado, o freio de estacionamento puxado. O que é do Jetta fica nos outros dois arquivos
+# (jetta-gli-2021.txt, o que foi lido do carro; jetta-gli-2021-deducoes.txt, os palpites).
+# Formato: cabeçalho do driver/veiculostub.c. Nomes de serviços, eventos e campos: gerado/esquema.txt.
+# Números das constantes: gerado/constantes.txt.
+
+fuso = -3                      # hora de Brasília: UTC−3, sem horário de verão desde 2019
+grava = DSICarTimeUnitsLanguage            # serviços em que o que a tela grava é aceito: o do relógio e das unidades (ver o fim do arquivo)
+ignora = DSICarTimeUnitsLanguage.setMenuLanguage   # menos o idioma do painel: atendê-lo põe a HMI em laço (ver o fim do arquivo)
+
+# ---- relógio: a hora e a data do computador, uma mensagem nova a cada segundo
+# A HMI só aceita a hora depois de receber a data, a hora E as opções de exibição com hora e
+# data existentes (AslTargetSystemDate.updateTimeDateValidity; medido na rodada c3 de 11/10/2026).
+# Por isso as duas opções mínimas ficam aqui, e não com os palpites do Jetta.
+[DSICarTimeUnitsLanguage.updateClockViewOptions]
+clockViewOptions.time.state = 2            # 2 = VIEWOPTIONSTATE_NORMAL_OPERATION: existe e pode ser usada
+clockViewOptions.date.state = 2
+
+[DSICarTimeUnitsLanguage.updateClockDate]
+date.year = @ano2000                       # a HMI soma 2000 (AslTargetSystemDate.updateClockDate)
+date.month = @mes
+date.day = @dia
+
+[DSICarTimeUnitsLanguage.updateClockTime]
+time.hours = @hora
+time.minutes = @minuto
+time.seconds = @segundo
+time.timeZone = -3                         # horas em relação ao UTC; a HMI procura o fuso numa tabela dela
+
+# ---- carro parado
+# Sem isto o valor padrão diz "em movimento": a HMI lê standstill = false como carro andando
+# (AslTargetSystemVehicleStates: setPropertyDrivingState(!standstill)).
+[DSIGeneralVehicleStates.updateVehicleStandstill]
+standstill = 1
+
+[DSIGeneralVehicleStates.updateParkingBrake]
+parkingBrakeEngaged = 1                    # freio de estacionamento puxado
+
+# Os limites de velocidade (updateCarVelocityThreshold e os outros …VelocityThreshold) ficam no
+# valor padrão: false = limite não ultrapassado, que é o certo para um carro parado.
+
+# ---- o que a tela grava (Marco 9, 11/10/2026)
+# Com o ajuste "grava", lá em cima, os pedidos set… do serviço de relógio e unidades trocam o
+# valor guardado e a atualização do atributo volta para a HMI: acertar a hora, a data e o fuso e
+# trocar as unidades pela tela passa a ter efeito (conferido na tela em 11/10/2026; a fonte de
+# referência e os formatos usam a mesma regra e não foram conferidos). Nada é gravado NESTE
+# arquivo. Desde 12/10/2026, no modo ao vivo, o que a tela grava vai para o arquivo de estado do
+# carro de mentira (ao-vivo/memoria/veiculo/estado.txt), e a partida seguinte o aplica por cima
+# destes perfis: a unidade escolhida volta, e a hora volta adiantada do tempo que passou. Nas
+# centrais de teste e no lançador direto continua valendo só até a central desligar, salvo pedido
+# (stubs/veiculo/README.md, "O estado"). Aqui estava "vale até a central desligar", sem exceção.
+# O que cada pedido grava está nas linhas G do gerado/esquema.txt. Falta uma ligação que o esquema
+# não tem como deduzir: a tela mostra o fuso que vem DENTRO da mensagem da hora
+# (AslTargetSystemDate.updateClockTime chama processDSIUpdateTimeZoneOffset(time.timeZone)), e não
+# o atributo de fuso. SIMULAÇÃO: o fuso novo vai para os dois lugares e a hora não é recalculada.
+# O que o painel do carro faz com a hora quando o fuso muda não está no código da HMI.
+[DSICarTimeUnitsLanguage.setClockTimeZoneOffset -> updateClockTime]
+time.timeZone = offset
+
+# O idioma do painel fica de fora (ajuste "ignora", lá em cima). Na partida a HMI manda o painel
+# trocar de idioma (setMenuLanguage) e trata a atualização do atributo como a resposta. Com a
+# resposta, em 1 de 9 partidas de 11/10/2026 (rodada n4) ela entrou em laço: pediu o idioma 1,
+# recebeu, pediu o 26, recebeu, pediu o 1… 222 mil vezes em 75 s. Lido no código
+# (AslTargetLscTNGBordComputerLAC): uma regra quer o idioma da tela e outra quer o último que ela
+# mesma pediu ao painel, e os dois diferem quando a memória da central não traz o idioma do
+# painel, que é o caso da memória de partida da bancada. Sem resposta, como até o Marco 8, a HMI
+# pede uma vez e para. O idioma do painel continua o do perfil de deduções.
+
+# ---- pedidos da partida que têm resposta com prazo: as três listas de motivos do start-stop
+# A HMI as pede porque o valor padrão do atributo que anuncia cada lista chega marcado como
+# válido (HsmTargetCarService.dsiCarEcoUpdateStartStop…ListUpdateInfo). Sem resposta ela registra
+# "DSI timeout occurred" depois de 10 s. SIMULAÇÃO: listas vazias, ou seja, nenhum motivo.
+# A seção de cada resposta é o que faz o pedido ser respondido. O número da transação é devolvido
+# do pedido (linhas X do esquema); a HMI só aceita a resposta que o traz igual.
+[DSICarEco.responseStartStopProhibitReasonList]
+listUpdateInfo.numOfElements = 0           # nenhum elemento nesta resposta (o pedido pede 3)
+
+[DSICarEco.responseStartStopRestartReasonList]
+listUpdateInfo.numOfElements = 0
+
+[DSICarEco.responseStartStopRestartProhibitReasonList]
+listUpdateInfo.numOfElements = 0

@@ -1,0 +1,20 @@
+# catalogo-menus-grava.txt — par do catálogo dos menus: o carro de mentira ACEITA o que a tela grava
+# nesses menus. NÃO É O CARRO e não entra em nenhuma partida por padrão. 12/10/2026.
+# Estudo num computador; nada daqui vai para o carro.
+#
+# Sem este arquivo, a central do catálogo mostra as telas e nada do que se marca nelas fica: os
+# pedidos da HMI chegam e o carro de mentira não os atende, porque os serviços não estão na lista
+# "grava". Com ele, a caixa marcada fica marcada, e, com o arquivo de estado ligado, volta marcada
+# na partida seguinte. Para subir assim:  sh driver/m14_menus.sh grava
+#
+# O que cada pedido grava vem das linhas G do esquema, que são dedução do gerador (pelo nome do
+# pedido e do atributo). Onde o nome não bate o esquema não diz nada, e a regra vai aqui embaixo.
+
+# A lista de depois troca a de antes: por isso o serviço de relógio e unidades vem repetido.
+grava = DSICarTimeUnitsLanguage DSICarComfort DSICarLight DSICarParkingSystem DSICarDriverAssistance
+
+# "Ativar automaticamente", em Estacionar e manobrar. O pedido é setPDCAutoActivation e o atributo
+# que a tela lê é o updatePDCOPSAutoActivation: os nomes diferem, e o gerador não os ligou.
+# DEDUÇÃO pelo nome e pelo campo (autoActivation nos dois); conferido na tela: com a regra a caixa fica.
+[DSICarParkingSystem.setPDCAutoActivation -> updatePDCOPSAutoActivation]
+autoActivation = autoActivation

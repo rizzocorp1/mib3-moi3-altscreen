@@ -1,0 +1,3387 @@
+# Esquema dos serviços DSI de telefone e conectividade da HMI do MOI3 (firmware MU0883, HMI H40.272.304).
+# GERADO por driver/m8_esquema.sh (driver/LeEsquemaDSI.java) a partir das classes do próprio
+# firmware, na JVM dele. Não editar à mão. Estudo num computador; nada daqui vai para o carro.
+#
+# Uma coisa por linha, campos separados por espaço:
+#   S <serviço> <domínio> <interface de pedidos> <interface de eventos> <pacote da LG>
+#   W <domínio> <interface org.dsi.ifc> <instância> <atraso em ms>   serviço que a HMI liga ao receber o anúncio (interface 9000)
+#   A <serviço> <número> <constante ATTR_>                          atributo que a HMI pode assinar
+#   E <serviço> <api> <atributo ou -> <entrega ou -> <evento> <mensagem ou ->
+#        mensagem que o serviço manda. Com atributo, é a atualização dele (a api tem o mesmo número).
+#        entrega: o número com que a HMI procura os ouvintes; quando difere do atributo, a
+#        atualização só chega a quem também assinou esse outro (é assim no firmware).
+#   P <serviço> <api> <método> <mensagem ou ->                      pedido que a HMI manda (9999 assina atributos, 9998 desassina)
+#   R <serviço> <api do pedido> <tipo> <prazo em ms> <api da resposta ou -> <método do ouvinte>
+#        pedido de que a HMI espera resposta, pela tabela do proxy DSI dela (Cfg.PT e Cfg.U). Uma linha
+#        por resposta possível. tipo: uma = uma resposta só; escolha = uma dentre as listadas;
+#        sequencia = todas; complexa = quem decide é um analisador da HMI. prazo: quanto ela espera antes
+#        de registrar "DSI timeout occurred" (-1 = sem prazo). "-" = nenhuma api da camada da LG chama o método.
+#   G <serviço> <api do pedido> <api do evento> <regra> <campo do pedido> <campo do evento>
+#        o que o pedido set<X> grava no atributo de nome <X>, campo a campo. DEDUÇÃO do gerador: o firmware
+#        não traz essa ligação. regra posicao = os campos do pedido são os do evento, número a número e
+#        tipo a tipo, fora o validFlag; regra nomes = cada campo do pedido tem um só campo de mesmo nome e
+#        tipo no evento (é a menos segura: conferir antes de ligar o serviço em "grava").
+#   X <serviço> <api do pedido> <api da resposta> <campo do pedido> <campo da resposta>
+#        o que a resposta devolve do pedido: campos de mesmo caminho e tipo nas duas mensagens. DEDUÇÃO.
+#   M <mensagem>                                                    mensagem protobuf; seguem os campos dela
+#   C <número> <nome> <tipo> <um|rep|pac> [<mensagem do campo>]      campo da mensagem da linha M de cima
+#        tipo: sint32 e sint64 vão em zigue-zague; int32, int64, uint32 e enum, em varint comum;
+#        fixed32, fixed64, bool, float, double, string, bytes; msg é outra mensagem.
+#        um = campo simples; rep = repetido, um por vez; pac = repetido empacotado.
+# No barramento: [canal:8][interface:4][instância:4][api:4][protobuf]. O canal é o remetente:
+# os eventos saem com o domínio do serviço; os pedidos da HMI, com 0x8000.
+S DSIBluetooth 256 1 2 bluetooth
+A DSIBluetooth 1 ATTR_ACCESSIBLEMODE
+A DSIBluetooth 3 ATTR_BTSTATE
+A DSIBluetooth 4 ATTR_DISCOVEREDDEVICES
+A DSIBluetooth 6 ATTR_TRUSTEDDEVICES
+A DSIBluetooth 7 ATTR_PASSKEYSTATE
+A DSIBluetooth 8 ATTR_SERVICEREQUESTSTATE
+A DSIBluetooth 9 ATTR_USERFRIENDLYNAME
+A DSIBluetooth 10 ATTR_RECONNECTINDICATOR
+A DSIBluetooth 11 ATTR_INCOMINGSERVICEREQUEST
+A DSIBluetooth 12 ATTR_SUPPORTEDBTPROFILES
+A DSIBluetooth 14 ATTR_MASTERROLEREQUESTERROR
+A DSIBluetooth 15 ATTR_HUCANDBTHSSTATE
+A DSIBluetooth 16 ATTR_A2DPUSERSETTING
+A DSIBluetooth 17 ATTR_PRIORIZEDDEVICERECONNECT
+A DSIBluetooth 18 ATTR_PIMDEVICE
+E DSIBluetooth 1 1 1 updateAccessibleMode DSIBluetoothListenerMsg.updateAccessibleMode
+E DSIBluetooth 3 3 3 updateBTState DSIBluetoothListenerMsg.updateBTState
+E DSIBluetooth 4 4 4 updateDiscoveredDevices DSIBluetoothListenerMsg.updateDiscoveredDevices
+E DSIBluetooth 6 6 6 updateTrustedDevices DSIBluetoothListenerMsg.updateTrustedDevices
+E DSIBluetooth 7 7 7 updatePasskeyState DSIBluetoothListenerMsg.updatePasskeyState
+E DSIBluetooth 8 8 8 updateServiceRequestState DSIBluetoothListenerMsg.updateServiceRequestState
+E DSIBluetooth 9 9 9 updateUserFriendlyName DSIBluetoothListenerMsg.updateUserFriendlyName
+E DSIBluetooth 10 10 10 updateReconnectIndicator DSIBluetoothListenerMsg.updateReconnectIndicator
+E DSIBluetooth 11 11 11 updateIncomingServiceRequest DSIBluetoothListenerMsg.updateIncomingServiceRequest
+E DSIBluetooth 12 12 12 updateSupportedBTProfiles DSIBluetoothListenerMsg.updateSupportedBTProfiles
+E DSIBluetooth 14 14 14 updateMasterRoleRequestError DSIBluetoothListenerMsg.updateMasterRoleRequestError
+E DSIBluetooth 15 15 15 updateHUCandBTHSState DSIBluetoothListenerMsg.updateHUCandBTHSState
+E DSIBluetooth 16 16 16 updateA2DPUserSetting DSIBluetoothListenerMsg.updateA2DPUserSetting
+E DSIBluetooth 17 17 17 updatePriorizedDeviceReconnect DSIBluetoothListenerMsg.updatePriorizedDeviceReconnect
+E DSIBluetooth 18 18 18 updatePIMDevice DSIBluetoothListenerMsg.updatePIMDevice
+E DSIBluetooth 2000 - - responseConnectService DSIBluetoothListenerMsg.responseConnectService
+E DSIBluetooth 2001 - - responseConnectServiceToInstance DSIBluetoothListenerMsg.responseConnectServiceToInstance
+E DSIBluetooth 2002 - - responseAbortConnectService DSIBluetoothListenerMsg.responseAbortConnectService
+E DSIBluetooth 2003 - - responseDisconnectService DSIBluetoothListenerMsg.responseDisconnectService
+E DSIBluetooth 2004 - - responseGetServices DSIBluetoothListenerMsg.responseGetServices
+E DSIBluetooth 2005 - - responseInquiry DSIBluetoothListenerMsg.responseInquiry
+E DSIBluetooth 2006 - - responseAbortInquiry DSIBluetoothListenerMsg.responseAbortInquiry
+E DSIBluetooth 2007 - - responseReconnectSuspend DSIBluetoothListenerMsg.responseReconnectSuspend
+E DSIBluetooth 2008 - - responsePasskeyResponse DSIBluetoothListenerMsg.responsePasskeyResponse
+E DSIBluetooth 2009 - - responseRemoveAuthentication DSIBluetoothListenerMsg.responseRemoveAuthentication
+E DSIBluetooth 2010 - - responseSwitchBTState DSIBluetoothListenerMsg.responseSwitchBTState
+E DSIBluetooth 2012 - - responseRestoreFactorySettings DSIBluetoothListenerMsg.responseRestoreFactorySettings
+E DSIBluetooth 2013 - - responseAcceptIncomingServiceRequest DSIBluetoothListenerMsg.responseAcceptIncomingServiceRequest
+E DSIBluetooth 2014 - - responseSetA2DPUserSetting DSIBluetoothListenerMsg.responseSetA2DPUserSetting
+E DSIBluetooth 2015 - - responseSetPriorizedDeviceReconnect DSIBluetoothListenerMsg.responseSetPriorizedDeviceReconnect
+E DSIBluetooth 2016 - - responseSetAccessibleMode DSIBluetoothListenerMsg.responseSetAccessibleMode
+E DSIBluetooth 2017 - - responseConnectPIMDevice DSIBluetoothListenerMsg.responseConnectPIMDevice
+E DSIBluetooth 2018 - - responseDisconnectPIMDevice DSIBluetoothListenerMsg.responseDisconnectPIMDevice
+E DSIBluetooth 3000 - - removeAuthenticationNoSupport DSIBluetoothListenerMsg.removeAuthenticationNoSupport
+E DSIBluetooth 3001 - - deviceDisconnectionInfo DSIBluetoothListenerMsg.deviceDisconnectionInfo
+E DSIBluetooth 3002 - - serviceRejectNoSupport DSIBluetoothListenerMsg.serviceRejectNoSupport
+P DSIBluetooth 9999 setNotification DSIBluetoothMsg.setNotification
+P DSIBluetooth 9998 clearNotification DSIBluetoothMsg.clearNotification
+P DSIBluetooth 1003 abortConnectService DSIBluetoothMsg.abortConnectService
+P DSIBluetooth 1007 abortInquiry DSIBluetoothMsg.abortInquiry
+P DSIBluetooth 1015 requestAcceptIncomingServiceRequest DSIBluetoothMsg.requestAcceptIncomingServiceRequest
+P DSIBluetooth 1001 requestConnectService DSIBluetoothMsg.requestConnectService
+P DSIBluetooth 1002 requestConnectServiceToInstance DSIBluetoothMsg.requestConnectServiceToInstance
+P DSIBluetooth 1004 requestDisconnectService DSIBluetoothMsg.requestDisconnectService
+P DSIBluetooth 1005 requestGetServices DSIBluetoothMsg.requestGetServices
+P DSIBluetooth 1006 requestInquiry DSIBluetoothMsg.requestInquiry
+P DSIBluetooth 1009 requestPasskeyResponse DSIBluetoothMsg.requestPasskeyResponse
+P DSIBluetooth 1008 requestReconnectSuspend DSIBluetoothMsg.requestReconnectSuspend
+P DSIBluetooth 1010 requestRemoveAuthentication DSIBluetoothMsg.requestRemoveAuthentication
+P DSIBluetooth 1014 requestRestoreFactorySettings DSIBluetoothMsg.requestRestoreFactorySettings
+P DSIBluetooth 1016 requestSetA2DPUserSetting DSIBluetoothMsg.requestSetA2DPUserSetting
+P DSIBluetooth 1012 requestSwitchBTState DSIBluetoothMsg.requestSwitchBTState
+P DSIBluetooth 1000 setAccessibleMode DSIBluetoothMsg.setAccessibleMode
+P DSIBluetooth 1011 setUserFriendlyName DSIBluetoothMsg.setUserFriendlyName
+P DSIBluetooth 1017 requestSetPriorizedDeviceReconnect DSIBluetoothMsg.requestSetPriorizedDeviceReconnect
+P DSIBluetooth 1018 requestConnectPIMDevice DSIBluetoothMsg.requestConnectPIMDevice
+P DSIBluetooth 1019 requestDisconnectPIMDevice DSIBluetoothMsg.requestDisconnectPIMDevice
+R DSIBluetooth 1003 uma 10000 2002 responseAbortConnectService
+R DSIBluetooth 1007 uma 10000 2006 responseAbortInquiry
+R DSIBluetooth 1015 uma 10000 2013 responseAcceptIncomingServiceRequest
+R DSIBluetooth 1001 uma 180000 2000 responseConnectService
+R DSIBluetooth 1002 uma 180000 2001 responseConnectServiceToInstance
+R DSIBluetooth 1004 uma 40000 2003 responseDisconnectService
+R DSIBluetooth 1005 uma 130000 2004 responseGetServices
+R DSIBluetooth 1006 uma 600000 2005 responseInquiry
+R DSIBluetooth 1009 uma 180000 2008 responsePasskeyResponse
+R DSIBluetooth 1008 uma 10000 2007 responseReconnectSuspend
+R DSIBluetooth 1010 uma 180000 2009 responseRemoveAuthentication
+R DSIBluetooth 1014 uma 10000 2012 responseRestoreFactorySettings
+R DSIBluetooth 1016 uma 10000 2014 responseSetA2DPUserSetting
+R DSIBluetooth 1012 uma 60000 2010 responseSwitchBTState
+R DSIBluetooth 1000 uma 10000 2016 responseSetAccessibleMode
+R DSIBluetooth 1017 uma 60000 2015 responseSetPriorizedDeviceReconnect
+R DSIBluetooth 1018 uma 10000 2017 responseConnectPIMDevice
+R DSIBluetooth 1019 uma 10000 2018 responseDisconnectPIMDevice
+G DSIBluetooth 1000 1 nomes accessibleMode accessibleMode
+G DSIBluetooth 1011 9 posicao userFriendlyName userFriendlyName
+X DSIBluetooth 1001 2000 btDeviceAddress btDeviceAddress
+X DSIBluetooth 1001 2000 btServiceType btServiceType
+X DSIBluetooth 1001 2000 btDeviceAddressToReplace btDeviceAddressToReplace
+X DSIBluetooth 1002 2001 btDeviceAddress btDeviceAddress
+X DSIBluetooth 1002 2001 btServiceType btServiceType
+X DSIBluetooth 1002 2001 instanceNumber instanceNumber
+X DSIBluetooth 1004 2003 btDeviceAddress btDeviceAddress
+X DSIBluetooth 1004 2003 btServiceType btServiceType
+X DSIBluetooth 1005 2004 btDeviceAddress btDeviceAddress
+X DSIBluetooth 1009 2008 btDeviceAddress btDeviceAddress
+X DSIBluetooth 1010 2009 btDeviceAddress btDeviceAddress
+S DSIBluetoothLEDataChannel 256 3 4 bluetooth
+E DSIBluetoothLEDataChannel 2000 - - responseSetCharacteristicState DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicState
+E DSIBluetoothLEDataChannel 2001 - - responseSetCharacteristicUserDescription DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicUserDescription
+E DSIBluetoothLEDataChannel 2002 - - responseSetCharacteristicValue DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicValue
+E DSIBluetoothLEDataChannel 3000 - - indicateCharacteristicValue DSIBluetoothLEDataChannelListenerMsg.indicateCharacteristicValue
+P DSIBluetoothLEDataChannel 9999 setNotification DSIBluetoothLEDataChannelMsg.setNotification
+P DSIBluetoothLEDataChannel 9998 clearNotification DSIBluetoothLEDataChannelMsg.clearNotification
+P DSIBluetoothLEDataChannel 1000 requestSetCharacteristicState DSIBluetoothLEDataChannelMsg.requestSetCharacteristicState
+P DSIBluetoothLEDataChannel 1001 requestSetCharacteristicUserDescription DSIBluetoothLEDataChannelMsg.requestSetCharacteristicUserDescription
+P DSIBluetoothLEDataChannel 1002 requestSetCharacteristicValue DSIBluetoothLEDataChannelMsg.requestSetCharacteristicValue
+R DSIBluetoothLEDataChannel 1000 uma 60000 2000 responseSetCharacteristicState
+R DSIBluetoothLEDataChannel 1001 uma 60000 2001 responseSetCharacteristicUserDescription
+R DSIBluetoothLEDataChannel 1002 uma 60000 2002 responseSetCharacteristicValue
+X DSIBluetoothLEDataChannel 1000 2000 characteristicUUID characteristicUUID
+X DSIBluetoothLEDataChannel 1001 2001 characteristicUUID characteristicUUID
+X DSIBluetoothLEDataChannel 1002 2002 characteristicUUID characteristicUUID
+S DSIBluetoothLE 256 5 6 bluetooth
+A DSIBluetoothLE 1 ATTR_ACCESSIBLEMODE
+A DSIBluetoothLE 2 ATTR_BTSTATE
+A DSIBluetoothLE 3 ATTR_SERVICE
+A DSIBluetoothLE 4 ATTR_TRUSTEDDEVICES
+A DSIBluetoothLE 5 ATTR_PASSKEYSTATE
+A DSIBluetoothLE 6 ATTR_USERFRIENDLYNAME
+A DSIBluetoothLE 7 ATTR_CHARACTERISTICVALUE
+E DSIBluetoothLE 1 1 1 updateAccessibleMode DSIBluetoothLEListenerMsg.updateAccessibleMode
+E DSIBluetoothLE 2 2 2 updateBTState DSIBluetoothLEListenerMsg.updateBTState
+E DSIBluetoothLE 3 3 3 updateService DSIBluetoothLEListenerMsg.updateService
+E DSIBluetoothLE 4 4 4 updateTrustedDevices DSIBluetoothLEListenerMsg.updateTrustedDevices
+E DSIBluetoothLE 5 5 5 updatePasskeyState DSIBluetoothLEListenerMsg.updatePasskeyState
+E DSIBluetoothLE 6 6 6 updateUserFriendlyName DSIBluetoothLEListenerMsg.updateUserFriendlyName
+E DSIBluetoothLE 7 7 7 updateCharacteristicValue DSIBluetoothLEListenerMsg.updateCharacteristicValue
+E DSIBluetoothLE 2001 - - responsePasskeyResponse DSIBluetoothLEListenerMsg.responsePasskeyResponse
+E DSIBluetoothLE 2002 - - responseRemoveAuthentication DSIBluetoothLEListenerMsg.responseRemoveAuthentication
+E DSIBluetoothLE 2003 - - responseSwitchBTState DSIBluetoothLEListenerMsg.responseSwitchBTState
+E DSIBluetoothLE 2004 - - responseSetService DSIBluetoothLEListenerMsg.responseSetService
+E DSIBluetoothLE 2005 - - responseSetAccessibleMode DSIBluetoothLEListenerMsg.responseSetAccessibleMode
+E DSIBluetoothLE 2006 - - responseSetCharacteristicState DSIBluetoothLEListenerMsg.responseSetCharacteristicState
+E DSIBluetoothLE 2007 - - responseNotifyCharacteristicValue DSIBluetoothLEListenerMsg.responseNotifyCharacteristicValue
+E DSIBluetoothLE 3001 - - deviceDisconnectionInfo DSIBluetoothLEListenerMsg.deviceDisconnectionInfo
+P DSIBluetoothLE 9999 setNotification DSIBluetoothLEMsg.setNotification
+P DSIBluetoothLE 9998 clearNotification DSIBluetoothLEMsg.clearNotification
+P DSIBluetoothLE 1001 requestPasskeyResponse DSIBluetoothLEMsg.requestPasskeyResponse
+P DSIBluetoothLE 1002 requestRemoveAuthentication DSIBluetoothLEMsg.requestRemoveAuthentication
+P DSIBluetoothLE 1004 requestSwitchBTState DSIBluetoothLEMsg.requestSwitchBTState
+P DSIBluetoothLE 1006 setAccessibleMode DSIBluetoothLEMsg.setAccessibleMode
+P DSIBluetoothLE 1003 requestSetUserFriendlyName DSIBluetoothLEMsg.requestSetUserFriendlyName
+P DSIBluetoothLE 1005 requestSetService DSIBluetoothLEMsg.requestSetService
+P DSIBluetoothLE 1007 requestSetCharacteristicState DSIBluetoothLEMsg.requestSetCharacteristicState
+P DSIBluetoothLE 1008 requestNotifyCharacteristicValue DSIBluetoothLEMsg.requestNotifyCharacteristicValue
+R DSIBluetoothLE 1001 uma 180000 2001 responsePasskeyResponse
+R DSIBluetoothLE 1002 uma 180000 2002 responseRemoveAuthentication
+R DSIBluetoothLE 1004 uma 60000 2003 responseSwitchBTState
+R DSIBluetoothLE 1006 uma 10000 2005 responseSetAccessibleMode
+R DSIBluetoothLE 1007 uma 60000 2006 responseSetCharacteristicState
+R DSIBluetoothLE 1005 uma 60000 2004 responseSetService
+R DSIBluetoothLE 1008 uma 60000 2007 responseNotifyCharacteristicValue
+G DSIBluetoothLE 1006 1 posicao accessibleMode result
+X DSIBluetoothLE 1001 2001 btDeviceAddress btDeviceAddress
+X DSIBluetoothLE 1002 2002 btDeviceAddress btDeviceAddress
+S DSIObexAuthentication 256 7 8 bluetooth
+E DSIObexAuthentication 3000 - - authenticationRequired DSIObexAuthenticationListenerMsg.authenticationRequired
+E DSIObexAuthentication 3001 - - indAuthentication DSIObexAuthenticationListenerMsg.indAuthentication
+P DSIObexAuthentication 9999 setNotification DSIObexAuthenticationMsg.setNotification
+P DSIObexAuthentication 9998 clearNotification DSIObexAuthenticationMsg.clearNotification
+P DSIObexAuthentication 1000 setAuthenticationInfo DSIObexAuthenticationMsg.setAuthenticationInfo
+S DSIObjectPush 256 9 10 bluetooth
+A DSIObjectPush 1 ATTR_OPPINCOMINGOBJECT
+A DSIObjectPush 2 ATTR_VCARDSRECEIVED
+E DSIObjectPush 1 1 1 updateOPPIncomingObject DSIObjectPushListenerMsg.updateOPPIncomingObject
+E DSIObjectPush 2 2 2 updateVCardsReceived DSIObjectPushListenerMsg.updateVCardsReceived
+E DSIObjectPush 2000 - - responseOPPAbortSending DSIObjectPushListenerMsg.responseOPPAbortSending
+E DSIObjectPush 2001 - - responseOPPAcceptObject DSIObjectPushListenerMsg.responseOPPAcceptObject
+E DSIObjectPush 2003 - - responseOPPSendBinary DSIObjectPushListenerMsg.responseOPPSendBinary
+E DSIObjectPush 2004 - - responseOPPSendContacts DSIObjectPushListenerMsg.responseOPPSendContacts
+E DSIObjectPush 2005 - - responseOPPSendMessages DSIObjectPushListenerMsg.responseOPPSendMessages
+P DSIObjectPush 9999 setNotification DSIObjectPushMsg.setNotification
+P DSIObjectPush 9998 clearNotification DSIObjectPushMsg.clearNotification
+P DSIObjectPush 1000 requestOPPAbortSending DSIObjectPushMsg.requestOPPAbortSending
+P DSIObjectPush 1001 requestOPPAcceptObject DSIObjectPushMsg.requestOPPAcceptObject
+P DSIObjectPush 1004 requestOPPSendContacts DSIObjectPushMsg.requestOPPSendContacts
+P DSIObjectPush 1005 requestOPPSendMessages DSIObjectPushMsg.requestOPPSendMessages
+P DSIObjectPush 1003 requestOPPSendBinary DSIObjectPushMsg.requestOPPSendBinary
+R DSIObjectPush 1000 uma 10000 2000 responseOPPAbortSending
+R DSIObjectPush 1001 uma 10000 2001 responseOPPAcceptObject
+R DSIObjectPush 1004 uma 10000 2004 responseOPPSendContacts
+R DSIObjectPush 1005 uma 10000 2005 responseOPPSendMessages
+S DSINFC 256 11 12 nfc
+A DSINFC 1 ATTR_SNEPPUSHHANDOVER
+A DSINFC 2 ATTR_SNEPPUSHCOMPLETED
+E DSINFC 1 1 1 updateSNEPPushHandover DSINFCListenerMsg.updateSNEPPushHandover
+E DSINFC 2 2 2 updateSNEPPushCompleted DSINFCListenerMsg.updateSNEPPushCompleted
+E DSINFC 2001 - - responseSNEPPushHandover DSINFCListenerMsg.responseSNEPPushHandover
+P DSINFC 9999 setNotification DSINFCMsg.setNotification
+P DSINFC 9998 clearNotification DSINFCMsg.clearNotification
+P DSINFC 1001 requestSNEPPushHandover DSINFCMsg.requestSNEPPushHandover
+R DSINFC 1001 uma 10000 2001 responseSNEPPushHandover
+S DSIMobileEquipment 256 1001 1002 telephoneng
+A DSIMobileEquipment 1 ATTR_DTMFTONEPLAYING
+A DSIMobileEquipment 2 ATTR_EMERGENCYNUMBERS
+A DSIMobileEquipment 3 ATTR_SIMPINREQUIRED
+A DSIMobileEquipment 4 ATTR_ACTIVATIONSTATE
+A DSIMobileEquipment 5 ATTR_AUTOMATICPINENTRYACTIVE
+A DSIMobileEquipment 6 ATTR_AUTOMATICREDIALACTIVE
+A DSIMobileEquipment 7 ATTR_BATTERYCHARGELEVEL
+A DSIMobileEquipment 8 ATTR_CALLDURATIONLIST
+A DSIMobileEquipment 9 ATTR_CALLLIST
+A DSIMobileEquipment 10 ATTR_CDMATHREEWAYCALLINGSETTING
+A DSIMobileEquipment 11 ATTR_CRADLEPLUGINSTATE
+A DSIMobileEquipment 12 ATTR_DISCONNECTREASON
+A DSIMobileEquipment 13 ATTR_EMERGENCYCALLACTIVE
+A DSIMobileEquipment 14 ATTR_ENHANCEDPRIVACYMODE
+A DSIMobileEquipment 15 ATTR_HANDSFREEMODE
+A DSIMobileEquipment 16 ATTR_LOCKSTATE
+A DSIMobileEquipment 17 ATTR_MAILBOXCONTENT
+A DSIMobileEquipment 18 ATTR_MICMUTESTATE
+A DSIMobileEquipment 19 ATTR_NADTEMPERATURE
+A DSIMobileEquipment 20 ATTR_PHONEINFORMATION
+A DSIMobileEquipment 21 ATTR_NETWORKPROVIDER
+A DSIMobileEquipment 22 ATTR_NETWORKTYPE
+A DSIMobileEquipment 23 ATTR_PRIVACYMODE
+A DSIMobileEquipment 24 ATTR_REGISTERSTATE
+A DSIMobileEquipment 25 ATTR_SERVICECODETYPE
+A DSIMobileEquipment 26 ATTR_SERVICENUMBERS
+A DSIMobileEquipment 27 ATTR_SIGNALQUALITY
+A DSIMobileEquipment 28 ATTR_SUPPSERVICERESPONSE
+A DSIMobileEquipment 29 ATTR_SERVICEPROVIDER
+A DSIMobileEquipment 30 ATTR_SIMALIASINFORMATION
+A DSIMobileEquipment 31 ATTR_MICGAINLEVEL
+A DSIMobileEquipment 32 ATTR_OPTIMIZATIONMODE
+A DSIMobileEquipment 33 ATTR_NADMODE
+A DSIMobileEquipment 34 ATTR_OTHERSIMAVAILABLE
+A DSIMobileEquipment 35 ATTR_PREFIXCONTENT
+A DSIMobileEquipment 36 ATTR_PHONEREMINDERSETTING
+A DSIMobileEquipment 37 ATTR_PREFIXACTIVATED
+A DSIMobileEquipment 38 ATTR_WIDEBANDSPEECH
+A DSIMobileEquipment 39 ATTR_PHONERINGTONE
+A DSIMobileEquipment 40 ATTR_FAVORITES
+A DSIMobileEquipment 41 ATTR_SAPUPGRADEACTIVE
+A DSIMobileEquipment 42 ATTR_EUICCID
+A DSIMobileEquipment 43 ATTR_ESIMMSISDN
+A DSIMobileEquipment 44 ATTR_ESIMACTIVE
+A DSIMobileEquipment 45 ATTR_ESIMB2BMODE
+A DSIMobileEquipment 46 ATTR_CALLSTACKSISREVERTED
+A DSIMobileEquipment 47 ATTR_LASTANSWEREDNUMBERS
+A DSIMobileEquipment 48 ATTR_LASTDIALEDNUMBERS
+A DSIMobileEquipment 49 ATTR_MISSEDNUMBERS
+A DSIMobileEquipment 50 ATTR_MEDATAVALIDITY
+A DSIMobileEquipment 51 ATTR_MISSEDCALLINDICATOR
+A DSIMobileEquipment 52 ATTR_SPEECHRECOGNITIONAVAILABLE
+A DSIMobileEquipment 53 ATTR_SPEECHRECOGNITIONACTIVE
+A DSIMobileEquipment 54 ATTR_SPEECHRECOGNITIONTYPE
+A DSIMobileEquipment 55 ATTR_CONFIDENTIALMODE
+A DSIMobileEquipment 56 ATTR_REJECTCALLWITHSMS
+A DSIMobileEquipment 57 ATTR_LASTANSWEREDNUMBERSRAW
+A DSIMobileEquipment 58 ATTR_LASTDIALEDNUMBERSRAW
+A DSIMobileEquipment 59 ATTR_MISSEDNUMBERSRAW
+A DSIMobileEquipment 60 ATTR_AUTOMATICACCEPT
+A DSIMobileEquipment 61 ATTR_INTELLIGENTCALLSTATISTICSCONFIGURATION
+A DSIMobileEquipment 62 ATTR_INTELLIGENTCALLSTATISTICS
+A DSIMobileEquipment 63 ATTR_TELEPHONEFAVORITESSUPPORTED
+A DSIMobileEquipment 64 ATTR_TELEPHONEFAVORITES
+A DSIMobileEquipment 65 ATTR_TELEPHONEFAVORITESAVAILABLE
+A DSIMobileEquipment 66 ATTR_INBANDRINGINGACTIVE
+A DSIMobileEquipment 67 ATTR_AUDIOCONNECTIONVOLUMELEVELS
+A DSIMobileEquipment 68 ATTR_VOLTEENABLED
+A DSIMobileEquipment 69 ATTR_ARTIFICIALWIDEBANDSPEECH
+A DSIMobileEquipment 70 ATTR_PHONETTSREMINDERSETTING
+E DSIMobileEquipment 1 1 1 updateDTMFTonePlaying DSIMobileEquipmentListenerMsg.updateDTMFTonePlaying
+E DSIMobileEquipment 2 2 2 updateEmergencyNumbers DSIMobileEquipmentListenerMsg.updateEmergencyNumbers
+E DSIMobileEquipment 3 3 3 updateSIMPINRequired DSIMobileEquipmentListenerMsg.updateSIMPINRequired
+E DSIMobileEquipment 4 4 4 updateActivationState DSIMobileEquipmentListenerMsg.updateActivationState
+E DSIMobileEquipment 5 5 5 updateAutomaticPinEntryActive DSIMobileEquipmentListenerMsg.updateAutomaticPinEntryActive
+E DSIMobileEquipment 6 6 6 updateAutomaticRedialActive DSIMobileEquipmentListenerMsg.updateAutomaticRedialActive
+E DSIMobileEquipment 7 7 7 updateBatteryChargeLevel DSIMobileEquipmentListenerMsg.updateBatteryChargeLevel
+E DSIMobileEquipment 8 8 8 updateCallDurationList DSIMobileEquipmentListenerMsg.updateCallDurationList
+E DSIMobileEquipment 9 9 9 updateCallList DSIMobileEquipmentListenerMsg.updateCallList
+E DSIMobileEquipment 10 10 10 updateCDMAThreeWayCallingSetting DSIMobileEquipmentListenerMsg.updateCDMAThreeWayCallingSetting
+E DSIMobileEquipment 11 11 11 updateCradlePlugInState DSIMobileEquipmentListenerMsg.updateCradlePlugInState
+E DSIMobileEquipment 12 12 12 updateDisconnectReason DSIMobileEquipmentListenerMsg.updateDisconnectReason
+E DSIMobileEquipment 13 13 13 updateEmergencyCallActive DSIMobileEquipmentListenerMsg.updateEmergencyCallActive
+E DSIMobileEquipment 14 14 14 updateEnhancedPrivacyMode DSIMobileEquipmentListenerMsg.updateEnhancedPrivacyMode
+E DSIMobileEquipment 15 15 15 updateHandsFreeMode DSIMobileEquipmentListenerMsg.updateHandsFreeMode
+E DSIMobileEquipment 16 16 16 updateLockState DSIMobileEquipmentListenerMsg.updateLockState
+E DSIMobileEquipment 17 17 17 updateMailboxContent DSIMobileEquipmentListenerMsg.updateMailboxContent
+E DSIMobileEquipment 18 18 18 updateMICMuteState DSIMobileEquipmentListenerMsg.updateMICMuteState
+E DSIMobileEquipment 19 19 19 updateNADTemperature DSIMobileEquipmentListenerMsg.updateNADTemperature
+E DSIMobileEquipment 20 20 20 updatePhoneInformation DSIMobileEquipmentListenerMsg.updatePhoneInformation
+E DSIMobileEquipment 21 21 21 updateNetworkProvider DSIMobileEquipmentListenerMsg.updateNetworkProvider
+E DSIMobileEquipment 22 22 22 updateNetworkType DSIMobileEquipmentListenerMsg.updateNetworkType
+E DSIMobileEquipment 23 23 23 updatePrivacyMode DSIMobileEquipmentListenerMsg.updatePrivacyMode
+E DSIMobileEquipment 24 24 24 updateRegisterState DSIMobileEquipmentListenerMsg.updateRegisterState
+E DSIMobileEquipment 25 25 25 updateServiceCodeType DSIMobileEquipmentListenerMsg.updateServiceCodeType
+E DSIMobileEquipment 26 26 26 updateServiceNumbers DSIMobileEquipmentListenerMsg.updateServiceNumbers
+E DSIMobileEquipment 27 27 27 updateSignalQuality DSIMobileEquipmentListenerMsg.updateSignalQuality
+E DSIMobileEquipment 28 28 28 updateSuppServiceResponse DSIMobileEquipmentListenerMsg.updateSuppServiceResponse
+E DSIMobileEquipment 29 29 29 updateServiceProvider DSIMobileEquipmentListenerMsg.updateServiceProvider
+E DSIMobileEquipment 30 30 30 updateSIMAliasInformation DSIMobileEquipmentListenerMsg.updateSIMAliasInformation
+E DSIMobileEquipment 31 31 31 updateMicGainLevel DSIMobileEquipmentListenerMsg.updateMicGainLevel
+E DSIMobileEquipment 32 32 32 updateOptimizationMode DSIMobileEquipmentListenerMsg.updateOptimizationMode
+E DSIMobileEquipment 33 33 33 updateNADMode DSIMobileEquipmentListenerMsg.updateNADMode
+E DSIMobileEquipment 34 34 34 updateOtherSIMAvailable DSIMobileEquipmentListenerMsg.updateOtherSIMAvailable
+E DSIMobileEquipment 35 35 35 updatePrefixContent DSIMobileEquipmentListenerMsg.updatePrefixContent
+E DSIMobileEquipment 36 36 36 updatePhoneReminderSetting DSIMobileEquipmentListenerMsg.updatePhoneReminderSetting
+E DSIMobileEquipment 37 37 37 updatePrefixActivated DSIMobileEquipmentListenerMsg.updatePrefixActivated
+E DSIMobileEquipment 38 38 38 updateWidebandSpeech DSIMobileEquipmentListenerMsg.updateWidebandSpeech
+E DSIMobileEquipment 39 39 39 updatePhoneRingtone DSIMobileEquipmentListenerMsg.updatePhoneRingtone
+E DSIMobileEquipment 40 40 40 updateFavorites DSIMobileEquipmentListenerMsg.updateFavorites
+E DSIMobileEquipment 41 41 41 updateSAPUpgradeActive DSIMobileEquipmentListenerMsg.updateSAPUpgradeActive
+E DSIMobileEquipment 42 42 42 updateEUICCID DSIMobileEquipmentListenerMsg.updateEUICCID
+E DSIMobileEquipment 43 43 43 updateESIMMSISDN DSIMobileEquipmentListenerMsg.updateESIMMSISDN
+E DSIMobileEquipment 44 44 44 updateESimActive DSIMobileEquipmentListenerMsg.updateESimActive
+E DSIMobileEquipment 45 45 45 updateESimB2BMode DSIMobileEquipmentListenerMsg.updateESimB2BMode
+E DSIMobileEquipment 46 46 46 updateCallstacksIsReverted DSIMobileEquipmentListenerMsg.updateCallstacksIsReverted
+E DSIMobileEquipment 47 47 47 updateLastAnsweredNumbers DSIMobileEquipmentListenerMsg.updateLastAnsweredNumbers
+E DSIMobileEquipment 48 48 48 updateLastDialedNumbers DSIMobileEquipmentListenerMsg.updateLastDialedNumbers
+E DSIMobileEquipment 49 49 49 updateMissedNumbers DSIMobileEquipmentListenerMsg.updateMissedNumbers
+E DSIMobileEquipment 50 50 50 updateMEDataValidity DSIMobileEquipmentListenerMsg.updateMEDataValidity
+E DSIMobileEquipment 51 51 51 updateMissedCallIndicator DSIMobileEquipmentListenerMsg.updateMissedCallIndicator
+E DSIMobileEquipment 52 52 52 updateSpeechRecognitionAvailable DSIMobileEquipmentListenerMsg.updateSpeechRecognitionAvailable
+E DSIMobileEquipment 53 53 53 updateSpeechRecognitionActive DSIMobileEquipmentListenerMsg.updateSpeechRecognitionActive
+E DSIMobileEquipment 54 54 54 updateSpeechRecognitionType DSIMobileEquipmentListenerMsg.updateSpeechRecognitionType
+E DSIMobileEquipment 55 55 55 updateConfidentialMode DSIMobileEquipmentListenerMsg.updateConfidentialMode
+E DSIMobileEquipment 56 56 56 updateRejectCallWithSMS DSIMobileEquipmentListenerMsg.updateRejectCallWithSMS
+E DSIMobileEquipment 57 57 57 updateLastAnsweredNumbersRaw DSIMobileEquipmentListenerMsg.updateLastAnsweredNumbersRaw
+E DSIMobileEquipment 58 58 58 updateLastDialedNumbersRaw DSIMobileEquipmentListenerMsg.updateLastDialedNumbersRaw
+E DSIMobileEquipment 59 59 59 updateMissedNumbersRaw DSIMobileEquipmentListenerMsg.updateMissedNumbersRaw
+E DSIMobileEquipment 60 60 60 updateAutomaticAccept DSIMobileEquipmentListenerMsg.updateAutomaticAccept
+E DSIMobileEquipment 61 61 61 updateIntelligentCallStatisticsConfiguration DSIMobileEquipmentListenerMsg.updateIntelligentCallStatisticsConfiguration
+E DSIMobileEquipment 62 62 62 updateIntelligentCallStatistics DSIMobileEquipmentListenerMsg.updateIntelligentCallStatistics
+E DSIMobileEquipment 63 63 63 updateTelephoneFavoritesSupported DSIMobileEquipmentListenerMsg.updateTelephoneFavoritesSupported
+E DSIMobileEquipment 64 64 64 updateTelephoneFavorites DSIMobileEquipmentListenerMsg.updateTelephoneFavorites
+E DSIMobileEquipment 65 65 65 updateTelephoneFavoritesAvailable DSIMobileEquipmentListenerMsg.updateTelephoneFavoritesAvailable
+E DSIMobileEquipment 66 66 66 updateInbandRingingActive DSIMobileEquipmentListenerMsg.updateInbandRingingActive
+E DSIMobileEquipment 67 67 67 updateAudioConnectionVolumeLevels DSIMobileEquipmentListenerMsg.updateAudioConnectionVolumeLevels
+E DSIMobileEquipment 68 68 68 updateVoLTEEnabled DSIMobileEquipmentListenerMsg.updateVoLTEEnabled
+E DSIMobileEquipment 69 69 69 updateArtificialWidebandSpeech DSIMobileEquipmentListenerMsg.updateArtificialWidebandSpeech
+E DSIMobileEquipment 70 70 70 updatePhoneTtsReminderSetting DSIMobileEquipmentListenerMsg.updatePhoneTtsReminderSetting
+E DSIMobileEquipment 2000 - - responseAbortNetworkRegistration DSIMobileEquipmentListenerMsg.responseAbortNetworkRegistration
+E DSIMobileEquipment 2001 - - responseAbortNetworkSearch DSIMobileEquipmentListenerMsg.responseAbortNetworkSearch
+E DSIMobileEquipment 2002 - - responseAcceptCall DSIMobileEquipmentListenerMsg.responseAcceptCall
+E DSIMobileEquipment 2003 - - responseCallForward DSIMobileEquipmentListenerMsg.responseCallForward
+E DSIMobileEquipment 2004 - - responseCallWaiting DSIMobileEquipmentListenerMsg.responseCallWaiting
+E DSIMobileEquipment 2005 - - responseChangeSIMCode DSIMobileEquipmentListenerMsg.responseChangeSIMCode
+E DSIMobileEquipment 2006 - - responseCLIR DSIMobileEquipmentListenerMsg.responseCLIR
+E DSIMobileEquipment 2007 - - responseDialNumber DSIMobileEquipmentListenerMsg.responseDialNumber
+E DSIMobileEquipment 2008 - - responseSendDTMF DSIMobileEquipmentListenerMsg.responseSendDTMF
+E DSIMobileEquipment 2009 - - responseSIMPINRequired DSIMobileEquipmentListenerMsg.responseSIMPINRequired
+E DSIMobileEquipment 2010 - - responseHangupCall DSIMobileEquipmentListenerMsg.responseHangupCall
+E DSIMobileEquipment 2011 - - responseJoinCalls DSIMobileEquipmentListenerMsg.responseJoinCalls
+E DSIMobileEquipment 2012 - - responseNetworkRegistration DSIMobileEquipmentListenerMsg.responseNetworkRegistration
+E DSIMobileEquipment 2013 - - responseNetworkSearch DSIMobileEquipmentListenerMsg.responseNetworkSearch
+E DSIMobileEquipment 2014 - - responseUnlockSIM DSIMobileEquipmentListenerMsg.responseUnlockSIM
+E DSIMobileEquipment 2015 - - responseCheckSIMPINCode DSIMobileEquipmentListenerMsg.responseCheckSIMPINCode
+E DSIMobileEquipment 2016 - - responseRestoreFactorySettings DSIMobileEquipmentListenerMsg.responseRestoreFactorySettings
+E DSIMobileEquipment 2017 - - responseSetHandsFreeMode DSIMobileEquipmentListenerMsg.responseSetHandsFreeMode
+E DSIMobileEquipment 2018 - - responseSetAutomaticPinEntryActive DSIMobileEquipmentListenerMsg.responseSetAutomaticPinEntryActive
+E DSIMobileEquipment 2019 - - responseSetAutomaticRedialActive DSIMobileEquipmentListenerMsg.responseSetAutomaticRedialActive
+E DSIMobileEquipment 2020 - - responseServiceCodeAbort DSIMobileEquipmentListenerMsg.responseServiceCodeAbort
+E DSIMobileEquipment 2021 - - responseSplitCall DSIMobileEquipmentListenerMsg.responseSplitCall
+E DSIMobileEquipment 2022 - - responseSwapCalls DSIMobileEquipmentListenerMsg.responseSwapCalls
+E DSIMobileEquipment 2023 - - responseTelPower DSIMobileEquipmentListenerMsg.responseTelPower
+E DSIMobileEquipment 2024 - - responseSetCDMAThreeWayCallingSetting DSIMobileEquipmentListenerMsg.responseSetCDMAThreeWayCallingSetting
+E DSIMobileEquipment 2025 - - responseSetAutomaticEmergencyCallActive DSIMobileEquipmentListenerMsg.responseSetAutomaticEmergencyCallActive
+E DSIMobileEquipment 2026 - - responseSetMailboxContent DSIMobileEquipmentListenerMsg.responseSetMailboxContent
+E DSIMobileEquipment 2027 - - responseSetPrivacyMode DSIMobileEquipmentListenerMsg.responseSetPrivacyMode
+E DSIMobileEquipment 2028 - - responseSetMICMuteState DSIMobileEquipmentListenerMsg.responseSetMICMuteState
+E DSIMobileEquipment 2029 - - responseSetOptimizationMode DSIMobileEquipmentListenerMsg.responseSetOptimizationMode
+E DSIMobileEquipment 2030 - - responseSetNADMode DSIMobileEquipmentListenerMsg.responseSetNADMode
+E DSIMobileEquipment 2031 - - responseUnlockOtherSIM DSIMobileEquipmentListenerMsg.responseUnlockOtherSIM
+E DSIMobileEquipment 2032 - - responseSetSIMAliases DSIMobileEquipmentListenerMsg.responseSetSIMAliases
+E DSIMobileEquipment 2033 - - responseRemoveOtherSIM DSIMobileEquipmentListenerMsg.responseRemoveOtherSIM
+E DSIMobileEquipment 2034 - - responseDialOperator DSIMobileEquipmentListenerMsg.responseDialOperator
+E DSIMobileEquipment 2035 - - responseSetPrefixContent DSIMobileEquipmentListenerMsg.responseSetPrefixContent
+E DSIMobileEquipment 2036 - - responseSetPhoneReminderSetting DSIMobileEquipmentListenerMsg.responseSetPhoneReminderSetting
+E DSIMobileEquipment 2037 - - responseSetPrefixActivated DSIMobileEquipmentListenerMsg.responseSetPrefixActivated
+E DSIMobileEquipment 2038 - - responseSetPhoneRingtone DSIMobileEquipmentListenerMsg.responseSetPhoneRingtone
+E DSIMobileEquipment 2039 - - responseSetFavorites DSIMobileEquipmentListenerMsg.responseSetFavorites
+E DSIMobileEquipment 2040 - - responseSetSIMName DSIMobileEquipmentListenerMsg.responseSetSIMName
+E DSIMobileEquipment 2041 - - responseSetESIMActive DSIMobileEquipmentListenerMsg.responseSetESIMActive
+E DSIMobileEquipment 2042 - - responseStartSpeechRecognition DSIMobileEquipmentListenerMsg.responseStartSpeechRecognition
+E DSIMobileEquipment 2043 - - responseStopSpeechRecognition DSIMobileEquipmentListenerMsg.responseStopSpeechRecognition
+E DSIMobileEquipment 2044 - - responseSetConfidentialMode DSIMobileEquipmentListenerMsg.responseSetConfidentialMode
+E DSIMobileEquipment 2045 - - responseSetRejectCallWithSMS DSIMobileEquipmentListenerMsg.responseSetRejectCallWithSMS
+E DSIMobileEquipment 2046 - - responseSetAutomaticAccept DSIMobileEquipmentListenerMsg.responseSetAutomaticAccept
+E DSIMobileEquipment 2047 - - responseSetIntelligentCallStatisticsConfiguration DSIMobileEquipmentListenerMsg.responseSetIntelligentCallStatisticsConfiguration
+E DSIMobileEquipment 2048 - - responseSetVoLTEEnabled DSIMobileEquipmentListenerMsg.responseSetVoLTEEnabled
+E DSIMobileEquipment 2049 - - responseSetAudioConnectionVolume DSIMobileEquipmentListenerMsg.responseSetAudioConnectionVolume
+E DSIMobileEquipment 2050 - - responseSetArtificialWidebandSpeech DSIMobileEquipmentListenerMsg.responseSetArtificialWidebandSpeech
+E DSIMobileEquipment 2051 - - responseSetPhoneTtsReminderSetting DSIMobileEquipmentListenerMsg.responseSetPhoneTtsReminderSetting
+P DSIMobileEquipment 9999 setNotification DSIMobileEquipmentMsg.setNotification
+P DSIMobileEquipment 9998 clearNotification DSIMobileEquipmentMsg.clearNotification
+P DSIMobileEquipment 1000 acceptCall DSIMobileEquipmentMsg.acceptCall
+P DSIMobileEquipment 1001 hangupCall DSIMobileEquipmentMsg.hangupCall
+P DSIMobileEquipment 1002 swapCalls DSIMobileEquipmentMsg.swapCalls
+P DSIMobileEquipment 1003 splitCall DSIMobileEquipmentMsg.splitCall
+P DSIMobileEquipment 1004 joinCalls DSIMobileEquipmentMsg.joinCalls
+P DSIMobileEquipment 1005 dialNumber DSIMobileEquipmentMsg.dialNumber
+P DSIMobileEquipment 1040 dialOperator DSIMobileEquipmentMsg.dialOperator
+P DSIMobileEquipment 1006 dialNumberFromDBEntry DSIMobileEquipmentMsg.dialNumberFromDBEntry
+P DSIMobileEquipment 1007 sendDTMF DSIMobileEquipmentMsg.sendDTMF
+P DSIMobileEquipment 1008 requestNetworkRegistration DSIMobileEquipmentMsg.requestNetworkRegistration
+P DSIMobileEquipment 1009 requestAbortNetworkRegistration DSIMobileEquipmentMsg.requestAbortNetworkRegistration
+P DSIMobileEquipment 1010 requestNetworkSearch DSIMobileEquipmentMsg.requestNetworkSearch
+P DSIMobileEquipment 1011 requestAbortNetworkSearch DSIMobileEquipmentMsg.requestAbortNetworkSearch
+P DSIMobileEquipment 1012 requestCallForward DSIMobileEquipmentMsg.requestCallForward
+P DSIMobileEquipment 1013 requestCallWaiting DSIMobileEquipmentMsg.requestCallWaiting
+P DSIMobileEquipment 1014 requestCLIR DSIMobileEquipmentMsg.requestCLIR
+P DSIMobileEquipment 1015 requestServiceCodeAbort DSIMobileEquipmentMsg.requestServiceCodeAbort
+P DSIMobileEquipment 1016 requestSetAutomaticPinEntryActive DSIMobileEquipmentMsg.requestSetAutomaticPinEntryActive
+P DSIMobileEquipment 1017 requestSetAutomaticRedialActive DSIMobileEquipmentMsg.requestSetAutomaticRedialActive
+P DSIMobileEquipment 1018 requestSetCDMAThreeWayCallingSetting DSIMobileEquipmentMsg.requestSetCDMAThreeWayCallingSetting
+P DSIMobileEquipment 1019 requestSetAutomaticEmergencyCallActive DSIMobileEquipmentMsg.requestSetAutomaticEmergencyCallActive
+P DSIMobileEquipment 1020 requestSetEnhancedPrivacyMode DSIMobileEquipmentMsg.requestSetEnhancedPrivacyMode
+P DSIMobileEquipment 1021 requestSetMailboxContent DSIMobileEquipmentMsg.requestSetMailboxContent
+P DSIMobileEquipment 1022 requestSetPrivacyMode DSIMobileEquipmentMsg.requestSetPrivacyMode
+P DSIMobileEquipment 1023 requestTelPower DSIMobileEquipmentMsg.requestTelPower
+P DSIMobileEquipment 1024 requestUnlockSIM DSIMobileEquipmentMsg.requestUnlockSIM
+P DSIMobileEquipment 1025 requestCheckSIMPINCode DSIMobileEquipmentMsg.requestCheckSIMPINCode
+P DSIMobileEquipment 1026 requestChangeSIMCode DSIMobileEquipmentMsg.requestChangeSIMCode
+P DSIMobileEquipment 1027 requestSetHandsFreeMode DSIMobileEquipmentMsg.requestSetHandsFreeMode
+P DSIMobileEquipment 1028 requestSetMICMuteState DSIMobileEquipmentMsg.requestSetMICMuteState
+P DSIMobileEquipment 1029 requestSetLanguage DSIMobileEquipmentMsg.requestSetLanguage
+P DSIMobileEquipment 1030 requestSIMPINRequired DSIMobileEquipmentMsg.requestSIMPINRequired
+P DSIMobileEquipment 1031 restoreFactorySettings DSIMobileEquipmentMsg.restoreFactorySettings
+P DSIMobileEquipment 1034 requestSetMicGainLevel DSIMobileEquipmentMsg.requestSetMicGainLevel
+P DSIMobileEquipment 1035 requestDecreaseMicGainLevel DSIMobileEquipmentMsg.requestDecreaseMicGainLevel
+P DSIMobileEquipment 1036 requestIncreaseMicGainLevel DSIMobileEquipmentMsg.requestIncreaseMicGainLevel
+P DSIMobileEquipment 1037 requestSetOptimizationMode DSIMobileEquipmentMsg.requestSetOptimizationMode
+P DSIMobileEquipment 1032 requestUnlockOtherSIM DSIMobileEquipmentMsg.requestUnlockOtherSIM
+P DSIMobileEquipment 1033 requestSetSIMAliases DSIMobileEquipmentMsg.requestSetSIMAliases
+P DSIMobileEquipment 1038 requestSetNADMode DSIMobileEquipmentMsg.requestSetNADMode
+P DSIMobileEquipment 1039 requestRemoveOtherSIM DSIMobileEquipmentMsg.requestRemoveOtherSIM
+P DSIMobileEquipment 1042 requestSetPhoneReminderSetting DSIMobileEquipmentMsg.requestSetPhoneReminderSetting
+P DSIMobileEquipment 1043 requestSetPrefixActivated DSIMobileEquipmentMsg.requestSetPrefixActivated
+P DSIMobileEquipment 1041 requestSetPrefixContent DSIMobileEquipmentMsg.requestSetPrefixContent
+P DSIMobileEquipment 1044 requestSetPhoneRingtone DSIMobileEquipmentMsg.requestSetPhoneRingtone
+P DSIMobileEquipment 1045 requestSetFavorites DSIMobileEquipmentMsg.requestSetFavorites
+P DSIMobileEquipment 1046 requestSetSIMName DSIMobileEquipmentMsg.requestSetSIMName
+P DSIMobileEquipment 1060 requestSetArtificialWidebandSpeech DSIMobileEquipmentMsg.requestSetArtificialWidebandSpeech
+P DSIMobileEquipment 1047 requestSetESIMActive DSIMobileEquipmentMsg.requestSetESIMActive
+P DSIMobileEquipment 1048 deleteCallstacksAll DSIMobileEquipmentMsg.deleteCallstacksAll
+P DSIMobileEquipment 1049 deleteCallstacksEntry DSIMobileEquipmentMsg.deleteCallstacksEntry
+P DSIMobileEquipment 1050 resetMissedCallIndicator DSIMobileEquipmentMsg.resetMissedCallIndicator
+P DSIMobileEquipment 1051 revertCallstacks DSIMobileEquipmentMsg.revertCallstacks
+P DSIMobileEquipment 1052 requestStartSpeechRecognition DSIMobileEquipmentMsg.requestStartSpeechRecognition
+P DSIMobileEquipment 1053 requestStopSpeechRecognition DSIMobileEquipmentMsg.requestStopSpeechRecognition
+P DSIMobileEquipment 1054 requestSetConfidentialMode DSIMobileEquipmentMsg.requestSetConfidentialMode
+P DSIMobileEquipment 1055 requestSetRejectCallWithSMS DSIMobileEquipmentMsg.requestSetRejectCallWithSMS
+P DSIMobileEquipment 1056 requestSetAutomaticAccept DSIMobileEquipmentMsg.requestSetAutomaticAccept
+P DSIMobileEquipment 1057 requestSetIntelligentCallStatisticsConfiguration DSIMobileEquipmentMsg.requestSetIntelligentCallStatisticsConfiguration
+P DSIMobileEquipment 1059 requestSetVoLTEEnabled DSIMobileEquipmentMsg.requestSetVoLTEEnabled
+P DSIMobileEquipment 1061 requestSetPhoneTtsReminderSetting DSIMobileEquipmentMsg.requestSetPhoneTtsReminderSetting
+R DSIMobileEquipment 1060 uma 10000 2050 responseSetArtificialWidebandSpeech
+R DSIMobileEquipment 1054 uma 10000 2044 responseSetConfidentialMode
+R DSIMobileEquipment 1055 uma 10000 2045 responseSetRejectCallWithSMS
+R DSIMobileEquipment 1056 uma 10000 2046 responseSetAutomaticAccept
+R DSIMobileEquipment 1057 uma 10000 2047 responseSetIntelligentCallStatisticsConfiguration
+R DSIMobileEquipment 1059 uma 10000 2048 responseSetVoLTEEnabled
+R DSIMobileEquipment 1061 uma 10000 2051 responseSetPhoneTtsReminderSetting
+R DSIMobileEquipment 1031 uma 10000 2016 responseRestoreFactorySettings
+R DSIMobileEquipment 1010 uma 240000 2013 responseNetworkSearch
+R DSIMobileEquipment 1008 uma 150000 2012 responseNetworkRegistration
+R DSIMobileEquipment 1009 uma 10000 2000 responseAbortNetworkRegistration
+R DSIMobileEquipment 1011 uma 10000 2001 responseAbortNetworkSearch
+R DSIMobileEquipment 1016 uma 10000 2018 responseSetAutomaticPinEntryActive
+R DSIMobileEquipment 1023 uma 60000 2023 responseTelPower
+R DSIMobileEquipment 1024 uma 120000 2014 responseUnlockSIM
+R DSIMobileEquipment 1025 uma 10000 2015 responseCheckSIMPINCode
+R DSIMobileEquipment 1026 uma 10000 2005 responseChangeSIMCode
+R DSIMobileEquipment 1030 uma 10000 2009 responseSIMPINRequired
+R DSIMobileEquipment 1052 uma 10000 2042 responseStartSpeechRecognition
+R DSIMobileEquipment 1053 uma 10000 2043 responseStopSpeechRecognition
+R DSIMobileEquipment 1000 uma 10000 2002 responseAcceptCall
+R DSIMobileEquipment 1001 uma 15000 2010 responseHangupCall
+R DSIMobileEquipment 1002 uma 10000 2022 responseSwapCalls
+R DSIMobileEquipment 1003 uma 10000 2021 responseSplitCall
+R DSIMobileEquipment 1004 uma 10000 2011 responseJoinCalls
+R DSIMobileEquipment 1005 uma 30000 2007 responseDialNumber
+R DSIMobileEquipment 1040 uma 10000 2034 responseDialOperator
+R DSIMobileEquipment 1006 uma 30000 2007 responseDialNumber
+R DSIMobileEquipment 1007 uma 10000 2008 responseSendDTMF
+R DSIMobileEquipment 1012 uma 30000 2003 responseCallForward
+R DSIMobileEquipment 1013 uma 30000 2004 responseCallWaiting
+R DSIMobileEquipment 1014 uma 30000 2006 responseCLIR
+R DSIMobileEquipment 1015 uma 30000 2020 responseServiceCodeAbort
+R DSIMobileEquipment 1017 uma 10000 2019 responseSetAutomaticRedialActive
+R DSIMobileEquipment 1018 uma 10000 2024 responseSetCDMAThreeWayCallingSetting
+R DSIMobileEquipment 1019 uma 10000 2025 responseSetAutomaticEmergencyCallActive
+R DSIMobileEquipment 1021 uma 10000 2026 responseSetMailboxContent
+R DSIMobileEquipment 1022 uma 10000 2027 responseSetPrivacyMode
+R DSIMobileEquipment 1027 uma 10000 2017 responseSetHandsFreeMode
+R DSIMobileEquipment 1028 uma 10000 2028 responseSetMICMuteState
+R DSIMobileEquipment 1037 uma 10000 2029 responseSetOptimizationMode
+R DSIMobileEquipment 1032 uma 135000 2031 responseUnlockOtherSIM
+R DSIMobileEquipment 1033 uma 10000 2032 responseSetSIMAliases
+R DSIMobileEquipment 1038 uma 10000 2030 responseSetNADMode
+R DSIMobileEquipment 1039 uma 10000 2033 responseRemoveOtherSIM
+R DSIMobileEquipment 1042 uma 10000 2036 responseSetPhoneReminderSetting
+R DSIMobileEquipment 1043 uma 10000 2037 responseSetPrefixActivated
+R DSIMobileEquipment 1041 uma 10000 2035 responseSetPrefixContent
+R DSIMobileEquipment 1044 uma 10000 2038 responseSetPhoneRingtone
+R DSIMobileEquipment 1045 uma 10000 2039 responseSetFavorites
+R DSIMobileEquipment 1046 uma 10000 2040 responseSetSIMName
+R DSIMobileEquipment 1047 uma 10000 2041 responseSetESIMActive
+X DSIMobileEquipment 1026 2005 telLockCode telLockCode
+X DSIMobileEquipment 1014 2006 telCLIRState telCLIRState
+X DSIMobileEquipment 1037 2029 optMode optMode
+X DSIMobileEquipment 1038 2030 nadMode nadMode
+S DSIMobileEquipmentTopology 256 1003 1004 telephoneng
+A DSIMobileEquipmentTopology 1 ATTR_TOPOLOGY
+A DSIMobileEquipmentTopology 2 ATTR_USAGE
+E DSIMobileEquipmentTopology 1 1 1 updateTopology DSIMobileEquipmentTopologyListenerMsg.updateTopology
+E DSIMobileEquipmentTopology 2 2 2 updateUsage DSIMobileEquipmentTopologyListenerMsg.updateUsage
+E DSIMobileEquipmentTopology 2000 - - responseChangeTopology DSIMobileEquipmentTopologyListenerMsg.responseChangeTopology
+P DSIMobileEquipmentTopology 9999 setNotification DSIMobileEquipmentTopologyMsg.setNotification
+P DSIMobileEquipmentTopology 9998 clearNotification DSIMobileEquipmentTopologyMsg.clearNotification
+P DSIMobileEquipmentTopology 1000 requestChangeTopology DSIMobileEquipmentTopologyMsg.requestChangeTopology
+R DSIMobileEquipmentTopology 1000 uma 10000 2000 responseChangeTopology
+S DSIMessaging 256 1101 1102 messaging
+A DSIMessaging 4 ATTR_SYNCHINPROGRESS
+A DSIMessaging 5 ATTR_MESSAGINGACCOUNTS
+A DSIMessaging 6 ATTR_TEMPLATES
+A DSIMessaging 8 ATTR_MESSAGINGACCOUNTSERVICES
+A DSIMessaging 9 ATTR_USEPROFILE
+A DSIMessaging 10 ATTR_ACTIVATEREJECTCALLWITHSMS
+E DSIMessaging 4 4 4 updateSynchInProgress DSIMessagingListenerMsg.updateSynchInProgress
+E DSIMessaging 5 5 5 updateMessagingAccounts DSIMessagingListenerMsg.updateMessagingAccounts
+E DSIMessaging 6 6 6 updateTemplates DSIMessagingListenerMsg.updateTemplates
+E DSIMessaging 8 8 8 updateMessagingAccountServices DSIMessagingListenerMsg.updateMessagingAccountServices
+E DSIMessaging 9 9 9 updateUseProfile DSIMessagingListenerMsg.updateUseProfile
+E DSIMessaging 10 10 10 updateActivateRejectCallWithSMS DSIMessagingListenerMsg.updateActivateRejectCallWithSMS
+E DSIMessaging 2000 - - listEntriesResponse DSIMessagingListenerMsg.listEntriesResponse
+E DSIMessaging 2001 - - changeFolderResponse DSIMessagingListenerMsg.changeFolderResponse
+E DSIMessaging 2002 - - deleteMessageResponse DSIMessagingListenerMsg.deleteMessageResponse
+E DSIMessaging 2003 - - sendMessageResponse DSIMessagingListenerMsg.sendMessageResponse
+E DSIMessaging 2004 - - getMessageContentsResponse DSIMessagingListenerMsg.getMessageContentsResponse
+E DSIMessaging 2005 - - setMessageReadStatusResponse DSIMessagingListenerMsg.setMessageReadStatusResponse
+E DSIMessaging 2006 - - parseVCardResponse DSIMessagingListenerMsg.parseVCardResponse
+E DSIMessaging 2007 - - saveAsDraftResponse DSIMessagingListenerMsg.saveAsDraftResponse
+E DSIMessaging 2008 - - extractInformationResponse DSIMessagingListenerMsg.extractInformationResponse
+E DSIMessaging 2009 - - deleteTemplateResponse DSIMessagingListenerMsg.deleteTemplateResponse
+E DSIMessaging 2010 - - getTemplatesResponse DSIMessagingListenerMsg.getTemplatesResponse
+E DSIMessaging 2011 - - getTemplateResponse DSIMessagingListenerMsg.getTemplateResponse
+E DSIMessaging 2012 - - changeTemplateResponse DSIMessagingListenerMsg.changeTemplateResponse
+E DSIMessaging 2013 - - getPositionOfMessageResponse DSIMessagingListenerMsg.getPositionOfMessageResponse
+E DSIMessaging 2014 - - getPositionOfFolderResponse DSIMessagingListenerMsg.getPositionOfFolderResponse
+E DSIMessaging 2015 - - deleteSimCardMessagesResponse DSIMessagingListenerMsg.deleteSimCardMessagesResponse
+E DSIMessaging 2016 - - decodeAttachmentResponse DSIMessagingListenerMsg.decodeAttachmentResponse
+E DSIMessaging 2017 - - responseMeasureMessageLength DSIMessagingListenerMsg.responseMeasureMessageLength
+E DSIMessaging 2018 - - responseInboxSync DSIMessagingListenerMsg.responseInboxSync
+E DSIMessaging 2019 - - responseExchangeTemplate DSIMessagingListenerMsg.responseExchangeTemplate
+E DSIMessaging 2020 - - responseSetTemplatePosition DSIMessagingListenerMsg.responseSetTemplatePosition
+E DSIMessaging 2021 - - forwardMessageResponse DSIMessagingListenerMsg.forwardMessageResponse
+E DSIMessaging 2022 - - responseGetConversations DSIMessagingListenerMsg.responseGetConversations
+E DSIMessaging 2023 - - responseUseProfile DSIMessagingListenerMsg.responseUseProfile
+E DSIMessaging 2024 - - responseUseConversationalView DSIMessagingListenerMsg.responseUseConversationalView
+E DSIMessaging 2025 - - responseActivateRejectCallWithSMS DSIMessagingListenerMsg.responseActivateRejectCallWithSMS
+E DSIMessaging 3001 - - indicateNewMessage DSIMessagingListenerMsg.indicateNewMessage
+E DSIMessaging 3003 - - indicateListChanged DSIMessagingListenerMsg.indicateListChanged
+E DSIMessaging 3004 - - indicateMessageStatus DSIMessagingListenerMsg.indicateMessageStatus
+E DSIMessaging 3005 - - indicatePushMessageFailed DSIMessagingListenerMsg.indicatePushMessageFailed
+E DSIMessaging 3006 - - indicateSendMessage DSIMessagingListenerMsg.indicateSendMessage
+E DSIMessaging 3007 - - indicateFolderInformation DSIMessagingListenerMsg.indicateFolderInformation
+P DSIMessaging 9999 setNotification DSIMessagingMsg.setNotification
+P DSIMessaging 9998 clearNotification DSIMessagingMsg.clearNotification
+P DSIMessaging 1000 changeFolderRequest DSIMessagingMsg.changeFolderRequest
+P DSIMessaging 1001 listEntriesRequest DSIMessagingMsg.listEntriesRequest
+P DSIMessaging 1013 getPositionOfMessageRequest DSIMessagingMsg.getPositionOfMessageRequest
+P DSIMessaging 1014 getPositionOfFolderRequest DSIMessagingMsg.getPositionOfFolderRequest
+P DSIMessaging 1002 deleteMessageRequest DSIMessagingMsg.deleteMessageRequest
+P DSIMessaging 1003 sendMessageRequest DSIMessagingMsg.sendMessageRequest
+P DSIMessaging 1004 getMessageContentsRequest DSIMessagingMsg.getMessageContentsRequest
+P DSIMessaging 1005 setMessageReadStatusRequest DSIMessagingMsg.setMessageReadStatusRequest
+P DSIMessaging 1007 saveAsDraftRequest DSIMessagingMsg.saveAsDraftRequest
+P DSIMessaging 1008 extractInformationRequest DSIMessagingMsg.extractInformationRequest
+P DSIMessaging 1012 changeTemplateRequest DSIMessagingMsg.changeTemplateRequest
+P DSIMessaging 1021 changeTemplateRequestWithTextID DSIMessagingMsg.changeTemplateRequestWithTextID
+P DSIMessaging 1011 getTemplateRequest DSIMessagingMsg.getTemplateRequest
+P DSIMessaging 1010 getTemplatesRequest DSIMessagingMsg.getTemplatesRequest
+P DSIMessaging 1009 deleteTemplateRequest DSIMessagingMsg.deleteTemplateRequest
+P DSIMessaging 1019 requestExchangeTemplate DSIMessagingMsg.requestExchangeTemplate
+P DSIMessaging 1020 requestSetTemplatePosition DSIMessagingMsg.requestSetTemplatePosition
+P DSIMessaging 1015 deleteSimCardMessagesRequest DSIMessagingMsg.deleteSimCardMessagesRequest
+P DSIMessaging 1016 decodeAttachmentRequest DSIMessagingMsg.decodeAttachmentRequest
+P DSIMessaging 1017 requestMeasureMessageLength DSIMessagingMsg.requestMeasureMessageLength
+P DSIMessaging 1018 requestInboxSync DSIMessagingMsg.requestInboxSync
+P DSIMessaging 1022 forwardMessageRequest DSIMessagingMsg.forwardMessageRequest
+P DSIMessaging 1023 requestGetConversations DSIMessagingMsg.requestGetConversations
+P DSIMessaging 1024 requestUseProfile DSIMessagingMsg.requestUseProfile
+P DSIMessaging 1025 requestUseConversationalView DSIMessagingMsg.requestUseConversationalView
+P DSIMessaging 1026 requestActivateRejectCallWithSMS DSIMessagingMsg.requestActivateRejectCallWithSMS
+R DSIMessaging 1000 escolha 120000 2001 changeFolderResponse
+R DSIMessaging 1000 escolha 120000 2000 listEntriesResponse
+R DSIMessaging 1001 escolha 90000 2001 changeFolderResponse
+R DSIMessaging 1001 escolha 90000 2000 listEntriesResponse
+R DSIMessaging 1013 uma 30000 2013 getPositionOfMessageResponse
+R DSIMessaging 1014 uma 30000 2014 getPositionOfFolderResponse
+R DSIMessaging 1002 uma 30000 2002 deleteMessageResponse
+R DSIMessaging 1003 uma -1 2003 sendMessageResponse
+R DSIMessaging 1004 uma 30000 2004 getMessageContentsResponse
+R DSIMessaging 1005 uma 30000 2005 setMessageReadStatusResponse
+R DSIMessaging 1007 uma 30000 2007 saveAsDraftResponse
+R DSIMessaging 1008 uma 30000 2008 extractInformationResponse
+R DSIMessaging 1012 uma 10000 2012 changeTemplateResponse
+R DSIMessaging 1021 uma 10000 2012 changeTemplateResponse
+R DSIMessaging 1011 uma 10000 2011 getTemplateResponse
+R DSIMessaging 1010 uma 10000 2010 getTemplatesResponse
+R DSIMessaging 1009 uma 10000 2009 deleteTemplateResponse
+R DSIMessaging 1019 uma 10000 2019 responseExchangeTemplate
+R DSIMessaging 1020 uma 10000 2020 responseSetTemplatePosition
+R DSIMessaging 1015 uma 60000 2015 deleteSimCardMessagesResponse
+R DSIMessaging 1016 uma 10000 2016 decodeAttachmentResponse
+R DSIMessaging 1017 uma 10000 2017 responseMeasureMessageLength
+R DSIMessaging 1022 uma 20000 2021 forwardMessageResponse
+R DSIMessaging 1023 uma 30000 2022 responseGetConversations
+R DSIMessaging 1024 uma 10000 2023 responseUseProfile
+R DSIMessaging 1025 uma 10000 2024 responseUseConversationalView
+R DSIMessaging 1026 uma 10000 2025 responseActivateRejectCallWithSMS
+R DSIMessaging 1018 uma 10000 2018 responseInboxSync
+X DSIMessaging 1001 2000 requestId requestId
+X DSIMessaging 1001 2000 offset offset
+X DSIMessaging 1003 2003 requestId requestId
+X DSIMessaging 1007 2007 messageID messageID
+X DSIMessaging 1012 2012 templateID templateID
+X DSIMessaging 1021 2012 templateID templateID
+X DSIMessaging 1017 2017 requestId requestId
+X DSIMessaging 1022 2021 requestId requestId
+X DSIMessaging 1023 2022 requestId requestId
+X DSIMessaging 1023 2022 accountID accountID
+X DSIMessaging 1024 2023 deviceID deviceID
+S DSIMessagingServiceConfiguration 256 1103 1104 messaging
+A DSIMessagingServiceConfiguration 1 ATTR_SMSCNUMBER
+A DSIMessagingServiceConfiguration 2 ATTR_SMSDELIVERYREPORT
+A DSIMessagingServiceConfiguration 3 ATTR_STORESMSONSENT
+A DSIMessagingServiceConfiguration 4 ATTR_SHORTMESSAGEVALIDITYPERIOD
+A DSIMessagingServiceConfiguration 5 ATTR_PHONESYSTEMRINGINGVOLUME
+A DSIMessagingServiceConfiguration 6 ATTR_PHONESYSTEMRINGINGTYPE
+A DSIMessagingServiceConfiguration 7 ATTR_EMAILINCLUDEOLDMAILINREPLY
+A DSIMessagingServiceConfiguration 8 ATTR_EMAILEMPTYSUBJECTNOTIFICATION
+A DSIMessagingServiceConfiguration 9 ATTR_FOLDERVIEWMODE
+A DSIMessagingServiceConfiguration 10 ATTR_ACCOUNTPREFERENCES
+A DSIMessagingServiceConfiguration 11 ATTR_SMSINDICATIONS
+A DSIMessagingServiceConfiguration 12 ATTR_EMAILINDICATIONS
+A DSIMessagingServiceConfiguration 13 ATTR_PUSHSMS
+E DSIMessagingServiceConfiguration 1 1 1 updateSMSCNumber DSIMessagingServiceConfigurationListenerMsg.updateSMSCNumber
+E DSIMessagingServiceConfiguration 2 2 2 updateSmsDeliveryReport DSIMessagingServiceConfigurationListenerMsg.updateSmsDeliveryReport
+E DSIMessagingServiceConfiguration 3 3 3 updateStoreSmsOnSent DSIMessagingServiceConfigurationListenerMsg.updateStoreSmsOnSent
+E DSIMessagingServiceConfiguration 4 4 4 updateShortMessageValidityPeriod DSIMessagingServiceConfigurationListenerMsg.updateShortMessageValidityPeriod
+E DSIMessagingServiceConfiguration 5 5 5 updatePhoneSystemRingingVolume DSIMessagingServiceConfigurationListenerMsg.updatePhoneSystemRingingVolume
+E DSIMessagingServiceConfiguration 6 6 6 updatePhoneSystemRingingType DSIMessagingServiceConfigurationListenerMsg.updatePhoneSystemRingingType
+E DSIMessagingServiceConfiguration 7 7 7 updateEmailIncludeOldMailInReply DSIMessagingServiceConfigurationListenerMsg.updateEmailIncludeOldMailInReply
+E DSIMessagingServiceConfiguration 8 8 8 updateEmailEmptySubjectNotification DSIMessagingServiceConfigurationListenerMsg.updateEmailEmptySubjectNotification
+E DSIMessagingServiceConfiguration 9 9 9 updateFolderViewMode DSIMessagingServiceConfigurationListenerMsg.updateFolderViewMode
+E DSIMessagingServiceConfiguration 10 10 10 updateAccountPreferences DSIMessagingServiceConfigurationListenerMsg.updateAccountPreferences
+E DSIMessagingServiceConfiguration 11 11 11 updateSmsIndications DSIMessagingServiceConfigurationListenerMsg.updateSmsIndications
+E DSIMessagingServiceConfiguration 12 12 12 updateEmailIndications DSIMessagingServiceConfigurationListenerMsg.updateEmailIndications
+E DSIMessagingServiceConfiguration 13 13 13 updatePushSms DSIMessagingServiceConfigurationListenerMsg.updatePushSms
+E DSIMessagingServiceConfiguration 2001 - - setSMSCNumberResponse DSIMessagingServiceConfigurationListenerMsg.setSMSCNumberResponse
+E DSIMessagingServiceConfiguration 2002 - - activateSMSDeliveryReportResponse DSIMessagingServiceConfigurationListenerMsg.activateSMSDeliveryReportResponse
+E DSIMessagingServiceConfiguration 2003 - - activateStoreSmsOnSentResponse DSIMessagingServiceConfigurationListenerMsg.activateStoreSmsOnSentResponse
+E DSIMessagingServiceConfiguration 2004 - - setShortMessageValidityPeriodResponse DSIMessagingServiceConfigurationListenerMsg.setShortMessageValidityPeriodResponse
+E DSIMessagingServiceConfiguration 2005 - - setPhoneSystemRingingVolumeResponse DSIMessagingServiceConfigurationListenerMsg.setPhoneSystemRingingVolumeResponse
+E DSIMessagingServiceConfiguration 2006 - - setPhoneSystemRingingTypeResponse DSIMessagingServiceConfigurationListenerMsg.setPhoneSystemRingingTypeResponse
+E DSIMessagingServiceConfiguration 2007 - - activateEmailIncludeOldMailInReplyResponse DSIMessagingServiceConfigurationListenerMsg.activateEmailIncludeOldMailInReplyResponse
+E DSIMessagingServiceConfiguration 2008 - - activateEmailEmptySubjectNotificationResponse DSIMessagingServiceConfigurationListenerMsg.activateEmailEmptySubjectNotificationResponse
+E DSIMessagingServiceConfiguration 2009 - - changeFolderViewModeResponse DSIMessagingServiceConfigurationListenerMsg.changeFolderViewModeResponse
+E DSIMessagingServiceConfiguration 2010 - - restoreFactorySettingsResponse DSIMessagingServiceConfigurationListenerMsg.restoreFactorySettingsResponse
+E DSIMessagingServiceConfiguration 2011 - - responseSetSmsIndications DSIMessagingServiceConfigurationListenerMsg.responseSetSmsIndications
+E DSIMessagingServiceConfiguration 2012 - - responseSetEmailIndications DSIMessagingServiceConfigurationListenerMsg.responseSetEmailIndications
+E DSIMessagingServiceConfiguration 2013 - - responseSetPushSms DSIMessagingServiceConfigurationListenerMsg.responseSetPushSms
+E DSIMessagingServiceConfiguration 2014 - - responseSetAccountService DSIMessagingServiceConfigurationListenerMsg.responseSetAccountService
+P DSIMessagingServiceConfiguration 9999 setNotification DSIMessagingServiceConfigurationMsg.setNotification
+P DSIMessagingServiceConfiguration 9998 clearNotification DSIMessagingServiceConfigurationMsg.clearNotification
+P DSIMessagingServiceConfiguration 1005 setPhoneSystemRingingVolumeRequest DSIMessagingServiceConfigurationMsg.setPhoneSystemRingingVolumeRequest
+P DSIMessagingServiceConfiguration 1006 setPhoneSystemRingingTypeRequest DSIMessagingServiceConfigurationMsg.setPhoneSystemRingingTypeRequest
+P DSIMessagingServiceConfiguration 1001 setSMSCNumberRequest DSIMessagingServiceConfigurationMsg.setSMSCNumberRequest
+P DSIMessagingServiceConfiguration 1002 activateSmsDeliveryReportRequest DSIMessagingServiceConfigurationMsg.activateSmsDeliveryReportRequest
+P DSIMessagingServiceConfiguration 1003 activateStoreSmsOnSentRequest DSIMessagingServiceConfigurationMsg.activateStoreSmsOnSentRequest
+P DSIMessagingServiceConfiguration 1004 setShortMessageValidityPeriodRequest DSIMessagingServiceConfigurationMsg.setShortMessageValidityPeriodRequest
+P DSIMessagingServiceConfiguration 1007 activateEmailIncludeOldMailInReplyRequest DSIMessagingServiceConfigurationMsg.activateEmailIncludeOldMailInReplyRequest
+P DSIMessagingServiceConfiguration 1008 activateEmailEmptySubjectNotificationRequest DSIMessagingServiceConfigurationMsg.activateEmailEmptySubjectNotificationRequest
+P DSIMessagingServiceConfiguration 1009 changeFolderViewModeRequest DSIMessagingServiceConfigurationMsg.changeFolderViewModeRequest
+P DSIMessagingServiceConfiguration 1010 restoreFactorySettingsRequest DSIMessagingServiceConfigurationMsg.restoreFactorySettingsRequest
+P DSIMessagingServiceConfiguration 1011 setAccountPreferences DSIMessagingServiceConfigurationMsg.setAccountPreferences
+P DSIMessagingServiceConfiguration 1012 requestSetSmsIndications DSIMessagingServiceConfigurationMsg.requestSetSmsIndications
+P DSIMessagingServiceConfiguration 1013 requestSetEmailIndications DSIMessagingServiceConfigurationMsg.requestSetEmailIndications
+P DSIMessagingServiceConfiguration 1014 requestSetPushSms DSIMessagingServiceConfigurationMsg.requestSetPushSms
+P DSIMessagingServiceConfiguration 1015 requestSetAccountService DSIMessagingServiceConfigurationMsg.requestSetAccountService
+R DSIMessagingServiceConfiguration 1005 uma 10000 - setPhoneSystemRingingVolumeResponse
+R DSIMessagingServiceConfiguration 1006 uma 10000 2006 setPhoneSystemRingingTypeResponse
+R DSIMessagingServiceConfiguration 1001 uma 10000 2001 setSMSCNumberResponse
+R DSIMessagingServiceConfiguration 1002 uma 10000 2002 activateSMSDeliveryReportResponse
+R DSIMessagingServiceConfiguration 1003 uma 10000 2003 activateStoreSmsOnSentResponse
+R DSIMessagingServiceConfiguration 1004 uma 10000 2004 setShortMessageValidityPeriodResponse
+R DSIMessagingServiceConfiguration 1007 uma 10000 2007 activateEmailIncludeOldMailInReplyResponse
+R DSIMessagingServiceConfiguration 1008 uma 10000 2008 activateEmailEmptySubjectNotificationResponse
+R DSIMessagingServiceConfiguration 1009 uma 10000 2009 changeFolderViewModeResponse
+R DSIMessagingServiceConfiguration 1010 uma 10000 2010 restoreFactorySettingsResponse
+R DSIMessagingServiceConfiguration 1012 uma 10000 2011 responseSetSmsIndications
+R DSIMessagingServiceConfiguration 1013 uma 10000 2012 responseSetEmailIndications
+R DSIMessagingServiceConfiguration 1014 uma 10000 2013 responseSetPushSms
+R DSIMessagingServiceConfiguration 1015 uma 10000 2014 responseSetAccountService
+G DSIMessagingServiceConfiguration 1011 10 posicao accountID accountID
+G DSIMessagingServiceConfiguration 1011 10 posicao accountName accountName
+X DSIMessagingServiceConfiguration 1015 2014 requestId requestId
+S DSIAdb 256 1201 1202 addressbook
+A DSIAdb 1 ATTR_ADBSTATE
+A DSIAdb 2 ATTR_PROFILEINFO
+A DSIAdb 3 ATTR_DEVICECONNECTED
+A DSIAdb 4 ATTR_DOWNLOADCOUNTSIM
+A DSIAdb 5 ATTR_DOWNLOADCOUNTME
+A DSIAdb 6 ATTR_DOWNLOADCOUNTOPP
+A DSIAdb 7 ATTR_DOWNLOADSTATE
+E DSIAdb 1 1 1 updateAdbState DSIAdbListenerMsg.updateAdbState
+E DSIAdb 2 2 2 updateProfileInfo DSIAdbListenerMsg.updateProfileInfo
+E DSIAdb 3 3 3 updateDeviceConnected DSIAdbListenerMsg.updateDeviceConnected
+E DSIAdb 4 4 4 updateDownloadCountSim DSIAdbListenerMsg.updateDownloadCountSim
+E DSIAdb 5 5 5 updateDownloadCountMe DSIAdbListenerMsg.updateDownloadCountMe
+E DSIAdb 6 6 6 updateDownloadCountOpp DSIAdbListenerMsg.updateDownloadCountOpp
+E DSIAdb 7 7 7 updateDownloadState DSIAdbListenerMsg.updateDownloadState
+E DSIAdb 2000 - - setLanguageResult DSIAdbListenerMsg.setLanguageResult
+E DSIAdb 2001 - - resetToFactorySettingsResult DSIAdbListenerMsg.resetToFactorySettingsResult
+E DSIAdb 2002 - - createBackupFileResult DSIAdbListenerMsg.createBackupFileResult
+E DSIAdb 2003 - - importBackupFileResult DSIAdbListenerMsg.importBackupFileResult
+E DSIAdb 2004 - - restartDownloadResult DSIAdbListenerMsg.restartDownloadResult
+E DSIAdb 2005 - - deleteProfilesResult DSIAdbListenerMsg.deleteProfilesResult
+P DSIAdb 9999 setNotification DSIAdbMsg.setNotification
+P DSIAdb 9998 clearNotification DSIAdbMsg.clearNotification
+P DSIAdb 1000 setLanguage DSIAdbMsg.setLanguage
+P DSIAdb 1001 resetToFactorySettings DSIAdbMsg.resetToFactorySettings
+P DSIAdb 1002 createBackupFile DSIAdbMsg.createBackupFile
+P DSIAdb 1003 importBackupFile DSIAdbMsg.importBackupFile
+P DSIAdb 1004 restartDownload DSIAdbMsg.restartDownload
+P DSIAdb 1005 deleteProfiles DSIAdbMsg.deleteProfiles
+R DSIAdb 1001 uma 30000 2001 resetToFactorySettingsResult
+R DSIAdb 1002 uma 10000 2002 createBackupFileResult
+R DSIAdb 1003 uma 10000 2003 importBackupFileResult
+R DSIAdb 1004 uma 10000 2004 restartDownloadResult
+R DSIAdb 1005 uma 10000 2005 deleteProfilesResult
+R DSIAdb 1000 uma 10000 2000 setLanguageResult
+X DSIAdb 1003 2003 fullPath fullPath
+S DSIAdbDataResolution 256 1203 1204 addressbook
+E DSIAdbDataResolution 2000 - - resolveMailAddressResult DSIAdbDataResolutionListenerMsg.resolveMailAddressResult
+E DSIAdbDataResolution 2001 - - resolvePhoneNumbersResult DSIAdbDataResolutionListenerMsg.resolvePhoneNumbersResult
+P DSIAdbDataResolution 9999 setNotification DSIAdbDataResolutionMsg.setNotification
+P DSIAdbDataResolution 9998 clearNotification DSIAdbDataResolutionMsg.clearNotification
+P DSIAdbDataResolution 1000 resolveMailAddresses DSIAdbDataResolutionMsg.resolveMailAddresses
+P DSIAdbDataResolution 1001 resolvePhoneNumbers DSIAdbDataResolutionMsg.resolvePhoneNumbers
+R DSIAdbDataResolution 1000 uma 10000 2000 resolveMailAddressResult
+R DSIAdbDataResolution 1001 uma 10000 2001 resolvePhoneNumbersResult
+S DSIAdbEdit 256 1205 1206 addressbook
+A DSIAdbEdit 2 ATTR_NEWPUBLICPROFILEENTRYAVAILABLE
+A DSIAdbEdit 6 ATTR_SPEEDDIALS
+E DSIAdbEdit 2 2 2 updateNewPublicProfileEntryAvailable DSIAdbEditListenerMsg.updateNewPublicProfileEntryAvailable
+E DSIAdbEdit 6 6 6 updateSpeedDials DSIAdbEditListenerMsg.updateSpeedDials
+E DSIAdbEdit 2000 - - insertEntryResult DSIAdbEditListenerMsg.insertEntryResult
+E DSIAdbEdit 2001 - - getEntriesResult DSIAdbEditListenerMsg.getEntriesResult
+E DSIAdbEdit 2002 - - getEntryDataSetsResult DSIAdbEditListenerMsg.getEntryDataSetsResult
+E DSIAdbEdit 2003 - - changeEntryResult DSIAdbEditListenerMsg.changeEntryResult
+E DSIAdbEdit 2004 - - deleteEntriesResult DSIAdbEditListenerMsg.deleteEntriesResult
+E DSIAdbEdit 2005 - - setSpeedDialResult DSIAdbEditListenerMsg.setSpeedDialResult
+E DSIAdbEdit 2006 - - deleteSpeedDialResult DSIAdbEditListenerMsg.deleteSpeedDialResult
+E DSIAdbEdit 2007 - - getEntryByReferenceIdResult DSIAdbEditListenerMsg.getEntryByReferenceIdResult
+E DSIAdbEdit 2008 - - getEntryNamesResult DSIAdbEditListenerMsg.getEntryNamesResult
+P DSIAdbEdit 9999 setNotification DSIAdbEditMsg.setNotification
+P DSIAdbEdit 9998 clearNotification DSIAdbEditMsg.clearNotification
+P DSIAdbEdit 1000 insertEntry DSIAdbEditMsg.insertEntry
+P DSIAdbEdit 1001 getEntries DSIAdbEditMsg.getEntries
+P DSIAdbEdit 1002 getEntryDataSets DSIAdbEditMsg.getEntryDataSets
+P DSIAdbEdit 1003 changeEntry DSIAdbEditMsg.changeEntry
+P DSIAdbEdit 1004 deleteEntries DSIAdbEditMsg.deleteEntries
+P DSIAdbEdit 1005 setSpeedDial DSIAdbEditMsg.setSpeedDial
+P DSIAdbEdit 1009 deleteAllSpeedDials DSIAdbEditMsg.deleteAllSpeedDials
+P DSIAdbEdit 1006 deleteSpeedDial DSIAdbEditMsg.deleteSpeedDial
+P DSIAdbEdit 1008 getEntryNames DSIAdbEditMsg.getEntryNames
+R DSIAdbEdit 1002 uma 10000 2002 getEntryDataSetsResult
+R DSIAdbEdit 1004 uma 10000 2004 deleteEntriesResult
+R DSIAdbEdit 1009 uma 10000 2006 deleteSpeedDialResult
+R DSIAdbEdit 1006 uma 10000 2006 deleteSpeedDialResult
+R DSIAdbEdit 1008 uma 10000 2008 getEntryNamesResult
+R DSIAdbEdit 1005 uma 10000 2005 setSpeedDialResult
+R DSIAdbEdit 1001 uma 10000 2001 getEntriesResult
+R DSIAdbEdit 1003 uma 10000 2003 changeEntryResult
+R DSIAdbEdit 1000 uma 10000 2000 insertEntryResult
+X DSIAdbEdit 1003 2003 entry.entryId entry.entryId
+X DSIAdbEdit 1003 2003 entry.entryType entry.entryType
+X DSIAdbEdit 1003 2003 entry.combinedName entry.combinedName
+X DSIAdbEdit 1003 2003 entry.personalData.lastName entry.personalData.lastName
+X DSIAdbEdit 1003 2003 entry.personalData.lastNameSound entry.personalData.lastNameSound
+X DSIAdbEdit 1003 2003 entry.personalData.firstName entry.personalData.firstName
+X DSIAdbEdit 1003 2003 entry.personalData.firstNameSound entry.personalData.firstNameSound
+X DSIAdbEdit 1003 2003 entry.personalData.birthday.time entry.personalData.birthday.time
+X DSIAdbEdit 1003 2003 entry.personalData.organization entry.personalData.organization
+X DSIAdbEdit 1003 2003 entry.personalData.organizationSound entry.personalData.organizationSound
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.id entry.personalData.contactPicture.id
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.url entry.personalData.contactPicture.url
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6 entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.cdnAccess.cdnInternalPort entry.personalData.contactPicture.cdnAccess.cdnInternalPort
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6 entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.cdnAccess.cdnExternalPort entry.personalData.contactPicture.cdnAccess.cdnExternalPort
+X DSIAdbEdit 1003 2003 entry.personalData.contactPicture.cdnAccess.imageResourcePath entry.personalData.contactPicture.cdnAccess.imageResourcePath
+X DSIAdbEdit 1003 2003 entry.referenceId entry.referenceId
+X DSIAdbEdit 1000 2000 entry.entryId entry.entryId
+X DSIAdbEdit 1000 2000 entry.entryType entry.entryType
+X DSIAdbEdit 1000 2000 entry.combinedName entry.combinedName
+X DSIAdbEdit 1000 2000 entry.personalData.lastName entry.personalData.lastName
+X DSIAdbEdit 1000 2000 entry.personalData.lastNameSound entry.personalData.lastNameSound
+X DSIAdbEdit 1000 2000 entry.personalData.firstName entry.personalData.firstName
+X DSIAdbEdit 1000 2000 entry.personalData.firstNameSound entry.personalData.firstNameSound
+X DSIAdbEdit 1000 2000 entry.personalData.birthday.time entry.personalData.birthday.time
+X DSIAdbEdit 1000 2000 entry.personalData.organization entry.personalData.organization
+X DSIAdbEdit 1000 2000 entry.personalData.organizationSound entry.personalData.organizationSound
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.id entry.personalData.contactPicture.id
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.url entry.personalData.contactPicture.url
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6 entry.personalData.contactPicture.cdnAccess.cdnInternalIpv6
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.cdnAccess.cdnInternalPort entry.personalData.contactPicture.cdnAccess.cdnInternalPort
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6 entry.personalData.contactPicture.cdnAccess.cdnExternalIpv6
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.cdnAccess.cdnExternalPort entry.personalData.contactPicture.cdnAccess.cdnExternalPort
+X DSIAdbEdit 1000 2000 entry.personalData.contactPicture.cdnAccess.imageResourcePath entry.personalData.contactPicture.cdnAccess.imageResourcePath
+X DSIAdbEdit 1000 2000 entry.referenceId entry.referenceId
+S DSIAdbList 256 1207 1208 addressbook
+A DSIAdbList 2 ATTR_ALPHABETICALINDEX
+E DSIAdbList 2 2 2 updateAlphabeticalIndex DSIAdbListListenerMsg.updateAlphabeticalIndex
+E DSIAdbList 2003 - - getViewWindowResult DSIAdbListListenerMsg.getViewWindowResult
+E DSIAdbList 2004 - - setListStyleResult DSIAdbListListenerMsg.setListStyleResult
+E DSIAdbList 3000 - - invalidData DSIAdbListListenerMsg.invalidData
+P DSIAdbList 9999 setNotification DSIAdbListMsg.setNotification
+P DSIAdbList 9998 clearNotification DSIAdbListMsg.clearNotification
+P DSIAdbList 1004 getViewWindow DSIAdbListMsg.getViewWindow
+P DSIAdbList 1005 setListStyle DSIAdbListMsg.setListStyle
+R DSIAdbList 1005 uma 10000 2004 setListStyleResult
+R DSIAdbList 1004 uma 10000 2003 getViewWindowResult
+S DSIAdbUserProfile 256 1209 1210 addressbook
+A DSIAdbUserProfile 1 ATTR_SOSBUTTON
+A DSIAdbUserProfile 2 ATTR_SORTORDER
+A DSIAdbUserProfile 3 ATTR_PICTUREVISIBILITY
+A DSIAdbUserProfile 4 ATTR_CONTEXTSPECIFICVISIBILITY
+A DSIAdbUserProfile 5 ATTR_ACTIVEPROFILE
+E DSIAdbUserProfile 1 1 1 updateSOSButton DSIAdbUserProfileListenerMsg.updateSOSButton
+E DSIAdbUserProfile 2 2 2 updateSortOrder DSIAdbUserProfileListenerMsg.updateSortOrder
+E DSIAdbUserProfile 3 3 3 updatePictureVisibility DSIAdbUserProfileListenerMsg.updatePictureVisibility
+E DSIAdbUserProfile 4 4 4 updateContextSpecificVisibility DSIAdbUserProfileListenerMsg.updateContextSpecificVisibility
+E DSIAdbUserProfile 5 5 5 updateActiveProfile DSIAdbUserProfileListenerMsg.updateActiveProfile
+E DSIAdbUserProfile 2000 - - setProfileNameResult DSIAdbUserProfileListenerMsg.setProfileNameResult
+E DSIAdbUserProfile 2002 - - setSOSButtonResult DSIAdbUserProfileListenerMsg.setSOSButtonResult
+E DSIAdbUserProfile 2003 - - useProfileResult DSIAdbUserProfileListenerMsg.useProfileResult
+E DSIAdbUserProfile 2004 - - setSortOrderResult DSIAdbUserProfileListenerMsg.setSortOrderResult
+E DSIAdbUserProfile 2005 - - setPublicProfileVisibilityResult DSIAdbUserProfileListenerMsg.setPublicProfileVisibilityResult
+E DSIAdbUserProfile 2008 - - setContextSpecificVisibilityResult DSIAdbUserProfileListenerMsg.setContextSpecificVisibilityResult
+P DSIAdbUserProfile 9999 setNotification DSIAdbUserProfileMsg.setNotification
+P DSIAdbUserProfile 9998 clearNotification DSIAdbUserProfileMsg.clearNotification
+P DSIAdbUserProfile 1000 setProfileName DSIAdbUserProfileMsg.setProfileName
+P DSIAdbUserProfile 1002 setSOSButton DSIAdbUserProfileMsg.setSOSButton
+P DSIAdbUserProfile 1003 useProfile DSIAdbUserProfileMsg.useProfile
+P DSIAdbUserProfile 1004 setSortOrder DSIAdbUserProfileMsg.setSortOrder
+P DSIAdbUserProfile 1005 setPublicProfileVisibility DSIAdbUserProfileMsg.setPublicProfileVisibility
+P DSIAdbUserProfile 1008 setContextSpecificVisibility DSIAdbUserProfileMsg.setContextSpecificVisibility
+R DSIAdbUserProfile 1003 uma 10000 2003 useProfileResult
+R DSIAdbUserProfile 1008 uma 10000 2008 setContextSpecificVisibilityResult
+R DSIAdbUserProfile 1005 uma 10000 2005 setPublicProfileVisibilityResult
+R DSIAdbUserProfile 1000 uma 10000 2000 setProfileNameResult
+R DSIAdbUserProfile 1002 uma 10000 2002 setSOSButtonResult
+R DSIAdbUserProfile 1004 uma 10000 2004 setSortOrderResult
+G DSIAdbUserProfile 1002 1 posicao enabled visiblity
+G DSIAdbUserProfile 1004 2 posicao sortOrder sortOrder
+G DSIAdbUserProfile 1008 4 posicao showOnlyUsableContacts visibility
+X DSIAdbUserProfile 1003 2003 deviceID deviceID
+S DSIAdbVCardExchange 256 1211 1212 addressbook
+A DSIAdbVCardExchange 4 ATTR_EXPORTCOUNT
+A DSIAdbVCardExchange 5 ATTR_IMPORTCOUNT
+E DSIAdbVCardExchange 4 4 4 updateExportCount DSIAdbVCardExchangeListenerMsg.updateExportCount
+E DSIAdbVCardExchange 5 5 5 updateImportCount DSIAdbVCardExchangeListenerMsg.updateImportCount
+E DSIAdbVCardExchange 2000 - - importVCardResult DSIAdbVCardExchangeListenerMsg.importVCardResult
+E DSIAdbVCardExchange 2001 - - exportVCardResult DSIAdbVCardExchangeListenerMsg.exportVCardResult
+E DSIAdbVCardExchange 2002 - - createVCardResult DSIAdbVCardExchangeListenerMsg.createVCardResult
+E DSIAdbVCardExchange 2003 - - parseVCardResult DSIAdbVCardExchangeListenerMsg.parseVCardResult
+P DSIAdbVCardExchange 9999 setNotification DSIAdbVCardExchangeMsg.setNotification
+P DSIAdbVCardExchange 9998 clearNotification DSIAdbVCardExchangeMsg.clearNotification
+P DSIAdbVCardExchange 1000 importVCard DSIAdbVCardExchangeMsg.importVCard
+P DSIAdbVCardExchange 1001 exportVCard DSIAdbVCardExchangeMsg.exportVCard
+P DSIAdbVCardExchange 1002 createVCard DSIAdbVCardExchangeMsg.createVCard
+P DSIAdbVCardExchange 1003 parseVCard DSIAdbVCardExchangeMsg.parseVCard
+R DSIAdbVCardExchange 1000 uma 420000 2000 importVCardResult
+R DSIAdbVCardExchange 1001 uma 10000 2001 exportVCardResult
+R DSIAdbVCardExchange 1002 uma 10000 2002 createVCardResult
+R DSIAdbVCardExchange 1003 uma 10000 2003 parseVCardResult
+X DSIAdbVCardExchange 1002 2002 listMode listMode
+S DSIPhoneManager 4096 600 600 phonemanager
+A DSIPhoneManager 1 ATTR_DISCOVEREDDEVICES
+A DSIPhoneManager 2 ATTR_KNOWNDEVICES
+A DSIPhoneManager 4 ATTR_SINGLEDEVICECOEXMODE
+A DSIPhoneManager 7 ATTR_EMERGENCYCALLINDICATOR
+A DSIPhoneManager 8 ATTR_SWAPSTATUS
+E DSIPhoneManager 1 1 1 updateDiscoveredDevices DSIPhoneManagerListenerMsg.updateDiscoveredDevices
+E DSIPhoneManager 2 2 2 updateKnownDevices DSIPhoneManagerListenerMsg.updateKnownDevices
+E DSIPhoneManager 4 4 4 updateSingleDeviceCoexMode DSIPhoneManagerListenerMsg.updateSingleDeviceCoexMode
+E DSIPhoneManager 7 7 7 updateEmergencyCallIndicator DSIPhoneManagerListenerMsg.updateEmergencyCallIndicator
+E DSIPhoneManager 8 8 8 updateSwapStatus DSIPhoneManagerListenerMsg.updateSwapStatus
+E DSIPhoneManager 2000 - - responseConnectService DSIPhoneManagerListenerMsg.responseConnectService
+E DSIPhoneManager 2001 - - responseDisconnectService DSIPhoneManagerListenerMsg.responseDisconnectService
+E DSIPhoneManager 2002 - - responseStartDiscovery DSIPhoneManagerListenerMsg.responseStartDiscovery
+E DSIPhoneManager 2003 - - responseAbortDiscovery DSIPhoneManagerListenerMsg.responseAbortDiscovery
+E DSIPhoneManager 2004 - - responseReconnectSuspend DSIPhoneManagerListenerMsg.responseReconnectSuspend
+E DSIPhoneManager 2005 - - responseRemoveDevice DSIPhoneManagerListenerMsg.responseRemoveDevice
+E DSIPhoneManager 2006 - - responseRejectTechnologySelection DSIPhoneManagerListenerMsg.responseRejectTechnologySelection
+E DSIPhoneManager 2007 - - responseRestoreFactorySettings DSIPhoneManagerListenerMsg.responseRestoreFactorySettings
+E DSIPhoneManager 2008 - - responseSetPrioritizedDevice DSIPhoneManagerListenerMsg.responseSetPrioritizedDevice
+E DSIPhoneManager 2010 - - responseSetEmergencyCallIndicator DSIPhoneManagerListenerMsg.responseSetEmergencyCallIndicator
+E DSIPhoneManager 2011 - - responseAbortConnectService DSIPhoneManagerListenerMsg.responseAbortConnectService
+E DSIPhoneManager 3000 - 3000 indicateDeviceDisconnectionInfo DSIPhoneManagerListenerMsg.indicateDeviceDisconnectionInfo
+E DSIPhoneManager 3001 - 3001 indicateIncomingServiceRequestLimitExceeded DSIPhoneManagerListenerMsg.indicateIncomingServiceRequestLimitExceeded
+E DSIPhoneManager 3002 - 3002 indicateGetTechnologySelection DSIPhoneManagerListenerMsg.indicateGetTechnologySelection
+E DSIPhoneManager 3003 - 3003 indicateIncomingAAWLConnectionRequest DSIPhoneManagerListenerMsg.indicateIncomingAAWLConnectionRequest
+P DSIPhoneManager 9999 setNotification DSIPhoneManagerMsg.setNotification
+P DSIPhoneManager 9998 clearNotification DSIPhoneManagerMsg.clearNotification
+P DSIPhoneManager 1000 requestConnectService DSIPhoneManagerMsg.requestConnectService
+P DSIPhoneManager 1001 requestDisconnectService DSIPhoneManagerMsg.requestDisconnectService
+P DSIPhoneManager 1002 requestStartDiscovery DSIPhoneManagerMsg.requestStartDiscovery
+P DSIPhoneManager 1003 requestAbortDiscovery DSIPhoneManagerMsg.requestAbortDiscovery
+P DSIPhoneManager 1008 requestRestoreFactorySettings DSIPhoneManagerMsg.requestRestoreFactorySettings
+P DSIPhoneManager 1004 requestReconnectSuspend DSIPhoneManagerMsg.requestReconnectSuspend
+P DSIPhoneManager 1012 requestSetEmergencyCallIndicator DSIPhoneManagerMsg.requestSetEmergencyCallIndicator
+P DSIPhoneManager 1010 requestSetPrioritizedDevice DSIPhoneManagerMsg.requestSetPrioritizedDevice
+P DSIPhoneManager 1007 requestRejectTechnologySelection DSIPhoneManagerMsg.requestRejectTechnologySelection
+P DSIPhoneManager 1006 requestRemoveDevice DSIPhoneManagerMsg.requestRemoveDevice
+P DSIPhoneManager 1013 requestAbortConnectService DSIPhoneManagerMsg.requestAbortConnectService
+R DSIPhoneManager 1000 uma 180000 2000 responseConnectService
+R DSIPhoneManager 1001 uma 10000 2001 responseDisconnectService
+R DSIPhoneManager 1004 uma 10000 2004 responseReconnectSuspend
+R DSIPhoneManager 1008 uma 10000 2007 responseRestoreFactorySettings
+R DSIPhoneManager 1013 uma 10000 2011 responseAbortConnectService
+R DSIPhoneManager 1002 uma 10000 2002 responseStartDiscovery
+R DSIPhoneManager 1003 uma 10000 2003 responseAbortDiscovery
+R DSIPhoneManager 1012 uma 10000 2010 responseSetEmergencyCallIndicator
+R DSIPhoneManager 1010 uma 10000 2008 responseSetPrioritizedDevice
+R DSIPhoneManager 1007 uma 10000 2006 responseRejectTechnologySelection
+R DSIPhoneManager 1006 uma 10000 2005 responseRemoveDevice
+X DSIPhoneManager 1007 2006 uniqueDeviceID uniqueDeviceID
+X DSIPhoneManager 1006 2005 uniqueDeviceID uniqueDeviceID
+S DSISmartphoneIntegration 4096 600 602 smartphoneintegration
+A DSISmartphoneIntegration 1 ATTR_DISCOVEREDDEVICES
+A DSISmartphoneIntegration 2 ATTR_DEVICECONNECTIONSTATE
+A DSISmartphoneIntegration 3 ATTR_SWAPSTATUS
+A DSISmartphoneIntegration 4 ATTR_USBRESETACTIVE
+E DSISmartphoneIntegration 1 - - updateDiscoveredDevices -
+E DSISmartphoneIntegration 2 - - updateDeviceConnectionState -
+E DSISmartphoneIntegration 3 - - updateSWaPStatus -
+E DSISmartphoneIntegration 4 - - updateUSBResetActive -
+E DSISmartphoneIntegration 2001 - - responseFactorySettings -
+P DSISmartphoneIntegration -1 setNotification -
+W 256 org.dsi.ifc.bluetooth.DSIBluetooth 0 0
+W 256 org.dsi.ifc.bluetooth.DSIBluetoothLE 0 0
+W 256 org.dsi.ifc.bluetooth.DSIBluetoothLEDataChannel 0 0
+W 256 org.dsi.ifc.bluetooth.DSIObexAuthentication 0 0
+W 256 org.dsi.ifc.bluetooth.DSIObjectPush 0 0
+W 256 org.dsi.ifc.nfc.DSINFC 0 0
+W 256 org.dsi.ifc.messaging.DSIMessaging 0 0
+W 256 org.dsi.ifc.messaging.DSIMessagingServiceConfiguration 0 0
+W 256 org.dsi.ifc.telephoneng.DSIMobileEquipment 0 0
+W 256 org.dsi.ifc.telephoneng.DSIMobileEquipment 1 0
+W 256 org.dsi.ifc.telephoneng.DSIMobileEquipment 2 0
+W 256 org.dsi.ifc.telephoneng.DSIMobileEquipmentTopology 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbUserProfile 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbUserProfile 1 0
+W 256 org.dsi.ifc.addressbook.DSIAdbUserProfile 2 0
+W 256 org.dsi.ifc.addressbook.DSIAdbUserProfile 3 0
+W 256 org.dsi.ifc.addressbook.DSIAdb 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbList 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbList 1 0
+W 256 org.dsi.ifc.addressbook.DSIAdbList 2 0
+W 256 org.dsi.ifc.addressbook.DSIAdbList 3 0
+W 256 org.dsi.ifc.addressbook.DSIAdbEdit 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbEdit 1 0
+W 256 org.dsi.ifc.addressbook.DSIAdbEdit 2 0
+W 256 org.dsi.ifc.addressbook.DSIAdbEdit 3 0
+W 256 org.dsi.ifc.addressbook.DSIAdbDataResolution 0 0
+W 256 org.dsi.ifc.addressbook.DSIAdbVCardExchange 0 0
+W 4096 org.dsi.ifc.phonemanager.DSIPhoneManager 0 0
+W 4096 org.dsi.ifc.smartphoneintegration.DSISmartphoneIntegration 0 0
+M DSIBluetoothListenerMsg.updateAccessibleMode
+C 1 accessibleMode sint32 um
+C 2 visible bool um
+C 3 validFlag sint32 um
+M DSIBluetoothListenerMsg.updateBTState
+C 1 bTState sint32 um
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.updateDiscoveredDevices
+C 1 discoveredDevices msg um DSIBluetoothListenerMsg.DiscoveredDevice
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.DiscoveredDevice
+C 1 deviceName string um
+C 2 deviceAddress string um
+C 3 deviceClass string um
+C 4 serviceTypes sint32 um
+C 5 rssi sint32 um
+M DSIBluetoothListenerMsg.updateTrustedDevices
+C 1 trustedDevices msg rep DSIBluetoothListenerMsg.TrustedDevice
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.TrustedDevice
+C 1 deviceName string um
+C 2 deviceAddress string um
+C 3 deviceClass sint32 um
+C 4 deviceSecurity sint32 um
+C 5 linkMode sint32 um
+C 6 linkkeyStrength sint32 um
+C 7 lastConnectedServiceTypes sint32 um
+C 8 activeServiceTypes sint32 um
+C 9 offeredServiceTypes sint32 um
+M DSIBluetoothListenerMsg.updatePasskeyState
+C 1 passkeyState msg um DSIBluetoothListenerMsg.PasskeyStateStruct
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.PasskeyStateStruct
+C 1 btPasskeyState sint32 um
+C 2 btDeviceName string um
+C 3 btDeviceAddress string um
+C 4 btPasskey string um
+M DSIBluetoothListenerMsg.updateServiceRequestState
+C 1 serviceRequestState msg um DSIBluetoothListenerMsg.ServiceRequestStateStruct
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.ServiceRequestStateStruct
+C 1 btServiceRequestState sint32 um
+C 2 btDeviceAddress string um
+C 3 btDeviceName string um
+M DSIBluetoothListenerMsg.updateUserFriendlyName
+C 1 userFriendlyName string um
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.updateReconnectIndicator
+C 1 reconnectInfo msg um DSIBluetoothListenerMsg.ReconnectInfo
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.ReconnectInfo
+C 1 reconnectIndicator sint32 um
+C 2 deviceNameList string rep
+C 3 serviceTypeList sint32 rep
+M DSIBluetoothListenerMsg.updateIncomingServiceRequest
+C 1 incomingServiceRequest msg um DSIBluetoothListenerMsg.RequestIncomingService
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.RequestIncomingService
+C 1 btDeviceName string um
+C 2 btDeviceAddress string um
+C 3 btServiceType sint32 um
+M DSIBluetoothListenerMsg.updateSupportedBTProfiles
+C 1 supportedBTProfiles sint32 um
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.updateMasterRoleRequestError
+C 1 masterRoleRequestError msg um DSIBluetoothListenerMsg.MasterRoleRequestStruct
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.MasterRoleRequestStruct
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 requested bool um
+M DSIBluetoothListenerMsg.updateHUCandBTHSState
+C 1 hUCandBTHSState sint32 um
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.updateA2DPUserSetting
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIBluetoothListenerMsg.updatePriorizedDeviceReconnect
+C 1 active bool um
+C 2 btDeviceAddress string um
+C 3 validFlag sint32 um
+M DSIBluetoothListenerMsg.updatePIMDevice
+C 1 simID string um
+C 2 btDeviceAddress string um
+C 3 validFlag sint32 um
+M DSIBluetoothListenerMsg.responseConnectService
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 btServiceType sint32 um
+C 4 btDeviceAddressToReplace string um
+C 5 result sint32 um
+M DSIBluetoothListenerMsg.responseConnectServiceToInstance
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 btServiceType sint32 um
+C 4 instanceNumber sint32 um
+C 5 result sint32 um
+M DSIBluetoothListenerMsg.responseAbortConnectService
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseDisconnectService
+C 1 btDeviceAddress string um
+C 2 btServiceType sint32 um
+C 3 result sint32 um
+M DSIBluetoothListenerMsg.responseGetServices
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 btServiceTypes sint32 um
+C 4 result sint32 um
+M DSIBluetoothListenerMsg.responseInquiry
+C 1 numDevices sint32 um
+C 2 result sint32 um
+M DSIBluetoothListenerMsg.responseAbortInquiry
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseReconnectSuspend
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responsePasskeyResponse
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 result sint32 um
+M DSIBluetoothListenerMsg.responseRemoveAuthentication
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 result sint32 um
+M DSIBluetoothListenerMsg.responseSwitchBTState
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseRestoreFactorySettings
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseAcceptIncomingServiceRequest
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseSetA2DPUserSetting
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseSetPriorizedDeviceReconnect
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseSetAccessibleMode
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseConnectPIMDevice
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.responseDisconnectPIMDevice
+C 1 result sint32 um
+M DSIBluetoothListenerMsg.removeAuthenticationNoSupport
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+M DSIBluetoothListenerMsg.deviceDisconnectionInfo
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 disconnectionInfo sint32 um
+M DSIBluetoothListenerMsg.serviceRejectNoSupport
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+M DSIBluetoothMsg.setNotification
+C 1 attributes sint32 rep
+M DSIBluetoothMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIBluetoothMsg.abortConnectService
+C 1 btDeviceAddress string um
+M DSIBluetoothMsg.abortInquiry
+M DSIBluetoothMsg.requestAcceptIncomingServiceRequest
+C 1 btDeviceAddress string um
+C 2 btServiceType sint32 um
+C 3 btAccept bool um
+M DSIBluetoothMsg.requestConnectService
+C 1 btDeviceAddress string um
+C 2 btServiceType sint32 um
+C 3 btDeviceAddressToReplace string um
+M DSIBluetoothMsg.requestConnectServiceToInstance
+C 1 btDeviceAddress string um
+C 2 btServiceType sint32 um
+C 3 instanceNumber sint32 um
+M DSIBluetoothMsg.requestDisconnectService
+C 1 btDeviceAddress string um
+C 2 btServiceType sint32 um
+M DSIBluetoothMsg.requestGetServices
+C 1 btDeviceAddress string um
+M DSIBluetoothMsg.requestInquiry
+C 1 inquiryLength sint32 um
+C 2 numResponses sint32 um
+C 3 inquiryMode sint32 um
+M DSIBluetoothMsg.requestPasskeyResponse
+C 1 btPasskey string um
+C 2 btDeviceAddress string um
+C 3 btAuthenticationResponse sint32 um
+M DSIBluetoothMsg.requestReconnectSuspend
+C 1 suspend bool um
+M DSIBluetoothMsg.requestRemoveAuthentication
+C 1 btDeviceAddress string um
+M DSIBluetoothMsg.requestRestoreFactorySettings
+M DSIBluetoothMsg.requestSetA2DPUserSetting
+C 1 btA2DPisActive bool um
+M DSIBluetoothMsg.requestSwitchBTState
+C 1 btStateTarget sint32 um
+M DSIBluetoothMsg.setAccessibleMode
+C 1 accessibleMode sint32 um
+M DSIBluetoothMsg.setUserFriendlyName
+C 1 userFriendlyName string um
+M DSIBluetoothMsg.requestSetPriorizedDeviceReconnect
+C 1 active bool um
+C 2 btDeviceAddress string um
+M DSIBluetoothMsg.requestConnectPIMDevice
+C 1 simID string um
+C 2 btDeviceAddress string um
+M DSIBluetoothMsg.requestDisconnectPIMDevice
+C 1 simID string um
+C 2 btDeviceAddress string um
+M DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicState
+C 1 characteristicUUID string um
+C 2 result sint32 um
+M DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicUserDescription
+C 1 characteristicUUID string um
+C 2 result sint32 um
+M DSIBluetoothLEDataChannelListenerMsg.responseSetCharacteristicValue
+C 1 characteristicUUID string um
+C 2 result sint32 um
+M DSIBluetoothLEDataChannelListenerMsg.indicateCharacteristicValue
+C 1 characteristicUUID string um
+C 2 receivedValue sint32 rep
+M DSIBluetoothLEDataChannelMsg.setNotification
+C 1 attributes sint32 rep
+M DSIBluetoothLEDataChannelMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIBluetoothLEDataChannelMsg.requestSetCharacteristicState
+C 1 characteristicUUID string um
+C 2 serviceState sint32 um
+M DSIBluetoothLEDataChannelMsg.requestSetCharacteristicUserDescription
+C 1 characteristicUUID string um
+C 2 data sint32 rep
+M DSIBluetoothLEDataChannelMsg.requestSetCharacteristicValue
+C 1 characteristicUUID string um
+C 2 data sint32 rep
+M DSIBluetoothLEListenerMsg.updateAccessibleMode
+C 1 result sint32 um
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.updateBTState
+C 1 bTState sint32 um
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.updateService
+C 1 bleService msg um DSIBluetoothLEListenerMsg.BleService
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.BleService
+C 1 serviceID sint32 um
+C 2 serviceState sint32 um
+M DSIBluetoothLEListenerMsg.updateTrustedDevices
+C 1 trustedleDevices msg rep DSIBluetoothLEListenerMsg.TrustedLEDevice
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.TrustedLEDevice
+C 1 deviceName string um
+C 2 deviceAddress string um
+C 3 deviceClass sint32 um
+C 4 deviceSecurity sint32 um
+C 5 linkMode sint32 um
+C 6 linkkeyStrength sint32 um
+M DSIBluetoothLEListenerMsg.updatePasskeyState
+C 1 passkeyState msg um DSIBluetoothLEListenerMsg.PasskeyStateStruct
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.PasskeyStateStruct
+C 1 btPasskeyState sint32 um
+C 2 btDeviceName string um
+C 3 btDeviceAddress string um
+C 4 btPasskey string um
+M DSIBluetoothLEListenerMsg.updateUserFriendlyName
+C 1 userFriendlyName string um
+C 2 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.updateCharacteristicValue
+C 1 characteristicUUID string um
+C 2 receivedValue string um
+C 3 validFlag sint32 um
+M DSIBluetoothLEListenerMsg.responsePasskeyResponse
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 result sint32 um
+M DSIBluetoothLEListenerMsg.responseRemoveAuthentication
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 result sint32 um
+M DSIBluetoothLEListenerMsg.responseSwitchBTState
+C 1 result sint32 um
+M DSIBluetoothLEListenerMsg.responseSetService
+C 1 result sint32 um
+M DSIBluetoothLEListenerMsg.responseSetAccessibleMode
+C 1 result sint32 um
+M DSIBluetoothLEListenerMsg.responseSetCharacteristicState
+C 1 result sint32 um
+M DSIBluetoothLEListenerMsg.responseNotifyCharacteristicValue
+C 1 result sint32 um
+M DSIBluetoothLEListenerMsg.deviceDisconnectionInfo
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 disconnectionInfo sint32 um
+M DSIBluetoothLEMsg.setNotification
+C 1 attributes sint32 rep
+M DSIBluetoothLEMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIBluetoothLEMsg.requestPasskeyResponse
+C 1 btPasskey string um
+C 2 btDeviceAddress string um
+C 3 btAuthenticationResponse sint32 um
+M DSIBluetoothLEMsg.requestRemoveAuthentication
+C 1 btDeviceAddress string um
+M DSIBluetoothLEMsg.requestSwitchBTState
+C 1 btStateTarget sint32 um
+M DSIBluetoothLEMsg.setAccessibleMode
+C 1 accessibleMode sint32 um
+M DSIBluetoothLEMsg.requestSetUserFriendlyName
+C 1 name string um
+M DSIBluetoothLEMsg.requestSetService
+C 1 serviceID sint32 um
+C 2 serviceState sint32 um
+M DSIBluetoothLEMsg.requestSetCharacteristicState
+C 1 uuid string um
+C 2 serviceState sint32 um
+M DSIBluetoothLEMsg.requestNotifyCharacteristicValue
+C 1 characteristicUUID string um
+C 2 notifyValue string um
+M DSIObexAuthenticationListenerMsg.authenticationRequired
+C 1 btServiceType sint32 um
+C 2 userIdRequired bool um
+C 3 btDeviceName string um
+M DSIObexAuthenticationListenerMsg.indAuthentication
+C 1 success bool um
+M DSIObexAuthenticationMsg.setNotification
+C 1 attributes sint32 rep
+M DSIObexAuthenticationMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIObexAuthenticationMsg.setAuthenticationInfo
+C 1 btServiceType sint32 um
+C 2 userID string um
+C 3 passKey string um
+M DSIObjectPushListenerMsg.updateOPPIncomingObject
+C 1 btDeviceAddress string um
+C 2 btDeviceName string um
+C 3 objectType sint32 um
+C 4 validFlag sint32 um
+M DSIObjectPushListenerMsg.updateVCardsReceived
+C 1 fullPathToVCards string um
+C 2 validFlag sint32 um
+M DSIObjectPushListenerMsg.responseOPPAbortSending
+C 1 result sint32 um
+M DSIObjectPushListenerMsg.responseOPPAcceptObject
+C 1 result sint32 um
+M DSIObjectPushListenerMsg.responseOPPSendBinary
+C 1 result sint32 um
+M DSIObjectPushListenerMsg.responseOPPSendContacts
+C 1 result sint32 um
+M DSIObjectPushListenerMsg.responseOPPSendMessages
+C 1 result sint32 um
+M DSIObjectPushMsg.setNotification
+C 1 attributes sint32 rep
+M DSIObjectPushMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIObjectPushMsg.requestOPPAbortSending
+M DSIObjectPushMsg.requestOPPAcceptObject
+C 1 btDeviceAddress string um
+C 2 btAccept bool um
+M DSIObjectPushMsg.requestOPPSendContacts
+C 1 btDeviceAddress string um
+C 2 fullPathToVCards string um
+M DSIObjectPushMsg.requestOPPSendMessages
+C 1 btDeviceAddress string um
+C 2 messageIds sint32 rep
+M DSIObjectPushMsg.requestOPPSendBinary
+C 1 btDeviceAddress string um
+C 2 paths string rep
+M DSINFCListenerMsg.updateSNEPPushHandover
+C 1 type sint32 um
+C 2 active bool um
+C 3 validFlag sint32 um
+M DSINFCListenerMsg.updateSNEPPushCompleted
+C 1 type sint32 um
+C 2 validFlag sint32 um
+M DSINFCListenerMsg.responseSNEPPushHandover
+C 1 result sint32 um
+M DSINFCMsg.setNotification
+C 1 attributes sint32 rep
+M DSINFCMsg.clearNotification
+C 1 attributes sint32 rep
+M DSINFCMsg.requestSNEPPushHandover
+C 1 type sint32 um
+C 2 active bool um
+M DSIMobileEquipmentListenerMsg.updateDTMFTonePlaying
+C 1 dtmfTone string um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateEmergencyNumbers
+C 1 telEmerNums msg um DSIMobileEquipmentListenerMsg.EmergencyNumbers
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.EmergencyNumbers
+C 1 mainEmergencyNumber string um
+C 2 additionalEmergencyNumber string rep
+M DSIMobileEquipmentListenerMsg.updateSIMPINRequired
+C 1 simPINRequired bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateActivationState
+C 1 activationState msg um DSIMobileEquipmentListenerMsg.ActivationStateStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.ActivationStateStruct
+C 1 telActivationState sint32 um
+C 2 telPhoneModuleState sint32 um
+C 3 telMode sint32 um
+C 4 telFeat sint32 um
+C 5 telHFPVersion string um
+M DSIMobileEquipmentListenerMsg.updateAutomaticPinEntryActive
+C 1 automaticPinEntryActive bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateAutomaticRedialActive
+C 1 automaticRedialActive bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateBatteryChargeLevel
+C 1 batteryChargeLevel sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateCallDurationList
+C 1 callDurationList msg rep DSIMobileEquipmentListenerMsg.CallDuration
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.CallDuration
+C 1 telCallID sint32 um
+C 2 telElapsedTime sint32 um
+M DSIMobileEquipmentListenerMsg.updateCallList
+C 1 callList msg rep DSIMobileEquipmentListenerMsg.CallInformation
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.CallInformation
+C 1 telCallID sint32 um
+C 2 telCallState sint32 um
+C 3 telMpty sint32 um
+C 4 contactInformation msg um DSIMobileEquipmentListenerMsg.ContactInformation
+C 5 telRemName string um
+C 6 telRemLastName string um
+C 7 telRemFirstName string um
+C 8 telRemOrganization string um
+C 9 telRemNumber string um
+C 10 telRemPictureId msg um DSIMobileEquipmentListenerMsg.ResourceLocator
+C 11 telNumType sint32 um
+C 12 telCallType sint32 um
+C 13 telRemEntryId sint64 um
+C 14 telRemNumberType sint32 um
+C 15 telCallStartingTime sint32 um
+C 16 extendedCallInformation msg um DSIMobileEquipmentListenerMsg.CallInformationExt
+C 17 telCallCarrier sint32 um
+M DSIMobileEquipmentListenerMsg.ContactInformation
+C 1 name string um
+C 2 lastName string um
+C 3 firstName string um
+C 4 organization string um
+C 5 adbEntryID sint64 um
+C 6 adbPictureID msg um DSIMobileEquipmentListenerMsg.ResourceLocator
+C 7 adbPhoneDataCount sint32 um
+C 8 entryType sint32 um
+C 9 generalDescription1 string um
+C 10 generalDescription2 string um
+C 11 probNavigable sint32 um
+C 12 navigable sint32 um
+C 13 webAddressCount sint32 um
+C 14 emailCount sint32 um
+M DSIMobileEquipmentListenerMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMobileEquipmentListenerMsg.ResourceCDNAccess
+M DSIMobileEquipmentListenerMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMobileEquipmentListenerMsg.CallInformationExt
+C 1 telEntryType sint32 um
+C 2 telDBPhoneNumberIndex sint32 um
+C 3 adbPhoneDataCount sint32 um
+M DSIMobileEquipmentListenerMsg.updateCDMAThreeWayCallingSetting
+C 1 cdmaThreeWayCallingSetting bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateCradlePlugInState
+C 1 cradlePlugInState sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateDisconnectReason
+C 1 disconnectReason msg um DSIMobileEquipmentListenerMsg.DisconnectReason
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.DisconnectReason
+C 1 disconnectReason sint32 um
+C 2 callId sint32 um
+M DSIMobileEquipmentListenerMsg.updateEmergencyCallActive
+C 1 emergencyCallActive msg um DSIMobileEquipmentListenerMsg.EmergencyCallSetting
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.EmergencyCallSetting
+C 1 value bool um
+C 2 changeable bool um
+M DSIMobileEquipmentListenerMsg.updateEnhancedPrivacyMode
+C 1 enhancedPrivacyMode bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateHandsFreeMode
+C 1 handsFreeMode sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateLockState
+C 1 lockState msg um DSIMobileEquipmentListenerMsg.LockStateStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.LockStateStruct
+C 1 telLockState sint32 um
+C 2 telRetryCounter sint32 um
+M DSIMobileEquipmentListenerMsg.updateMailboxContent
+C 1 mailboxContent msg rep DSIMobileEquipmentListenerMsg.MailboxDialingNumber
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.MailboxDialingNumber
+C 1 mailboxIdentifier sint32 um
+C 2 mailboxNumber string um
+C 3 tonNpiValid bool um
+C 4 tonNpi sint32 um
+C 5 alphaIdentifierValid bool um
+C 6 alphaIdentifier string um
+C 7 extConfCapValid bool um
+C 8 extConfCap sint32 um
+C 9 extInfoValid bool um
+C 10 extInfo string um
+M DSIMobileEquipmentListenerMsg.updateMICMuteState
+C 1 mICMuteState sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateNADTemperature
+C 1 nADTemperature msg um DSIMobileEquipmentListenerMsg.NADTemperatureStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.NADTemperatureStruct
+C 1 telNADTemperature sint32 um
+C 2 telNADTemperatureLevel sint32 um
+M DSIMobileEquipmentListenerMsg.updatePhoneInformation
+C 1 phoneInformation msg um DSIMobileEquipmentListenerMsg.PhoneInformation
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.PhoneInformation
+C 1 imsi string um
+C 2 simId string um
+C 3 nadIMEI string um
+C 4 meIMEI string um
+C 5 meBtAddress string um
+C 6 meFriendlyName string um
+C 7 telNetIdAvailIMSI sint32 um
+C 8 telNetIdAvailSimId sint32 um
+C 9 telNetIdAvailNadIMEI sint32 um
+C 10 telNetIdAvailMeIMEI sint32 um
+C 11 telNetIdAvailMeBtAddress sint32 um
+C 12 telNetIdAvailMeFriendlyName sint32 um
+C 13 simName string um
+M DSIMobileEquipmentListenerMsg.updateNetworkProvider
+C 1 networkProvider msg um DSIMobileEquipmentListenerMsg.NetworkProviderName
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.NetworkProviderName
+C 1 telLongProviderName string um
+C 2 telNumProviderName string um
+C 3 telRegMode sint32 um
+M DSIMobileEquipmentListenerMsg.updateNetworkType
+C 1 networkType sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePrivacyMode
+C 1 privacyMode bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateRegisterState
+C 1 registerState msg um DSIMobileEquipmentListenerMsg.RegisterStateStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.RegisterStateStruct
+C 1 telRegisterState sint32 um
+C 2 telLongProviderName string um
+C 3 telNumProviderName string um
+C 4 telRegMode sint32 um
+M DSIMobileEquipmentListenerMsg.updateServiceCodeType
+C 1 serviceCodeType msg um DSIMobileEquipmentListenerMsg.ServiceCodeTypeStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.ServiceCodeTypeStruct
+C 1 telDialNumberType sint32 um
+C 2 telServiceCode string um
+C 3 telServiceCodeRequestType sint32 um
+M DSIMobileEquipmentListenerMsg.updateServiceNumbers
+C 1 serviceNumbers msg um DSIMobileEquipmentListenerMsg.ServiceNumbers
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.ServiceNumbers
+C 1 infonumber string um
+C 2 infonumberRoaming string um
+C 3 breakdownNumber string um
+C 4 breakdownNumberRoaming string um
+M DSIMobileEquipmentListenerMsg.updateSignalQuality
+C 1 signalQuality sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateSuppServiceResponse
+C 1 suppServiceResponse msg um DSIMobileEquipmentListenerMsg.SuppServiceResponseStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.SuppServiceResponseStruct
+C 1 telCWStatus sint32 um
+C 2 telCFResponseData msg rep DSIMobileEquipmentListenerMsg.CFResponseData
+C 3 simPINRequired bool um
+C 4 telCLIRState sint32 um
+C 5 telCLIRNWState sint32 um
+C 6 telServiceState sint32 um
+C 7 telResponseText string um
+M DSIMobileEquipmentListenerMsg.CFResponseData
+C 1 telCFStatus sint32 um
+C 2 telCFCondition sint32 um
+C 3 telCFNumber string um
+C 4 telClass sint32 um
+C 5 telNumType sint32 um
+C 6 telCFTime sint32 um
+C 7 result sint32 um
+M DSIMobileEquipmentListenerMsg.updateServiceProvider
+C 1 serviceProvider msg um DSIMobileEquipmentListenerMsg.ServiceProvider
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.ServiceProvider
+C 1 displayConditionProviderName bool um
+C 2 displayConditionServiceProviderName bool um
+C 3 telServiceProviderName string um
+M DSIMobileEquipmentListenerMsg.updateSIMAliasInformation
+C 1 simAliasInformation msg um DSIMobileEquipmentListenerMsg.SIMAliasInformation
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.SIMAliasInformation
+C 1 btAddress string um
+C 2 imsi string um
+C 3 activeName string um
+C 4 inactiveName string um
+M DSIMobileEquipmentListenerMsg.updateMicGainLevel
+C 1 micGainLevel sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateOptimizationMode
+C 1 optimizationMode sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateNADMode
+C 1 nadMode sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateOtherSIMAvailable
+C 1 otherSIMAvailable bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePrefixContent
+C 1 prefixContent string um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePhoneReminderSetting
+C 1 phoneReminderSetting bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePrefixActivated
+C 1 prefixActivated bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateWidebandSpeech
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePhoneRingtone
+C 1 ringtoneIndex sint32 um
+C 2 ringtonePath string um
+C 3 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateFavorites
+C 1 favorites msg rep DSIMobileEquipmentListenerMsg.Favorite
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.Favorite
+C 1 name string um
+C 2 number string um
+M DSIMobileEquipmentListenerMsg.updateSAPUpgradeActive
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateEUICCID
+C 1 eUICCID string um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateESIMMSISDN
+C 1 eSIMMSISDN string um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateESimActive
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateESimB2BMode
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateCallstacksIsReverted
+C 1 isReverted bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateLastAnsweredNumbers
+C 1 lastAnsweredNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.CallStackEntry
+C 1 clEntryID sint32 um
+C 2 clNumber string um
+C 3 contactInformation msg um DSIMobileEquipmentListenerMsg.ContactInformation
+C 4 clName string um
+C 5 lastName string um
+C 6 firstName string um
+C 7 organization string um
+C 8 clEntryOrigin sint32 um
+C 9 clEntryType sint32 um
+C 10 clYear sint32 um
+C 11 clMonth sint32 um
+C 12 clDay sint32 um
+C 13 clHour sint32 um
+C 14 clMinute sint32 um
+C 15 clSecond sint32 um
+C 16 adbPictureID msg um DSIMobileEquipmentListenerMsg.ResourceLocator
+C 17 adbEntryID sint64 um
+C 18 adbPhoneDataIndex sint32 um
+C 19 adbPhoneDataCount sint32 um
+C 20 newMissedCallAttempts sint32 um
+C 21 adbNumberType sint32 um
+M DSIMobileEquipmentListenerMsg.updateLastDialedNumbers
+C 1 lastDialedNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateMissedNumbers
+C 1 missedNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateMEDataValidity
+C 1 mEDataValidity sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateMissedCallIndicator
+C 1 missedCallIndicator msg um DSIMobileEquipmentListenerMsg.MissedCallIndicator
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.MissedCallIndicator
+C 1 missedCall bool um
+C 2 missedCallCount sint32 um
+M DSIMobileEquipmentListenerMsg.updateSpeechRecognitionAvailable
+C 1 available sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateSpeechRecognitionActive
+C 1 active sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateSpeechRecognitionType
+C 1 type sint32 um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateConfidentialMode
+C 1 confidentialModeStruct msg um DSIMobileEquipmentListenerMsg.ConfidentialModeStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.ConfidentialModeStruct
+C 1 confidentialMode sint32 um
+C 2 pin string um
+C 3 allowedTerminals sint32 rep
+C 4 confidentialModeDeactivatedTerminalId sint32 um
+M DSIMobileEquipmentListenerMsg.updateRejectCallWithSMS
+C 1 text string um
+C 2 account sint32 um
+C 3 on bool um
+C 4 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateLastAnsweredNumbersRaw
+C 1 lastAnsweredNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateLastDialedNumbersRaw
+C 1 lastDialedNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateMissedNumbersRaw
+C 1 missedNumbers msg rep DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateAutomaticAccept
+C 1 on bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateIntelligentCallStatisticsConfiguration
+C 1 callStackTypes sint32 um
+C 2 groupingCritieria sint32 um
+C 3 includeNumbersWithoutContact bool um
+C 4 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateIntelligentCallStatistics
+C 1 entries msg rep DSIMobileEquipmentListenerMsg.CallStatisticsEntry
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.CallStatisticsEntry
+C 1 callStackEntry msg um DSIMobileEquipmentListenerMsg.CallStackEntry
+C 2 callCount sint32 um
+C 3 phoneNumberDetails msg rep DSIMobileEquipmentListenerMsg.PhoneNumberDetails
+M DSIMobileEquipmentListenerMsg.PhoneNumberDetails
+C 1 phoneNumber string um
+C 2 callCount sint32 um
+M DSIMobileEquipmentListenerMsg.updateTelephoneFavoritesSupported
+C 1 supported bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateTelephoneFavorites
+C 1 telephoneFavorites msg rep DSIMobileEquipmentListenerMsg.TelephoneFavorite
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.TelephoneFavorite
+C 1 entryID sint32 um
+C 2 contactInformation msg um DSIMobileEquipmentListenerMsg.ContactInformation
+M DSIMobileEquipmentListenerMsg.updateTelephoneFavoritesAvailable
+C 1 available bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateInbandRingingActive
+C 1 inbandRingingActive bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateAudioConnectionVolumeLevels
+C 1 audioConnections msg rep DSIMobileEquipmentListenerMsg.TelephoneAudioConnectionStruct
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.TelephoneAudioConnectionStruct
+C 1 id sint32 um
+C 2 volumeLevel sint32 um
+M DSIMobileEquipmentListenerMsg.updateVoLTEEnabled
+C 1 userSwitchable bool um
+C 2 enabled bool um
+C 3 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updateArtificialWidebandSpeech
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.updatePhoneTtsReminderSetting
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMobileEquipmentListenerMsg.responseAbortNetworkRegistration
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseAbortNetworkSearch
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseAcceptCall
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseCallForward
+C 1 telCFResponseData msg rep DSIMobileEquipmentListenerMsg.CFResponseData
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseCallWaiting
+C 1 telCWStatus sint32 um
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseChangeSIMCode
+C 1 telLockCode sint32 um
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseCLIR
+C 1 telCLIRState sint32 um
+C 2 telCLIRNWState sint32 um
+C 3 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseDialNumber
+C 1 result sint32 um
+C 2 telSuppServResult msg um DSIMobileEquipmentListenerMsg.SuppServiceResponseStruct
+M DSIMobileEquipmentListenerMsg.responseSendDTMF
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSIMPINRequired
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseHangupCall
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseJoinCalls
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseNetworkRegistration
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseNetworkSearch
+C 1 telNetworkProviders msg rep DSIMobileEquipmentListenerMsg.NetworkProvider
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.NetworkProvider
+C 1 telLongProviderName string um
+C 2 telNumProviderName string um
+C 3 telProviderState sint32 um
+M DSIMobileEquipmentListenerMsg.responseUnlockSIM
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseCheckSIMPINCode
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseRestoreFactorySettings
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetHandsFreeMode
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetAutomaticPinEntryActive
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetAutomaticRedialActive
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseServiceCodeAbort
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSplitCall
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSwapCalls
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseTelPower
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetCDMAThreeWayCallingSetting
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetAutomaticEmergencyCallActive
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetMailboxContent
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetPrivacyMode
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetMICMuteState
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetOptimizationMode
+C 1 optMode sint32 um
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetNADMode
+C 1 nadMode sint32 um
+C 2 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseUnlockOtherSIM
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetSIMAliases
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseRemoveOtherSIM
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseDialOperator
+C 1 result sint32 um
+C 2 telSuppServResult msg um DSIMobileEquipmentListenerMsg.SuppServiceResponseStruct
+M DSIMobileEquipmentListenerMsg.responseSetPrefixContent
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetPhoneReminderSetting
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetPrefixActivated
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetPhoneRingtone
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetFavorites
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetSIMName
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetESIMActive
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseStartSpeechRecognition
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseStopSpeechRecognition
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetConfidentialMode
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetRejectCallWithSMS
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetAutomaticAccept
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetIntelligentCallStatisticsConfiguration
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetVoLTEEnabled
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetAudioConnectionVolume
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetArtificialWidebandSpeech
+C 1 result sint32 um
+M DSIMobileEquipmentListenerMsg.responseSetPhoneTtsReminderSetting
+C 1 result sint32 um
+M DSIMobileEquipmentMsg.setNotification
+C 1 attributes sint32 rep
+M DSIMobileEquipmentMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIMobileEquipmentMsg.acceptCall
+C 1 telAcceptMode sint32 um
+M DSIMobileEquipmentMsg.hangupCall
+C 1 callID sint32 um
+M DSIMobileEquipmentMsg.swapCalls
+M DSIMobileEquipmentMsg.splitCall
+C 1 telCallID sint32 um
+M DSIMobileEquipmentMsg.joinCalls
+M DSIMobileEquipmentMsg.dialNumber
+C 1 telNumber string um
+M DSIMobileEquipmentMsg.dialOperator
+C 1 callType sint32 um
+C 2 telNumber string um
+M DSIMobileEquipmentMsg.dialNumberFromDBEntry
+C 1 telNumber string um
+C 2 telDBEntryId sint64 um
+C 3 telDBName string um
+C 4 telPhoneType sint32 um
+C 5 telEntryType sint32 um
+C 6 telDBPicture msg um DSIMobileEquipmentMsg.ResourceLocator
+C 7 telDBPhoneNumberIndex sint32 um
+C 8 adbPhoneDataCount sint32 um
+M DSIMobileEquipmentMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMobileEquipmentMsg.ResourceCDNAccess
+M DSIMobileEquipmentMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMobileEquipmentMsg.sendDTMF
+C 1 telDTMF string um
+M DSIMobileEquipmentMsg.requestNetworkRegistration
+C 1 telNumProviderName string um
+C 2 telRegMode sint32 um
+M DSIMobileEquipmentMsg.requestAbortNetworkRegistration
+M DSIMobileEquipmentMsg.requestNetworkSearch
+M DSIMobileEquipmentMsg.requestAbortNetworkSearch
+M DSIMobileEquipmentMsg.requestCallForward
+C 1 telCFRequestData msg rep DSIMobileEquipmentMsg.CFRequestData
+M DSIMobileEquipmentMsg.CFRequestData
+C 1 telCFMode sint32 um
+C 2 telCFCondition sint32 um
+C 3 telCFNumber string um
+C 4 telClass sint32 um
+C 5 telCFTime sint32 um
+M DSIMobileEquipmentMsg.requestCallWaiting
+C 1 telCWMode sint32 um
+M DSIMobileEquipmentMsg.requestCLIR
+C 1 telCLIRState sint32 um
+M DSIMobileEquipmentMsg.requestServiceCodeAbort
+M DSIMobileEquipmentMsg.requestSetAutomaticPinEntryActive
+C 1 automaticPinEntryActive bool um
+M DSIMobileEquipmentMsg.requestSetAutomaticRedialActive
+C 1 automaticRedialActive bool um
+M DSIMobileEquipmentMsg.requestSetCDMAThreeWayCallingSetting
+C 1 cdmaThreeWayCallingSetting bool um
+M DSIMobileEquipmentMsg.requestSetAutomaticEmergencyCallActive
+C 1 automaticEmergencyCallActive bool um
+M DSIMobileEquipmentMsg.requestSetEnhancedPrivacyMode
+C 1 enhancedPrivacyMode bool um
+M DSIMobileEquipmentMsg.requestSetMailboxContent
+C 1 telMailboxDialingNumbersArray msg rep DSIMobileEquipmentMsg.MailboxDialingNumber
+M DSIMobileEquipmentMsg.MailboxDialingNumber
+C 1 mailboxIdentifier sint32 um
+C 2 mailboxNumber string um
+C 3 tonNpiValid bool um
+C 4 tonNpi sint32 um
+C 5 alphaIdentifierValid bool um
+C 6 alphaIdentifier string um
+C 7 extConfCapValid bool um
+C 8 extConfCap sint32 um
+C 9 extInfoValid bool um
+C 10 extInfo string um
+M DSIMobileEquipmentMsg.requestSetPrivacyMode
+C 1 privacyMode bool um
+M DSIMobileEquipmentMsg.requestTelPower
+C 1 telPower sint32 um
+M DSIMobileEquipmentMsg.requestUnlockSIM
+C 1 telLockCode sint32 um
+C 2 telCurrentCode string um
+C 3 telNewCode string um
+M DSIMobileEquipmentMsg.requestCheckSIMPINCode
+C 1 telCurrentCode string um
+M DSIMobileEquipmentMsg.requestChangeSIMCode
+C 1 telLockCode sint32 um
+C 2 telCurrentCode string um
+C 3 telNewCode string um
+M DSIMobileEquipmentMsg.requestSetHandsFreeMode
+C 1 telHFMode sint32 um
+M DSIMobileEquipmentMsg.requestSetMICMuteState
+C 1 telMICMuteState sint32 um
+M DSIMobileEquipmentMsg.requestSetLanguage
+C 1 language string um
+M DSIMobileEquipmentMsg.requestSIMPINRequired
+C 1 telCurrentCode string um
+C 2 simPINrequired bool um
+M DSIMobileEquipmentMsg.restoreFactorySettings
+M DSIMobileEquipmentMsg.requestSetMicGainLevel
+C 1 micGainLevel sint32 um
+M DSIMobileEquipmentMsg.requestDecreaseMicGainLevel
+C 1 value sint32 um
+M DSIMobileEquipmentMsg.requestIncreaseMicGainLevel
+C 1 value sint32 um
+M DSIMobileEquipmentMsg.requestSetOptimizationMode
+C 1 optMode sint32 um
+M DSIMobileEquipmentMsg.requestUnlockOtherSIM
+C 1 telLockCode sint32 um
+C 2 telCurrentCode string um
+M DSIMobileEquipmentMsg.requestSetSIMAliases
+C 1 aliasForCurrentSIM string um
+C 2 aliasForOtherSIM string um
+M DSIMobileEquipmentMsg.requestSetNADMode
+C 1 nadMode sint32 um
+M DSIMobileEquipmentMsg.requestRemoveOtherSIM
+M DSIMobileEquipmentMsg.requestSetPhoneReminderSetting
+C 1 phoneReminderSetting bool um
+M DSIMobileEquipmentMsg.requestSetPrefixActivated
+C 1 prefixActivated bool um
+M DSIMobileEquipmentMsg.requestSetPrefixContent
+C 1 telPrefixDialingString string um
+M DSIMobileEquipmentMsg.requestSetPhoneRingtone
+C 1 ringtoneIndex sint32 um
+C 2 ringtonePath string um
+M DSIMobileEquipmentMsg.requestSetFavorites
+C 1 favorites msg rep DSIMobileEquipmentMsg.Favorite
+M DSIMobileEquipmentMsg.Favorite
+C 1 name string um
+C 2 number string um
+M DSIMobileEquipmentMsg.requestSetSIMName
+C 1 simname string um
+M DSIMobileEquipmentMsg.requestSetArtificialWidebandSpeech
+C 1 active bool um
+M DSIMobileEquipmentMsg.requestSetESIMActive
+C 1 active bool um
+M DSIMobileEquipmentMsg.deleteCallstacksAll
+C 1 calllist sint32 um
+M DSIMobileEquipmentMsg.deleteCallstacksEntry
+C 1 callList sint32 um
+C 2 clEntryID sint32 um
+M DSIMobileEquipmentMsg.resetMissedCallIndicator
+M DSIMobileEquipmentMsg.revertCallstacks
+C 1 isReverted bool um
+M DSIMobileEquipmentMsg.requestStartSpeechRecognition
+M DSIMobileEquipmentMsg.requestStopSpeechRecognition
+M DSIMobileEquipmentMsg.requestSetConfidentialMode
+C 1 confidentialModeStruct msg um DSIMobileEquipmentMsg.ConfidentialModeStruct
+M DSIMobileEquipmentMsg.ConfidentialModeStruct
+C 1 confidentialMode sint32 um
+C 2 pin string um
+C 3 allowedTerminals sint32 rep
+C 4 confidentialModeDeactivatedTerminalId sint32 um
+M DSIMobileEquipmentMsg.requestSetRejectCallWithSMS
+C 1 text string um
+C 2 account sint32 um
+C 3 on bool um
+M DSIMobileEquipmentMsg.requestSetAutomaticAccept
+C 1 on bool um
+M DSIMobileEquipmentMsg.requestSetIntelligentCallStatisticsConfiguration
+C 1 callStackTypes sint32 um
+C 2 groupingCritiera sint32 um
+C 3 includeNumbersWithoutContact bool um
+M DSIMobileEquipmentMsg.requestSetVoLTEEnabled
+C 1 enabled bool um
+M DSIMobileEquipmentMsg.requestSetPhoneTtsReminderSetting
+C 1 active bool um
+M DSIMobileEquipmentTopologyListenerMsg.updateTopology
+C 1 slots sint32 rep
+C 2 validFlag sint32 um
+M DSIMobileEquipmentTopologyListenerMsg.updateUsage
+C 1 usage sint32 rep
+C 2 validFlag sint32 um
+M DSIMobileEquipmentTopologyListenerMsg.responseChangeTopology
+C 1 result sint32 um
+M DSIMobileEquipmentTopologyMsg.setNotification
+C 1 attributes sint32 rep
+M DSIMobileEquipmentTopologyMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIMobileEquipmentTopologyMsg.requestChangeTopology
+C 1 slots sint32 rep
+M DSIMessagingListenerMsg.updateSynchInProgress
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.updateMessagingAccounts
+C 1 accounts msg rep DSIMessagingListenerMsg.updateMessagingAccounts.MessagingAccount
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.updateMessagingAccounts.MessagingAccount
+C 1 accountID sint32 um
+C 2 accountName string um
+C 3 accountType sint32 um
+C 4 supportsSMS sint32 um
+C 5 supportsEMail bool um
+C 6 offeredFolderTypes sint32 um
+C 7 memoryStatus sint32 um
+C 8 unreadMessageCount sint32 um
+C 9 btDeviceAddress string um
+C 10 btUserFriendlyName string um
+C 11 simCardId string um
+M DSIMessagingListenerMsg.updateTemplates
+C 1 templates msg rep DSIMessagingListenerMsg.updateTemplates.Template
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.updateTemplates.Template
+C 1 id sint32 um
+C 2 textID sint32 um
+C 3 body string um
+C 4 readOnly bool um
+M DSIMessagingListenerMsg.updateMessagingAccountServices
+C 1 messagingAccountServices msg um DSIMessagingListenerMsg.updateMessagingAccountServices.MessagingAccountServices
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.updateMessagingAccountServices.MessagingAccountServices
+C 1 conversationalView bool um
+C 2 conversationalViewSupportedByDevice bool um
+C 3 emailService bool um
+C 4 smsService bool um
+C 5 imService bool um
+M DSIMessagingListenerMsg.updateUseProfile
+C 1 deviceID string um
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.updateActivateRejectCallWithSMS
+C 1 currentStateRejectCallWithSMS bool um
+C 2 validFlag sint32 um
+M DSIMessagingListenerMsg.listEntriesResponse
+C 1 requestId sint32 um
+C 2 result sint32 um
+C 3 entries msg rep DSIMessagingListenerMsg.listEntriesResponse.ListEntry
+C 4 accountId sint32 um
+C 5 folderId sint32 um
+C 6 offset sint32 um
+M DSIMessagingListenerMsg.listEntriesResponse.ListEntry
+C 1 listEntryId int64 um
+C 2 type sint32 um
+C 3 folderEntry msg um DSIMessagingListenerMsg.listEntriesResponse.FolderEntry
+C 4 messageListEntry msg um DSIMessagingListenerMsg.listEntriesResponse.MessageListEntry
+M DSIMessagingListenerMsg.listEntriesResponse.FolderEntry
+C 1 folderID sint32 um
+C 2 parentFolderID sint32 um
+C 3 folderType sint32 um
+C 4 folderName string um
+C 5 unreadMessageCount sint32 um
+M DSIMessagingListenerMsg.listEntriesResponse.MessageListEntry
+C 1 matchedAddress msg um DSIMessagingListenerMsg.listEntriesResponse.MatchedAddress
+C 2 messageID string um
+C 3 messagingAccountID sint32 um
+C 4 sender string um
+C 5 recipients string rep
+C 6 dateTime int64 um
+C 7 messageStatus sint32 um
+C 8 subject string um
+C 9 attachmentSize sint32 um
+C 10 priority sint32 um
+C 11 type sint32 um
+C 12 storageLocation sint32 um
+M DSIMessagingListenerMsg.listEntriesResponse.MatchedAddress
+C 1 address string um
+C 2 name string um
+C 3 adbEntryID int64 um
+C 4 adbPictureID msg um DSIMessagingListenerMsg.listEntriesResponse.ResourceLocator
+C 5 hasPhoneNumbers bool um
+C 6 hasEmailAddresses bool um
+C 7 hasNavAddresses bool um
+M DSIMessagingListenerMsg.listEntriesResponse.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingListenerMsg.listEntriesResponse.ResourceCDNAccess
+M DSIMessagingListenerMsg.listEntriesResponse.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingListenerMsg.changeFolderResponse
+C 1 activeFolder msg um DSIMessagingListenerMsg.changeFolderResponse.FolderEntry
+C 2 result sint32 um
+M DSIMessagingListenerMsg.changeFolderResponse.FolderEntry
+C 1 folderID sint32 um
+C 2 parentFolderID sint32 um
+C 3 folderType sint32 um
+C 4 folderName string um
+C 5 unreadMessageCount sint32 um
+M DSIMessagingListenerMsg.deleteMessageResponse
+C 1 result sint32 um
+C 2 deleted sint32 um
+C 3 num sint32 um
+M DSIMessagingListenerMsg.sendMessageResponse
+C 1 result sint32 um
+C 2 requestId sint32 um
+M DSIMessagingListenerMsg.getMessageContentsResponse
+C 1 result sint32 um
+C 2 messageDetails msg um DSIMessagingListenerMsg.getMessageContentsResponse.MessageDetails
+M DSIMessagingListenerMsg.getMessageContentsResponse.MessageDetails
+C 1 messagingAccountID sint32 um
+C 2 messageID string um
+C 3 type sint32 um
+C 4 sender msg um DSIMessagingListenerMsg.getMessageContentsResponse.MatchedAddress
+C 5 recipientsTo msg rep DSIMessagingListenerMsg.getMessageContentsResponse.MatchedAddress
+C 6 recipientsCc msg rep DSIMessagingListenerMsg.getMessageContentsResponse.MatchedAddress
+C 7 recipientsBcc msg rep DSIMessagingListenerMsg.getMessageContentsResponse.MatchedAddress
+C 8 subject string um
+C 9 dateTime int64 um
+C 10 messageStatus sint32 um
+C 11 replyTo string um
+C 12 body string um
+C 13 attachments msg rep DSIMessagingListenerMsg.getMessageContentsResponse.AttachmentInformation
+C 14 priority sint32 um
+C 15 segmentLengths sint32 rep
+C 16 storageLocation sint32 um
+C 17 extractedItems msg rep DSIMessagingListenerMsg.getMessageContentsResponse.ExtractedItem
+M DSIMessagingListenerMsg.getMessageContentsResponse.MatchedAddress
+C 1 address string um
+C 2 name string um
+C 3 adbEntryID int64 um
+C 4 adbPictureID msg um DSIMessagingListenerMsg.getMessageContentsResponse.ResourceLocator
+C 5 hasPhoneNumbers bool um
+C 6 hasEmailAddresses bool um
+C 7 hasNavAddresses bool um
+M DSIMessagingListenerMsg.getMessageContentsResponse.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingListenerMsg.getMessageContentsResponse.ResourceCDNAccess
+M DSIMessagingListenerMsg.getMessageContentsResponse.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingListenerMsg.getMessageContentsResponse.AttachmentInformation
+C 1 attachmentID sint32 um
+C 2 name string um
+C 3 mimeType string um
+C 4 size sint32 um
+C 5 entryID sint32 um
+C 6 attachmentPath msg um DSIMessagingListenerMsg.getMessageContentsResponse.ResourceLocator
+M DSIMessagingListenerMsg.getMessageContentsResponse.ExtractedItem
+C 1 type sint32 um
+C 2 value string um
+C 3 offset sint32 um
+C 4 length sint32 um
+M DSIMessagingListenerMsg.setMessageReadStatusResponse
+C 1 result sint32 um
+M DSIMessagingListenerMsg.parseVCardResponse
+C 1 result sint32 um
+C 2 adbEntry string um
+M DSIMessagingListenerMsg.saveAsDraftResponse
+C 1 result sint32 um
+C 2 messageID string um
+M DSIMessagingListenerMsg.extractInformationResponse
+C 1 result sint32 um
+C 2 items msg rep DSIMessagingListenerMsg.extractInformationResponse.ExtractedItem
+M DSIMessagingListenerMsg.extractInformationResponse.ExtractedItem
+C 1 type sint32 um
+C 2 value string um
+C 3 offset sint32 um
+C 4 length sint32 um
+M DSIMessagingListenerMsg.deleteTemplateResponse
+C 1 result sint32 um
+M DSIMessagingListenerMsg.getTemplatesResponse
+C 1 result sint32 um
+C 2 templates msg rep DSIMessagingListenerMsg.getTemplatesResponse.Template
+M DSIMessagingListenerMsg.getTemplatesResponse.Template
+C 1 id sint32 um
+C 2 textID sint32 um
+C 3 body string um
+C 4 readOnly bool um
+M DSIMessagingListenerMsg.getTemplateResponse
+C 1 result sint32 um
+C 2 templateContent msg um DSIMessagingListenerMsg.getTemplateResponse.Template
+M DSIMessagingListenerMsg.getTemplateResponse.Template
+C 1 id sint32 um
+C 2 textID sint32 um
+C 3 body string um
+C 4 readOnly bool um
+M DSIMessagingListenerMsg.changeTemplateResponse
+C 1 result sint32 um
+C 2 templateID sint32 um
+M DSIMessagingListenerMsg.getPositionOfMessageResponse
+C 1 result sint32 um
+C 2 position sint32 um
+M DSIMessagingListenerMsg.getPositionOfFolderResponse
+C 1 result sint32 um
+C 2 position sint32 um
+M DSIMessagingListenerMsg.deleteSimCardMessagesResponse
+C 1 result sint32 um
+M DSIMessagingListenerMsg.decodeAttachmentResponse
+C 1 result sint32 um
+C 2 destLoc msg um DSIMessagingListenerMsg.decodeAttachmentResponse.ResourceLocator
+M DSIMessagingListenerMsg.decodeAttachmentResponse.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingListenerMsg.decodeAttachmentResponse.ResourceCDNAccess
+M DSIMessagingListenerMsg.decodeAttachmentResponse.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingListenerMsg.responseMeasureMessageLength
+C 1 result sint32 um
+C 2 requestId sint32 um
+C 3 totalCharactersUsed sint32 um
+C 4 totalCharactersLimit sint32 um
+C 5 currentSegmentCharactersUsed sint32 um
+C 6 currentSegmentCharactersLimit sint32 um
+C 7 segmentsUsed sint32 um
+C 8 segmentsLimit sint32 um
+M DSIMessagingListenerMsg.responseInboxSync
+C 1 result sint32 um
+M DSIMessagingListenerMsg.responseExchangeTemplate
+C 1 result sint32 um
+M DSIMessagingListenerMsg.responseSetTemplatePosition
+C 1 result sint32 um
+M DSIMessagingListenerMsg.forwardMessageResponse
+C 1 result sint32 um
+C 2 requestId sint32 um
+M DSIMessagingListenerMsg.responseGetConversations
+C 1 requestId sint32 um
+C 2 result sint32 um
+C 3 accountID sint32 um
+C 4 conversationID sint32 um
+C 5 entries msg rep DSIMessagingListenerMsg.responseGetConversations.ConversationListEntry
+M DSIMessagingListenerMsg.responseGetConversations.ConversationListEntry
+C 1 type sint32 um
+C 2 conversationMessageDetails msg um DSIMessagingListenerMsg.responseGetConversations.ConversationMessageDetails
+C 3 conversationListing msg um DSIMessagingListenerMsg.responseGetConversations.ConversationListing
+M DSIMessagingListenerMsg.responseGetConversations.ConversationMessageDetails
+C 1 messagingAccountID sint32 um
+C 2 messageID string um
+C 3 type sint32 um
+C 4 sender msg um DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 5 recipientsTo msg rep DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 6 recipientsCc msg rep DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 7 recipientsBcc msg rep DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 8 subject string um
+C 9 dateTime int64 um
+C 10 messageStatus sint32 um
+C 11 body string um
+C 12 priority sint32 um
+C 13 segmentLengths sint32 rep
+C 14 attachmentAvailable bool um
+M DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 1 address string um
+C 2 name string um
+C 3 adbEntryID int64 um
+C 4 adbPictureID msg um DSIMessagingListenerMsg.responseGetConversations.ResourceLocator
+C 5 hasPhoneNumbers bool um
+C 6 hasEmailAddresses bool um
+C 7 hasNavAddresses bool um
+M DSIMessagingListenerMsg.responseGetConversations.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingListenerMsg.responseGetConversations.ResourceCDNAccess
+M DSIMessagingListenerMsg.responseGetConversations.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingListenerMsg.responseGetConversations.ConversationListing
+C 1 conversationID string um
+C 2 sender msg um DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 3 recipients msg rep DSIMessagingListenerMsg.responseGetConversations.MatchedAddress
+C 4 dateTime int64 um
+C 5 messageStatus sint32 um
+C 6 subject string um
+C 7 type sint32 um
+M DSIMessagingListenerMsg.responseUseProfile
+C 1 deviceID string um
+C 2 result sint32 um
+M DSIMessagingListenerMsg.responseUseConversationalView
+C 1 result sint32 um
+M DSIMessagingListenerMsg.responseActivateRejectCallWithSMS
+C 1 result sint32 um
+M DSIMessagingListenerMsg.indicateNewMessage
+C 1 newMessage bool um
+C 2 messageID string um
+C 3 messagingAccount sint32 um
+C 4 messageType sint32 um
+C 5 folderId sint32 um
+M DSIMessagingListenerMsg.indicateListChanged
+C 1 information msg um DSIMessagingListenerMsg.indicateListChanged.ListChangedInformation
+M DSIMessagingListenerMsg.indicateListChanged.ListChangedInformation
+C 1 reason sint32 um
+C 2 listSize sint32 um
+M DSIMessagingListenerMsg.indicateMessageStatus
+C 1 statusInformation msg um DSIMessagingListenerMsg.indicateMessageStatus.StatusInformation
+M DSIMessagingListenerMsg.indicateMessageStatus.StatusInformation
+C 1 messageId string um
+C 2 status sint32 um
+M DSIMessagingListenerMsg.indicatePushMessageFailed
+C 1 accountId sint32 um
+C 2 folderId sint32 um
+C 3 messageType sint32 um
+C 4 messageID string um
+M DSIMessagingListenerMsg.indicateSendMessage
+C 1 result sint32 rep
+C 2 requestId sint32 um
+C 3 type sint32 um
+C 4 recipients msg um DSIMessagingListenerMsg.indicateSendMessage.RecipientList
+C 5 subject string um
+C 6 message string um
+C 7 attachments msg rep DSIMessagingListenerMsg.indicateSendMessage.AttachmentInformation
+C 8 messagingAccountID sint32 um
+M DSIMessagingListenerMsg.indicateSendMessage.RecipientList
+C 1 to string rep
+C 2 cc string rep
+C 3 bcc string rep
+M DSIMessagingListenerMsg.indicateSendMessage.AttachmentInformation
+C 1 attachmentID sint32 um
+C 2 name string um
+C 3 mimeType string um
+C 4 size sint32 um
+C 5 entryID sint32 um
+C 6 attachmentPath msg um DSIMessagingListenerMsg.indicateSendMessage.ResourceLocator
+M DSIMessagingListenerMsg.indicateSendMessage.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingListenerMsg.indicateSendMessage.ResourceCDNAccess
+M DSIMessagingListenerMsg.indicateSendMessage.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingListenerMsg.indicateFolderInformation
+C 1 folderEntry msg um DSIMessagingListenerMsg.indicateFolderInformation.FolderEntry
+M DSIMessagingListenerMsg.indicateFolderInformation.FolderEntry
+C 1 folderID sint32 um
+C 2 parentFolderID sint32 um
+C 3 folderType sint32 um
+C 4 folderName string um
+C 5 unreadMessageCount sint32 um
+M DSIMessagingMsg.setNotification
+C 1 attributes sint32 rep
+M DSIMessagingMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIMessagingMsg.changeFolderRequest
+C 1 folderID sint32 um
+C 2 filter sint32 um
+C 3 accountID sint32 um
+C 4 sortCriteria sint32 um
+C 5 order sint32 um
+M DSIMessagingMsg.listEntriesRequest
+C 1 requestId sint32 um
+C 2 offset sint32 um
+C 3 numItems sint32 um
+M DSIMessagingMsg.getPositionOfMessageRequest
+C 1 messageID string um
+M DSIMessagingMsg.getPositionOfFolderRequest
+C 1 folderId sint32 um
+M DSIMessagingMsg.deleteMessageRequest
+C 1 messageIDs string rep
+C 2 deleteList bool um
+M DSIMessagingMsg.sendMessageRequest
+C 1 requestId sint32 um
+C 2 type sint32 um
+C 3 recipients msg um DSIMessagingMsg.sendMessageRequest.RecipientList
+C 4 subject string um
+C 5 message string um
+C 6 attachments msg rep DSIMessagingMsg.sendMessageRequest.AttachmentInformation
+C 7 messagingAccountID sint32 um
+M DSIMessagingMsg.sendMessageRequest.RecipientList
+C 1 to string rep
+C 2 cc string rep
+C 3 bcc string rep
+M DSIMessagingMsg.sendMessageRequest.AttachmentInformation
+C 1 attachmentID sint32 um
+C 2 name string um
+C 3 mimeType string um
+C 4 size sint32 um
+C 5 entryID sint32 um
+C 6 attachmentPath msg um DSIMessagingMsg.sendMessageRequest.ResourceLocator
+M DSIMessagingMsg.sendMessageRequest.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingMsg.sendMessageRequest.ResourceCDNAccess
+M DSIMessagingMsg.sendMessageRequest.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingMsg.getMessageContentsRequest
+C 1 accountID sint32 um
+C 2 messageID string um
+C 3 download sint32 um
+C 4 folderId sint32 um
+M DSIMessagingMsg.setMessageReadStatusRequest
+C 1 messageID string um
+C 2 read bool um
+M DSIMessagingMsg.saveAsDraftRequest
+C 1 messageID string um
+C 2 type sint32 um
+C 3 recipients msg um DSIMessagingMsg.saveAsDraftRequest.RecipientList
+C 4 subject string um
+C 5 body string um
+C 6 messagingAccountID sint32 um
+C 7 attachments msg rep DSIMessagingMsg.saveAsDraftRequest.AttachmentInformation
+M DSIMessagingMsg.saveAsDraftRequest.RecipientList
+C 1 to string rep
+C 2 cc string rep
+C 3 bcc string rep
+M DSIMessagingMsg.saveAsDraftRequest.AttachmentInformation
+C 1 attachmentID sint32 um
+C 2 name string um
+C 3 mimeType string um
+C 4 size sint32 um
+C 5 entryID sint32 um
+C 6 attachmentPath msg um DSIMessagingMsg.saveAsDraftRequest.ResourceLocator
+M DSIMessagingMsg.saveAsDraftRequest.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingMsg.saveAsDraftRequest.ResourceCDNAccess
+M DSIMessagingMsg.saveAsDraftRequest.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingMsg.extractInformationRequest
+C 1 messageID string um
+M DSIMessagingMsg.changeTemplateRequest
+C 1 templateID sint32 um
+C 2 text string um
+M DSIMessagingMsg.changeTemplateRequestWithTextID
+C 1 templateID sint32 um
+C 2 textID sint32 um
+C 3 text string um
+M DSIMessagingMsg.getTemplateRequest
+C 1 templateID sint32 um
+M DSIMessagingMsg.getTemplatesRequest
+M DSIMessagingMsg.deleteTemplateRequest
+C 1 templateIDs sint32 rep
+M DSIMessagingMsg.requestExchangeTemplate
+C 1 firstTemplateID sint32 um
+C 2 secondTemplateID sint32 um
+M DSIMessagingMsg.requestSetTemplatePosition
+C 1 templateID sint32 um
+C 2 listPosition sint32 um
+M DSIMessagingMsg.deleteSimCardMessagesRequest
+C 1 accountID sint32 um
+C 2 delFlag sint32 um
+M DSIMessagingMsg.decodeAttachmentRequest
+C 1 attachment msg um DSIMessagingMsg.decodeAttachmentRequest.AttachmentInformation
+M DSIMessagingMsg.decodeAttachmentRequest.AttachmentInformation
+C 1 attachmentID sint32 um
+C 2 name string um
+C 3 mimeType string um
+C 4 size sint32 um
+C 5 entryID sint32 um
+C 6 attachmentPath msg um DSIMessagingMsg.decodeAttachmentRequest.ResourceLocator
+M DSIMessagingMsg.decodeAttachmentRequest.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIMessagingMsg.decodeAttachmentRequest.ResourceCDNAccess
+M DSIMessagingMsg.decodeAttachmentRequest.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIMessagingMsg.requestMeasureMessageLength
+C 1 requestId sint32 um
+C 2 type sint32 um
+C 3 message string um
+M DSIMessagingMsg.requestInboxSync
+C 1 accountID sint32 um
+M DSIMessagingMsg.forwardMessageRequest
+C 1 requestId sint32 um
+C 2 messageID string um
+C 3 recipients msg um DSIMessagingMsg.forwardMessageRequest.RecipientList
+C 4 subject string um
+C 5 message string um
+C 6 messagingAccountID sint32 um
+C 7 forwardAttachments bool um
+M DSIMessagingMsg.forwardMessageRequest.RecipientList
+C 1 to string rep
+C 2 cc string rep
+C 3 bcc string rep
+M DSIMessagingMsg.requestGetConversations
+C 1 requestId sint32 um
+C 2 accountID sint32 um
+C 3 conversationID string um
+C 4 offset sint32 um
+C 5 numItems sint32 um
+M DSIMessagingMsg.requestUseProfile
+C 1 deviceID string um
+M DSIMessagingMsg.requestUseConversationalView
+C 1 conversationalView bool um
+M DSIMessagingMsg.requestActivateRejectCallWithSMS
+C 1 activateRejectCallWithSMS bool um
+M DSIMessagingServiceConfigurationListenerMsg.updateSMSCNumber
+C 1 smscNumber string um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateSmsDeliveryReport
+C 1 deliveryReport bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateStoreSmsOnSent
+C 1 store bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateShortMessageValidityPeriod
+C 1 validityPeriod sint32 um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updatePhoneSystemRingingVolume
+C 1 volume sint32 um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updatePhoneSystemRingingType
+C 1 type sint32 um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateEmailIncludeOldMailInReply
+C 1 includeOldEmail bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateEmailEmptySubjectNotification
+C 1 notify bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateFolderViewMode
+C 1 viewmode sint32 um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateAccountPreferences
+C 1 accountID sint32 um
+C 2 accountName string um
+C 3 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateSmsIndications
+C 1 smsIndications bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updateEmailIndications
+C 1 emailIndications bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.updatePushSms
+C 1 pushSms bool um
+C 2 validFlag sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.setSMSCNumberResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.activateSMSDeliveryReportResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.activateStoreSmsOnSentResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.setShortMessageValidityPeriodResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.setPhoneSystemRingingVolumeResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.setPhoneSystemRingingTypeResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.activateEmailIncludeOldMailInReplyResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.activateEmailEmptySubjectNotificationResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.changeFolderViewModeResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.restoreFactorySettingsResponse
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.responseSetSmsIndications
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.responseSetEmailIndications
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.responseSetPushSms
+C 1 result sint32 um
+M DSIMessagingServiceConfigurationListenerMsg.responseSetAccountService
+C 1 requestId sint32 um
+C 2 result sint32 um
+M DSIMessagingServiceConfigurationMsg.setNotification
+C 1 attributes sint32 rep
+M DSIMessagingServiceConfigurationMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIMessagingServiceConfigurationMsg.setPhoneSystemRingingVolumeRequest
+C 1 volume sint32 um
+M DSIMessagingServiceConfigurationMsg.setPhoneSystemRingingTypeRequest
+C 1 type sint32 um
+M DSIMessagingServiceConfigurationMsg.setSMSCNumberRequest
+C 1 smscNumber string um
+M DSIMessagingServiceConfigurationMsg.activateSmsDeliveryReportRequest
+C 1 reportOnOff bool um
+M DSIMessagingServiceConfigurationMsg.activateStoreSmsOnSentRequest
+C 1 storeSms bool um
+M DSIMessagingServiceConfigurationMsg.setShortMessageValidityPeriodRequest
+C 1 validityPeriod sint32 um
+M DSIMessagingServiceConfigurationMsg.activateEmailIncludeOldMailInReplyRequest
+C 1 includeInReply bool um
+M DSIMessagingServiceConfigurationMsg.activateEmailEmptySubjectNotificationRequest
+C 1 emptySubjectNotification bool um
+M DSIMessagingServiceConfigurationMsg.changeFolderViewModeRequest
+C 1 viewmode sint32 um
+M DSIMessagingServiceConfigurationMsg.restoreFactorySettingsRequest
+M DSIMessagingServiceConfigurationMsg.setAccountPreferences
+C 1 accountID sint32 um
+C 2 accountName string um
+M DSIMessagingServiceConfigurationMsg.requestSetSmsIndications
+C 1 smsIndications bool um
+M DSIMessagingServiceConfigurationMsg.requestSetEmailIndications
+C 1 emailIndications bool um
+M DSIMessagingServiceConfigurationMsg.requestSetPushSms
+C 1 pushSms bool um
+M DSIMessagingServiceConfigurationMsg.requestSetAccountService
+C 1 requestId sint32 um
+C 2 messageType sint32 um
+C 3 accountSuppress bool um
+M DSIAdbListenerMsg.updateAdbState
+C 1 adbState sint32 um
+C 2 validFlag sint32 um
+M DSIAdbListenerMsg.updateProfileInfo
+C 1 profileInfo msg rep DSIAdbListenerMsg.updateProfileInfo_ProfileInfo
+C 2 validFlag sint32 um
+M DSIAdbListenerMsg.updateProfileInfo_ProfileInfo
+C 1 num sint32 um
+C 2 name string um
+C 3 publicProfileVisibility bool um
+C 4 active bool um
+C 5 deviceID string um
+M DSIAdbListenerMsg.updateDeviceConnected
+C 1 deviceConnected bool um
+C 2 profileID sint32 um
+C 3 validFlag sint32 um
+M DSIAdbListenerMsg.updateDownloadCountSim
+C 1 downloadInfoSim msg um DSIAdbListenerMsg.updateDownloadCountSim_DownloadInfo
+C 2 profileID sint32 um
+C 3 deviceID string um
+C 4 validFlag sint32 um
+M DSIAdbListenerMsg.updateDownloadCountSim_DownloadInfo
+C 1 count sint32 um
+C 2 numberOfItems sint32 um
+M DSIAdbListenerMsg.updateDownloadCountMe
+C 1 downloadInfoMe msg um DSIAdbListenerMsg.updateDownloadCountMe_DownloadInfo
+C 2 profileID sint32 um
+C 3 deviceID string um
+C 4 validFlag sint32 um
+M DSIAdbListenerMsg.updateDownloadCountMe_DownloadInfo
+C 1 count sint32 um
+C 2 numberOfItems sint32 um
+M DSIAdbListenerMsg.updateDownloadCountOpp
+C 1 downloadInfoOpp msg um DSIAdbListenerMsg.updateDownloadCountOpp_DownloadInfo
+C 2 profileID sint32 um
+C 3 deviceID string um
+C 4 validFlag sint32 um
+M DSIAdbListenerMsg.updateDownloadCountOpp_DownloadInfo
+C 1 count sint32 um
+C 2 numberOfItems sint32 um
+M DSIAdbListenerMsg.updateDownloadState
+C 1 downloadState sint32 um
+C 2 failureReason sint32 um
+C 3 profileID sint32 um
+C 4 validFlag sint32 um
+M DSIAdbListenerMsg.setLanguageResult
+C 1 success sint32 um
+M DSIAdbListenerMsg.resetToFactorySettingsResult
+C 1 success sint32 um
+M DSIAdbListenerMsg.createBackupFileResult
+C 1 success sint32 um
+C 2 fullPath string um
+M DSIAdbListenerMsg.importBackupFileResult
+C 1 success sint32 um
+C 2 fullPath string um
+M DSIAdbListenerMsg.restartDownloadResult
+C 1 success sint32 um
+M DSIAdbListenerMsg.deleteProfilesResult
+C 1 success sint32 um
+M DSIAdbMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbMsg.setLanguage
+C 1 language string um
+M DSIAdbMsg.resetToFactorySettings
+M DSIAdbMsg.createBackupFile
+C 1 path string um
+M DSIAdbMsg.importBackupFile
+C 1 fullPath string um
+M DSIAdbMsg.restartDownload
+C 1 profileID sint32 um
+M DSIAdbMsg.deleteProfiles
+C 1 profileNums sint32 rep
+M DSIAdbDataResolutionListenerMsg.resolveMailAddressResult
+C 1 success sint32 um
+C 2 locatedEMails msg rep DSIAdbDataResolutionListenerMsg.resolveMailAddressResult_DataSet
+M DSIAdbDataResolutionListenerMsg.resolveMailAddressResult_DataSet
+C 1 entryId sint64 um
+C 2 entryPosition sint32 um
+C 3 entryType sint32 um
+C 4 generalDescription1 string um
+C 5 generalDescription2 string um
+C 6 phoneCount sint32 um
+C 7 probNavigable sint32 um
+C 8 navigable sint32 um
+C 9 topDestination sint32 um
+C 10 contactPicture msg um DSIAdbDataResolutionListenerMsg.ResourceLocator
+C 11 webAddressCount sint32 um
+C 12 emailCount sint32 um
+C 13 numberType sint32 um
+M DSIAdbDataResolutionListenerMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbDataResolutionListenerMsg.ResourceCDNAccess
+M DSIAdbDataResolutionListenerMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbDataResolutionListenerMsg.resolvePhoneNumbersResult
+C 1 success sint32 um
+C 2 resolvedNumbers msg rep DSIAdbDataResolutionListenerMsg.resolvePhoneNumbersResult_DataSet
+M DSIAdbDataResolutionListenerMsg.resolvePhoneNumbersResult_DataSet
+C 1 entryId sint64 um
+C 2 entryPosition sint32 um
+C 3 entryType sint32 um
+C 4 generalDescription1 string um
+C 5 generalDescription2 string um
+C 6 phoneCount sint32 um
+C 7 probNavigable sint32 um
+C 8 navigable sint32 um
+C 9 topDestination sint32 um
+C 10 contactPicture msg um DSIAdbDataResolutionListenerMsg.ResourceLocator
+C 11 webAddressCount sint32 um
+C 12 emailCount sint32 um
+C 13 numberType sint32 um
+M DSIAdbDataResolutionMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbDataResolutionMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbDataResolutionMsg.resolveMailAddresses
+C 1 eMailAddresses string rep
+M DSIAdbDataResolutionMsg.resolvePhoneNumbers
+C 1 phoneNumbers string rep
+M DSIAdbEditListenerMsg.updateNewPublicProfileEntryAvailable
+C 1 newPublicProfileEntryAvailable bool um
+C 2 validFlag sint32 um
+M DSIAdbEditListenerMsg.updateSpeedDials
+C 1 speedDialList msg rep DSIAdbEditListenerMsg.updateSpeedDials_SpeedDial
+C 2 validFlag sint32 um
+M DSIAdbEditListenerMsg.updateSpeedDials_SpeedDial
+C 1 lastName string um
+C 2 firstName string um
+C 3 combinedName string um
+C 4 contactPicture msg um DSIAdbEditListenerMsg.ResourceLocator
+C 5 phoneData msg um DSIAdbEditListenerMsg.PhoneData
+C 6 speedDialIndex sint32 um
+M DSIAdbEditListenerMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbEditListenerMsg.ResourceCDNAccess
+M DSIAdbEditListenerMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbEditListenerMsg.PhoneData
+C 1 number string um
+C 2 numberType sint32 um
+C 3 speedDialKey sint32 um
+M DSIAdbEditListenerMsg.insertEntryResult
+C 1 success sint32 um
+C 2 entry msg um DSIAdbEditListenerMsg.insertEntryResult_AdbEntry
+M DSIAdbEditListenerMsg.insertEntryResult_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditListenerMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditListenerMsg.AddressData
+C 6 emailData msg rep DSIAdbEditListenerMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditListenerMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditListenerMsg.AddressData
+C 1 addressType sint32 um
+C 2 street string um
+C 3 locality string um
+C 4 country string um
+C 5 region string um
+C 6 postalCode string um
+C 7 geoPosition string um
+M DSIAdbEditListenerMsg.EmailData
+C 1 preferred bool um
+C 2 emailType sint32 um
+C 3 emailAddr string um
+M DSIAdbEditListenerMsg.PersonalData
+C 1 lastName string um
+C 2 lastNameSound string um
+C 3 firstName string um
+C 4 firstNameSound string um
+C 5 birthday msg um DSIAdbEditListenerMsg.DateTime
+C 6 organization string um
+C 7 organizationSound string um
+C 8 contactPicture msg um DSIAdbEditListenerMsg.ResourceLocator
+M DSIAdbEditListenerMsg.DateTime
+C 1 time sint64 um
+M DSIAdbEditListenerMsg.getEntriesResult
+C 1 success sint32 um
+C 2 entryList msg rep DSIAdbEditListenerMsg.getEntriesResult_AdbEntry
+M DSIAdbEditListenerMsg.getEntriesResult_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditListenerMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditListenerMsg.AddressData
+C 6 emailData msg rep DSIAdbEditListenerMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditListenerMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditListenerMsg.getEntryDataSetsResult
+C 1 success sint32 um
+C 2 entryDataSetList msg rep DSIAdbEditListenerMsg.getEntryDataSetsResult_DataSet
+M DSIAdbEditListenerMsg.getEntryDataSetsResult_DataSet
+C 1 entryId sint64 um
+C 2 entryPosition sint32 um
+C 3 entryType sint32 um
+C 4 generalDescription1 string um
+C 5 generalDescription2 string um
+C 6 phoneCount sint32 um
+C 7 probNavigable sint32 um
+C 8 navigable sint32 um
+C 9 topDestination sint32 um
+C 10 contactPicture msg um DSIAdbEditListenerMsg.ResourceLocator
+C 11 webAddressCount sint32 um
+C 12 emailCount sint32 um
+C 13 numberType sint32 um
+M DSIAdbEditListenerMsg.changeEntryResult
+C 1 success sint32 um
+C 2 entry msg um DSIAdbEditListenerMsg.changeEntryResult_AdbEntry
+M DSIAdbEditListenerMsg.changeEntryResult_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditListenerMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditListenerMsg.AddressData
+C 6 emailData msg rep DSIAdbEditListenerMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditListenerMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditListenerMsg.deleteEntriesResult
+C 1 success sint32 um
+M DSIAdbEditListenerMsg.setSpeedDialResult
+C 1 success sint32 um
+M DSIAdbEditListenerMsg.deleteSpeedDialResult
+C 1 success sint32 um
+M DSIAdbEditListenerMsg.getEntryByReferenceIdResult
+C 1 success sint32 um
+C 2 entry msg um DSIAdbEditListenerMsg.getEntryByReferenceIdResult_AdbEntry
+M DSIAdbEditListenerMsg.getEntryByReferenceIdResult_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditListenerMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditListenerMsg.AddressData
+C 6 emailData msg rep DSIAdbEditListenerMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditListenerMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditListenerMsg.getEntryNamesResult
+C 1 success sint32 um
+C 2 entryNameList msg rep DSIAdbEditListenerMsg.getEntryNamesResult_EntryName
+M DSIAdbEditListenerMsg.getEntryNamesResult_EntryName
+C 1 entryId sint64 um
+C 2 firstName string um
+C 3 lastName string um
+C 4 firstNameSound string um
+C 5 lastNameSound string um
+M DSIAdbEditMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbEditMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbEditMsg.insertEntry
+C 1 entry msg um DSIAdbEditMsg.insertEntry_AdbEntry
+C 2 profileIndex sint32 um
+M DSIAdbEditMsg.insertEntry_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditMsg.AddressData
+C 6 emailData msg rep DSIAdbEditMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditMsg.PhoneData
+C 1 number string um
+C 2 numberType sint32 um
+C 3 speedDialKey sint32 um
+M DSIAdbEditMsg.AddressData
+C 1 addressType sint32 um
+C 2 street string um
+C 3 locality string um
+C 4 country string um
+C 5 region string um
+C 6 postalCode string um
+C 7 geoPosition string um
+M DSIAdbEditMsg.EmailData
+C 1 preferred bool um
+C 2 emailType sint32 um
+C 3 emailAddr string um
+M DSIAdbEditMsg.PersonalData
+C 1 lastName string um
+C 2 lastNameSound string um
+C 3 firstName string um
+C 4 firstNameSound string um
+C 5 birthday msg um DSIAdbEditMsg.DateTime
+C 6 organization string um
+C 7 organizationSound string um
+C 8 contactPicture msg um DSIAdbEditMsg.ResourceLocator
+M DSIAdbEditMsg.DateTime
+C 1 time sint64 um
+M DSIAdbEditMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbEditMsg.ResourceCDNAccess
+M DSIAdbEditMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbEditMsg.getEntries
+C 1 entryIdList sint64 rep
+C 2 viewType sint32 um
+C 3 listMode sint32 um
+M DSIAdbEditMsg.getEntryDataSets
+C 1 entryIdList sint64 rep
+C 2 viewType sint32 um
+C 3 listMode sint32 um
+M DSIAdbEditMsg.changeEntry
+C 1 entry msg um DSIAdbEditMsg.changeEntry_AdbEntry
+C 2 profileIndex sint32 um
+M DSIAdbEditMsg.changeEntry_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbEditMsg.PhoneData
+C 5 addressData msg rep DSIAdbEditMsg.AddressData
+C 6 emailData msg rep DSIAdbEditMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbEditMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbEditMsg.deleteEntries
+C 1 entryIdList sint64 rep
+C 2 viewType sint32 um
+C 3 listMode sint32 um
+M DSIAdbEditMsg.setSpeedDial
+C 1 speedDial msg um DSIAdbEditMsg.setSpeedDial_SpeedDial
+C 2 profileIndex sint32 um
+M DSIAdbEditMsg.setSpeedDial_SpeedDial
+C 1 lastName string um
+C 2 firstName string um
+C 3 combinedName string um
+C 4 contactPicture msg um DSIAdbEditMsg.ResourceLocator
+C 5 phoneData msg um DSIAdbEditMsg.PhoneData
+C 6 speedDialIndex sint32 um
+M DSIAdbEditMsg.deleteAllSpeedDials
+C 1 profileIndex sint32 um
+M DSIAdbEditMsg.deleteSpeedDial
+C 1 speedDialKey sint32 um
+C 2 profileIndex sint32 um
+M DSIAdbEditMsg.getEntryNames
+C 1 entryIdList sint64 rep
+M DSIAdbListListenerMsg.updateAlphabeticalIndex
+C 1 indexInfos msg rep DSIAdbListListenerMsg.updateAlphabeticalIndex_IndexInformation
+C 2 validFlag sint32 um
+M DSIAdbListListenerMsg.updateAlphabeticalIndex_IndexInformation
+C 1 viewtype sint32 um
+C 2 characterInfo msg rep DSIAdbListListenerMsg.CharacterInfo
+M DSIAdbListListenerMsg.CharacterInfo
+C 1 value sint32 um
+C 2 index sint32 um
+C 3 characters string um
+M DSIAdbListListenerMsg.getViewWindowResult
+C 1 success sint32 um
+C 2 dataSetList msg rep DSIAdbListListenerMsg.getViewWindowResult_DataSet
+C 3 totalEntries sint32 um
+M DSIAdbListListenerMsg.getViewWindowResult_DataSet
+C 1 entryId sint64 um
+C 2 entryPosition sint32 um
+C 3 entryType sint32 um
+C 4 generalDescription1 string um
+C 5 generalDescription2 string um
+C 6 phoneCount sint32 um
+C 7 probNavigable sint32 um
+C 8 navigable sint32 um
+C 9 topDestination sint32 um
+C 10 contactPicture msg um DSIAdbListListenerMsg.ResourceLocator
+C 11 webAddressCount sint32 um
+C 12 emailCount sint32 um
+C 13 numberType sint32 um
+M DSIAdbListListenerMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbListListenerMsg.ResourceCDNAccess
+M DSIAdbListListenerMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbListListenerMsg.setListStyleResult
+C 1 success sint32 um
+M DSIAdbListListenerMsg.invalidData
+C 1 reason sint32 um
+C 2 viewSize msg um DSIAdbListListenerMsg.invalidData_AdbViewSize
+M DSIAdbListListenerMsg.invalidData_AdbViewSize
+C 1 all sint32 um
+C 2 phone sint32 um
+C 3 navi sint32 um
+C 4 email sint32 um
+M DSIAdbListMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbListMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbListMsg.getViewWindow
+C 1 entryId sint64 um
+C 2 movement sint32 um
+C 3 viewType sint32 um
+C 4 windowSize sint32 um
+M DSIAdbListMsg.setListStyle
+C 1 line1 sint32 um
+C 2 line2 sint32 um
+M DSIAdbUserProfileListenerMsg.updateSOSButton
+C 1 visiblity bool um
+C 2 validFlag sint32 um
+M DSIAdbUserProfileListenerMsg.updateSortOrder
+C 1 sortOrder sint32 um
+C 2 validFlag sint32 um
+M DSIAdbUserProfileListenerMsg.updatePictureVisibility
+C 1 visibility bool um
+C 2 validFlag sint32 um
+M DSIAdbUserProfileListenerMsg.updateContextSpecificVisibility
+C 1 visibility bool um
+C 2 validFlag sint32 um
+M DSIAdbUserProfileListenerMsg.updateActiveProfile
+C 1 profileInfo msg um DSIAdbUserProfileListenerMsg.updateActiveProfile_ProfileInfo
+C 2 validFlag sint32 um
+M DSIAdbUserProfileListenerMsg.updateActiveProfile_ProfileInfo
+C 1 num sint32 um
+C 2 name string um
+C 3 publicProfileVisibility bool um
+C 4 active bool um
+C 5 deviceID string um
+M DSIAdbUserProfileListenerMsg.setProfileNameResult
+C 1 success sint32 um
+M DSIAdbUserProfileListenerMsg.setSOSButtonResult
+C 1 success sint32 um
+M DSIAdbUserProfileListenerMsg.useProfileResult
+C 1 deviceID string um
+C 2 success sint32 um
+M DSIAdbUserProfileListenerMsg.setSortOrderResult
+C 1 success sint32 um
+M DSIAdbUserProfileListenerMsg.setPublicProfileVisibilityResult
+C 1 success sint32 um
+M DSIAdbUserProfileListenerMsg.setContextSpecificVisibilityResult
+C 1 success sint32 um
+M DSIAdbUserProfileMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbUserProfileMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbUserProfileMsg.setProfileName
+C 1 name string um
+M DSIAdbUserProfileMsg.setSOSButton
+C 1 enabled bool um
+M DSIAdbUserProfileMsg.useProfile
+C 1 deviceID string um
+M DSIAdbUserProfileMsg.setSortOrder
+C 1 sortOrder sint32 um
+M DSIAdbUserProfileMsg.setPublicProfileVisibility
+C 1 visibility bool um
+M DSIAdbUserProfileMsg.setContextSpecificVisibility
+C 1 showOnlyUsableContacts bool um
+M DSIAdbVCardExchangeListenerMsg.updateExportCount
+C 1 exportCount msg um DSIAdbVCardExchangeListenerMsg.updateExportCount_DownloadInfo
+C 2 validFlag sint32 um
+M DSIAdbVCardExchangeListenerMsg.updateExportCount_DownloadInfo
+C 1 count sint32 um
+C 2 numberOfItems sint32 um
+M DSIAdbVCardExchangeListenerMsg.updateImportCount
+C 1 importCount msg um DSIAdbVCardExchangeListenerMsg.updateImportCount_DownloadInfo
+C 2 validFlag sint32 um
+M DSIAdbVCardExchangeListenerMsg.updateImportCount_DownloadInfo
+C 1 count sint32 um
+C 2 numberOfItems sint32 um
+M DSIAdbVCardExchangeListenerMsg.importVCardResult
+C 1 success sint32 um
+C 2 countSuccess sint32 um
+C 3 countFailure sint32 um
+C 4 failureReason sint32 um
+M DSIAdbVCardExchangeListenerMsg.exportVCardResult
+C 1 success sint32 um
+C 2 countSuccess sint32 um
+C 3 countFailure sint32 um
+C 4 failureReason sint32 um
+M DSIAdbVCardExchangeListenerMsg.createVCardResult
+C 1 success sint32 um
+C 2 entryIdList sint64 rep
+C 3 listMode sint32 um
+C 4 fullPathToVCards string um
+M DSIAdbVCardExchangeListenerMsg.parseVCardResult
+C 1 success sint32 um
+C 2 entries msg rep DSIAdbVCardExchangeListenerMsg.parseVCardResult_AdbEntry
+M DSIAdbVCardExchangeListenerMsg.parseVCardResult_AdbEntry
+C 1 entryId sint64 um
+C 2 entryType sint32 um
+C 3 combinedName string um
+C 4 phoneData msg rep DSIAdbVCardExchangeListenerMsg.PhoneData
+C 5 addressData msg rep DSIAdbVCardExchangeListenerMsg.AddressData
+C 6 emailData msg rep DSIAdbVCardExchangeListenerMsg.EmailData
+C 7 urlData string rep
+C 8 personalData msg um DSIAdbVCardExchangeListenerMsg.PersonalData
+C 9 referenceId string um
+M DSIAdbVCardExchangeListenerMsg.PhoneData
+C 1 number string um
+C 2 numberType sint32 um
+C 3 speedDialKey sint32 um
+M DSIAdbVCardExchangeListenerMsg.AddressData
+C 1 addressType sint32 um
+C 2 street string um
+C 3 locality string um
+C 4 country string um
+C 5 region string um
+C 6 postalCode string um
+C 7 geoPosition string um
+M DSIAdbVCardExchangeListenerMsg.EmailData
+C 1 preferred bool um
+C 2 emailType sint32 um
+C 3 emailAddr string um
+M DSIAdbVCardExchangeListenerMsg.PersonalData
+C 1 lastName string um
+C 2 lastNameSound string um
+C 3 firstName string um
+C 4 firstNameSound string um
+C 5 birthday msg um DSIAdbVCardExchangeListenerMsg.DateTime
+C 6 organization string um
+C 7 organizationSound string um
+C 8 contactPicture msg um DSIAdbVCardExchangeListenerMsg.ResourceLocator
+M DSIAdbVCardExchangeListenerMsg.DateTime
+C 1 time sint64 um
+M DSIAdbVCardExchangeListenerMsg.ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbVCardExchangeListenerMsg.ResourceCDNAccess
+M DSIAdbVCardExchangeListenerMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbVCardExchangeMsg.setNotification
+C 1 attributes sint32 rep
+M DSIAdbVCardExchangeMsg.clearNotification
+C 1 attributes sint32 rep
+M DSIAdbVCardExchangeMsg.importVCard
+C 1 resourceLocators msg rep DSIAdbVCardExchangeMsg.importVCard_ResourceLocator
+C 2 destinationProfile sint32 um
+M DSIAdbVCardExchangeMsg.importVCard_ResourceLocator
+C 1 id sint32 um
+C 2 url string um
+C 3 cdnAccess msg um DSIAdbVCardExchangeMsg.ResourceCDNAccess
+M DSIAdbVCardExchangeMsg.ResourceCDNAccess
+C 1 cdnInternalIpv6 string um
+C 2 cdnInternalPort sint32 um
+C 3 cdnExternalIpv6 string um
+C 4 cdnExternalPort sint32 um
+C 5 imageResourcePath string um
+M DSIAdbVCardExchangeMsg.exportVCard
+C 1 sourceView sint32 um
+C 2 destMountPoint string um
+C 3 entryIdList sint64 rep
+C 4 listMode sint32 um
+M DSIAdbVCardExchangeMsg.createVCard
+C 1 sourceView sint32 um
+C 2 entryIdList sint64 rep
+C 3 listMode sint32 um
+M DSIAdbVCardExchangeMsg.parseVCard
+C 1 fullPathToVCards string um
+M DSIPhoneManagerListenerMsg.updateDiscoveredDevices
+C 1 discoveredDevices msg rep DSIPhoneManagerListenerMsg.Device
+C 2 validFlag sint32 um
+M DSIPhoneManagerListenerMsg.Device
+C 1 wlanP2PMacAddress string um
+C 2 wlanMacAddress string um
+C 3 btDeviceClass string um
+C 4 btDeviceAddress string um
+C 5 deviceName string um
+C 6 uniqueDeviceID string um
+C 7 productID string um
+C 8 vendorID string um
+C 9 version string um
+C 10 serviceStateHFP sint32 um
+C 11 serviceStateMAP sint32 um
+C 12 serviceStateA2DP sint32 um
+C 13 serviceStateCPWL sint32 um
+C 14 serviceStateCPWired sint32 um
+C 15 serviceStateMLWL sint32 um
+C 16 serviceStateMLWired sint32 um
+C 17 serviceStateAAWL sint32 um
+C 18 serviceStateAAWired sint32 um
+C 19 serviceStateBCLWL sint32 um
+C 20 serviceStateBCLWired sint32 um
+C 21 serviceStatePBAP sint32 um
+C 22 serviceStatePIM sint32 um
+M DSIPhoneManagerListenerMsg.updateKnownDevices
+C 1 knownDevices msg rep DSIPhoneManagerListenerMsg.Device
+C 2 validFlag sint32 um
+M DSIPhoneManagerListenerMsg.updateSingleDeviceCoexMode
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIPhoneManagerListenerMsg.updateEmergencyCallIndicator
+C 1 active bool um
+C 2 validFlag sint32 um
+M DSIPhoneManagerListenerMsg.updateSwapStatus
+C 1 swapOrFod sint32 um
+C 2 isCarPlayUnlocked bool um
+C 3 isAndroidAutoUnlocked bool um
+C 4 isMirrorLinkUnlocked bool um
+C 5 isCarLifeUnlocked bool um
+C 6 validFlag sint32 um
+M DSIPhoneManagerListenerMsg.responseConnectService
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseDisconnectService
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseStartDiscovery
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseAbortDiscovery
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseReconnectSuspend
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseRemoveDevice
+C 1 uniqueDeviceID string um
+C 2 result sint32 um
+M DSIPhoneManagerListenerMsg.responseRejectTechnologySelection
+C 1 uniqueDeviceID string um
+C 2 result sint32 um
+M DSIPhoneManagerListenerMsg.responseRestoreFactorySettings
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseSetPrioritizedDevice
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseSetEmergencyCallIndicator
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.responseAbortConnectService
+C 1 result sint32 um
+M DSIPhoneManagerListenerMsg.indicateDeviceDisconnectionInfo
+C 1 uniqueDeviceID string um
+C 2 serviceType sint32 um
+C 3 disconnectionInfo sint32 um
+M DSIPhoneManagerListenerMsg.indicateIncomingServiceRequestLimitExceeded
+C 1 uniqueDeviceID string um
+C 2 serviceType sint32 um
+M DSIPhoneManagerListenerMsg.indicateGetTechnologySelection
+C 1 uniqueDeviceID string um
+M DSIPhoneManagerListenerMsg.indicateIncomingAAWLConnectionRequest
+C 1 uniqueDeviceID string um
+M DSIPhoneManagerMsg.setNotification
+C 1 attributes int32 rep
+M DSIPhoneManagerMsg.clearNotification
+C 1 attributes int32 rep
+M DSIPhoneManagerMsg.requestConnectService
+C 1 uniqueDeviceID string um
+C 2 serviceType sint32 um
+C 3 uniqueDeviceIDToReplace string um
+M DSIPhoneManagerMsg.requestDisconnectService
+C 1 uniqueDeviceID string um
+C 2 serviceType sint32 um
+M DSIPhoneManagerMsg.requestStartDiscovery
+C 1 discoveryDuration sint32 um
+C 2 numIterations sint32 um
+M DSIPhoneManagerMsg.requestAbortDiscovery
+M DSIPhoneManagerMsg.requestRestoreFactorySettings
+M DSIPhoneManagerMsg.requestReconnectSuspend
+C 1 suspend bool um
+M DSIPhoneManagerMsg.requestSetEmergencyCallIndicator
+C 1 active bool um
+M DSIPhoneManagerMsg.requestSetPrioritizedDevice
+C 1 uniqueDeviceID string um
+M DSIPhoneManagerMsg.requestRejectTechnologySelection
+C 1 uniqueDeviceID string um
+M DSIPhoneManagerMsg.requestRemoveDevice
+C 1 uniqueDeviceID string um
+M DSIPhoneManagerMsg.requestAbortConnectService
+C 1 uniqueDeviceID string um

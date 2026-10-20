@@ -1,0 +1,19 @@
+# relatorio.txt — gerado por driver/som_tabela.sh; não editar à mão
+# O que o gerente de áudio do firmware (audiomgnt) serve em repouso, sem HMI e sem carro.
+tabela de áudio: MIB3_Audiotable_MQB.xml, versão v207, de 2019-10-15 (MIB3 OI MQB SOP2 LG)
+sha256 da tabela: b5abe27c0783045e48a7dd05f16f360de65cd66f64ac9f1b11bcb8a65340de1d
+sha256 do audiomgnt: 004b6fa5fac66fc359aca4695530e61e5bc9f1996f4198d35ce1f1a1db989390
+sha256 da libAudioManagement.so: b72fdf63d98088db0ed31fc028d23a48bad4ea1082fed450a4e2e8d21f0c9e2a
+especificação do serviço: viwi.service.audiomanagement-1.2.2.json
+elementos por recurso:
+  globals 1
+  connections 124
+  volumesettings 39
+  soundsettings 49
+  soundparameters 94
+  soundpresets 31
+  controls 0
+  sinks 18
+  sources 25
+saída de som 'entertainment' em repouso: "amplifierId":"" "audioStatus":"invalid" "connectStatus":"disconnected" 
+volume de entretenimento em repouso: "locked":true "value":5 "valueMax":30 "valueMin":0 

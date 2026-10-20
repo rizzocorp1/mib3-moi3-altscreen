@@ -1,0 +1,50 @@
+# jetta-gli-2021-menus.txt — os menus do carro que o Lipe disse que a central dele tem.
+# Marco 14, 12/10/2026, à tarde. Estudo num computador; nada daqui vai para o carro.
+#
+# NÃO É LEITURA DO CARRO, e não serve de codificação para ele. Em 12/10/2026, às 17h31, o Lipe
+# respondeu de memória, sem foto, a duas perguntas da sessão principal:
+#   "Em Veículo → Config. no seu carro, quais destes itens aparecem?"
+#       "Luz, Espelho e limpador, Abrir e fechar, Estacionar e manobrar" (não citou Pneus)
+#   "A foto de 09/10 mostra o bloco Assistentes na grade do seu carro. O que aparece dentro dele?"
+#       "ACC, Front Assist, Detector de fadiga"
+# Ele disse que os MENUS existem; não disse que linhas cada um tem. Por isso cada menu entra aqui
+# com UMA opção só, a que tem alguma fonte, e a fonte vai ao lado da linha. O resto de cada menu
+# fica desligado até haver foto da tela do carro (pedida na ficha). O que a central sabe mostrar
+# em cada um está no catálogo (catalogo-menus.txt), que não é o carro.
+# Pneus e Lane Assist ficam de fora: o primeiro ele não citou; o segundo depende da câmera, que o
+# carro não tem (projeto 01).
+#
+# Entra no padrão do modo ao vivo (driver/ao_vivo.sh), junto com o par dele na codificação
+# (stubs/codificacao/jetta-gli-2021-menus.txt). Para desligar:  MENUS=0 sh driver/ao_vivo.sh
+# 2 = VIEWOPTIONSTATE_NORMAL_OPERATION: existe e pode ser usada.
+
+# O que se marca nesses menus fica, e volta na partida seguinte (com a memória do modo ao vivo):
+# os serviços deles entram na lista dos que aceitam o que a tela grava. A lista de depois troca a
+# de antes, por isso o serviço de relógio e unidades do carro-parado.txt vem repetido.
+grava = DSICarTimeUnitsLanguage DSICarComfort DSICarLight DSICarParkingSystem DSICarDriverAssistance
+
+# ---- "Luz" (o menu: dito pelo Lipe em 12/10/2026, de memória)
+[DSICarLight.updateExtLightViewOptions]
+extLightViewOptions.headlightSystem.state = 2          # "Light Assist". O Lipe informou em 07/10/2026 que o carro tem farol alto automático (ficha); que a linha é esta é palpite
+
+# ---- "Estacionar e manobrar" (o menu: dito pelo Lipe em 12/10/2026, de memória)
+[DSICarParkingSystem.updateParkingSystemViewOptions]
+parkingSystemViewOptions.pdcVolumeRear.state = 2       # "Volume atrás". palpite: a ficha traz sensores de estacionamento dianteiros e traseiros pelo Garagem360 (imprensa, a confirmar)
+
+# ---- "Espelho e limpador" (o menu: dito pelo Lipe em 12/10/2026, de memória)
+[DSICarComfort.updateWiperViewOptions]
+wiperViewOptions.wiperRainSensorOnOff.state = 2        # "Ativação autom. limpadores dos vidros na chuva". palpite: a ficha traz o sensor de chuva como de série pelo Garagem360 (imprensa, a confirmar)
+
+# ---- "Abrir e fechar" (o menu: dito pelo Lipe em 12/10/2026, de memória)
+[DSICarComfort.updateDoorLockingViewOptions]
+doorLockingViewOptions.keyless.state = 2               # "Keyless-Access". palpite: a ficha traz a chave presencial como de série pelo Garagem360 (imprensa, a confirmar)
+
+# ---- o bloco "Assistentes" da grade de menus (visto na foto de 09/10/2026) e o que há nele
+[DSICarDriverAssistance.updateACCViewOptions]
+aCCViewOptions.timegap.state = 2                       # ACC: dito pelo Lipe em 12/10/2026, de memória. A linha "Distância" é palpite
+
+[DSICarDriverAssistance.updateAWVViewOptions]
+aWVViewOptions.system.state = 2                        # Front Assist: dito pelo Lipe em 12/10/2026, de memória. A opção é palpite
+
+[DSICarDriverAssistance.updateMKEViewOptions]
+mKEViewOptions.systemOnOff.state = 2                   # detector de fadiga: dito pelo Lipe em 12/10/2026, de memória. A opção é palpite

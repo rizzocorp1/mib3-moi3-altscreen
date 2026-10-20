@@ -1,0 +1,1761 @@
+# Perfil de PROVA do veiculostub: dá valor a toda folha de todo evento. GERADO por
+# driver/m8_esquema.sh; os valores não querem dizer nada. Não é perfil de carro.
+[DSIMediaBase.MBLupdateParentalML]
+parentalML = -38
+validFlag = 183
+[DSIMediaBase.MBLupdatePreferredLanguage]
+preferredLanguage = "t3"
+validFlag = 365
+[DSIMediaBase.MBLupdateMediaList]
+mediaList[0].activeApp = "t5"
+mediaList[0].deviceID = 180000000115
+mediaList[0].flags = -700022
+mediaList[0].mediaCaps.albumBrowser = 1
+mediaList[0].mediaCaps.authentication = 1
+mediaList[0].mediaCaps.browserCoverArt = 1
+mediaList[0].mediaCaps.contentBrowser = 1
+mediaList[0].mediaCaps.dislike = 1
+mediaList[0].mediaCaps.dynamicResourceHandling = 1
+mediaList[0].mediaCaps.favorites = 1
+mediaList[0].mediaCaps.importData = 1
+mediaList[0].mediaCaps.like = 1
+mediaList[0].mediaCaps.playbackModes = 1
+mediaList[0].mediaCaps.playerCoverArt = 1
+mediaList[0].mediaCaps.rawBrowser = 1
+mediaList[0].mediaCaps.remoteApps = 1
+mediaList[0].mediaCaps.searchEntries = 1
+mediaList[0].mediaCaps.videoSupport = 1
+mediaList[0].mediaCaps.addToOnlinePlaylist = 1
+mediaList[0].mediaID = 720000000457
+mediaList[0].mediaType = -926
+mediaList[0].mountPoint = "t26"
+mediaList[0].name = "t27"
+mediaList[0].providerLogo.id = 2549
+mediaList[0].providerLogo.url = "t29"
+mediaList[0].providerLogo.cdnAccess.cdnInternalIpv6 = "t30"
+mediaList[0].providerLogo.cdnAccess.cdnInternalPort = -1148
+mediaList[0].providerLogo.cdnAccess.cdnExternalIpv6 = "t32"
+mediaList[0].providerLogo.cdnAccess.cdnExternalPort = -1222
+mediaList[0].providerLogo.cdnAccess.imageResourcePath = "t34"
+mediaList[0].uniqueMediaID = "aspas \" barra \\ é 35"
+mediaList[0].providerLogoLarge.id = 3277
+mediaList[0].providerLogoLarge.url = "t37"
+mediaList[0].providerLogoLarge.cdnAccess.cdnInternalIpv6 = "t38"
+mediaList[0].providerLogoLarge.cdnAccess.cdnInternalPort = -1444
+mediaList[0].providerLogoLarge.cdnAccess.cdnExternalIpv6 = "t40"
+mediaList[0].providerLogoLarge.cdnAccess.cdnExternalPort = -1518
+mediaList[0].providerLogoLarge.cdnAccess.imageResourcePath = "aspas \" barra \\ é 42"
+mediaList[0].providerDislike.id = -1592
+mediaList[0].providerDislike.url = "t44"
+mediaList[0].providerDislike.cdnAccess.cdnInternalIpv6 = "t45"
+mediaList[0].providerDislike.cdnAccess.cdnInternalPort = 4187
+mediaList[0].providerDislike.cdnAccess.cdnExternalIpv6 = "t47"
+mediaList[0].providerDislike.cdnAccess.cdnExternalPort = 4369
+mediaList[0].providerDislike.cdnAccess.imageResourcePath = "aspas \" barra \\ é 49"
+mediaList[0].providerLike.id = 4551
+mediaList[0].providerLike.url = "t51"
+mediaList[0].providerLike.cdnAccess.cdnInternalIpv6 = "t52"
+mediaList[0].providerLike.cdnAccess.cdnInternalPort = -1962
+mediaList[0].providerLike.cdnAccess.cdnExternalIpv6 = "t54"
+mediaList[0].providerLike.cdnAccess.cdnExternalPort = -2036
+mediaList[0].providerLike.cdnAccess.imageResourcePath = "aspas \" barra \\ é 56"
+mediaList[0].providerLogoApproximated.id = -2110
+mediaList[0].providerLogoApproximated.url = "t58"
+mediaList[0].providerLogoApproximated.cdnAccess.cdnInternalIpv6 = "t59"
+mediaList[0].providerLogoApproximated.cdnAccess.cdnInternalPort = 5461
+mediaList[0].providerLogoApproximated.cdnAccess.cdnExternalIpv6 = "t61"
+mediaList[0].providerLogoApproximated.cdnAccess.cdnExternalPort = 5643
+mediaList[0].providerLogoApproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 63"
+mediaList[0].providerLogoNonapproximated.id = 5825
+mediaList[0].providerLogoNonapproximated.url = "t65"
+mediaList[0].providerLogoNonapproximated.cdnAccess.cdnInternalIpv6 = "t66"
+mediaList[0].providerLogoNonapproximated.cdnAccess.cdnInternalPort = -2480
+mediaList[0].providerLogoNonapproximated.cdnAccess.cdnExternalIpv6 = "t68"
+mediaList[0].providerLogoNonapproximated.cdnAccess.cdnExternalPort = -2554
+mediaList[0].providerLogoNonapproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 70"
+mediaList[0].likeIconApproximated.id = -2628
+mediaList[0].likeIconApproximated.url = "t72"
+mediaList[0].likeIconApproximated.cdnAccess.cdnInternalIpv6 = "t73"
+mediaList[0].likeIconApproximated.cdnAccess.cdnInternalPort = 6735
+mediaList[0].likeIconApproximated.cdnAccess.cdnExternalIpv6 = "t75"
+mediaList[0].likeIconApproximated.cdnAccess.cdnExternalPort = 6917
+mediaList[0].likeIconApproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 77"
+mediaList[0].likeIconNonapproximated.id = 7099
+mediaList[0].likeIconNonapproximated.url = "t79"
+mediaList[0].likeIconNonapproximated.cdnAccess.cdnInternalIpv6 = "t80"
+mediaList[0].likeIconNonapproximated.cdnAccess.cdnInternalPort = -2998
+mediaList[0].likeIconNonapproximated.cdnAccess.cdnExternalIpv6 = "t82"
+mediaList[0].likeIconNonapproximated.cdnAccess.cdnExternalPort = -3072
+mediaList[0].likeIconNonapproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 84"
+mediaList[0].unlikeIconApproximated.id = -3146
+mediaList[0].unlikeIconApproximated.url = "t86"
+mediaList[0].unlikeIconApproximated.cdnAccess.cdnInternalIpv6 = "t87"
+mediaList[0].unlikeIconApproximated.cdnAccess.cdnInternalPort = 8009
+mediaList[0].unlikeIconApproximated.cdnAccess.cdnExternalIpv6 = "t89"
+mediaList[0].unlikeIconApproximated.cdnAccess.cdnExternalPort = 8191
+mediaList[0].unlikeIconApproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 91"
+mediaList[0].unlikeIconNonapproximated.id = 8373
+mediaList[0].unlikeIconNonapproximated.url = "t93"
+mediaList[0].unlikeIconNonapproximated.cdnAccess.cdnInternalIpv6 = "t94"
+mediaList[0].unlikeIconNonapproximated.cdnAccess.cdnInternalPort = -3516
+mediaList[0].unlikeIconNonapproximated.cdnAccess.cdnExternalIpv6 = "t96"
+mediaList[0].unlikeIconNonapproximated.cdnAccess.cdnExternalPort = -3590
+mediaList[0].unlikeIconNonapproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 98"
+mediaList[0].addToOnlinePlaylistApproximated.id = -3664
+mediaList[0].addToOnlinePlaylistApproximated.url = "t100"
+mediaList[0].addToOnlinePlaylistApproximated.cdnAccess.cdnInternalIpv6 = "t101"
+mediaList[0].addToOnlinePlaylistApproximated.cdnAccess.cdnInternalPort = 9283
+mediaList[0].addToOnlinePlaylistApproximated.cdnAccess.cdnExternalIpv6 = "t103"
+mediaList[0].addToOnlinePlaylistApproximated.cdnAccess.cdnExternalPort = 9465
+mediaList[0].addToOnlinePlaylistApproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 105"
+mediaList[0].addToOnlinePlaylistNonapproximated.id = 9647
+mediaList[0].addToOnlinePlaylistNonapproximated.url = "t107"
+mediaList[0].addToOnlinePlaylistNonapproximated.cdnAccess.cdnInternalIpv6 = "t108"
+mediaList[0].addToOnlinePlaylistNonapproximated.cdnAccess.cdnInternalPort = -4034
+mediaList[0].addToOnlinePlaylistNonapproximated.cdnAccess.cdnExternalIpv6 = "t110"
+mediaList[0].addToOnlinePlaylistNonapproximated.cdnAccess.cdnExternalPort = -4108
+mediaList[0].addToOnlinePlaylistNonapproximated.cdnAccess.imageResourcePath = "aspas \" barra \\ é 112"
+mediaList[1].activeApp = "t113"
+mediaList[1].deviceID = 3420000002167
+mediaList[1].flags = -11500346
+mediaList[1].mediaCaps.albumBrowser = 1
+mediaList[1].mediaCaps.authentication = 1
+mediaList[1].mediaCaps.browserCoverArt = 1
+mediaList[1].mediaCaps.contentBrowser = 1
+mediaList[1].mediaCaps.dislike = 1
+mediaList[1].mediaCaps.dynamicResourceHandling = 1
+mediaList[1].mediaCaps.favorites = 1
+mediaList[1].mediaCaps.importData = 1
+mediaList[1].mediaCaps.like = 1
+mediaList[1].mediaCaps.playbackModes = 1
+mediaList[1].mediaCaps.playerCoverArt = 1
+mediaList[1].mediaCaps.rawBrowser = 1
+mediaList[1].mediaCaps.remoteApps = 1
+mediaList[1].mediaCaps.searchEntries = 1
+mediaList[1].mediaCaps.videoSupport = 1
+mediaList[1].mediaCaps.addToOnlinePlaylist = 1
+mediaList[1].mediaID = 3960000002509
+mediaList[1].mediaType = -4922
+mediaList[1].mountPoint = "t134"
+mediaList[1].name = "t135"
+mediaList[1].providerLogo.id = 12377
+mediaList[1].providerLogo.url = "t137"
+mediaList[1].providerLogo.cdnAccess.cdnInternalIpv6 = "t138"
+mediaList[1].providerLogo.cdnAccess.cdnInternalPort = -5144
+mediaList[1].providerLogo.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 140"
+mediaList[1].providerLogo.cdnAccess.cdnExternalPort = -5218
+mediaList[1].providerLogo.cdnAccess.imageResourcePath = "t142"
+mediaList[1].uniqueMediaID = "t143"
+mediaList[1].providerLogoLarge.id = 13105
+mediaList[1].providerLogoLarge.url = "t145"
+mediaList[1].providerLogoLarge.cdnAccess.cdnInternalIpv6 = "t146"
+mediaList[1].providerLogoLarge.cdnAccess.cdnInternalPort = -5440
+mediaList[1].providerLogoLarge.cdnAccess.cdnExternalIpv6 = "t148"
+mediaList[1].providerLogoLarge.cdnAccess.cdnExternalPort = -5514
+mediaList[1].providerLogoLarge.cdnAccess.imageResourcePath = "t150"
+mediaList[1].providerDislike.id = -5588
+mediaList[1].providerDislike.url = "t152"
+mediaList[1].providerDislike.cdnAccess.cdnInternalIpv6 = "t153"
+mediaList[1].providerDislike.cdnAccess.cdnInternalPort = 14015
+mediaList[1].providerDislike.cdnAccess.cdnExternalIpv6 = "t155"
+mediaList[1].providerDislike.cdnAccess.cdnExternalPort = 14197
+mediaList[1].providerDislike.cdnAccess.imageResourcePath = "t157"
+mediaList[1].providerLike.id = 14379
+mediaList[1].providerLike.url = "t159"
+mediaList[1].providerLike.cdnAccess.cdnInternalIpv6 = "t160"
+mediaList[1].providerLike.cdnAccess.cdnInternalPort = -5958
+mediaList[1].providerLike.cdnAccess.cdnExternalIpv6 = "t162"
+mediaList[1].providerLike.cdnAccess.cdnExternalPort = -6032
+mediaList[1].providerLike.cdnAccess.imageResourcePath = "t164"
+mediaList[1].providerLogoApproximated.id = -6106
+mediaList[1].providerLogoApproximated.url = "t166"
+mediaList[1].providerLogoApproximated.cdnAccess.cdnInternalIpv6 = "t167"
+mediaList[1].providerLogoApproximated.cdnAccess.cdnInternalPort = 15289
+mediaList[1].providerLogoApproximated.cdnAccess.cdnExternalIpv6 = "t169"
+mediaList[1].providerLogoApproximated.cdnAccess.cdnExternalPort = 15471
+mediaList[1].providerLogoApproximated.cdnAccess.imageResourcePath = "t171"
+mediaList[1].providerLogoNonapproximated.id = 15653
+mediaList[1].providerLogoNonapproximated.url = "t173"
+mediaList[1].providerLogoNonapproximated.cdnAccess.cdnInternalIpv6 = "t174"
+mediaList[1].providerLogoNonapproximated.cdnAccess.cdnInternalPort = -6476
+mediaList[1].providerLogoNonapproximated.cdnAccess.cdnExternalIpv6 = "t176"
+mediaList[1].providerLogoNonapproximated.cdnAccess.cdnExternalPort = -6550
+mediaList[1].providerLogoNonapproximated.cdnAccess.imageResourcePath = "t178"
+mediaList[1].likeIconApproximated.id = -6624
+mediaList[1].likeIconApproximated.url = "t180"
+mediaList[1].likeIconApproximated.cdnAccess.cdnInternalIpv6 = "t181"
+mediaList[1].likeIconApproximated.cdnAccess.cdnInternalPort = 16563
+mediaList[1].likeIconApproximated.cdnAccess.cdnExternalIpv6 = "t183"
+mediaList[1].likeIconApproximated.cdnAccess.cdnExternalPort = 16745
+mediaList[1].likeIconApproximated.cdnAccess.imageResourcePath = "t185"
+mediaList[1].likeIconNonapproximated.id = 16927
+mediaList[1].likeIconNonapproximated.url = "t187"
+mediaList[1].likeIconNonapproximated.cdnAccess.cdnInternalIpv6 = "t188"
+mediaList[1].likeIconNonapproximated.cdnAccess.cdnInternalPort = -6994
+mediaList[1].likeIconNonapproximated.cdnAccess.cdnExternalIpv6 = "t190"
+mediaList[1].likeIconNonapproximated.cdnAccess.cdnExternalPort = -7068
+mediaList[1].likeIconNonapproximated.cdnAccess.imageResourcePath = "t192"
+mediaList[1].unlikeIconApproximated.id = -7142
+mediaList[1].unlikeIconApproximated.url = "t194"
+mediaList[1].unlikeIconApproximated.cdnAccess.cdnInternalIpv6 = "t195"
+mediaList[1].unlikeIconApproximated.cdnAccess.cdnInternalPort = 17837
+mediaList[1].unlikeIconApproximated.cdnAccess.cdnExternalIpv6 = "t197"
+mediaList[1].unlikeIconApproximated.cdnAccess.cdnExternalPort = 18019
+mediaList[1].unlikeIconApproximated.cdnAccess.imageResourcePath = "t199"
+mediaList[1].unlikeIconNonapproximated.id = 18201
+mediaList[1].unlikeIconNonapproximated.url = "t201"
+mediaList[1].unlikeIconNonapproximated.cdnAccess.cdnInternalIpv6 = "t202"
+mediaList[1].unlikeIconNonapproximated.cdnAccess.cdnInternalPort = -7512
+mediaList[1].unlikeIconNonapproximated.cdnAccess.cdnExternalIpv6 = "t204"
+mediaList[1].unlikeIconNonapproximated.cdnAccess.cdnExternalPort = -7586
+mediaList[1].unlikeIconNonapproximated.cdnAccess.imageResourcePath = "t206"
+mediaList[1].addToOnlinePlaylistApproximated.id = -7660
+mediaList[1].addToOnlinePlaylistApproximated.url = "t208"
+mediaList[1].addToOnlinePlaylistApproximated.cdnAccess.cdnInternalIpv6 = "t209"
+mediaList[1].addToOnlinePlaylistApproximated.cdnAccess.cdnInternalPort = 19111
+mediaList[1].addToOnlinePlaylistApproximated.cdnAccess.cdnExternalIpv6 = "t211"
+mediaList[1].addToOnlinePlaylistApproximated.cdnAccess.cdnExternalPort = 19293
+mediaList[1].addToOnlinePlaylistApproximated.cdnAccess.imageResourcePath = "t213"
+mediaList[1].addToOnlinePlaylistNonapproximated.id = 19475
+mediaList[1].addToOnlinePlaylistNonapproximated.url = "t215"
+mediaList[1].addToOnlinePlaylistNonapproximated.cdnAccess.cdnInternalIpv6 = "t216"
+mediaList[1].addToOnlinePlaylistNonapproximated.cdnAccess.cdnInternalPort = -8030
+mediaList[1].addToOnlinePlaylistNonapproximated.cdnAccess.cdnExternalIpv6 = "t218"
+mediaList[1].addToOnlinePlaylistNonapproximated.cdnAccess.cdnExternalPort = -8104
+mediaList[1].addToOnlinePlaylistNonapproximated.cdnAccess.imageResourcePath = "t220"
+validFlag = -8178
+[DSIMediaBase.MBLupdateDeviceList]
+deviceList[0].deviceID = 6660000004219
+deviceList[0].deviceType = -8252
+deviceList[0].flags = 20385
+deviceList[0].numSlots = -8326
+deviceList[1].deviceID = 6780000004295
+deviceList[1].deviceType = -8400
+deviceList[1].flags = 20749
+deviceList[1].numSlots = -8474
+validFlag = 20931
+[DSIMediaBase.MBLupdateCustomerUpdate]
+update = -8548
+validFlag = 21113
+[DSIMediaBase.MBLupdateApplicationVersion]
+versionInfo = "t233"
+validFlag = 21295
+[DSIMediaBase.MBLupdateMetadataDBVersion]
+versionInfo = "t235"
+validFlag = 21477
+[DSIMediaBase.MBLupdateProfileState]
+state = -8770
+profile = 21659
+validFlag = -8844
+[DSIMediaBase.MBLupdateSearchMedia]
+deviceID = 21841
+mediaID = -24100724
+validFlag = 22023
+[DSIMediaBase.MBLupdateOnlineState]
+onlinestate = -8992
+validflag = 22205
+[DSIMediaBase.MBLupdateReplayGain]
+replayGain = -9066
+validflag = 22387
+[DSIMediaBase.MBLresponseResetFactorySettings]
+resetMode = -9140
+success = 1
+[DSIMediaBase.MBLlaunchAppResult]
+deviceID = -24900748
+mediaID = 7500000004751
+appName = "t251"
+success = 1
+[DSIMediaBase.MBLprofileChanged]
+profile = -9362
+result = 23115
+[DSIMediaBase.MBLprofileCopied]
+fromProfile = -9436
+toProfile = 23297
+result = -9510
+[DSIMediaBase.MBLprofileResetR]
+profile = 23479
+result = -9584
+[DSIMediaBase.MBLprofileResetAllR]
+result = 23661
+[DSIMediaBase.MBLresponseAuthenticate]
+deviceId = -26100784
+mediaId = 7860000004979
+result = -9732
+[DSIMediaBase.MBLresponseRemoveAuthentication]
+deviceId = 7920000005017
+mediaId = -26500796
+result = 24207
+[DSIMediaBase.MBLresponseActivationCode]
+deviceId = -26700802
+mediaId = 8040000005093
+activationCode = "t269"
+activationUR = "t270"
+[DSIMediaBrowser.MBRLupdateBrowseMode]
+browseMode = -10028
+validFlag = 24753
+[DSIMediaBrowser.MBRLupdateContentFilter]
+contentFilterMask = -10102
+validFlag = 24935
+[DSIMediaBrowser.MBRLupdateBrowseMedia]
+deviceID = -27500826
+mediaID = 8280000005245
+validFlag = -10250
+[DSIMediaBrowser.MBRLupdateBrowseFolder]
+activeBrowsingFolder[0].entryID = 8340000005283
+activeBrowsingFolder[0].filename = "t279"
+activeBrowsingFolder[0].title = "aspas \" barra \\ é 280"
+activeBrowsingFolder[0].contentType = -10398
+activeBrowsingFolder[0].secLength = 25663
+activeBrowsingFolder[0].flags = -10472
+activeBrowsingFolder[0].extInfo.album = "t284"
+activeBrowsingFolder[0].extInfo.albumID = -28500856
+activeBrowsingFolder[0].extInfo.artist = "t286"
+activeBrowsingFolder[0].extInfo.artistID = -28700862
+activeBrowsingFolder[0].extInfo.coverArtResource.id = 26209
+activeBrowsingFolder[0].extInfo.coverArtResource.url = "t289"
+activeBrowsingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t290"
+activeBrowsingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -10768
+activeBrowsingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t292"
+activeBrowsingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -10842
+activeBrowsingFolder[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "aspas \" barra \\ é 294"
+activeBrowsingFolder[0].extInfo.titleID = -29500886
+activeBrowsingFolder[0].extInfo.fileCount = 26937
+activeBrowsingFolder[0].extInfo.folderCount = -10990
+activeBrowsingFolder[0].extInfo.playlistCount = 27119
+activeBrowsingFolder[0].extInfo.storageLocationType = -11064
+activeBrowsingFolder[0].extInfo.storageLocationIndex = 27301
+activeBrowsingFolder[0].extInfo.singleAccessibleSourceInUse = 1
+activeBrowsingFolder[1].entryID = 9060000005739
+activeBrowsingFolder[1].filename = "t303"
+activeBrowsingFolder[1].title = "t304"
+activeBrowsingFolder[1].contentType = -11286
+activeBrowsingFolder[1].secLength = 27847
+activeBrowsingFolder[1].flags = -11360
+activeBrowsingFolder[1].extInfo.album = "aspas \" barra \\ é 308"
+activeBrowsingFolder[1].extInfo.albumID = -30900928
+activeBrowsingFolder[1].extInfo.artist = "t310"
+activeBrowsingFolder[1].extInfo.artistID = -31100934
+activeBrowsingFolder[1].extInfo.coverArtResource.id = 28393
+activeBrowsingFolder[1].extInfo.coverArtResource.url = "t313"
+activeBrowsingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t314"
+activeBrowsingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -11656
+activeBrowsingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t316"
+activeBrowsingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -11730
+activeBrowsingFolder[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t318"
+activeBrowsingFolder[1].extInfo.titleID = -31900958
+activeBrowsingFolder[1].extInfo.fileCount = 29121
+activeBrowsingFolder[1].extInfo.folderCount = -11878
+activeBrowsingFolder[1].extInfo.playlistCount = 29303
+activeBrowsingFolder[1].extInfo.storageLocationType = -11952
+activeBrowsingFolder[1].extInfo.storageLocationIndex = 29485
+activeBrowsingFolder[1].extInfo.singleAccessibleSourceInUse = 1
+validFlag = 29667
+[DSIMediaBrowser.MBRLupdateListSize]
+listSizeCount = -12100
+listSizeFlags = 29849
+validFlag = -12174
+[DSIMediaBrowser.MBRLupdateSearchSpellerState]
+searchSpellerState = 30031
+validFlag = -12248
+[DSIMediaBrowser.MBRLupdateSearchSize]
+searchCountTotal = 30213
+searchCountArtist = -12322
+searchCountAlbum = 30395
+searchCountTitle = -12396
+validFlag = 30577
+[DSIMediaBrowser.MBRLupdateAlphabeticalIndex]
+characterInfos[0].value = -12470
+characterInfos[0].index = 30759
+characterInfos[0].characters = "t339"
+characterInfos[1].value = 30941
+characterInfos[1].index = -12618
+characterInfos[1].characters = "t342"
+validFlag = -12692
+[DSIMediaBrowser.MBRLupdateSearchSourceState]
+searchState = 31305
+validFlag = -12766
+[DSIMediaBrowser.MBRLupdateGlobalPlaylistSizeExceeded]
+sizeExceeded = 1
+validFlag = -12840
+[DSIMediaBrowser.MBRLupdateGlobalPlaylistEmpty]
+globalplaylistEmpty = 1
+validFlag = -12914
+[DSIMediaBrowser.MBRLupdateLastPlayedPlaylistEmpty]
+lastplayedplaylistEmpty = 1
+validFlag = -12988
+[DSIMediaBrowser.MBRLresponseList]
+entrylist[0].entryID = 10560000006689
+entrylist[0].filename = "t353"
+entrylist[0].title = "t354"
+entrylist[0].contentType = -13136
+entrylist[0].secLength = 32397
+entrylist[0].flags = -13210
+entrylist[0].extInfo.album = "t358"
+entrylist[0].extInfo.albumID = -35901078
+entrylist[0].extInfo.artist = "t360"
+entrylist[0].extInfo.artistID = -36101084
+entrylist[0].extInfo.coverArtResource.id = 32943
+entrylist[0].extInfo.coverArtResource.url = "t363"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 364"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -13506
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t366"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -13580
+entrylist[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t368"
+entrylist[0].extInfo.titleID = -36901108
+entrylist[0].extInfo.fileCount = 33671
+entrylist[0].extInfo.folderCount = -13728
+entrylist[0].extInfo.playlistCount = 33853
+entrylist[0].extInfo.storageLocationType = -13802
+entrylist[0].extInfo.storageLocationIndex = 34035
+entrylist[0].extInfo.singleAccessibleSourceInUse = 1
+entrylist[1].entryID = 11280000007145
+entrylist[1].filename = "t377"
+entrylist[1].title = "aspas \" barra \\ é 378"
+entrylist[1].contentType = -14024
+entrylist[1].secLength = 34581
+entrylist[1].flags = -14098
+entrylist[1].extInfo.album = "t382"
+entrylist[1].extInfo.albumID = -38301150
+entrylist[1].extInfo.artist = "t384"
+entrylist[1].extInfo.artistID = -38501156
+entrylist[1].extInfo.coverArtResource.id = 35127
+entrylist[1].extInfo.coverArtResource.url = "t387"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t388"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -14394
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t390"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -14468
+entrylist[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "aspas \" barra \\ é 392"
+entrylist[1].extInfo.titleID = -39301180
+entrylist[1].extInfo.fileCount = 35855
+entrylist[1].extInfo.folderCount = -14616
+entrylist[1].extInfo.playlistCount = 36037
+entrylist[1].extInfo.storageLocationType = -14690
+entrylist[1].extInfo.storageLocationIndex = 36219
+entrylist[1].extInfo.singleAccessibleSourceInUse = 1
+index = 36401
+[DSIMediaBrowser.MBRLselectionResult]
+result = -14838
+selectionState = 36583
+filesExist = 1
+sizeAvail = 12120000007677
+sizeSelected = -40501216
+entriesAvail = 12180000007715
+entriesSelected = -40701222
+playlistsSelected = 12240000007753
+[DSIMediaBrowser.MBRLresponsePickList]
+entrylist[0].entryID = -40901228
+entrylist[0].filename = "t410"
+entrylist[0].title = "t411"
+entrylist[0].contentType = 37493
+entrylist[0].secLength = -15282
+entrylist[0].flags = 37675
+entrylist[0].extInfo.album = "t415"
+entrylist[0].extInfo.albumID = 12480000007905
+entrylist[0].extInfo.artist = "t417"
+entrylist[0].extInfo.artistID = 12540000007943
+entrylist[0].extInfo.coverArtResource.id = -15504
+entrylist[0].extInfo.coverArtResource.url = "aspas \" barra \\ é 420"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t421"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = 38403
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t423"
+entrylist[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = 38585
+entrylist[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t425"
+entrylist[0].extInfo.titleID = 12780000008095
+entrylist[0].extInfo.fileCount = -15800
+entrylist[0].extInfo.folderCount = 38949
+entrylist[0].extInfo.playlistCount = -15874
+entrylist[0].extInfo.storageLocationType = 39131
+entrylist[0].extInfo.storageLocationIndex = -15948
+entrylist[0].extInfo.singleAccessibleSourceInUse = 1
+entrylist[1].entryID = -43301300
+entrylist[1].filename = "aspas \" barra \\ é 434"
+entrylist[1].title = "t435"
+entrylist[1].contentType = 39677
+entrylist[1].secLength = -16170
+entrylist[1].flags = 39859
+entrylist[1].extInfo.album = "t439"
+entrylist[1].extInfo.albumID = 13200000008361
+entrylist[1].extInfo.artist = "aspas \" barra \\ é 441"
+entrylist[1].extInfo.artistID = 13260000008399
+entrylist[1].extInfo.coverArtResource.id = -16392
+entrylist[1].extInfo.coverArtResource.url = "t444"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t445"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = 40587
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t447"
+entrylist[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = 40769
+entrylist[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t449"
+entrylist[1].extInfo.titleID = 13500000008551
+entrylist[1].extInfo.fileCount = -16688
+entrylist[1].extInfo.folderCount = 41133
+entrylist[1].extInfo.playlistCount = -16762
+entrylist[1].extInfo.storageLocationType = 41315
+entrylist[1].extInfo.storageLocationIndex = -16836
+entrylist[1].extInfo.singleAccessibleSourceInUse = 1
+[DSIMediaBrowser.MBRLresponseSearchList]
+searchlist[0].description = "t457"
+searchlist[0].entryID = 13740000008703
+searchlist[0].flags = -16984
+searchlist[0].searchID = 13800000008741
+searchlist[0].tagType = -17058
+searchlist[1].description = "aspas \" barra \\ é 462"
+searchlist[1].entryID = -46301390
+searchlist[1].flags = 42225
+searchlist[1].searchID = -46501396
+searchlist[1].tagType = 42407
+index = -17280
+[DSIMediaBrowser.MBRLresponseSetSearchString]
+searchString = "t468"
+result = 1
+[DSIMediaBrowser.MBRLresponseSelectSearchResult]
+searchID = 14100000008931
+entryID = -47101414
+result = 1
+[DSIMediaBrowser.MBRLresponseSetSearchCriteria]
+searchCriteriaMask = -17502
+result = 1
+[DSIMediaBrowser.MBRLresponseSearchListExt]
+searchlist[0].album = "t475"
+searchlist[0].albumID = 14280000009045
+searchlist[0].artist = "t477"
+searchlist[0].artistID = 14340000009083
+searchlist[0].coverArtResource.id = -17724
+searchlist[0].coverArtResource.url = "t480"
+searchlist[0].coverArtResource.cdnAccess.cdnInternalIpv6 = "t481"
+searchlist[0].coverArtResource.cdnAccess.cdnInternalPort = 43863
+searchlist[0].coverArtResource.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 483"
+searchlist[0].coverArtResource.cdnAccess.cdnExternalPort = 44045
+searchlist[0].coverArtResource.cdnAccess.imageResourcePath = "t485"
+searchlist[0].description = "t486"
+searchlist[0].entryID = -48701462
+searchlist[0].flags = 44409
+searchlist[0].searchID = -48901468
+searchlist[0].tagType = 44591
+searchlist[1].album = "t491"
+searchlist[1].albumID = 14760000009349
+searchlist[1].artist = "t493"
+searchlist[1].artistID = 14820000009387
+searchlist[1].coverArtResource.id = -18316
+searchlist[1].coverArtResource.url = "t496"
+searchlist[1].coverArtResource.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 497"
+searchlist[1].coverArtResource.cdnAccess.cdnInternalPort = 45319
+searchlist[1].coverArtResource.cdnAccess.cdnExternalIpv6 = "t499"
+searchlist[1].coverArtResource.cdnAccess.cdnExternalPort = 45501
+searchlist[1].coverArtResource.cdnAccess.imageResourcePath = "t501"
+searchlist[1].description = "t502"
+searchlist[1].entryID = -50301510
+searchlist[1].flags = 45865
+searchlist[1].searchID = -50501516
+searchlist[1].tagType = 46047
+index = -18760
+[DSIMediaBrowser.MBRLresponseFullyQualifiedName]
+titleID = 15240000009653
+path = "t509"
+[DSIMediaBrowser.MBRLresponseOTG]
+count = 46411
+requestType = -18908
+[DSIMediaBrowser.MBRLresponseBrowsePath]
+path[0].entryID = 15360000009729
+path[0].filename = "t513"
+path[0].title = "t514"
+path[0].contentType = -19056
+path[0].secLength = 46957
+path[0].flags = -19130
+path[0].extInfo.album = "aspas \" barra \\ é 518"
+path[0].extInfo.albumID = -51901558
+path[0].extInfo.artist = "t520"
+path[0].extInfo.artistID = -52101564
+path[0].extInfo.coverArtResource.id = 47503
+path[0].extInfo.coverArtResource.url = "t523"
+path[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t524"
+path[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -19426
+path[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t526"
+path[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -19500
+path[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t528"
+path[0].extInfo.titleID = -52901588
+path[0].extInfo.fileCount = 48231
+path[0].extInfo.folderCount = -19648
+path[0].extInfo.playlistCount = 48413
+path[0].extInfo.storageLocationType = -19722
+path[0].extInfo.storageLocationIndex = 48595
+path[0].extInfo.singleAccessibleSourceInUse = 1
+path[1].entryID = 16080000010185
+path[1].filename = "t537"
+path[1].title = "t538"
+path[1].contentType = -19944
+path[1].secLength = 49141
+path[1].flags = -20018
+path[1].extInfo.album = "t542"
+path[1].extInfo.albumID = -54301630
+path[1].extInfo.artist = "t544"
+path[1].extInfo.artistID = -54501636
+path[1].extInfo.coverArtResource.id = 49687
+path[1].extInfo.coverArtResource.url = "t547"
+path[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t548"
+path[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -20314
+path[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t550"
+path[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -20388
+path[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t552"
+path[1].extInfo.titleID = -55301660
+path[1].extInfo.fileCount = 50415
+path[1].extInfo.folderCount = -20536
+path[1].extInfo.playlistCount = 50597
+path[1].extInfo.storageLocationType = -20610
+path[1].extInfo.storageLocationIndex = 50779
+path[1].extInfo.singleAccessibleSourceInUse = 1
+[DSIMediaBrowser.MBRLresponseAddToGlobalPlaylist]
+result = 50961
+[DSIMediaOnline.MOLupdateBufferState]
+state = -20758
+validFlag = 51143
+[DSIMediaOnline.MOLupdateBufferFillInfo]
+downloaded = -20832
+total = 51325
+validFlag = -20906
+[DSIMediaOnline.MOLupdateAudioSettings]
+audioType = 51507
+value = -20980
+validFlag = 51689
+[DSIMediaOnline.MOLupdateActiveCodec]
+codec = -21054
+bitrateKbps = 51871
+validFlag = -21128
+[DSIMediaOnline.MOLinternalError]
+error = 52053
+httpcode = -21202
+[DSIMediaPlayer.MPLupdateVideoFormat]
+videoFormat = 52235
+validFlag = -21276
+[DSIMediaPlayer.MPLupdateVideoNorm]
+videoNorm = 52417
+validFlag = -21350
+[DSIMediaPlayer.MPLupdateCmdBlockingMask]
+cmdBlockingMask = 52599
+validFlag = -21424
+[DSIMediaPlayer.MPLupdateNumVideoAngles]
+numVideoAngles = 52781
+validFlag = -21498
+[DSIMediaPlayer.MPLupdatePlaybackModeList]
+playbackModeList[0].modeFlag = 52963
+playbackModeList[0].modeID = -21572
+playbackModeList[0].scope = 53145
+playbackModeList[1].modeFlag = -21646
+playbackModeList[1].modeID = 53327
+playbackModeList[1].scope = -21720
+validFlag = 53509
+[DSIMediaPlayer.MPLupdatePlaybackMode]
+playbackMode = -21794
+validFlag = 53691
+[DSIMediaPlayer.MPLupdatePlaybackState:7]
+playbackState = -21868
+validFlag = 53873
+[DSIMediaPlayer.MPLupdateActiveMedia]
+deviceID = -59301780
+mediaID = 17820000011287
+groupID = -22016
+physicalPlayerID = 54237
+validFlag = -22090
+[DSIMediaPlayer.MPLupdatePlaybackFolder]
+activePlayingFolder[0].entryID = 17940000011363
+activePlayingFolder[0].filename = "t599"
+activePlayingFolder[0].title = "t600"
+activePlayingFolder[0].contentType = -22238
+activePlayingFolder[0].secLength = 54783
+activePlayingFolder[0].flags = -22312
+activePlayingFolder[0].extInfo.album = "t604"
+activePlayingFolder[0].extInfo.albumID = -60501816
+activePlayingFolder[0].extInfo.artist = "t606"
+activePlayingFolder[0].extInfo.artistID = -60701822
+activePlayingFolder[0].extInfo.coverArtResource.id = 55329
+activePlayingFolder[0].extInfo.coverArtResource.url = "aspas \" barra \\ é 609"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t610"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -22608
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t612"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -22682
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t614"
+activePlayingFolder[0].extInfo.titleID = -61501846
+activePlayingFolder[0].extInfo.fileCount = 56057
+activePlayingFolder[0].extInfo.folderCount = -22830
+activePlayingFolder[0].extInfo.playlistCount = 56239
+activePlayingFolder[0].extInfo.storageLocationType = -22904
+activePlayingFolder[0].extInfo.storageLocationIndex = 56421
+activePlayingFolder[0].extInfo.singleAccessibleSourceInUse = 1
+activePlayingFolder[1].entryID = 18660000011819
+activePlayingFolder[1].filename = "aspas \" barra \\ é 623"
+activePlayingFolder[1].title = "t624"
+activePlayingFolder[1].contentType = -23126
+activePlayingFolder[1].secLength = 56967
+activePlayingFolder[1].flags = -23200
+activePlayingFolder[1].extInfo.album = "t628"
+activePlayingFolder[1].extInfo.albumID = -62901888
+activePlayingFolder[1].extInfo.artist = "aspas \" barra \\ é 630"
+activePlayingFolder[1].extInfo.artistID = -63101894
+activePlayingFolder[1].extInfo.coverArtResource.id = 57513
+activePlayingFolder[1].extInfo.coverArtResource.url = "t633"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t634"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -23496
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t636"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -23570
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t638"
+activePlayingFolder[1].extInfo.titleID = -63901918
+activePlayingFolder[1].extInfo.fileCount = 58241
+activePlayingFolder[1].extInfo.folderCount = -23718
+activePlayingFolder[1].extInfo.playlistCount = 58423
+activePlayingFolder[1].extInfo.storageLocationType = -23792
+activePlayingFolder[1].extInfo.storageLocationIndex = 58605
+activePlayingFolder[1].extInfo.singleAccessibleSourceInUse = 1
+validFlag = 58787
+[DSIMediaPlayer.MPLupdateCapabilities]
+capabilities.browseWhilePlay = 1
+capabilities.detailInfos = 1
+capabilities.extendedPlayView = 1
+capabilities.fastBwd = 1
+capabilities.fastFwd = 1
+capabilities.pause = 1
+capabilities.play = 1
+capabilities.playbackModes = 1
+capabilities.playbackModeTakeOver = 1
+capabilities.playbackModeToggle = 1
+capabilities.playSimilarEntries = 1
+capabilities.playTime = 1
+capabilities.playView = 1
+capabilities.resume = 1
+capabilities.setEntry = 1
+capabilities.setTimePos = 1
+capabilities.skipBwd = 1
+capabilities.skipFwd = 1
+capabilities.sloMoBwd = 1
+capabilities.sloMoFwd = 1
+capabilities.stillBwd = 1
+capabilities.stillFwd = 1
+capabilities.stop = 1
+capabilities.supportedCustomCommandMask = 60971
+capabilities.totalPlaytime = 1
+validFlag = 61153
+[DSIMediaPlayer.MPLupdatePlayPosition]
+entryID = -67302020
+timePosition = 61335
+totalPlayTime = -24976
+validFlag = 61517
+[DSIMediaPlayer.MPLupdatePlayViewSize]
+pvCount = -25050
+pvFlags = 61699
+validFlag = -25124
+[DSIMediaPlayer.MPLupdateActiveVideoAngle]
+activeVideoAngle = 61881
+validFlag = -25198
+[DSIMediaPlayer.MPLupdateAudioStreamList]
+audioStreamList[0].audioCoding = 62063
+audioStreamList[0].audioLanguageExtension = -25272
+audioStreamList[0].languageCode = 62245
+audioStreamList[0].numChannels = -25346
+audioStreamList[0].samplingRate = 62427
+audioStreamList[1].audioCoding = -25420
+audioStreamList[1].audioLanguageExtension = 62609
+audioStreamList[1].languageCode = -25494
+audioStreamList[1].numChannels = 62791
+audioStreamList[1].samplingRate = -25568
+validFlag = 62973
+[DSIMediaPlayer.MPLupdateActiveAudioStream]
+activeAudioStream = -25642
+validFlag = 63155
+[DSIMediaPlayer.MPLupdateSubtitleList]
+subtitleList[0] = -25716
+subtitleList[1] = 63337
+validFlag = -25790
+[DSIMediaPlayer.MPLupdateActiveSubtitle]
+activeSubtitle = 63519
+validFlag = -25864
+[DSIMediaPlayer.MPLupdatePlaybackContentFolder]
+activePlayingFolder[0].entryID = 21000000013301
+activePlayingFolder[0].filename = "t701"
+activePlayingFolder[0].title = "t702"
+activePlayingFolder[0].contentType = -26012
+activePlayingFolder[0].secLength = 64065
+activePlayingFolder[0].flags = -26086
+activePlayingFolder[0].extInfo.album = "t706"
+activePlayingFolder[0].extInfo.albumID = -70702122
+activePlayingFolder[0].extInfo.artist = "t708"
+activePlayingFolder[0].extInfo.artistID = -70902128
+activePlayingFolder[0].extInfo.coverArtResource.id = 64611
+activePlayingFolder[0].extInfo.coverArtResource.url = "t711"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t712"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -26382
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 714"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -26456
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t716"
+activePlayingFolder[0].extInfo.titleID = -71702152
+activePlayingFolder[0].extInfo.fileCount = 65339
+activePlayingFolder[0].extInfo.folderCount = -26604
+activePlayingFolder[0].extInfo.playlistCount = 65521
+activePlayingFolder[0].extInfo.storageLocationType = -26678
+activePlayingFolder[0].extInfo.storageLocationIndex = 65703
+activePlayingFolder[0].extInfo.singleAccessibleSourceInUse = 1
+activePlayingFolder[1].entryID = 21720000013757
+activePlayingFolder[1].filename = "t725"
+activePlayingFolder[1].title = "t726"
+activePlayingFolder[1].contentType = -26900
+activePlayingFolder[1].secLength = 66249
+activePlayingFolder[1].flags = -26974
+activePlayingFolder[1].extInfo.album = "t730"
+activePlayingFolder[1].extInfo.albumID = -73102194
+activePlayingFolder[1].extInfo.artist = "t732"
+activePlayingFolder[1].extInfo.artistID = -73302200
+activePlayingFolder[1].extInfo.coverArtResource.id = 66795
+activePlayingFolder[1].extInfo.coverArtResource.url = "aspas \" barra \\ é 735"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t736"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -27270
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t738"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -27344
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t740"
+activePlayingFolder[1].extInfo.titleID = -74102224
+activePlayingFolder[1].extInfo.fileCount = 67523
+activePlayingFolder[1].extInfo.folderCount = -27492
+activePlayingFolder[1].extInfo.playlistCount = 67705
+activePlayingFolder[1].extInfo.storageLocationType = -27566
+activePlayingFolder[1].extInfo.storageLocationIndex = 67887
+activePlayingFolder[1].extInfo.singleAccessibleSourceInUse = 1
+validFlag = 68069
+[DSIMediaPlayer.MPLupdateDynamicFeaturesInfo]
+featureInfoArray[0].feature = -27714
+featureInfoArray[0].status = 68251
+featureInfoArray[1].feature = -27788
+featureInfoArray[1].status = 68433
+validFlag = -27862
+[DSIMediaPlayer.MPLupdateVideoResolutionInfo]
+resolutionInfo.height = 68615
+resolutionInfo.width = -27936
+validFlag = 68797
+[DSIMediaPlayer.MPLupdateFavoriteList]
+favoriteList[0].path[0].entryID = -75702272
+favoriteList[0].path[0].filename = "t758"
+favoriteList[0].path[0].title = "t759"
+favoriteList[0].path[0].contentType = 69161
+favoriteList[0].path[0].secLength = -28158
+favoriteList[0].path[0].flags = 69343
+favoriteList[0].path[0].extInfo.album = "aspas \" barra \\ é 763"
+favoriteList[0].path[0].extInfo.albumID = 22920000014517
+favoriteList[0].path[0].extInfo.artist = "t765"
+favoriteList[0].path[0].extInfo.artistID = 22980000014555
+favoriteList[0].path[0].extInfo.coverArtResource.id = -28380
+favoriteList[0].path[0].extInfo.coverArtResource.url = "t768"
+favoriteList[0].path[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t769"
+favoriteList[0].path[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = 70071
+favoriteList[0].path[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t771"
+favoriteList[0].path[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = 70253
+favoriteList[0].path[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t773"
+favoriteList[0].path[0].extInfo.titleID = 23220000014707
+favoriteList[0].path[0].extInfo.fileCount = -28676
+favoriteList[0].path[0].extInfo.folderCount = 70617
+favoriteList[0].path[0].extInfo.playlistCount = -28750
+favoriteList[0].path[0].extInfo.storageLocationType = 70799
+favoriteList[0].path[0].extInfo.storageLocationIndex = -28824
+favoriteList[0].path[0].extInfo.singleAccessibleSourceInUse = 1
+favoriteList[0].path[1].entryID = -78102344
+favoriteList[0].path[1].filename = "t782"
+favoriteList[0].path[1].title = "t783"
+favoriteList[0].path[1].contentType = 71345
+favoriteList[0].path[1].secLength = -29046
+favoriteList[0].path[1].flags = 71527
+favoriteList[0].path[1].extInfo.album = "t787"
+favoriteList[0].path[1].extInfo.albumID = 23640000014973
+favoriteList[0].path[1].extInfo.artist = "t789"
+favoriteList[0].path[1].extInfo.artistID = 23700000015011
+favoriteList[0].path[1].extInfo.coverArtResource.id = -29268
+favoriteList[0].path[1].extInfo.coverArtResource.url = "t792"
+favoriteList[0].path[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t793"
+favoriteList[0].path[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = 72255
+favoriteList[0].path[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t795"
+favoriteList[0].path[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = 72437
+favoriteList[0].path[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t797"
+favoriteList[0].path[1].extInfo.titleID = 23940000015163
+favoriteList[0].path[1].extInfo.fileCount = -29564
+favoriteList[0].path[1].extInfo.folderCount = 72801
+favoriteList[0].path[1].extInfo.playlistCount = -29638
+favoriteList[0].path[1].extInfo.storageLocationType = 72983
+favoriteList[0].path[1].extInfo.storageLocationIndex = -29712
+favoriteList[0].path[1].extInfo.singleAccessibleSourceInUse = 1
+favoriteList[0].index = -29786
+favoriteList[1].path[0].entryID = 24180000015315
+favoriteList[1].path[0].filename = "t807"
+favoriteList[1].path[0].title = "t808"
+favoriteList[1].path[0].contentType = -29934
+favoriteList[1].path[0].secLength = 73711
+favoriteList[1].path[0].flags = -30008
+favoriteList[1].path[0].extInfo.album = "aspas \" barra \\ é 812"
+favoriteList[1].path[0].extInfo.albumID = -81302440
+favoriteList[1].path[0].extInfo.artist = "t814"
+favoriteList[1].path[0].extInfo.artistID = -81502446
+favoriteList[1].path[0].extInfo.coverArtResource.id = 74257
+favoriteList[1].path[0].extInfo.coverArtResource.url = "t817"
+favoriteList[1].path[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t818"
+favoriteList[1].path[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -30304
+favoriteList[1].path[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t820"
+favoriteList[1].path[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -30378
+favoriteList[1].path[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t822"
+favoriteList[1].path[0].extInfo.titleID = -82302470
+favoriteList[1].path[0].extInfo.fileCount = 74985
+favoriteList[1].path[0].extInfo.folderCount = -30526
+favoriteList[1].path[0].extInfo.playlistCount = 75167
+favoriteList[1].path[0].extInfo.storageLocationType = -30600
+favoriteList[1].path[0].extInfo.storageLocationIndex = 75349
+favoriteList[1].path[0].extInfo.singleAccessibleSourceInUse = 1
+favoriteList[1].path[1].entryID = 24900000015771
+favoriteList[1].path[1].filename = "t831"
+favoriteList[1].path[1].title = "t832"
+favoriteList[1].path[1].contentType = -30822
+favoriteList[1].path[1].secLength = 75895
+favoriteList[1].path[1].flags = -30896
+favoriteList[1].path[1].extInfo.album = "t836"
+favoriteList[1].path[1].extInfo.albumID = -83702512
+favoriteList[1].path[1].extInfo.artist = "t838"
+favoriteList[1].path[1].extInfo.artistID = -83902518
+favoriteList[1].path[1].extInfo.coverArtResource.id = 76441
+favoriteList[1].path[1].extInfo.coverArtResource.url = "t841"
+favoriteList[1].path[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t842"
+favoriteList[1].path[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -31192
+favoriteList[1].path[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t844"
+favoriteList[1].path[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -31266
+favoriteList[1].path[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t846"
+favoriteList[1].path[1].extInfo.titleID = -84702542
+favoriteList[1].path[1].extInfo.fileCount = 77169
+favoriteList[1].path[1].extInfo.folderCount = -31414
+favoriteList[1].path[1].extInfo.playlistCount = 77351
+favoriteList[1].path[1].extInfo.storageLocationType = -31488
+favoriteList[1].path[1].extInfo.storageLocationIndex = 77533
+favoriteList[1].path[1].extInfo.singleAccessibleSourceInUse = 1
+favoriteList[1].index = 77715
+validFlag = -31636
+[DSIMediaPlayer.MPLupdatePlaySelectionBasePath]
+baseDirectory[0].entryID = 25680000016265
+baseDirectory[0].filename = "t857"
+baseDirectory[0].title = "t858"
+baseDirectory[0].contentType = -31784
+baseDirectory[0].secLength = 78261
+baseDirectory[0].flags = -31858
+baseDirectory[0].extInfo.album = "t862"
+baseDirectory[0].extInfo.albumID = -86302590
+baseDirectory[0].extInfo.artist = "t864"
+baseDirectory[0].extInfo.artistID = -86502596
+baseDirectory[0].extInfo.coverArtResource.id = 78807
+baseDirectory[0].extInfo.coverArtResource.url = "t867"
+baseDirectory[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 868"
+baseDirectory[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -32154
+baseDirectory[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t870"
+baseDirectory[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -32228
+baseDirectory[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t872"
+baseDirectory[0].extInfo.titleID = -87302620
+baseDirectory[0].extInfo.fileCount = 79535
+baseDirectory[0].extInfo.folderCount = -32376
+baseDirectory[0].extInfo.playlistCount = 79717
+baseDirectory[0].extInfo.storageLocationType = -32450
+baseDirectory[0].extInfo.storageLocationIndex = 79899
+baseDirectory[0].extInfo.singleAccessibleSourceInUse = 1
+baseDirectory[1].entryID = 26400000016721
+baseDirectory[1].filename = "t881"
+baseDirectory[1].title = "aspas \" barra \\ é 882"
+baseDirectory[1].contentType = -32672
+baseDirectory[1].secLength = 80445
+baseDirectory[1].flags = -32746
+baseDirectory[1].extInfo.album = "t886"
+baseDirectory[1].extInfo.albumID = -88702662
+baseDirectory[1].extInfo.artist = "t888"
+baseDirectory[1].extInfo.artistID = -88902668
+baseDirectory[1].extInfo.coverArtResource.id = 80991
+baseDirectory[1].extInfo.coverArtResource.url = "t891"
+baseDirectory[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t892"
+baseDirectory[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -33042
+baseDirectory[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t894"
+baseDirectory[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -33116
+baseDirectory[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "aspas \" barra \\ é 896"
+baseDirectory[1].extInfo.titleID = -89702692
+baseDirectory[1].extInfo.fileCount = 81719
+baseDirectory[1].extInfo.folderCount = -33264
+baseDirectory[1].extInfo.playlistCount = 81901
+baseDirectory[1].extInfo.storageLocationType = -33338
+baseDirectory[1].extInfo.storageLocationIndex = 82083
+baseDirectory[1].extInfo.singleAccessibleSourceInUse = 1
+recursive = 1
+validFlag = -33486
+[DSIMediaPlayer.MPLresponseRating]
+entryID = 27180000017215
+rating = -33560
+[DSIMediaPlayer.MPLresponsePlayView]
+activePlayingFolder[0].entryID = 27240000017253
+activePlayingFolder[0].filename = "t909"
+activePlayingFolder[0].title = "aspas \" barra \\ é 910"
+activePlayingFolder[0].contentType = -33708
+activePlayingFolder[0].secLength = 82993
+activePlayingFolder[0].flags = -33782
+activePlayingFolder[0].extInfo.album = "t914"
+activePlayingFolder[0].extInfo.albumID = -91502746
+activePlayingFolder[0].extInfo.artist = "t916"
+activePlayingFolder[0].extInfo.artistID = -91702752
+activePlayingFolder[0].extInfo.coverArtResource.id = 83539
+activePlayingFolder[0].extInfo.coverArtResource.url = "t919"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t920"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -34078
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t922"
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -34152
+activePlayingFolder[0].extInfo.coverArtResource.cdnAccess.imageResourcePath = "aspas \" barra \\ é 924"
+activePlayingFolder[0].extInfo.titleID = -92502776
+activePlayingFolder[0].extInfo.fileCount = 84267
+activePlayingFolder[0].extInfo.folderCount = -34300
+activePlayingFolder[0].extInfo.playlistCount = 84449
+activePlayingFolder[0].extInfo.storageLocationType = -34374
+activePlayingFolder[0].extInfo.storageLocationIndex = 84631
+activePlayingFolder[0].extInfo.singleAccessibleSourceInUse = 1
+activePlayingFolder[1].entryID = 27960000017709
+activePlayingFolder[1].filename = "t933"
+activePlayingFolder[1].title = "t934"
+activePlayingFolder[1].contentType = -34596
+activePlayingFolder[1].secLength = 85177
+activePlayingFolder[1].flags = -34670
+activePlayingFolder[1].extInfo.album = "aspas \" barra \\ é 938"
+activePlayingFolder[1].extInfo.albumID = -93902818
+activePlayingFolder[1].extInfo.artist = "t940"
+activePlayingFolder[1].extInfo.artistID = -94102824
+activePlayingFolder[1].extInfo.coverArtResource.id = 85723
+activePlayingFolder[1].extInfo.coverArtResource.url = "t943"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t944"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnInternalPort = -34966
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t946"
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.cdnExternalPort = -35040
+activePlayingFolder[1].extInfo.coverArtResource.cdnAccess.imageResourcePath = "t948"
+activePlayingFolder[1].extInfo.titleID = -94902848
+activePlayingFolder[1].extInfo.fileCount = 86451
+activePlayingFolder[1].extInfo.folderCount = -35188
+activePlayingFolder[1].extInfo.playlistCount = 86633
+activePlayingFolder[1].extInfo.storageLocationType = -35262
+activePlayingFolder[1].extInfo.storageLocationIndex = 86815
+activePlayingFolder[1].extInfo.singleAccessibleSourceInUse = 1
+orderCriteria = 86997
+index = -35410
+clientID = 87179
+[DSIMediaPlayer.MPLresponseSetPlaySelection]
+browserID = -35484
+selectionResult = 87361
+[DSIMediaPlayer.MPLresponseSetPlaybackURL]
+url = "t961"
+[DSIMediaPlayer.MPLresponseSetVideoRect]
+srcX0 = 87543
+srcY0 = -35632
+srcWidth = 87725
+srcHeight = -35706
+destX0 = 87907
+destY0 = -35780
+destWidth = 88089
+destHeight = -35854
+[DSIMediaPlayer.MPLresponsePlaySimilarEntry]
+entryID = 29100000018431
+result = 1
+[DSIMediaPlayer.MPLresponseSetColorParam]
+type = 88453
+result = 1
+[DSIMediaPlayer.MPLresponseAddToOnlinePlaylist]
+result = 88635
+[DSIMediaPlayer.MPLindicationDvdEvent]
+dvdEvent = -36076
+[DSIMediaPlayer.MPLtempPMLRequest]
+tempPml = 88817
+[DSIMediaPlayer.MPLresponseCmdBlocked]
+command = -36150
+[DSIMediaPlayer.MPLresponseDetailInfo]
+entryinfo.album = "t978"
+entryinfo.albumID = -97902938
+entryinfo.artist = "aspas \" barra \\ é 980"
+entryinfo.artistID = -98102944
+entryinfo.avgBitrate = 29460000018659
+entryinfo.chapterInfo.activeChapter = -36372
+entryinfo.chapterInfo.activeChapterFirstTimePos = 29520000018697
+entryinfo.chapterInfo.activeChapterLastTimePos = -98502956
+entryinfo.chapterInfo.numChapters = 89727
+entryinfo.comments = "aspas \" barra \\ é 987"
+entryinfo.contentType = 89909
+entryinfo.entryID = -98902968
+entryinfo.filename = "t990"
+entryinfo.flags = -36668
+entryinfo.genre = "t992"
+entryinfo.genreID = -99302980
+entryinfo.numTracks = 29820000018887
+entryinfo.rating = -36816
+entryinfo.samplingrate = 29880000018925
+entryinfo.title = "t997"
+entryinfo.trackNo = 29940000018963
+entryinfo.year = "t999"
+entryinfo.titleID = 30000000019001
+[DSIMediaPlayer.MPLresponseCoverArt]
+entryID = -100103004
+res.id = 91183
+res.url = "t1003"
+res.cdnAccess.cdnInternalIpv6 = "t1004"
+res.cdnAccess.cdnInternalPort = -37186
+res.cdnAccess.cdnExternalIpv6 = "t1006"
+res.cdnAccess.cdnExternalPort = -37260
+res.cdnAccess.imageResourcePath = "aspas \" barra \\ é 1008"
+[DSIMediaPlayer.MPLresponseCustomCommand]
+command = -37334
+commandResponse = 91911
+success = 1
+[DSIMediaPlayer.MPLupdatePlaybackState:9000]
+playbackState = 92093
+validFlag = -37482
+[DSIMediaRecorder.MRLupdateActiveMedia]
+deviceID = 30420000019267
+mediaID = -101503046
+validFlag = 92457
+[DSIMediaRecorder.MRLupdateImportSummary]
+numberOfImportedFiles = -101703052
+numberOfErroneousFiles = 30540000019343
+numberOfProtectedFiles = -101903058
+numberOfFilesTotalToImport = 30600000019381
+numberOfImportedPlaylists = -102103064
+numberOfPlaylistsTotalToImport = 30660000019419
+validFlag = -37852
+[DSIMediaRecorder.MRLupdateImportProgress]
+importProgress = 30720000019457
+listEntry.entryID = -102503076
+listEntry.filename = "t1026"
+listEntry.title = "t1027"
+listEntry.contentType = 93549
+listEntry.secLength = -38074
+listEntry.flags = 93731
+listEntry.extInfo.album = "t1031"
+listEntry.extInfo.albumID = 30960000019609
+listEntry.extInfo.artist = "t1033"
+listEntry.extInfo.artistID = 31020000019647
+listEntry.extInfo.coverArtResource.id = -38296
+listEntry.extInfo.coverArtResource.url = "aspas \" barra \\ é 1036"
+listEntry.extInfo.coverArtResource.cdnAccess.cdnInternalIpv6 = "t1037"
+listEntry.extInfo.coverArtResource.cdnAccess.cdnInternalPort = 94459
+listEntry.extInfo.coverArtResource.cdnAccess.cdnExternalIpv6 = "t1039"
+listEntry.extInfo.coverArtResource.cdnAccess.cdnExternalPort = 94641
+listEntry.extInfo.coverArtResource.cdnAccess.imageResourcePath = "t1041"
+listEntry.extInfo.titleID = 31260000019799
+listEntry.extInfo.fileCount = -38592
+listEntry.extInfo.folderCount = 95005
+listEntry.extInfo.playlistCount = -38666
+listEntry.extInfo.storageLocationType = 95187
+listEntry.extInfo.storageLocationIndex = -38740
+listEntry.extInfo.singleAccessibleSourceInUse = 1
+validFlag = -38814
+[DSIMediaRecorder.MRLupdateDeletionProgress]
+deletionProgress = 31500000019951
+validFlag = -38888
+[DSIMediaRecorder.MRLupdateDatabaseSpace]
+databasespace.maxEntries = 31560000019989
+databasespace.numEntries = -105303160
+databasespace.size = 31620000020027
+databasespace.sizeAvail = -105503166
+databasespace.sizeApps = 31680000020065
+validFlag = -39110
+[DSIMediaRecorder.MRLupdateImportStatus]
+status = 96279
+validFlag = -39184
+[DSIMediaRecorder.MRLupdateDeletionStatus]
+status = 96461
+validFlag = -39258
+[DSIMediaRecorder.MRLupdateTargetMedia]
+deviceID = 31860000020179
+mediaID = -106303190
+validFlag = 96825
+[DSIMediaRecorder.MRLresponseSetSelection]
+browserID = -39406
+result = 1
+[DSIMediaRecorder.MRLresponseSetEncodingQuality]
+encodingQuality = -39480
+[DSIUPNPBase.UBLupdateDeviceList]
+deviceList[0].deviceName = "t1068"
+deviceList[0].deviceID = "t1069"
+deviceList[0].deviceType = 97371
+deviceList[0].deviceDistributedPlaybackURL = "aspas \" barra \\ é 1071"
+deviceList[0].devicePermissionClass = 97553
+deviceList[0].deviceLockState = -39702
+deviceList[0].deviceVolume = 97735
+deviceList[0].deviceA2LSState = -39776
+deviceList[0].deviceCamAvailable = 97917
+deviceList[0].deviceConnectionState = -39850
+deviceList[1].deviceName = "aspas \" barra \\ é 1078"
+deviceList[1].deviceID = "t1079"
+deviceList[1].deviceType = 98281
+deviceList[1].deviceDistributedPlaybackURL = "t1081"
+deviceList[1].devicePermissionClass = 98463
+deviceList[1].deviceLockState = -40072
+deviceList[1].deviceVolume = 98645
+deviceList[1].deviceA2LSState = -40146
+deviceList[1].deviceCamAvailable = 98827
+deviceList[1].deviceConnectionState = -40220
+validFlag = 99009
+[DSIUPNPBase.UBLupdateVolume]
+deviceID = "t1089"
+volume = 99191
+validFlag = -40368
+[DSIUPNPBase.UBLupdateLockState]
+deviceID = "aspas \" barra \\ é 1092"
+lockState = -40442
+validFlag = 99555
+[DSIUPNPBase.UBLupdatePermissionClass]
+deviceID = "t1095"
+permissionClass = 99737
+validFlag = -40590
+[DSIUPNPBase.UBLupdateA2LSState]
+deviceID = "t1098"
+a2LsState = -40664
+validFlag = 100101
+[DSIUPNPBase.UBLupdateRSEState]
+rseState = -40738
+validFlag = 100283
+[DSIUPNPBase.UBLupdateSyncedPlaybackActive]
+active = 1
+validFlag = 100465
+[DSIUPNPBase.UBLupdateFodAvailable]
+available = 1
+validFlag = 100647
+[DSIUPNPBase.UBLupdateSwapStatus]
+swapOrFod = 1
+unlocked = 1
+validFlag = -41034
+[DSIUPNPBrowser.UBRLupdateBrowseFolder]
+activeBrowsingFolder[0].entryID = "t1110"
+activeBrowsingFolder[0].filename = "t1111"
+activeBrowsingFolder[0].title = "t1112"
+activeBrowsingFolder[0].contentType = -41182
+activeBrowsingFolder[0].secLength = 101375
+activeBrowsingFolder[0].flags = -41256
+activeBrowsingFolder[0].dynamicImage.id = 101557
+activeBrowsingFolder[0].dynamicImage.url = "t1117"
+activeBrowsingFolder[0].dynamicImage.cdnAccess.cdnInternalIpv6 = "t1118"
+activeBrowsingFolder[0].dynamicImage.cdnAccess.cdnInternalPort = -41404
+activeBrowsingFolder[0].dynamicImage.cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1120"
+activeBrowsingFolder[0].dynamicImage.cdnAccess.cdnExternalPort = -41478
+activeBrowsingFolder[0].dynamicImage.cdnAccess.imageResourcePath = "t1122"
+activeBrowsingFolder[1].entryID = "t1123"
+activeBrowsingFolder[1].filename = "t1124"
+activeBrowsingFolder[1].title = "t1125"
+activeBrowsingFolder[1].contentType = 102467
+activeBrowsingFolder[1].secLength = -41700
+activeBrowsingFolder[1].flags = 102649
+activeBrowsingFolder[1].dynamicImage.id = -41774
+activeBrowsingFolder[1].dynamicImage.url = "t1130"
+activeBrowsingFolder[1].dynamicImage.cdnAccess.cdnInternalIpv6 = "t1131"
+activeBrowsingFolder[1].dynamicImage.cdnAccess.cdnInternalPort = 103013
+activeBrowsingFolder[1].dynamicImage.cdnAccess.cdnExternalIpv6 = "t1133"
+activeBrowsingFolder[1].dynamicImage.cdnAccess.cdnExternalPort = 103195
+activeBrowsingFolder[1].dynamicImage.cdnAccess.imageResourcePath = "t1135"
+validFlag = 103377
+[DSIUPNPBrowser.UBRLupdateListSize]
+listSizeCount = -42070
+listSizeFlags = 103559
+validFlag = -42144
+[DSIUPNPBrowser.UBRLresponseList]
+entrylist[0].entryID = "t1140"
+entrylist[0].filename = "aspas \" barra \\ é 1141"
+entrylist[0].title = "t1142"
+entrylist[0].contentType = -42292
+entrylist[0].secLength = 104105
+entrylist[0].flags = -42366
+entrylist[0].dynamicImage.id = 104287
+entrylist[0].dynamicImage.url = "t1147"
+entrylist[0].dynamicImage.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1148"
+entrylist[0].dynamicImage.cdnAccess.cdnInternalPort = -42514
+entrylist[0].dynamicImage.cdnAccess.cdnExternalIpv6 = "t1150"
+entrylist[0].dynamicImage.cdnAccess.cdnExternalPort = -42588
+entrylist[0].dynamicImage.cdnAccess.imageResourcePath = "t1152"
+entrylist[1].entryID = "t1153"
+entrylist[1].filename = "t1154"
+entrylist[1].title = "aspas \" barra \\ é 1155"
+entrylist[1].contentType = 105197
+entrylist[1].secLength = -42810
+entrylist[1].flags = 105379
+entrylist[1].dynamicImage.id = -42884
+entrylist[1].dynamicImage.url = "t1160"
+entrylist[1].dynamicImage.cdnAccess.cdnInternalIpv6 = "t1161"
+entrylist[1].dynamicImage.cdnAccess.cdnInternalPort = 105743
+entrylist[1].dynamicImage.cdnAccess.cdnExternalIpv6 = "t1163"
+entrylist[1].dynamicImage.cdnAccess.cdnExternalPort = 105925
+entrylist[1].dynamicImage.cdnAccess.imageResourcePath = "t1165"
+index = 106107
+[DSIUPNPCam.UCLupdateStreamingState]
+deviceID = "t1167"
+streamingState = 106289
+validFlag = -43254
+[DSIUPNPCam.UCLupdateStillFrame]
+deviceID = "t1170"
+stillFrame.id = -43328
+stillFrame.url = "t1172"
+stillFrame.cdnAccess.cdnInternalIpv6 = "t1173"
+stillFrame.cdnAccess.cdnInternalPort = 106835
+stillFrame.cdnAccess.cdnExternalIpv6 = "t1175"
+stillFrame.cdnAccess.cdnExternalPort = 107017
+stillFrame.cdnAccess.imageResourcePath = "t1177"
+validFlag = 107199
+[DSIUPNPPlayer.UPLupdateDetailInfo]
+deviceID = "t1179"
+entryInfo.entryID = "t1180"
+entryInfo.filename = "t1181"
+entryInfo.contentType = 107563
+entryInfo.title = "aspas \" barra \\ é 1183"
+entryInfo.trackNo = 35520000022497
+entryInfo.numTracks = -118503556
+entryInfo.album = "t1186"
+entryInfo.artist = "t1187"
+entryInfo.genre = "t1188"
+entryInfo.year = "t1189"
+entryInfo.comments = "aspas \" barra \\ é 1190"
+entryInfo.avgBitrate = -119103574
+entryInfo.samplingrate = 35760000022649
+entryInfo.rating = -44142
+entryInfo.flags = 108655
+coverArt.id = -44216
+coverArt.url = "t1196"
+coverArt.cdnAccess.cdnInternalIpv6 = "aspas \" barra \\ é 1197"
+coverArt.cdnAccess.cdnInternalPort = 109019
+coverArt.cdnAccess.cdnExternalIpv6 = "t1199"
+coverArt.cdnAccess.cdnExternalPort = 109201
+coverArt.cdnAccess.imageResourcePath = "t1201"
+validFlag = 109383
+[DSIUPNPPlayer.UPLupdateDeviceList]
+deviceList[0].deviceName = "t1203"
+deviceList[0].deviceID = "aspas \" barra \\ é 1204"
+deviceList[0].deviceType = -44586
+deviceList[0].deviceDistributedPlaybackURL = "t1206"
+deviceList[0].devicePermissionClass = -44660
+deviceList[0].deviceLockState = 109929
+deviceList[0].deviceVolume = -44734
+deviceList[0].deviceA2LSState = 110111
+deviceList[0].deviceCamAvailable = -44808
+deviceList[0].deviceConnectionState = 110293
+deviceList[1].deviceName = "t1213"
+deviceList[1].deviceID = "t1214"
+deviceList[1].deviceType = -44956
+deviceList[1].deviceDistributedPlaybackURL = "t1216"
+deviceList[1].devicePermissionClass = -45030
+deviceList[1].deviceLockState = 110839
+deviceList[1].deviceVolume = -45104
+deviceList[1].deviceA2LSState = 111021
+deviceList[1].deviceCamAvailable = -45178
+deviceList[1].deviceConnectionState = 111203
+validFlag = -45252
+[DSIUPNPPlayer.UPLupdatePlaybackMode]
+deviceId = "t1224"
+playbackMode = -45326
+validFlag = 111567
+[DSIUPNPPlayer.UPLupdatePlaybackModeList]
+deviceId = "t1227"
+playbackModeList[0].modeID = 111749
+playbackModeList[0].scope = -45474
+playbackModeList[0].modeFlag = 111931
+playbackModeList[1].modeID = -45548
+playbackModeList[1].scope = 112113
+playbackModeList[1].modeFlag = -45622
+validFlag = 112295
+[DSIUPNPPlayer.UPLupdatePlaybackState]
+deviceId = "t1235"
+playbackState = 112477
+validFlag = -45770
+[DSIUPNPPlayer.UPLupdatePlayPosition]
+deviceID = "t1238"
+entryID = "aspas \" barra \\ é 1239"
+timePosition = 112841
+totalPlayTime = -45918
+validFlag = 113023
+[DSIUPNPPlayer.UPLupdateVolume]
+deviceID = "t1243"
+volume = 113205
+validFlag = -46066
+[DSIFileBrowser.FBLupdateMountPoints]
+mountPoints[0].mountPoint = "aspas \" barra \\ é 1246"
+mountPoints[0].name = "t1247"
+mountPoints[0].sourceType = 113569
+mountPoints[0].slot = -46214
+mountPoints[1].mountPoint = "t1250"
+mountPoints[1].name = "t1251"
+mountPoints[1].sourceType = 113933
+mountPoints[1].slot = -46362
+validFlag = 114115
+[DSIFileBrowser.FBLstartResult]
+sessionHandle = -46436
+success = 114297
+path.mountPoint = "t1257"
+path.folderNames[0] = "t1258"
+path.folderNames[1] = "t1259"
+[DSIFileBrowser.FBLgetViewWindowResult]
+sessionHandle = 114661
+success = -46658
+offset = 114843
+files.path.mountPoint = "t1263"
+files.path.folderNames[0] = "t1264"
+files.path.folderNames[1] = "t1265"
+files.files[0].id = 37980000024055
+files.files[0].selected = 1
+files.files[0].filename = "t1268"
+files.files[0].fileType = -46954
+files.files[0].fileSize = 38100000024131
+files.files[1].id = -127103814
+files.files[1].selected = 1
+files.files[1].filename = "t1273"
+files.files[1].fileType = 115935
+files.files[1].fileSize = -127503826
+totalEntryCount = 116117
+[DSIFileBrowser.FBLgetSelectedFilesResult]
+handle = -47250
+newSelectionHandle = 116299
+success = -47324
+[DSIFileBrowser.FBLchangeFolderResult]
+sessionHandle = 116481
+success = -47398
+newPath.mountPoint = "t1282"
+newPath.folderNames[0] = "t1283"
+newPath.folderNames[1] = "t1284"
+[DSIFileBrowser.FBLspellerResult]
+sessionHandle = -47546
+success = 117027
+uniqueChars = "t1287"
+validChars = "aspas \" barra \\ é 1288"
+[DSIFileBrowser.FBLgetResourceLocatorsResult]
+callerID = -47694
+success = 117391
+rls[0].id = -47768
+rls[0].url = "t1292"
+rls[0].cdnAccess.cdnInternalIpv6 = "t1293"
+rls[0].cdnAccess.cdnInternalPort = 117755
+rls[0].cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1295"
+rls[0].cdnAccess.cdnExternalPort = 117937
+rls[0].cdnAccess.imageResourcePath = "t1297"
+rls[1].id = 118119
+rls[1].url = "t1299"
+rls[1].cdnAccess.cdnInternalIpv6 = "t1300"
+rls[1].cdnAccess.cdnInternalPort = -48138
+rls[1].cdnAccess.cdnExternalIpv6 = "aspas \" barra \\ é 1302"
+rls[1].cdnAccess.cdnExternalPort = -48212
+rls[1].cdnAccess.imageResourcePath = "t1304"
+[DSIFileBrowser.FBLgetFileCountResult]
+sessionHandle = -48286
+success = 118847
+fileCount = -48360
+[DSIFileBrowser.FBLsetFileExtensionFilterResult]
+sessionHandle = 119029
+success = -48434
+[DSIFileBrowser.FBLsetFileTypeFilterResult]
+sessionHandle = 119211
+success = -48508
+[DSIFileBrowser.FBLgetResourceLocatorWindowResult]
+handle = 119393
+success = -48582
+offset = 119575
+rls[0].id = -48656
+rls[0].url = "aspas \" barra \\ é 1316"
+rls[0].cdnAccess.cdnInternalIpv6 = "t1317"
+rls[0].cdnAccess.cdnInternalPort = 119939
+rls[0].cdnAccess.cdnExternalIpv6 = "t1319"
+rls[0].cdnAccess.cdnExternalPort = 120121
+rls[0].cdnAccess.imageResourcePath = "t1321"
+rls[1].id = 120303
+rls[1].url = "aspas \" barra \\ é 1323"
+rls[1].cdnAccess.cdnInternalIpv6 = "t1324"
+rls[1].cdnAccess.cdnInternalPort = -49026
+rls[1].cdnAccess.cdnExternalIpv6 = "t1326"
+rls[1].cdnAccess.cdnExternalPort = -49100
+rls[1].cdnAccess.imageResourcePath = "t1328"
+totalEntryCount = -49174
+[DSIFileBrowser.FBLsetLanguageResult]
+success = 121031
+language = "t1331"
+[DSIFileBrowser.FBLsetFileTypeActiveResult]
+success = 121213
+[DSIFileBrowser.FBLgetFileCountWithFileTypeFilterResult]
+sessionHandle = -49322
+success = 121395
+fileTypes = -49396
+fileCount = 121577
+[DSIFileBrowser.FBLvalidateSpellerCharsResult]
+success = -49470
+sessionHandle = 121759
+testedChars = "t1339"
+validChars = "t1340"
+[DSIFileBrowser.FBLgetViewWindowWithPreviewsResult]
+sessionHandle = -49618
+success = 122123
+offset = -49692
+files.path.mountPoint = "aspas \" barra \\ é 1344"
+files.path.folderNames[0] = "t1345"
+files.path.folderNames[1] = "t1346"
+files.files[0].id = -134704042
+files.files[0].selected = 1
+files.files[0].filename = "t1349"
+files.files[0].fileType = 122851
+files.files[0].fileSize = -135104054
+files.files[1].id = 40560000025689
+files.files[1].selected = 1
+files.files[1].filename = "t1354"
+files.files[1].fileType = -50136
+files.files[1].fileSize = 40680000025765
+previewInfo[0].previewRL.id = -50210
+previewInfo[0].previewRL.url = "aspas \" barra \\ é 1358"
+previewInfo[0].previewRL.cdnAccess.cdnInternalIpv6 = "t1359"
+previewInfo[0].previewRL.cdnAccess.cdnInternalPort = 123761
+previewInfo[0].previewRL.cdnAccess.cdnExternalIpv6 = "t1361"
+previewInfo[0].previewRL.cdnAccess.cdnExternalPort = 123943
+previewInfo[0].previewRL.cdnAccess.imageResourcePath = "t1363"
+previewInfo[0].utcTimestampCreatedOn = 40920000025917
+previewInfo[0].gpsInfo.latitudeDecimalDegrees = -165.5
+previewInfo[0].gpsInfo.longitudeDecimalDegrees = 166.5
+previewInfo[0].gpsInfo.altitudeMetersAboveSeaLevel = -167.5
+previewInfo[0].headline = "t1368"
+previewInfo[0].imageDescription = "t1369"
+previewInfo[0].copyright = "t1370"
+previewInfo[1].previewRL.id = -50728
+previewInfo[1].previewRL.url = "aspas \" barra \\ é 1372"
+previewInfo[1].previewRL.cdnAccess.cdnInternalIpv6 = "t1373"
+previewInfo[1].previewRL.cdnAccess.cdnInternalPort = 125035
+previewInfo[1].previewRL.cdnAccess.cdnExternalIpv6 = "t1375"
+previewInfo[1].previewRL.cdnAccess.cdnExternalPort = 125217
+previewInfo[1].previewRL.cdnAccess.imageResourcePath = "t1377"
+previewInfo[1].utcTimestampCreatedOn = 41340000026183
+previewInfo[1].gpsInfo.latitudeDecimalDegrees = -179.5
+previewInfo[1].gpsInfo.longitudeDecimalDegrees = 180.5
+previewInfo[1].gpsInfo.altitudeMetersAboveSeaLevel = -181.5
+previewInfo[1].headline = "t1382"
+previewInfo[1].imageDescription = "t1383"
+previewInfo[1].copyright = "t1384"
+totalEntryCount = -51246
+[DSIFileBrowser.FBLcreatePreviewImageResult]
+sourceFile.id = 126127
+sourceFile.url = "t1387"
+sourceFile.cdnAccess.cdnInternalIpv6 = "t1388"
+sourceFile.cdnAccess.cdnInternalPort = -51394
+sourceFile.cdnAccess.cdnExternalIpv6 = "t1390"
+sourceFile.cdnAccess.cdnExternalPort = -51468
+sourceFile.cdnAccess.imageResourcePath = "t1392"
+previewImage.id = -51542
+previewImage.url = "t1394"
+previewImage.cdnAccess.cdnInternalIpv6 = "t1395"
+previewImage.cdnAccess.cdnInternalPort = 127037
+previewImage.cdnAccess.cdnExternalIpv6 = "t1397"
+previewImage.cdnAccess.cdnExternalPort = 127219
+previewImage.cdnAccess.imageResourcePath = "t1399"
+success = 127401
+[DSIFileBrowser.FBLcancelPreviewCreationResult]
+success = -51838
+[DSIFileBrowser.FBLindicateSelectionResult]
+sessionHandle = 127583
+success = -51912
+selectedFileCount = 127765
+[DSISearch.updateSearchIsActive]
+queryId = -51986
+isActive = 1
+validFlag = -52060
+[DSISearch.updatePotentialConflict]
+queryId = 128129
+isConflict = 1
+conflictMatch.token.wordType = 128311
+conflictMatch.token.token = "t1411"
+conflictMatch.token.highlights[0].highlightStart = 128493
+conflictMatch.token.highlights[0].highlightEnd = -52282
+conflictMatch.token.highlights[0].type = 128675
+conflictMatch.token.highlights[0].needleIndex = -52356
+conflictMatch.token.highlights[1].highlightStart = 128857
+conflictMatch.token.highlights[1].highlightEnd = -52430
+conflictMatch.token.highlights[1].type = 129039
+conflictMatch.token.highlights[1].needleIndex = -52504
+conflictMatch.token.externalType = 129221
+conflictMatch.country.countryID = -52578
+conflictMatch.country.name = "t1422"
+conflictMatch.country.code = "t1423"
+conflictMatch.country.houseNumberFormatting = 129585
+conflictMatch.country.stateName = "t1425"
+conflictMatch.country.stateAbbreviation = "t1426"
+conflictMatch.type = -52800
+validFlag = 129949
+[DSISearch.updateProfileState]
+state = -52874
+profile = 130131
+validFlag = -52948
+[DSISearch.requestSupportedCountriesResult]
+success = 130313
+countries[0].countryID = -53022
+countries[0].name = "t1434"
+countries[0].code = "aspas \" barra \\ é 1435"
+countries[0].houseNumberFormatting = 130677
+countries[0].stateName = "t1437"
+countries[0].stateAbbreviation = "t1438"
+countries[1].countryID = -53244
+countries[1].name = "t1440"
+countries[1].code = "t1441"
+countries[1].houseNumberFormatting = 131223
+countries[1].stateName = "t1443"
+countries[1].stateAbbreviation = "t1444"
+[DSISearch.searchResult]
+success = -53466
+searchResult.queryId = 131587
+searchResult.source = -53540
+searchResult.listPosition = 131769
+searchResult.entryType = -53614
+searchResult.entryFlags = 131951
+searchResult.poiType = -53688
+searchResult.iconID = 132133
+searchResult.position.lat = -53.5
+searchResult.position.lon = 54.5
+searchResult.distanceMeters = -53836
+searchResult.dataId = 43680000027665
+searchResult.tokens[0].wordType = -53910
+searchResult.tokens[0].token = "t1458"
+searchResult.tokens[0].highlights[0].highlightStart = -53984
+searchResult.tokens[0].highlights[0].highlightEnd = 132861
+searchResult.tokens[0].highlights[0].type = -54058
+searchResult.tokens[0].highlights[0].needleIndex = 133043
+searchResult.tokens[0].highlights[1].highlightStart = -54132
+searchResult.tokens[0].highlights[1].highlightEnd = 133225
+searchResult.tokens[0].highlights[1].type = -54206
+searchResult.tokens[0].highlights[1].needleIndex = 133407
+searchResult.tokens[0].externalType = -54280
+searchResult.tokens[1].wordType = 133589
+searchResult.tokens[1].token = "t1469"
+searchResult.tokens[1].highlights[0].highlightStart = 133771
+searchResult.tokens[1].highlights[0].highlightEnd = -54428
+searchResult.tokens[1].highlights[0].type = 133953
+searchResult.tokens[1].highlights[0].needleIndex = -54502
+searchResult.tokens[1].highlights[1].highlightStart = 134135
+searchResult.tokens[1].highlights[1].highlightEnd = -54576
+searchResult.tokens[1].highlights[1].type = 134317
+searchResult.tokens[1].highlights[1].needleIndex = -54650
+searchResult.tokens[1].externalType = 134499
+searchResult.suggestion.query = "t1479"
+searchResult.suggestion.suggestion = "t1480"
+searchResult.suggestion.fullSuggestion = "t1481"
+searchResult.suggestion.rank = 134863
+searchResult.suggestion.needleIndex = -54872
+searchResult.suggestion.keywordTriggered = 1
+searchResult.suggestion.categoryId = -54946
+searchResult.suggestions[0].query = "t1486"
+searchResult.suggestions[0].suggestion = "t1487"
+searchResult.suggestions[0].fullSuggestion = "t1488"
+searchResult.suggestions[0].rank = -55094
+searchResult.suggestions[0].needleIndex = 135591
+searchResult.suggestions[0].keywordTriggered = 1
+searchResult.suggestions[0].categoryId = 135773
+searchResult.suggestions[1].query = "t1493"
+searchResult.suggestions[1].suggestion = "t1494"
+searchResult.suggestions[1].fullSuggestion = "t1495"
+searchResult.suggestions[1].rank = 136137
+searchResult.suggestions[1].needleIndex = -55390
+searchResult.suggestions[1].keywordTriggered = 1
+searchResult.suggestions[1].categoryId = -55464
+searchResult.country.countryID = 136501
+searchResult.country.name = "t1501"
+searchResult.country.code = "t1502"
+searchResult.country.houseNumberFormatting = -55612
+searchResult.country.stateName = "t1504"
+searchResult.country.stateAbbreviation = "aspas \" barra \\ é 1505"
+searchResult.applicationData[0] = 137047
+searchResult.applicationData[1] = -55760
+searchResult.supplementalId = 45240000028653
+searchResult.additionalListPositions[0].sortCriteriaID = -55834
+searchResult.additionalListPositions[0].listPosition = 137411
+searchResult.additionalListPositions[1].sortCriteriaID = -55908
+searchResult.additionalListPositions[1].listPosition = 137593
+searchResult.coveredNeedleIndexes[0] = -55982
+searchResult.coveredNeedleIndexes[1] = 137775
+searchResult.numAddresses = -56056
+searchResult.numTelnumbers = 137957
+searchResult.numEMailAddresses = -56130
+searchResult.supplementalProviderName = "t1518"
+searchResult.categoryIds[0] = -56204
+searchResult.categoryIds[1] = 138321
+[DSISearch.addToHistoryResult]
+success = -56278
+[DSISearch.cancelQueryResult]
+queryId = 138503
+success = -56352
+[DSISearch.setCurrentPositionResult]
+success = 138685
+[DSISearch.setRoutePointsResult]
+success = -56426
+[DSISearch.setLanguageResult]
+success = 138867
+[DSISearch.setCarFunctionStatesResult]
+success = -56500
+[DSISearch.setRadioStationsResult]
+success = 139049
+source = -56574
+[DSISearch.setActiveProfileResult]
+success = 139231
+[DSISearch.setActiveSearchCountriesResult]
+success = -56648
+[DSISearch.resetToFactorySettingsResult]
+success = 139413
+[DSISearch.prepareSourcesResult]
+success = -56722
+[DSISearch.setSearchFilterResult]
+success = 139595
+source = -56796
+[DSISearch.removeFromHistoryResult]
+success = 139777
+[DSISearch.resetAutocompletionResult]
+success = -56870
+source = 139959
+[DSISearch.removeAllFromHistoryResult]
+success = -56944
+[DSISearch.createBackupFileResult]
+success = 140141
+fullPath = "t1541"
+[DSISearch.importBackupFileResult]
+success = 140323
+fullPath = "t1543"
+[DSISearch.setEnvironmentResult]
+success = 140505
+[DSISearch.requestSuggestionResult]
+success = -57166
+queryID = 140687
+suggestions[0].query = "aspas \" barra \\ é 1547"
+suggestions[0].suggestion = "t1548"
+suggestions[0].fullSuggestion = "t1549"
+suggestions[0].rank = 141051
+suggestions[0].needleIndex = -57388
+suggestions[0].keywordTriggered = 1
+suggestions[0].categoryId = -57462
+suggestions[1].query = "aspas \" barra \\ é 1554"
+suggestions[1].suggestion = "t1555"
+suggestions[1].fullSuggestion = "t1556"
+suggestions[1].rank = -57610
+suggestions[1].needleIndex = 141779
+suggestions[1].keywordTriggered = 1
+suggestions[1].categoryId = 141961
+[DSISearch.removeAllFromHistoryBySourceResult]
+success = -57758
+[DSISearch.profileChanged]
+profile = 142143
+result = -57832
+[DSISearch.profileCopied]
+fromProfile = 142325
+toProfile = -57906
+result = 142507
+[DSISearch.profileReset]
+profile = -57980
+result = 142689
+[DSISearch.profileResetAll]
+result = -58054
+[DSISearch.invalidateData]
+sources[0] = 142871
+sources[1] = -58128
+[DSISearch.sourceDataAvailabilityChanged]
+source = 143053
+dataAvailable = 1
+[DSISearchDataProvider.registerProviderSourceResult]
+success = 143235
+source = -58276
+[DSISearchDataProvider.invalidateAllDataResult]
+success = 143417
+source = -58350
+[DSISearchDataProvider.storeDataSetsResult]
+success = 143599
+source = -58424
+[DSISearchDataProvider.deleteDataSetResult]
+success = 143781
+source = -58498
+dataSetId = 47460000030059
+[DSISearchDataProvider.activateProviderSource]
+source = -58572
+[DSISearchDataProvider.provideData]
+source = 144145
+offset = -58646
+count = 144327

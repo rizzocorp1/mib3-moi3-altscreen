@@ -1,0 +1,230 @@
+serviços: 16; atributos: 957; eventos: 1119; pedidos: 647; mensagens: 2362; campos: 6941; vetores: 1117 (10762 folhas); constantes: 3812
+pedidos com resposta na tabela da HMI: 84; pedidos set… com regra de gravação (dedução): 373; campos devolvidos pelas respostas (dedução): 45
+DSICarAirCondition: domínio 16, pedidos 800, eventos 801; 158 atributos, 165 eventos (155 de atributo), 62 pedidos
+  evento updateAirconMaxDefrost (api 81): a HMI o entrega pelo método updateAirconDefrost do ouvinte
+  atributo 192 ATTR_AIRCONAIRQUALITY2INCAR: sem evento que o atualize
+  atributo 193 ATTR_AIRCONAIRQUALITY2OUTSIDE: sem evento que o atualize
+  atributo 194 ATTR_AIRCONBEHAVIORMODE: sem evento que o atualize
+  pedidos com resposta: 5; pedidos set…: 57, dos quais gravam atributo 32 (29 pela regra posicao, 3 pela regra nomes)
+  set sem regra de gravação: setAirconMiddleExhaustion (api 1004): não há atributo ATTR_AIRCONMIDDLEEXHAUSTION
+  set sem regra de gravação: setAirconSystemOnOffRow (api 1063): não há atributo ATTR_AIRCONSYSTEMONOFFROW
+  set sem regra de gravação: setAirconTempZone (api 1024): não há atributo ATTR_AIRCONTEMPZONE
+  set sem regra de gravação: setAirconAirVolume (api 1025): não há atributo ATTR_AIRCONAIRVOLUME
+  set sem regra de gravação: setAirconAirDistribution (api 1026): não há atributo ATTR_AIRCONAIRDISTRIBUTION
+  set sem regra de gravação: setAirconFootwellTemp (api 1027): não há atributo ATTR_AIRCONFOOTWELLTEMP
+  set sem regra de gravação: setAirconSeatHeater (api 1067): não há atributo ATTR_AIRCONSEATHEATER
+  set sem regra de gravação: setAirconSeatVentilation (api 1068): não há atributo ATTR_AIRCONSEATVENTILATION
+  set sem regra de gravação: setAirconHMIIsReady (api 1030): não há atributo ATTR_AIRCONHMIISREADY
+  set sem regra de gravação: setAirconSeatHeaterDistribution (api 1038): não há atributo ATTR_AIRCONSEATHEATERDISTRIBUTION
+  set sem regra de gravação: setAirconSeatVentilationDistribution (api 1039): não há atributo ATTR_AIRCONSEATVENTILATIONDISTRIBUTION
+  set sem regra de gravação: setAirconTempStep (api 1040): não há atributo ATTR_AIRCONTEMPSTEP
+  set sem regra de gravação: setAirconClimateStyle (api 1058): não há atributo ATTR_AIRCONCLIMATESTYLE
+  set sem regra de gravação: setAirconSetFactoryDefaultMaster (api 1047): não há atributo ATTR_AIRCONSETFACTORYDEFAULTMASTER
+  set sem regra de gravação: setAirconSetFactoryDefaultRow (api 1048): não há atributo ATTR_AIRCONSETFACTORYDEFAULTROW
+  set sem regra de gravação: setAirconNozzleControlRow1 (api 1049): não há atributo ATTR_AIRCONNOZZLECONTROLROW1
+  set sem regra de gravação: setAirconNozzleControlRow2 (api 1050): não há atributo ATTR_AIRCONNOZZLECONTROLROW2
+  set sem regra de gravação: setAirconNozzleControlRow3 (api 1051): não há atributo ATTR_AIRCONNOZZLECONTROLROW3
+  set sem regra de gravação: setAirconSeatNeckHeater (api 1059): não há atributo ATTR_AIRCONSEATNECKHEATER
+  set sem regra de gravação: setAirconSeatSurfaceHeater (api 1060): não há atributo ATTR_AIRCONSEATSURFACEHEATER
+  set sem regra de gravação: setAirconIndividualClimatisation (api 1061): não há atributo ATTR_AIRCONINDIVIDUALCLIMATISATION
+  set sem regra de gravação: setAirconIonisator (api 1069): não há atributo ATTR_AIRCONIONISATOR
+  set sem regra de gravação: setAirconBodyCloseMeasures (api 1062): não há atributo ATTR_AIRCONBODYCLOSEMEASURES
+  set sem regra de gravação: setAirconFootHeater (api 1072): não há atributo ATTR_AIRCONFOOTHEATER
+  set sem regra de gravação: setAirconAutoMode (api 1071): não há atributo ATTR_AIRCONAUTOMODE
+DSICarParkingSystem: domínio 16, pedidos 802, eventos 803; 101 atributos, 117 eventos (101 de atributo), 80 pedidos
+  pedidos com resposta: 2; pedidos set…: 59, dos quais gravam atributo 50 (50 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setHMIStateIsReady (api 1000): não há atributo ATTR_HMISTATEISREADY
+  set sem regra de gravação: setPDCAutoActivation (api 1007): não há atributo ATTR_PDCAUTOACTIVATION
+  set sem regra de gravação: setPDCPLAPreSelection (api 1038): não há atributo ATTR_PDCPLAPRESELECTION
+  set sem regra de gravação: setPDCPLAParkMode (api 1039): não há atributo ATTR_PDCPLAPARKMODE
+  set sem regra de gravação: setPDCVisualisationParkbox (api 1042): não há atributo ATTR_PDCVISUALISATIONPARKBOX
+  set sem regra de gravação: setPdcSetFactoryDefault (api 1031): não há atributo ATTR_PDCSETFACTORYDEFAULT
+  set sem regra de gravação: setVpsSetFactoryDefault (api 1032): não há atributo ATTR_VPSSETFACTORYDEFAULT
+  set sem regra de gravação: setVPSFavoriteList (api 1055): não há atributo ATTR_VPSFAVORITELIST
+  set sem regra de gravação: setWCSetFactoryDefault (api 1062): não há atributo ATTR_WCSETFACTORYDEFAULT
+DSICarComfort: domínio 16, pedidos 804, eventos 805; 95 atributos, 139 eventos (95 de atributo), 116 pedidos
+  evento acknowledgeSunroofFrontSliding (api 2030): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  evento acknowledgeSunroofRearSliding (api 2031): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  evento acknowledgeSunroofFrontTilting (api 2032): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  evento acknowledgeSunroofRearTilting (api 2033): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  evento acknowledgeSunroofFrontBlind (api 2034): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  evento acknowledgeSunroofRearBlind (api 2035): a HMI o entrega pelo método acknowledgeDoorLockingPrompt do ouvinte
+  pedidos com resposta: 27 (6 com resposta que a camada da LG não entrega); pedidos set…: 83, dos quais gravam atributo 57 (57 pela regra posicao, 0 pela regra nomes)
+  os pedidos setDoorlockingBlindsControl e setDoorlockingBlindsControlExtended saem com a mesma api 1079 na camada da LG; o esquema fica com o primeiro
+  os pedidos setWiperRearWiping e setWiperTearsWiping saem com a mesma api 1018 na camada da LG; o esquema fica com o primeiro
+  pedido startSunroofFrontSliding (api 1093): a HMI espera acknowledgeSunroofFrontSliding, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido startSunroofRearSliding (api 1094): a HMI espera acknowledgeSunroofRearSliding, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido startSunroofFrontTilting (api 1095): a HMI espera acknowledgeSunroofFrontTilting, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido startSunroofRearTilting (api 1096): a HMI espera acknowledgeSunroofRearTilting, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido startSunroofFrontBlind (api 1097): a HMI espera acknowledgeSunroofFrontBlind, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido startSunroofRearBlind (api 1098): a HMI espera acknowledgeSunroofRearBlind, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setRGSBeltPretensionerDataFront (api 1000): não há atributo ATTR_RGSBELTPRETENSIONERDATAFRONT
+  set sem regra de gravação: setRGSBeltPretensionerDataRear (api 1001): não há atributo ATTR_RGSBELTPRETENSIONERDATAREAR
+  set sem regra de gravação: setRgsSetFactoryDefault (api 1043): não há atributo ATTR_RGSSETFACTORYDEFAULT
+  set sem regra de gravação: setRGSLocalHazardInformation (api 1061): não há atributo ATTR_RGSLOCALHAZARDINFORMATION
+  set sem regra de gravação: setDoorLockingSetFactoryDefault (api 1041): não há atributo ATTR_DOORLOCKINGSETFACTORYDEFAULT
+  set sem regra de gravação: setDoorLockingUserListRA1 (api 1070): não há atributo ATTR_DOORLOCKINGUSERLISTRA1
+  set sem regra de gravação: setDoorLockingUserListRAF (api 1071): não há atributo ATTR_DOORLOCKINGUSERLISTRAF
+  set sem regra de gravação: setWiperSetFactoryDefault (api 1039): não há atributo ATTR_WIPERSETFACTORYDEFAULT
+  set sem regra de gravação: setUGDOSetFactoryDefault (api 1042): não há atributo ATTR_UGDOSETFACTORYDEFAULT
+  set sem regra de gravação: setUGDOSynchronisation (api 1046): não há atributo ATTR_UGDOSYNCHRONISATION
+  set sem regra de gravação: setUGDOButtonListRA0 (api 1051): não há atributo ATTR_UGDOBUTTONLISTRA0
+  set sem regra de gravação: setUGDOButtonListRA1 (api 1052): não há atributo ATTR_UGDOBUTTONLISTRA1
+  set sem regra de gravação: setUGDOButtonListRA2 (api 1053): não há atributo ATTR_UGDOBUTTONLISTRA2
+  set sem regra de gravação: setUGDOButtonListRA3 (api 1054): não há atributo ATTR_UGDOBUTTONLISTRA3
+  set sem regra de gravação: setUGDOButtonListRA4 (api 1055): não há atributo ATTR_UGDOBUTTONLISTRA4
+  set sem regra de gravação: setUGDOButtonListRA5 (api 1080): não há atributo ATTR_UGDOBUTTONLISTRA5
+  set sem regra de gravação: setUGDOButtonListRAF (api 1056): não há atributo ATTR_UGDOBUTTONLISTRAF
+  set sem regra de gravação: setRDKTireChanged (api 1029): não há atributo ATTR_RDKTIRECHANGED
+  set sem regra de gravação: setRDKPressureChanged (api 1030): não há atributo ATTR_RDKPRESSURECHANGED
+  set sem regra de gravação: setRDKSetFactoryDefault (api 1081): não há atributo ATTR_RDKSETFACTORYDEFAULT
+  set sem regra de gravação: setMirrorSetFactoryDefault (api 1040): não há atributo ATTR_MIRRORSETFACTORYDEFAULT
+  set sem regra de gravação: setHMIIsReady (api 1060): não há atributo ATTR_HMIISREADY
+  set sem regra de gravação: setSunroofFrontSetFactoryDefault (api 1085): não há atributo ATTR_SUNROOFFRONTSETFACTORYDEFAULT
+  set sem regra de gravação: setSunroofRearSetFactoryDefault (api 1086): não há atributo ATTR_SUNROOFREARSETFACTORYDEFAULT
+  set sem regra de gravação: setCar2xSetFactoryDefault (api 1109): não há atributo ATTR_CAR2XSETFACTORYDEFAULT
+  set sem regra de gravação: setBrakeSetFactoryDefault (api 1118): não há atributo ATTR_BRAKESETFACTORYDEFAULT
+DSICarDriverAssistance: domínio 16, pedidos 807, eventos 808; 104 atributos, 116 eventos (103 de atributo), 90 pedidos
+  atributo 105 ATTR_ACCTRAFFICJAMTAILENDASSIST: sem evento que o atualize
+  pedidos com resposta: 12; pedidos set…: 84, dos quais gravam atributo 72 (70 pela regra posicao, 2 pela regra nomes)
+  set sem regra de gravação: setACCSetFactoryDefault (api 1043): não há atributo ATTR_ACCSETFACTORYDEFAULT
+  set sem regra de gravação: setPACCMaxSpeed (api 1060): o campo pACCmaxSpeedValue do pedido tem 0 campos de mesmo nome e tipo no evento updatePACCMaxSpeed
+  set sem regra de gravação: setAWVSetFactoryDefault (api 1058): não há atributo ATTR_AWVSETFACTORYDEFAULT
+  set sem regra de gravação: setNVSetFactoryDefault (api 1062): não há atributo ATTR_NVSETFACTORYDEFAULT
+  set sem regra de gravação: setLdwhcaSetFactoryDefault (api 1035): não há atributo ATTR_LDWHCASETFACTORYDEFAULT
+  set sem regra de gravação: setTsdSetFactoryDefault (api 1036): não há atributo ATTR_TSDSETFACTORYDEFAULT
+  set sem regra de gravação: setMKESetFactoryDefault (api 1049): não há atributo ATTR_MKESETFACTORYDEFAULT
+  set sem regra de gravação: setPASetFactoryDefault (api 1051): não há atributo ATTR_PASETFACTORYDEFAULT
+  set sem regra de gravação: setCurveAssistSetFactoryDefault (api 1055): não há atributo ATTR_CURVEASSISTSETFACTORYDEFAULT
+  set sem regra de gravação: setFASProfilesSetFactoryDefault (api 1076): não há atributo ATTR_FASPROFILESSETFACTORYDEFAULT
+  set sem regra de gravação: setFASProfileConfigList (api 1080): não há atributo ATTR_FASPROFILECONFIGLIST
+  set sem regra de gravação: setHMIStateIsReady (api 1083): não há atributo ATTR_HMISTATEISREADY
+DSIBAP: domínio 16, pedidos 809, eventos 810; 0 atributos, 6 eventos (0 de atributo), 9 pedidos
+  pedidos com resposta: 0; pedidos set…: 2, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setHMIState (api 1001): não há atributo ATTR_HMISTATE
+  set sem regra de gravação: setIndicationError (api 1006): não há atributo ATTR_INDICATIONERROR
+DSICarAuxHeaterCooler: domínio 16, pedidos 811, eventos 812; 21 atributos, 22 eventos (20 de atributo), 18 pedidos
+  atributo 16 ATTR_AUXHEATERCOOLERPOPUP: sem evento que o atualize
+  pedidos com resposta: 1; pedidos set…: 16, dos quais gravam atributo 12 (10 pela regra posicao, 2 pela regra nomes)
+  set sem regra de gravação: setAuxHeaterCoolerPopup (api 1010): o atributo 16 não tem evento com mensagem
+  set sem regra de gravação: setAuxHeaterSetFactoryDefault (api 1008): não há atributo ATTR_AUXHEATERSETFACTORYDEFAULT
+  set sem regra de gravação: setAuxHeaterCoolerExtendedConditioning (api 1011): o campo setup.z1Rl do pedido tem 2 campos de mesmo nome e tipo no evento updateAuxHeaterCoolerExtendedConditioning
+  set sem regra de gravação: setAuxHeaterCoolerTargetTemperature (api 1014): o campo temperature do pedido tem 0 campos de mesmo nome e tipo no evento updateAuxHeaterCoolerTargetTemperature
+DSICarTimeUnitsLanguage: domínio 16, pedidos 813, eventos 814; 24 atributos, 25 eventos (24 de atributo), 23 pedidos
+  evento updateUnitmasterViewOptions (api e atributo 10): a HMI entrega a quem assinou o atributo 5
+  evento updateMenuLanguage (api e atributo 11): a HMI entrega a quem assinou o atributo 5
+  pedidos com resposta: 1; pedidos set…: 21, dos quais gravam atributo 19 (18 pela regra posicao, 1 pela regra nomes)
+  set sem regra de gravação: setClockSummerTimeData (api 1020): não há atributo ATTR_CLOCKSUMMERTIMEDATA
+  set sem regra de gravação: setUmSetFactoryDefault (api 1017): não há atributo ATTR_UMSETFACTORYDEFAULT
+DSICarSeat: domínio 16, pedidos 815, eventos 816; 68 atributos, 76 eventos (68 de atributo), 35 pedidos
+  evento updateSeatSwitcherDataForward1RL (api 12): a HMI o entrega pelo método updateSeatSwitcherDataBack1RL do ouvinte
+  evento updateSeatSwitcherDataForward1RR (api 16): a HMI o entrega pelo método updateSeatSwitcherDataBack1RR do ouvinte
+  evento updateSeatEasyEntryRearRight (api 22): a HMI o entrega pelo método updateSeatEasyEntryRearLeft do ouvinte
+  evento updateSeatPneumaticMassageData1RL:30 (api 30): o nome não casa com ATTR_SEATPNEUMATICSWITCHERDATABACK1RL
+  evento updateSeatPneumaticSwitcherDataUp1RR (api 31): a HMI o entrega pelo método updateSeatPneumaticSwitcherDataUp1RL do ouvinte
+  evento updateSeatPneumaticMassageData1RR:34 (api 34): o nome não casa com ATTR_SEATPNEUMATICSWITCHERDATABACK1RR
+  evento updateSeatRearLeftStopButton (api 36): a HMI o entrega pelo método updateSeatRearRightStopButton do ouvinte
+  evento updateSeatSwitcherDataUp2RL (api 40): a HMI o entrega pelo método updateSeatSwitcherDataDown2RL do ouvinte
+  evento updateSeatSwitcherDataForward2RL (api e atributo 42): a HMI entrega a quem assinou o atributo 43
+  evento updateSeatSwitcherDataForward2RL (api 42): a HMI o entrega pelo método updateSeatSwitcherDataBack2RL do ouvinte
+  evento updateSeatSpecialPositionRearCoDriver (api e atributo 52): a HMI entrega a quem assinou o atributo 54
+  evento updateSeatFoldHeadRestRearDriver (api 55): a HMI o entrega pelo método updateSeatFoldHeadRestRearCoDriver do ouvinte
+  evento updateSeatPremiumMassageSwitcher2RL:62 (api e atributo 62): a HMI entrega a quem assinou o atributo 63
+  evento updateSeatPremiumMassageSwitcher2RL:62 (api 62): o nome não casa com ATTR_SEATPREMIUMMASSAGESWITCHER1RR
+  evento updateSeatPremiumMassageSwitcher2RL:62 (api 62): a HMI o entrega pelo método updateSeatPremiumMassageSwitcher2RR do ouvinte
+  evento updateSeatMassageSwitcher2RR:64 (api 64): o nome não casa com ATTR_SEATPREMIUMMASSAGESWITCHER2RR
+  evento acknowledgeSeatSetFactoryDefault:2004 (api 2004): a HMI o entrega pelo método acknowledgeSeatDeleteSpecialPosition do ouvinte
+  pedidos com resposta: 7; pedidos set…: 26, dos quais gravam atributo 13 (13 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setSeatHMIIsReady (api 1010): não há atributo ATTR_SEATHMIISREADY
+  set sem regra de gravação: setSeatSetFactoryDefault (api 1014): não há atributo ATTR_SEATSETFACTORYDEFAULT
+  set sem regra de gravação: setSeatPneumaticSetFactoryDefault (api 1015): não há atributo ATTR_SEATPNEUMATICSETFACTORYDEFAULT
+  set sem regra de gravação: setSeatMassageData (api 1018): não há atributo ATTR_SEATMASSAGEDATA
+  set sem regra de gravação: setSeatSwitcherDataUp (api 1019): não há atributo ATTR_SEATSWITCHERDATAUP
+  set sem regra de gravação: setSeatSwitcherDataDown (api 1020): não há atributo ATTR_SEATSWITCHERDATADOWN
+  set sem regra de gravação: setSeatSwitcherDataForward (api 1021): não há atributo ATTR_SEATSWITCHERDATAFORWARD
+  set sem regra de gravação: setSeatSwitcherDataBack (api 1022): não há atributo ATTR_SEATSWITCHERDATABACK
+  set sem regra de gravação: setSeatAdjustment (api 1023): não há atributo ATTR_SEATADJUSTMENT
+  set sem regra de gravação: setSeatStopButton (api 1029): não há atributo ATTR_SEATSTOPBUTTON
+  set sem regra de gravação: setSeatPremiumMassageData (api 1030): não há atributo ATTR_SEATPREMIUMMASSAGEDATA
+  set sem regra de gravação: setSeatPremiumMassageSwitcher (api 1031): não há atributo ATTR_SEATPREMIUMMASSAGESWITCHER
+  set sem regra de gravação: setSeatMassageSwitcher (api 1032): não há atributo ATTR_SEATMASSAGESWITCHER
+DSICarEco: domínio 16, pedidos 817, eventos 818; 49 atributos, 63 eventos (49 de atributo), 18 pedidos
+  evento updateRDConsumptionDistrictRoad2 (api 23): a HMI o entrega pelo método updateRDConsumptionDistrictRoad1 do ouvinte
+  pedidos com resposta: 5; pedidos set…: 10, dos quais gravam atributo 7 (7 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setBcmeSetFactoryDefault (api 1002): não há atributo ATTR_BCMESETFACTORYDEFAULT
+  set sem regra de gravação: setRDSetFactoryDefault (api 1006): não há atributo ATTR_RDSETFACTORYDEFAULT
+  set sem regra de gravação: setEASetFactoryDefault (api 1011): não há atributo ATTR_EASETFACTORYDEFAULT
+DSICarKombi: domínio 16, pedidos 819, eventos 820; 114 atributos, 132 eventos (114 de atributo), 55 pedidos
+  evento updateHUDConfigurationMode:114 (api 114): o nome não casa com ATTR_HUDSECTIONCONFIGLISTUPDATEINFO
+  pedidos com resposta: 6; pedidos set…: 45, dos quais gravam atributo 36 (32 pela regra posicao, 4 pela regra nomes)
+  os pedidos setDCActiveDisplayPreset e setDCDisplayViewConfiguration saem com a mesma api 1038 na camada da LG; o esquema fica com o primeiro
+  set sem regra de gravação: setBCMenueConfig (api 1004): não há atributo ATTR_BCMENUECONFIG
+  set sem regra de gravação: setBcSetFactoryDefault (api 1015): não há atributo ATTR_BCSETFACTORYDEFAULT
+  set sem regra de gravação: setHUDSetFactoryDefault (api 1021): não há atributo ATTR_HUDSETFACTORYDEFAULT
+  set sem regra de gravação: setDCSetFactoryDefault (api 1023): não há atributo ATTR_DCSETFACTORYDEFAULT
+  set sem regra de gravação: setDCElementContentSelectionListRA1 (api 1029): não há atributo ATTR_DCELEMENTCONTENTSELECTIONLISTRA1
+  set sem regra de gravação: setDCElementContentSelectionListRA2 (api 1044): não há atributo ATTR_DCELEMENTCONTENTSELECTIONLISTRA2
+  set sem regra de gravação: setDCElementContentSelectionListRAF (api 1030): não há atributo ATTR_DCELEMENTCONTENTSELECTIONLISTRAF
+  set sem regra de gravação: setDCDisplayPresetsList (api 1042): não há atributo ATTR_DCDISPLAYPRESETSLIST
+  set sem regra de gravação: setHUDSectionConfigList (api 1062): não há atributo ATTR_HUDSECTIONCONFIGLIST
+DSICarLight: domínio 16, pedidos 821, eventos 822; 71 atributos, 78 eventos (71 de atributo), 56 pedidos
+  pedidos com resposta: 7 (2 com resposta que a camada da LG não entrega); pedidos set…: 51, dos quais gravam atributo 42 (42 pela regra posicao, 0 pela regra nomes)
+  pedido setExtLightSetFactoryDefault2 (api 1055): a HMI espera acknowledgeExtLightSetFactoryDefault2, e nenhuma api da camada da LG chama esse método do ouvinte
+  pedido setIntLightSetFactoryDefault2 (api 1056): a HMI espera acknowledgeIntLightSetFactoryDefault2, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setExtLightGlidingLightSystem (api 1005): não há atributo ATTR_EXTLIGHTGLIDINGLIGHTSYSTEM
+  set sem regra de gravação: setExtLightSetFactoryDefault (api 1022): não há atributo ATTR_EXTLIGHTSETFACTORYDEFAULT
+  set sem regra de gravação: setIntLightIlluminationSet (api 1024): não há atributo ATTR_INTLIGHTILLUMINATIONSET
+  set sem regra de gravação: setIntLightSetFactoryDefault (api 1023): não há atributo ATTR_INTLIGHTSETFACTORYDEFAULT
+  set sem regra de gravação: setIntLightIlluminationProfile (api 1025): não há atributo ATTR_INTLIGHTILLUMINATIONPROFILE
+  set sem regra de gravação: setAHCSetFactoryDefault (api 1040): não há atributo ATTR_AHCSETFACTORYDEFAULT
+  set sem regra de gravação: setIntLightFunctionalAmbianceLightingList (api 1052): não há atributo ATTR_INTLIGHTFUNCTIONALAMBIANCELIGHTINGLIST
+  set sem regra de gravação: setExtLightSetFactoryDefault2 (api 1055): não há atributo ATTR_EXTLIGHTSETFACTORYDEFAULT2
+  set sem regra de gravação: setIntLightSetFactoryDefault2 (api 1056): não há atributo ATTR_INTLIGHTSETFACTORYDEFAULT2
+DSICarHybrid: domínio 16, pedidos 823, eventos 824; 36 atributos, 52 eventos (36 de atributo), 33 pedidos
+  pedidos com resposta: 2; pedidos set…: 29, dos quais gravam atributo 9 (6 pela regra posicao, 3 pela regra nomes)
+  set sem regra de gravação: setBatteryControlImmediately (api 1000): não há atributo ATTR_BATTERYCONTROLIMMEDIATELY
+  set sem regra de gravação: setBatteryControlTimerState (api 1001): o campo timer.timer1 do pedido tem 3 campos de mesmo nome e tipo no evento updateBatteryControlTimerState
+  set sem regra de gravação: setBatteryControlTimer (api 1002): não há atributo ATTR_BATTERYCONTROLTIMER
+  set sem regra de gravação: setBatteryControlSetFactoryDefault (api 1003): não há atributo ATTR_BATTERYCONTROLSETFACTORYDEFAULT
+  set sem regra de gravação: setHybridTargetRange (api 1020): o campo unit do pedido tem 0 campos de mesmo nome e tipo no evento updateHybridTargetRange
+  set sem regra de gravação: setBatteryControlProfileListRA0 (api 1005): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA0
+  set sem regra de gravação: setBatteryControlProfileListRA1 (api 1006): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA1
+  set sem regra de gravação: setBatteryControlProfileListRA2 (api 1007): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA2
+  set sem regra de gravação: setBatteryControlProfileListRA3 (api 1008): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA3
+  set sem regra de gravação: setBatteryControlProfileListRA4 (api 1009): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA4
+  set sem regra de gravação: setBatteryControlProfileListRA5 (api 1010): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA5
+  set sem regra de gravação: setBatteryControlProfileListRA6 (api 1011): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA6
+  set sem regra de gravação: setBatteryControlProfileListRA7 (api 1012): não há atributo ATTR_BATTERYCONTROLPROFILELISTRA7
+  set sem regra de gravação: setBatteryControlProfileListRAF (api 1013): não há atributo ATTR_BATTERYCONTROLPROFILELISTRAF
+  set sem regra de gravação: setBatteryControlPowerProviderRA0 (api 1014): não há atributo ATTR_BATTERYCONTROLPOWERPROVIDERRA0
+  set sem regra de gravação: setBatteryControlPowerProviderRA1 (api 1015): não há atributo ATTR_BATTERYCONTROLPOWERPROVIDERRA1
+  set sem regra de gravação: setBatteryControlPowerProviderRA2 (api 1016): não há atributo ATTR_BATTERYCONTROLPOWERPROVIDERRA2
+  set sem regra de gravação: setBatteryControlPowerProviderRAE (api 1017): não há atributo ATTR_BATTERYCONTROLPOWERPROVIDERRAE
+  set sem regra de gravação: setBatteryControlPowerProviderRAF (api 1018): não há atributo ATTR_BATTERYCONTROLPOWERPROVIDERRAF
+  set sem regra de gravação: setBatteryControlRemainingChargeTime (api 1023): o campo time1Mode do pedido tem 0 campos de mesmo nome e tipo no evento updateBatteryControlRemainingChargeTime
+DSICarDrivingCharacteristics: domínio 16, pedidos 825, eventos 826; 57 atributos, 68 eventos (57 de atributo), 37 pedidos
+  pedidos com resposta: 9 (1 com resposta que a camada da LG não entrega); pedidos set…: 29, dos quais gravam atributo 23 (22 pela regra posicao, 1 pela regra nomes)
+  os pedidos setSpoilerPositionSelection e setSpoilerActuation saem com a mesma api 1021 na camada da LG; o esquema fica com o primeiro
+  pedido setSpoilerSetFactoryDefault (api 1020): a HMI espera acknowledgeSpoilerSetFactoryDefault, e nenhuma api da camada da LG chama esse método do ouvinte
+  set sem regra de gravação: setCharismaSetFactoryDefault (api 1013): não há atributo ATTR_CHARISMASETFACTORYDEFAULT
+  set sem regra de gravação: setTADSetFactoryDefault (api 1016): não há atributo ATTR_TADSETFACTORYDEFAULT
+  set sem regra de gravação: setTADMaxMinAngleReset (api 1017): não há atributo ATTR_TADMAXMINANGLERESET
+  set sem regra de gravação: setHMIIsReady (api 1019): não há atributo ATTR_HMIISREADY
+  set sem regra de gravação: setSpoilerSetFactoryDefault (api 1020): não há atributo ATTR_SPOILERSETFACTORYDEFAULT
+  set sem regra de gravação: setSoundSetFactoryDefault (api 1025): não há atributo ATTR_SOUNDSETFACTORYDEFAULT
+DSICarVehicleStates: domínio 16, pedidos 827, eventos 828; 17 atributos, 17 eventos (17 de atributo), 4 pedidos
+  evento updateKeyData (api e atributo 6): a HMI entrega a quem assinou o atributo 4
+  pedidos com resposta: 0; pedidos set…: 2, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setCarMenuState (api 1000): não há atributo ATTR_CARMENUSTATE
+  set sem regra de gravação: setClusterState (api 1002): não há atributo ATTR_CLUSTERSTATE
+DSIGeneralVehicleStates: domínio 16, pedidos 829, eventos 830; 34 atributos, 34 eventos (34 de atributo), 7 pedidos
+  pedidos com resposta: 0; pedidos set…: 5, dos quais gravam atributo 0 (0 pela regra posicao, 0 pela regra nomes)
+  set sem regra de gravação: setDSSSKombiWarning (api 1000): não há atributo ATTR_DSSSKOMBIWARNING
+  set sem regra de gravação: setTLOData (api 1001): não há atributo ATTR_TLODATA
+  set sem regra de gravação: setAppConnectState (api 1002): não há atributo ATTR_APPCONNECTSTATE
+  set sem regra de gravação: setDMSTelActive (api 1003): não há atributo ATTR_DMSTELACTIVE
+  set sem regra de gravação: setDMSSDSActive (api 1004): não há atributo ATTR_DMSSDSACTIVE
+DSICarStatistics: domínio 16, pedidos 831, eventos 832; 8 atributos, 9 eventos (8 de atributo), 4 pedidos
+  pedidos com resposta: 0; pedidos set…: 1, dos quais gravam atributo 1 (1 pela regra posicao, 0 pela regra nomes)
+avisos: 1
+  com.lge.mib3oi.dsi.carauxheatercooler.DSICarAuxHeaterCoolerListenerService: api 16 não chama método de ouvinte

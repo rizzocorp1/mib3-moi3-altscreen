@@ -1,0 +1,17 @@
+# stubs/telefone/segundo-aparelho.txt — SIMULAÇÃO: um SEGUNDO aparelho fictício, que pede para parear.
+#
+# Esta central não busca aparelhos pela tela: a tela "Celulares conhecidos" manda procurar a central
+# pelo celular. O que ela faz é o inverso: o aparelho pede o pareamento e a central mostra um código
+# para confirmar. Não há aparelho nem Bluetooth de verdade; este perfil diz QUEM pede e com que
+# código, e o modelo (driver/telefonestub.c) decide QUANDO: 4 s depois de a tela "Celulares
+# conhecidos" abrir, uma vez por abertura, e nunca na partida nem em outra tela. O modelo guarda
+# estes valores e só os manda nessa hora; fora dela o estado do código sai como sempre saiu, vazio.
+#
+# "Sim" na tela: o aparelho entra na lista de aparelhos conhecidos, conhecido e não conectado, e
+# não pede mais. "Cancelar": não entra, e pede de novo na próxima vez que a tela abrir.
+# O nome, o endereço e o código são inventados. O endereço segue o do primeiro aparelho fictício.
+[DSIBluetooth.updatePasskeyState]
+passkeyState.btPasskeyState = 7                          # PS_SSP_SHOW_AND_CONFIRM: mostrar o código e pedir a confirmação
+passkeyState.btDeviceName = "Celular fictício 2"
+passkeyState.btDeviceAddress = "00:00:00:00:00:02"       # fictício: endereço de exemplo, de ninguém
+passkeyState.btPasskey = "123456"                        # fictício: o código que o aparelho de mentira "mostraria"

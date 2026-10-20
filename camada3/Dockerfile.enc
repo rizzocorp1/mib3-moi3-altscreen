@@ -1,0 +1,9 @@
+# moi3-bancada:rsidbg-enc = a imagem de debug da bancada (rsidbg) + PyAV (libx264/libavcodec),
+# para rodar o daemon encoder H.264 no lado host do container (fora do chroot do mss), que recebe
+# NV12 por socket do fakeomx e devolve H.264. O build usa rede (apt); o `docker run` segue
+# --network none. x264/openh264 não linkam no shim -nostdlib (glibc 2.23 do FW), por isso o encoder
+# real roda aqui no container (glibc do Ubuntu) e o fakeomx só encaminha.
+FROM moi3-bancada:rsidbg
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends python3-av strace iproute2 \
+ && rm -rf /var/lib/apt/lists/*
