@@ -1,8 +1,17 @@
 # MIB3 MOI3 LG — CarPlay AltScreen → Instrument Cluster (AID)
 
+> [!WARNING]
+> **⚠️ ALPHA — NOT YET TESTED ON REAL HARDWARE**
+> This project has never been confirmed working end-to-end on a real vehicle.
+> All bench results are on a PC workbench. Deploy at your own risk.
+
 > **Status:** Active research / alpha — not yet confirmed working on real hardware  
 > **Hardware:** VW MIB3 MOI3 LG (`3G5035832C`, SW MU0803/MU0883, Qualcomm Snapdragon AArch64, Yocto Linux, glibc 2.17)  
 > **Goal:** Display the CarPlay navigation map (AltScreen stream type 111, 1280×480 H.264) on the VW Active Info Display (digital instrument cluster) via MPEG-TS/RTP multicast
+
+[![status](https://img.shields.io/badge/status-alpha%20%2F%20in%20testing-red)](https://github.com/lipedesign/mib3-moi3-altscreen)
+[![research notes](https://img.shields.io/badge/%F0%9F%93%9D%20research-mib3--moi3--lg--research-1f6feb?logo=github&logoColor=white)](https://github.com/lipedesign/mib3-moi3-lg-research)
+[![pipeline bench](https://img.shields.io/badge/%F0%9F%9B%A0%20bench-moi3--cluster--pipeline--re-1f6feb?logo=github&logoColor=white)](https://github.com/lipedesign/moi3-cluster-pipeline-re)
 
 ---
 
