@@ -18,6 +18,10 @@ jobs:
           gcc -shared -fPIC -Wall -Wextra -O2 deploy-usb/payload/altscreen_handler.c -ldl -pthread -o /tmp/handler-host.so
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
           timeout 30 /tmp/test-handler
+      - name: Check atomic startup-file backup and restore
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard
+          python3 tests/test-file-guard.py /tmp/file-guard
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |
@@ -30,4 +34,3 @@ jobs:
           ffmpeg -v error -i /tmp/cluster.ts -f null -
           count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
           test "$count" = 30
-
