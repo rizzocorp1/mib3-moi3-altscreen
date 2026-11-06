@@ -19,8 +19,12 @@ These checks establish host behavior only. They do not validate AArch64 factory 
 
 build-target.sh is a fail-closed target-linking recipe, not a validated build: it requires extracted AArch64 factory libraries and refuses ambiguous or missing inputs. The exact sysroot layout may require adjustment after inspection. A successful target link still does not prove the dynamically intercepted factory function ABIs.
 
-## Firmware retrieval
+## Factory inspection and target build
 
-MIB Vault lists MOI3_EU_VW_R8410L_MU0841_3G0919360TH.7z (5.8 GiB). The authenticated session works, but the local browser partial stopped at 1,090,458,624 bytes. Its 7z start header declares a complete length of 6,246,676,571 bytes. It is not extractable as a completed archive. An authenticated retry has not produced another local transfer. Resume or complete the download through normal browser controls; do not circumvent the quota or publish proprietary firmware to the public repository.
+The matching 0841 archive has downloaded successfully and passed its integrity test. Its manifest includes US variants. See factory-0841-audit.md for its hash, extracted runtime and hook evidence, successful factory-linked AArch64 candidate, signature checks and rejected recovery carriers.
 
-tools/inspect-firmware.ps1 rejects browser partial files, checks the declared 7z length, records SHA-256, and runs 7-Zip listing and integrity checks into a new report directory. It does not execute or install firmware. A successful archive integrity check establishes neither vendor authenticity nor vehicle compatibility. After inspection, extract factory files locally and use tools/check-sysroot.mjs to inventory the hook symbols before attempting a target build.
+GitHub Actions run 42166913526 passed sanitizer checks and a 30-frame moving H.264 mux/decode test. The subsequent factory-based derivation return-type correction requires a new CI run.
+
+tools/build-target-windows.ps1 records compiler, source, factory-library and output hashes for the local AArch64 build. The candidate imports only GLIBC_2.17 symbols from the factory glibc 2.23 runtime. It has not been executed on the vehicle.
+
+The remaining gaps are the one-shot launch/restore mechanism, native cluster-channel ownership and hand-back, incoming frame timing, concurrent-session behavior and on-car validation. The engineering USB trigger deletes four speech paths before our backup entry point. The two R9900 recovery packages contain bootloader writes and are unsuitable substitutes. No claim of complete stock rollback is made.

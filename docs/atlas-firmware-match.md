@@ -22,6 +22,6 @@ The manifest/variant list and component selection must still be inspected after 
 
 The vehicle already reports 0841. VW's bulletin says its update procedure does not apply when software is already 0841 or newer. There is no reason to reinstall stock firmware merely to develop the AltScreen handler.
 
-## Retrieval limitation
+## Download and manifest inspection completed
 
-The user signed in to MIB Vault successfully. A local partial download stopped at 1,090,458,624 bytes; its 7z header declares a complete length of 6,246,676,571 bytes. Both listings were tried, and another authenticated retry has not started a new local transfer. The user has been asked to resume the download or save a complete archive through regular Chrome. No completed archive, manifest inspection or factory binary match is claimed.
+The alternate (0841) archive completed at 6,246,676,571 bytes and passed its integrity test. Its manifest includes US variants. See factory-0841-audit.md for its hash and factory analysis. The unit's actual installed binary hashes are still unmeasured.

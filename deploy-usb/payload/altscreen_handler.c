@@ -362,7 +362,9 @@ typedef union {
     unsigned char bytes[512];
 } aes_ctr_storage_t;
 
-typedef int32_t (*AirPlay_DeriveAESKeySHA512ForScreen_fn)(
+/* MU0841 libAirPlay.so: the factory call site ignores x0 after derivation;
+ * the routine has no status return. AES_CTR_Init does return an OSStatus. */
+typedef void (*AirPlay_DeriveAESKeySHA512ForScreen_fn)(
     const uint8_t *master_key, size_t key_len, uint64_t connection_id, uint8_t *out_key, uint8_t *out_iv
 );
 typedef int32_t (*AES_CTR_Init_fn)(void *ctx, const uint8_t *key, const uint8_t *iv);
@@ -999,8 +1001,8 @@ static int start_alt_receiver(uint64_t connection_id) {
     uint8_t key[16] = {0}, iv[16] = {0};
     int ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen &&
         s_AES_CTR_Init && s_AES_CTR_Update;
-    if (ready) ready = s_AirPlay_DeriveAESKeySHA512ForScreen(
-        g_master_key, sizeof(g_master_key), connection_id, key, iv) == 0;
+    if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(
+        g_master_key, sizeof(g_master_key), connection_id, key, iv);
     if (ready) ready = s_AES_CTR_Init(&g_alt_aes, key, iv) == 0;
     memset(key, 0, sizeof(key));
     memset(iv, 0, sizeof(iv));
@@ -1008,7 +1010,7 @@ static int start_alt_receiver(uint64_t connection_id) {
         memset(&g_alt_aes, 0, sizeof(g_alt_aes));
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
-        log_msg("RECV111", "Refusing stream: crypto prerequisites/derivation failed");
+        log_msg("RECV111", "Refusing stream: crypto prerequisites/initialization failed");
         return -1;
     }
     g_alt_aes_valid = 1;
@@ -1398,3 +1400,4 @@ static void altscreen_cleanup(void) {
     }
 }
 #endif
+

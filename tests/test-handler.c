@@ -23,11 +23,11 @@ static ssize_t capture_sendto(int fd, const void *buf, size_t n, int flags,
 #define ALTSCREEN_TEST
 #include "../deploy-usb/payload/altscreen_handler.c"
 #undef sendto
-static int32_t derive_ok(const uint8_t *m,size_t n,uint64_t id,uint8_t *k,uint8_t *iv) {
-    (void)m;(void)n;(void)id; memset(k,1,16); memset(iv,2,16); return 0;
+static void derive_ok(const uint8_t *m,size_t n,uint64_t id,uint8_t *k,uint8_t *iv) {
+    (void)m;(void)n;(void)id; memset(k,1,16); memset(iv,2,16);
 }
-static int32_t derive_bad(const uint8_t *m,size_t n,uint64_t id,uint8_t *k,uint8_t *iv) {
-    (void)m;(void)n;(void)id;(void)k;(void)iv; return -1;
+static int32_t init_bad(void *c,const uint8_t *k,const uint8_t *iv) {
+    (void)c;(void)k;(void)iv; return -1;
 }
 static int32_t init_ok(void *c,const uint8_t *k,const uint8_t *iv) {(void)c;(void)k;(void)iv;return 0;}
 static int32_t update_bad(void *c,const void *s,size_t n,void *d) {(void)c;(void)s;(void)n;(void)d;return -1;}
@@ -92,9 +92,9 @@ static void test_receiver(void) {
     s_AES_CTR_Init=init_ok; s_AES_CTR_Update=update_bad;
     g_master_valid=0; assert(start_alt_receiver(1)==-1);
     assert(pthread_mutex_trylock(&g_crypto_lock)==0); pthread_mutex_unlock(&g_crypto_lock);
-    g_master_valid=1; s_AirPlay_DeriveAESKeySHA512ForScreen=derive_bad;
+    g_master_valid=1; s_AES_CTR_Init=init_bad;
     assert(start_alt_receiver(1)==-1); assert(g_alt_listen_fd==-1);
-    s_AirPlay_DeriveAESKeySHA512ForScreen=derive_ok;
+    s_AES_CTR_Init=init_ok;
     for(int i=0;i<25;i++) {
         assert(start_alt_receiver(1)==6031);
         if(i%2) {
