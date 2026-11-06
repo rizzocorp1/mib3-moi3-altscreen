@@ -10,10 +10,10 @@ import tempfile
 
 guard=Path(sys.argv[1]).resolve(); template=Path(sys.argv[2]).read_text()
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','stop-failure'):
+for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','stop-failure','logger-failure','logger-timeout','corrupt-collector'):
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
-        stage=base/'.moi3-altscreen-once-v1';stage.mkdir()
+        stage=base/'.moi3-altscreen-once-v2';stage.mkdir()
         startup=base/'carplay.sh';startup.write_bytes(b'#!/bin/sh\nexit 0\n');startup.chmod(0o755)
         os.setxattr(startup,'user.startup-label',b'factory-metadata')
         backup=stage/'factory-carplay.sh'
@@ -22,26 +22,33 @@ for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-fail
         factory_copy=root/'factory-copy';shutil.copyfile(target,factory_copy)
         patched=stage/'carplay-once';patched.write_bytes(b'experimental executable')
         handler=stage/'altscreen_handler.so';handler.write_bytes(b'handler')
+        collector=stage/'managed-log-collector.sh';collector.write_bytes(b'collector fixture')
         local_guard=stage/'file-guard';shutil.copyfile(guard,local_guard);local_guard.chmod(0o700)
         (root/'run').mkdir()
         units=root/'lib/systemd/system';units.mkdir(parents=True);(units/'multi-display.service').write_text('[Service]\n')
-        values={'ROOT':str(root),'GUARD_SHA':digest(local_guard),'STARTUP_SHA':digest(backup),'CARPLAY_SHA':digest(target),'PATCH_SHA':digest(patched),'HANDLER_SHA':digest(handler),'LOG_ITERATIONS':'0'}
+        values={'ROOT':str(root),'GUARD_SHA':digest(local_guard),'STARTUP_SHA':digest(backup),'CARPLAY_SHA':digest(target),'PATCH_SHA':digest(patched),'HANDLER_SHA':digest(handler),'COLLECTOR_SHA':digest(collector),'LOG_ITERATIONS':'1'}
         rendered=template
         for key,value in values.items():rendered=rendered.replace('@'+key+'@',value)
         assert '@ROOT@' not in rendered
         startup.write_text(rendered)
         boot=root/'run-boot.sh';boot.write_text(rendered)
-        if scenario!='unarmed':(stage/'ARMED').write_text('one-session-v1\n')
+        if scenario!='unarmed':(stage/'ARMED').write_text('one-session-v2\n')
         if scenario=='corrupt-patch':patched.write_bytes(b'bad executable')
         if scenario=='corrupt-backup':backup.write_bytes(b'bad backup')
+        if scenario=='corrupt-collector':collector.write_bytes(b'bad collector')
         tools=root/'tools';tools.mkdir();events=root/'events'
         stub='''#!/usr/bin/env python3
 import os,sys
 from pathlib import Path
-root=Path(os.environ['TEST_ROOT']);base=root/'lge/app_rw/smartlink/carplay';stage=base/'.moi3-altscreen-once-v1'
+root=Path(os.environ['TEST_ROOT']);base=root/'lge/app_rw/smartlink/carplay';stage=base/'.moi3-altscreen-once-v2'
 command=Path(sys.argv[0]).name
 with (root/'events').open('a') as log:log.write(command+' '+' '.join(sys.argv[1:])+'\\n')
-if command=='mount':
+if command=='systemd-run':
+    assert (base/'carplay.sh').read_bytes()==(stage/'factory-carplay.sh').read_bytes()
+    assert (base/'carplay').read_bytes()==(root/'factory-copy').read_bytes()
+    if os.environ['SCENARIO']=='logger-failure':sys.exit(1)
+    if os.environ['SCENARIO']!='logger-timeout':(root/'run/moi3-altscreen-once-v2/logger-ready').write_text('READY')
+elif command=='mount':
     assert (base/'carplay.sh').read_bytes()==(stage/'factory-carplay.sh').read_bytes()
     assert (stage/'CONSUMED').exists() and not (stage/'ARMED').exists()
     if os.environ['SCENARIO']=='mount-failure':sys.exit(1)
@@ -52,7 +59,7 @@ elif command=='systemctl':
     if sys.argv[1]=='is-active':sys.exit(3)
     if sys.argv[1]=='stop' and os.environ['SCENARIO']=='stop-failure':sys.exit(1)
 '''
-        for name in ('mount','umount','systemctl'):
+        for name in ('mount','umount','systemctl','systemd-run'):
             file=tools/name;file.write_text(stub);file.chmod(0o755)
         env=dict(os.environ,TEST_ROOT=str(root),SCENARIO=scenario,PATH=str(tools)+':'+os.environ['PATH'])
         subprocess.run(['sh','-n',boot],check=True)
@@ -73,8 +80,11 @@ elif command=='systemctl':
                 target.write_bytes(factory_copy.read_bytes());events.write_text('')
                 subprocess.run(['sh',boot],env=env,check=True,timeout=15)
                 assert events.read_text()=='' and 'DISARMED' in (stage/'boot-status.txt').read_text()
-            elif scenario in ('unarmed','corrupt-patch'):
+            elif scenario in ('unarmed','corrupt-patch','corrupt-collector'):
                 assert not history and target.read_bytes()==factory_copy.read_bytes()
+            elif scenario in ('logger-failure','logger-timeout'):
+                assert 'ABORT' in log and 'mount --bind' not in history and 'systemctl stop' not in history
+                assert target.read_bytes()==factory_copy.read_bytes()
             else:
                 assert 'ABORT' in log and target.read_bytes()==factory_copy.read_bytes()
                 if scenario=='mount-failure':assert 'systemctl stop' not in history

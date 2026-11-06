@@ -63,9 +63,9 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v2.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v2.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v2.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -79,6 +79,9 @@ static void log_msg(const char *tag, const char *fmt, ...) {
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
+
+    /* journald provides a second path if SMACK denies our file locations. */
+    fprintf(stderr, "[ALTSCREEN][%s] %s\n", tag, buffer);
 
     if (g_kmsg_fd < 0) {
         g_kmsg_fd = open("/dev/kmsg", O_WRONLY | O_CLOEXEC);

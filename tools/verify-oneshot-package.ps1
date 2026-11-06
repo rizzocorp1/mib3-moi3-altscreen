@@ -23,8 +23,8 @@ try {
     $main=[Text.Encoding]::UTF8.GetString((Bytes $test 'Meta/main.mnf'))|ConvertFrom-Json
     if($main.Release -ne 'MOI3_EU_SE_E9400L' -or $main.Includes.Count -ne 1 -or $main.Includes[0].PackageName -ne 'MIB3OI_POST_SCRIPT'){throw 'Unexpected update components'}
     $manifest=[Text.Encoding]::UTF8.GetString((Bytes $test 'build-manifest.json'))|ConvertFrom-Json
-    if($manifest.format -ne 'moi3-oneshot-experimental-v1' -or $manifest.software -ne '0841' -or $manifest.unit -ne '3G5035842B'){throw 'Wrong test identity'}
-    $required=@('fix_hw_partnumber.sh','payload/oneshot-boot.sh','payload/file-guard','payload/carplay-once','payload/altscreen_handler.so','ALTSCREEN_TEST_ONCE.txt','READ-ME-FIRST.txt')
+    if($manifest.format -ne 'moi3-oneshot-experimental-v2' -or $manifest.software -ne '0841' -or $manifest.unit -ne '3G5035842B'){throw 'Wrong test identity'}
+    $required=@('fix_hw_partnumber.sh','payload/oneshot-boot.sh','payload/managed-log-collector.sh','payload/file-guard','payload/carplay-once','payload/altscreen_handler.so','ALTSCREEN_TEST_ONCE.txt','READ-ME-FIRST.txt')
     $declared=@($manifest.files.psobject.Properties.Name)
     $expectedList=($required|Sort-Object) -join "`n"
     $actualList=($declared|Sort-Object) -join "`n"
@@ -37,12 +37,14 @@ try {
     $entryText=[Text.Encoding]::UTF8.GetString((Bytes $test 'fix_hw_partnumber.sh'))
     $bootText=[Text.Encoding]::UTF8.GetString((Bytes $test 'payload/oneshot-boot.sh'))
     if($entryText -match '@[A-Z_]+@|/lge/app_ro/bin/ksend' -or $bootText -match '@[A-Z_]+@'){throw 'Unrendered/unreviewed activation content'}
+    $collectorText=[IO.File]::ReadAllText((Join-Path $PSScriptRoot '../recovery/managed-log-collector.sh')).Replace("`r`n","`n")
+    if ($collectorText -cne [Text.Encoding]::UTF8.GetString((Bytes $test 'payload/managed-log-collector.sh'))){throw 'Collector differs from reviewed source'}
     $values=$manifest.factoryHashes
     $recovery=Join-Path $PSScriptRoot '../recovery'
     foreach($item in @(@{template='oneshot-usb.sh.in';name='fix_hw_partnumber.sh'},@{template='oneshot-boot.sh.in';name='payload/oneshot-boot.sh'})){
         $rendered=[IO.File]::ReadAllText((Join-Path $recovery $item.template)).Replace("`r`n","`n")
         foreach($property in $values.psobject.Properties){$rendered=$rendered.Replace("@$($property.Name)@",[string]$property.Value)}
-        $rendered=$rendered.Replace('@ROOT@','').Replace('@LOG_ITERATIONS@','300')
+        $rendered=$rendered.Replace('@ROOT@','').Replace('@LOG_ITERATIONS@','150')
         if($rendered -cne [Text.Encoding]::UTF8.GetString((Bytes $test $item.name))){throw "Candidate differs from current source template: $($item.name)"}
     }
     [ordered]@{vendorDataAndMetaUnchanged=$true;updateComponents=@('MIB3OI_POST_SCRIPT');payloadHashesVerified=$required.Count;templatesMatch=$true;hardwareActivationValidated=$false;candidateSha256=(Get-FileHash -LiteralPath $Candidate).Hash.ToLowerInvariant()}|ConvertTo-Json -Depth 4

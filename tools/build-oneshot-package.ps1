@@ -40,7 +40,7 @@ if ($LASTEXITCODE -ne 0) {throw 'Handler build failed'}
 if ($LASTEXITCODE -ne 0) {throw 'Metadata helper build failed'}
 $guardInfo=& node $Inspector $guard | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $guardInfo.architecture -ne 'AArch64' -or @($guardInfo.needed).Count -ne 0) {throw 'Helper is not standalone AArch64'}
-$dependency='/lge/app_rw/smartlink/carplay/.moi3-altscreen-once-v1/altscreen_handler.so'
+$dependency='/lge/app_rw/smartlink/carplay/.moi3-altscreen-once-v2/altscreen_handler.so'
 $patchInfo=& $Python (Join-Path $PSScriptRoot 'add-handler-dependency.py') $factoryBinary $patched $dependency | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $patchInfo.sourceSha256 -ne $expected.CARPLAY_SHA) {throw 'Executable-copy preparation failed'}
 $copyInfo=& node $Inspector $patched | ConvertFrom-Json
@@ -51,15 +51,18 @@ $expected.PATCH_SHA=File-Digest $patched
 function Render([string]$Path,[hashtable]$Values) {
     $text=[IO.File]::ReadAllText($Path).Replace("`r`n","`n")
     foreach($key in $Values.Keys){$text=$text.Replace("@$key@",[string]$Values[$key])}
-    $text=$text.Replace('@ROOT@','').Replace('@LOG_ITERATIONS@','300')
+    $text=$text.Replace('@ROOT@','').Replace('@LOG_ITERATIONS@','150')
     if($text -match '@[A-Z_]+@'){throw "Unrendered token in $Path"}
     return ,$utf8.GetBytes($text)
 }
+$collector=$utf8.GetBytes([IO.File]::ReadAllText((Join-Path $recovery 'managed-log-collector.sh')).Replace("`r`n","`n"))
+$expected.COLLECTOR_SHA=Digest $collector
 $boot=Render (Join-Path $recovery 'oneshot-boot.sh.in') $expected
 $expected.BOOT_SHA=Digest $boot
 $entry=Render (Join-Path $recovery 'oneshot-usb.sh.in') $expected
 $files=[ordered]@{
     'fix_hw_partnumber.sh'=$entry
+    'payload/managed-log-collector.sh'=$collector
     'payload/oneshot-boot.sh'=$boot
     'payload/file-guard'=[IO.File]::ReadAllBytes($guard)
     'payload/carplay-once'=[IO.File]::ReadAllBytes($patched)
@@ -69,7 +72,7 @@ $files=[ordered]@{
 }
 $fileHashes=[ordered]@{};foreach($name in $files.Keys){$fileHashes[$name]=Digest $files[$name]}
 $manifest=[ordered]@{
-    format='moi3-oneshot-experimental-v1';unit='3G5035842B';hardware='H56';software='0841'
+    format='moi3-oneshot-experimental-v2';unit='3G5035842B';hardware='H56';software='0841'
     factoryHashes=$expected;files=$fileHashes
     sourceHashes=@{handler=File-Digest $HandlerSource;fileGuard=File-Digest $guardSource;patcher=File-Digest (Join-Path $PSScriptRoot 'add-handler-dependency.py')}
     compilerVersion=(& $Zig version);containerSha256=File-Digest $containerPath

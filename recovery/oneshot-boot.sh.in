@@ -3,14 +3,22 @@
 # No set -e: a test failure must not make ExecStartPre fail/reboot repeatedly.
 R='@ROOT@'
 BASE="$R/lge/app_rw/smartlink/carplay"
-STAGE="$BASE/.moi3-altscreen-once-v1"
+STAGE="$BASE/.moi3-altscreen-once-v2"
 STARTUP="$BASE/carplay.sh"
 ORIGINAL="$STAGE/factory-carplay.sh"
 GUARD="$STAGE/file-guard"
 TARGET="$BASE/carplay"
-RAM="$R/run/moi3-altscreen-once"
+RAM="$R/run/moi3-altscreen-once-v2"
 LOG="$STAGE/boot-status.txt"
-status() { printf '%s\n' "$*" >> "$LOG" 2>/dev/null || true; }
+status() {
+    printf '%s\n' "$*" >> "$LOG" 2>/dev/null || true
+    # Export early aborts too, even when the independent collector cannot start.
+    for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
+        if [ -f "$usb/ALTSCREEN_TEST_ONCE.txt" ] && [ ! -L "$usb/boot-status.txt" ]; then
+            cp "$LOG" "$usb/boot-status.txt" 2>/dev/null || true
+        fi
+    done
+}
 matches() {
     [ -f "$1" ] && [ ! -L "$1" ] || return 1
     actual=$(sha256sum "$1" 2>/dev/null) || return 1
@@ -64,6 +72,26 @@ if ! matches "$RAM/carplay" '@PATCH_SHA@'; then
     status 'ABORT: RAM executable checksum mismatch'
     exit 0
 fi
+# The logger is owned by its own bounded unit, not the CarPlay service cgroup.
+if ! matches "$STAGE/managed-log-collector.sh" '@COLLECTOR_SHA@'; then
+    status 'ABORT: collector checksum mismatch; native executable retained'
+    exit 0
+fi
+if ! systemd-run --unit=moi3-altscreen-log-v2 --property=RuntimeMaxSec=330 --property=TimeoutStopSec=5 /bin/sh "$STAGE/managed-log-collector.sh" "$STAGE" "$RAM/logger-ready" @LOG_ITERATIONS@ "$R" >> "$LOG" 2>&1; then
+    status 'ABORT: independent logger could not start; native executable retained'
+    exit 0
+fi
+i=0
+while [ ! -f "$RAM/logger-ready" ] && [ "$i" -lt 5 ]; do
+    sleep 1
+    i=$((i+1))
+done
+if [ ! -f "$RAM/logger-ready" ] || [ -L "$RAM/logger-ready" ]; then
+    status 'ABORT: independent logger readiness timed out; native executable retained'
+    exit 0
+fi
+status 'LOGGER: independent service ready before any mount or encoder stop'
+systemctl show carplay.service multi-display.service >> "$LOG" 2>&1 || true
 if ! mount --bind "$RAM/carplay" "$TARGET"; then
     status 'ABORT: bind mount failed; native executable retained'
     exit 0
@@ -86,27 +114,4 @@ if systemctl is-active --quiet multi-display.service; then
     exit 0
 fi
 status 'ACTIVE: one-session CarPlay copy mounted; native encoder stopped until reboot'
-# Bounded USB log collector. It never mounts/remounts storage or changes services.
-(
-    i=0
-    while [ "$i" -lt @LOG_ITERATIONS@ ]; do
-        for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
-            if [ -f "$usb/ALTSCREEN_TEST_ONCE.txt" ] && [ ! -L "$usb/ALTSCREEN_TEST_ONCE.txt" ]; then
-                for name in boot-status.txt; do
-                    [ -L "$usb/$name" ] || cp "$STAGE/$name" "$usb/$name" 2>/dev/null || true
-                done
-                for source in "$R/data/lge/smartlink/carplay/carplay-handler.log" "$R/lge/app_rw/smartlink/carplay/carplay-handler.log" "$R/tmp/carplay-handler.log"; do
-                    if [ -f "$source" ] && [ ! -L "$source" ]; then
-                        [ -L "$usb/altscreen-handler.log" ] || cp "$source" "$usb/altscreen-handler.log" 2>/dev/null || true
-                    fi
-                done
-                if command -v journalctl >/dev/null 2>&1 && [ ! -L "$usb/carplay-journal.txt" ]; then
-                    journalctl -u carplay.service -b -n 150 --no-pager > "$usb/carplay-journal.txt" 2>&1
-                fi
-            fi
-        done
-        i=$((i+1))
-        sleep 2
-    done
-) >/dev/null 2>&1 &
 exit 0

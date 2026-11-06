@@ -22,8 +22,12 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         shutil.copyfile(guard,payload/'file-guard')
         (payload/'carplay-once').write_bytes(b'test executable')
         (payload/'altscreen_handler.so').write_bytes(b'test handler')
+        (payload/'managed-log-collector.sh').write_bytes(b'collector fixture')
         (usb/'ALTSCREEN_TEST_ONCE.txt').write_text('one session')
         values={'ROOT':str(root),'GUARD_SHA':digest(payload/'file-guard'),'STARTUP_SHA':digest(startup),'CARPLAY_SHA':digest(target),'OS_SHA':digest(release),'PATCH_SHA':digest(payload/'carplay-once'),'HANDLER_SHA':digest(payload/'altscreen_handler.so'),'LOG_ITERATIONS':'0'}
+        values['COLLECTOR_SHA']=digest(payload/'managed-log-collector.sh')
+        old_stage=base/'.moi3-altscreen-once-v1';old_stage.mkdir()
+        (old_stage/'boot-status.txt').write_text('retained previous test evidence')
         def render(template):
             for key,value in values.items():template=template.replace('@'+key+'@',value)
             return template
@@ -38,11 +42,13 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)
-        report=(usb/'altscreen-setup.txt').read_text();stage=base/'.moi3-altscreen-once-v1'
+        report=(usb/'altscreen-setup.txt').read_text();stage=base/'.moi3-altscreen-once-v2'
         if scenario=='arm-and-restore':
             assert 'RESULT: ARMED' in report and 'SETUP COMPLETE' in report,report
             assert (stage/'ARMED').is_file() and digest(startup)==values['BOOT_SHA']
             assert (stage/'factory-carplay.sh').read_bytes()==factory
+            assert (usb/'previous-v1-boot-status.txt').read_text()=='retained previous test evidence'
+            assert (stage/'managed-log-collector.sh').read_bytes()==(payload/'managed-log-collector.sh').read_bytes()
             assert (usb/'factory-carplay.sh.backup').read_bytes()==factory
             assert target.read_bytes()==original_exec
             assert os.getxattr(startup,'user.original-label')==b'preserve'

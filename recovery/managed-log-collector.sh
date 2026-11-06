@@ -22,7 +22,7 @@ while [ "$i" -lt "$iterations" ]; do
             [ -f "$stage/$name" ] && [ ! -L "$stage/$name" ] || continue
             [ -L "$usb/$name" ] || cp "$stage/$name" "$usb/$name" 2>/dev/null || true
         done
-        for source in "$root/data/lge/smartlink/carplay/carplay-handler.log" "$root/lge/app_rw/smartlink/carplay/carplay-handler.log" "$root/tmp/carplay-handler.log"; do
+        for source in "$root/data/lge/smartlink/carplay/carplay-handler-v2.log" "$root/lge/app_rw/smartlink/carplay/carplay-handler-v2.log" "$root/tmp/carplay-handler-v2.log"; do
             if [ -f "$source" ] && [ ! -L "$source" ]; then
                 [ -L "$usb/altscreen-handler.log" ] || cp "$source" "$usb/altscreen-handler.log" 2>/dev/null || true
             fi
