@@ -18,7 +18,7 @@ typedef struct { char *name; void *value; size_t size; } Attr;
 typedef struct { struct stat st; Attr *attrs; size_t count; } Meta;
 static void fail(const char *what) { perror(what); exit(1); }
 static int safe_open(const char *path, int directory) {
-    int fd=open(path,O_RDONLY|O_CLOEXEC|O_NOFOLLOW|(directory?O_DIRECTORY:0));
+    int fd=open(path,O_RDONLY|O_CLOEXEC|O_NOFOLLOW|O_NONBLOCK);
     if(fd<0)fail(path);
     struct stat st;if(fstat(fd,&st))fail("fstat");
     if(!S_ISREG(st.st_mode)&&!(directory&&S_ISDIR(st.st_mode))) {
@@ -39,7 +39,8 @@ static Meta capture(int fd) {
         Attr *a=&m.attrs[m.count++];a->name=strdup(names+p);if(!a->name)fail("allocate name");
         ssize_t size=fgetxattr(fd,a->name,NULL,0);if(size<0||size>65536)fail("get xattr size");
         a->size=(size_t)size;a->value=malloc(a->size+1);if(!a->value)fail("allocate value");
-        if(fgetxattr(fd,a->name,a->value,a->size)!=size)fail("changing xattr value");p+=n+1;
+        if(fgetxattr(fd,a->name,a->value,a->size)!=size)fail("changing xattr value");
+        p+=n+1;
     }
     free(names);if(m.count)qsort(m.attrs,m.count,sizeof(Attr),attr_compare);return m;
 }
@@ -82,15 +83,18 @@ int main(int argc,char **argv) {
         release(&a);close(src);close(dst);if(result<0)fail("apply metadata");return result;
     }
     if(is_replace)ref=safe_open(dest,0);else if(is_create)ref=safe_open(argv[4],0);else ref=dup(src);
-    if(ref<0)fail("reference");Meta metadata=capture(ref);struct stat source_before;if(fstat(src,&source_before))fail("source stat");
+    if(ref<0)fail("reference");
+    Meta metadata=capture(ref);struct stat source_before;if(fstat(src,&source_before))fail("source stat");
     char temporary[PATH_MAX];const char *output=dest;
     if(is_replace){int n=snprintf(temporary,sizeof(temporary),"%s.moi3-%ld",dest,(long)getpid());if(n<0||n>=(int)sizeof(temporary))return 1;output=temporary;}
     int parent=parent_fd(dest),out=open(output,O_WRONLY|O_CREAT|O_EXCL|O_CLOEXEC|O_NOFOLLOW,0600);
-    if(out<0)fail("exclusive output");int ok=1;char buffer[65536];ssize_t n;
+    if(out<0)fail("exclusive output");
+    int ok=1;char buffer[65536];ssize_t n;
     while((n=read(src,buffer,sizeof(buffer)))>0){size_t written=0;while(written<(size_t)n){ssize_t w=write(out,buffer+written,(size_t)n-written);if(w<=0){ok=0;break;}written+=(size_t)w;}if(!ok)break;}
     if(n<0)ok=0;
     struct stat source_after;if(fstat(src,&source_after)||source_before.st_size!=source_after.st_size||source_before.st_mtim.tv_sec!=source_after.st_mtim.tv_sec||source_before.st_mtim.tv_nsec!=source_after.st_mtim.tv_nsec||source_before.st_ctim.tv_sec!=source_after.st_ctim.tv_sec||source_before.st_ctim.tv_nsec!=source_after.st_ctim.tv_nsec){errno=EBUSY;ok=0;}
-    if(ok&&apply(out,&metadata))ok=0;if(ok&&fsync(out))ok=0;
+    if(ok&&apply(out,&metadata))ok=0;
+    if(ok&&fsync(out))ok=0;
     if(close(out))ok=0;
 #ifdef FILE_GUARD_TEST
     if(getenv("FILE_GUARD_FAIL_BEFORE_COMMIT")){errno=EIO;ok=0;}
@@ -104,5 +108,7 @@ int main(int argc,char **argv) {
      * Callers must inspect hashes and must not arm activation on any failure. */
     if(ok&&fsync(parent)){saved=errno;ok=0;}
     release(&metadata);close(ref);close(src);close(parent);errno=saved;
-    if(!ok)fail("copy/replace");return 0;
+    if(!ok)fail("copy/replace");
+    return 0;
 }
+
