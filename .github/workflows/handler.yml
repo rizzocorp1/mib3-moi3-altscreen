@@ -10,6 +10,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Compile actual handler with sanitizers
@@ -18,11 +19,15 @@ jobs:
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
           timeout 30 /tmp/test-handler
       - name: Decode generated transport stream
+        timeout-minutes: 6
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo timeout 120 apt-get update -qq
+            sudo timeout 180 apt-get install -y -qq ffmpeg
+          fi
           ffmpeg -v error -f lavfi -i testsrc2=size=1280x480:rate=30 -frames:v 30 -c:v libx264 -preset ultrafast -tune zerolatency -x264-params aud=1:keyint=10 -f h264 /tmp/frame.h264
           timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts
           ffmpeg -v error -i /tmp/cluster.ts -f null -
           count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
           test "$count" = 30
+
