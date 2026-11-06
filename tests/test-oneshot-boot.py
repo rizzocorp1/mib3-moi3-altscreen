@@ -10,10 +10,10 @@ import tempfile
 
 guard=Path(sys.argv[1]).resolve(); template=Path(sys.argv[2]).read_text()
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','stop-failure','logger-failure','logger-timeout','corrupt-collector'):
+for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','logger-failure','logger-timeout','corrupt-collector'):
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
-        stage=base/'.moi3-altscreen-once-v2';stage.mkdir()
+        stage=base/'.moi3-security-probe-v3';stage.mkdir()
         startup=base/'carplay.sh';startup.write_bytes(b'#!/bin/sh\nexit 0\n');startup.chmod(0o755)
         os.setxattr(startup,'user.startup-label',b'factory-metadata')
         backup=stage/'factory-carplay.sh'
@@ -32,7 +32,7 @@ for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-fail
         assert '@ROOT@' not in rendered
         startup.write_text(rendered)
         boot=root/'run-boot.sh';boot.write_text(rendered)
-        if scenario!='unarmed':(stage/'ARMED').write_text('one-session-v2\n')
+        if scenario!='unarmed':(stage/'ARMED').write_text('security-observation-v3\n')
         if scenario=='corrupt-patch':patched.write_bytes(b'bad executable')
         if scenario=='corrupt-backup':backup.write_bytes(b'bad backup')
         if scenario=='corrupt-collector':collector.write_bytes(b'bad collector')
@@ -40,14 +40,14 @@ for scenario in ('active','unarmed','corrupt-patch','corrupt-backup','mount-fail
         stub='''#!/usr/bin/env python3
 import os,sys
 from pathlib import Path
-root=Path(os.environ['TEST_ROOT']);base=root/'lge/app_rw/smartlink/carplay';stage=base/'.moi3-altscreen-once-v2'
+root=Path(os.environ['TEST_ROOT']);base=root/'lge/app_rw/smartlink/carplay';stage=base/'.moi3-security-probe-v3'
 command=Path(sys.argv[0]).name
 with (root/'events').open('a') as log:log.write(command+' '+' '.join(sys.argv[1:])+'\\n')
 if command=='systemd-run':
     assert (base/'carplay.sh').read_bytes()==(stage/'factory-carplay.sh').read_bytes()
     assert (base/'carplay').read_bytes()==(root/'factory-copy').read_bytes()
     if os.environ['SCENARIO']=='logger-failure':sys.exit(1)
-    if os.environ['SCENARIO']!='logger-timeout':(root/'run/moi3-altscreen-once-v2/logger-ready').write_text('READY')
+    if os.environ['SCENARIO']!='logger-timeout':(root/'run/moi3-security-probe-v3/logger-ready').write_text('READY')
 elif command=='mount':
     assert (base/'carplay.sh').read_bytes()==(stage/'factory-carplay.sh').read_bytes()
     assert (stage/'CONSUMED').exists() and not (stage/'ARMED').exists()
@@ -73,7 +73,8 @@ elif command=='systemctl':
             assert startup.read_bytes()==backup.read_bytes()
             assert os.getxattr(startup,'user.startup-label')==b'factory-metadata'
             if scenario=='active':
-                assert 'ACTIVE:' in log and 'mount --bind' in history and 'systemctl stop' in history
+                assert 'DIAGNOSTIC ACTIVE:' in log and 'mount --bind' in history
+                assert 'systemctl stop' not in history and 'systemctl disable' not in history
                 assert target.read_bytes()==patched.read_bytes()
                 # A reboot removes the bind mount; simulate that, then show a
                 # second execution cannot consume another ticket or reactivate.

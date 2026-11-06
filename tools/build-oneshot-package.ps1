@@ -36,11 +36,14 @@ $handler=Join-Path $work 'altscreen_handler.so'
 $patched=Join-Path $work 'carplay-once'
 & (Join-Path $PSScriptRoot 'build-target-windows.ps1') -Zig $Zig -Source $HandlerSource -Sysroot $Sysroot -Inspector $Inspector -Output $handler
 if ($LASTEXITCODE -ne 0) {throw 'Handler build failed'}
+$probeInfo=& node $Inspector $handler | ConvertFrom-Json
+$observerExports=@('AES_CBCFrame_Init','AirPlayReceiverSessionScreen_SetChaChaSecurityInfo','AirPlayReceiverSessionScreen_SetSecurityInfo','AirPlayReceiverSessionSetHomeKitSecurityContext','AirPlayReceiverSessionSetSecurityInfo')
+if ((@($probeInfo.exports.name | Sort-Object) -join ',') -cne (($observerExports | Sort-Object) -join ',')) {throw 'This package accepts only the five-function observation shim'}
 & $Zig cc -target aarch64-linux-musl -static -O2 -Wall -Wextra -Werror -fno-sanitize=all $guardSource -o $guard
 if ($LASTEXITCODE -ne 0) {throw 'Metadata helper build failed'}
 $guardInfo=& node $Inspector $guard | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $guardInfo.architecture -ne 'AArch64' -or @($guardInfo.needed).Count -ne 0) {throw 'Helper is not standalone AArch64'}
-$dependency='/lge/app_rw/smartlink/carplay/.moi3-altscreen-once-v2/altscreen_handler.so'
+$dependency='/lge/app_rw/smartlink/carplay/.moi3-security-probe-v3/altscreen_handler.so'
 $patchInfo=& $Python (Join-Path $PSScriptRoot 'add-handler-dependency.py') $factoryBinary $patched $dependency | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0 -or $patchInfo.sourceSha256 -ne $expected.CARPLAY_SHA) {throw 'Executable-copy preparation failed'}
 $copyInfo=& node $Inspector $patched | ConvertFrom-Json
@@ -67,12 +70,13 @@ $files=[ordered]@{
     'payload/file-guard'=[IO.File]::ReadAllBytes($guard)
     'payload/carplay-once'=[IO.File]::ReadAllBytes($patched)
     'payload/altscreen_handler.so'=[IO.File]::ReadAllBytes($handler)
-    'ALTSCREEN_TEST_ONCE.txt'=$utf8.GetBytes("One parked AltScreen experiment. No persistent CarPlay executable replacement.`n")
+    'ALTSCREEN_TEST_ONCE.txt'=$utf8.GetBytes("Security observation only. No map output or native encoder stop. One session.`n")
     'READ-ME-FIRST.txt'=$utf8.GetBytes([IO.File]::ReadAllText((Resolve-Path -LiteralPath $Instructions)))
 }
 $fileHashes=[ordered]@{};foreach($name in $files.Keys){$fileHashes[$name]=Digest $files[$name]}
 $manifest=[ordered]@{
-    format='moi3-oneshot-experimental-v2';unit='3G5035842B';hardware='H56';software='0841'
+    format='moi3-security-probe-v3';unit='3G5035842B';hardware='H56';software='0841'
+    purpose='security-observation-only';clusterOutput=$false;nativeEncoderStop=$false
     factoryHashes=$expected;files=$fileHashes
     sourceHashes=@{handler=File-Digest $HandlerSource;fileGuard=File-Digest $guardSource;patcher=File-Digest (Join-Path $PSScriptRoot 'add-handler-dependency.py')}
     compilerVersion=(& $Zig version);containerSha256=File-Digest $containerPath

@@ -22,15 +22,16 @@ while [ "$i" -lt "$iterations" ]; do
             [ -f "$stage/$name" ] && [ ! -L "$stage/$name" ] || continue
             [ -L "$usb/$name" ] || cp "$stage/$name" "$usb/$name" 2>/dev/null || true
         done
-        for source in "$root/data/lge/smartlink/carplay/carplay-handler-v2.log" "$root/lge/app_rw/smartlink/carplay/carplay-handler-v2.log" "$root/tmp/carplay-handler-v2.log"; do
+        for source in "$root/data/lge/smartlink/carplay/carplay-security-probe-v3.log" "$root/lge/app_rw/smartlink/carplay/carplay-security-probe-v3.log" "$root/tmp/carplay-security-probe-v3.log"; do
             if [ -f "$source" ] && [ ! -L "$source" ]; then
-                [ -L "$usb/altscreen-handler.log" ] || cp "$source" "$usb/altscreen-handler.log" 2>/dev/null || true
+                [ -L "$usb/security-probe.txt" ] || cp "$source" "$usb/security-probe.txt" 2>/dev/null || true
             fi
         done
         if command -v journalctl >/dev/null 2>&1 && [ ! -L "$usb/carplay-journal.txt" ]; then
             journalctl -u carplay.service -b -n 150 --no-pager > "$usb/carplay-journal.txt" 2>&1
         fi
     done
+    sync
     i=$((i+1))
     sleep 2
 done

@@ -43,9 +43,9 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)
-        report=(usb/'altscreen-setup.txt').read_text();stage=base/'.moi3-altscreen-once-v2'
+        report=(usb/'altscreen-setup.txt').read_text();stage=base/'.moi3-security-probe-v3'
         if scenario=='arm-and-restore':
-            assert 'RESULT: ARMED' in report and 'SETUP COMPLETE' in report,report
+            assert 'RESULT: DIAGNOSTIC ARMED' in report and 'SETUP COMPLETE' in report,report
             assert (stage/'ARMED').is_file() and digest(startup)==values['BOOT_SHA']
             assert (stage/'factory-carplay.sh').read_bytes()==factory
             assert (usb/'previous-v1-boot-status.txt').read_text()=='retained previous test evidence'

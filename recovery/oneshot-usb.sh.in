@@ -14,7 +14,7 @@ REPORT="$USB/altscreen-setup.txt"
 [ ! -L "$REPORT" ] || exit 0
 run() {
     BASE="$R/lge/app_rw/smartlink/carplay"
-    STAGE="$BASE/.moi3-altscreen-once-v2"
+    STAGE="$BASE/.moi3-security-probe-v3"
     TARGET="$BASE/carplay"
     STARTUP="$BASE/carplay.sh"
     matches() {
@@ -22,7 +22,7 @@ run() {
         actual=$(sha256sum "$1" 2>/dev/null) || return 1
         [ "${actual%% *}" = "$2" ]
     }
-    echo 'MOI3 MU0841 one-session AltScreen setup'
+    echo 'MOI3 MU0841 one-session SECURITY OBSERVATION setup'
     [ "$(id -u)" = 0 ] || { echo 'ABORT: root required'; return 1; }
     for marker in PROBE_ONLY.txt SUMMARY_PROBE_ONLY.txt REVERT.txt; do
         [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed/old USB files'; return 1; }
@@ -36,8 +36,8 @@ run() {
         for name in boot-status.txt; do
             if [ -f "$STAGE/$name" ] && [ ! -L "$STAGE/$name" ] && [ ! -L "$USB/$name" ]; then cp "$STAGE/$name" "$USB/$name" || return 1; fi
         done
-        for source in "$R/data/lge/smartlink/carplay/carplay-handler-v2.log" "$BASE/carplay-handler-v2.log" "$R/tmp/carplay-handler-v2.log"; do
-            if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$USB/altscreen-handler.log" ]; then cp "$source" "$USB/altscreen-handler.log" || return 1; fi
+        for source in "$R/data/lge/smartlink/carplay/carplay-security-probe-v3.log" "$BASE/carplay-security-probe-v3.log" "$R/tmp/carplay-security-probe-v3.log"; do
+            if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$USB/security-probe.txt" ]; then cp "$source" "$USB/security-probe.txt" || return 1; fi
         done
         echo 'RESULT: COLLECTION ONLY — no activation or restoration attempted'
         return 0
@@ -113,10 +113,10 @@ run() {
     # Arm only after the recovery-first bootstrap is committed and verified.
     # An interruption before this point leaves a bootstrap that restores stock
     # without mounting the experimental executable.
-    printf 'one-session-v2\n' > "$STAGE/ARMED.pending" || return 1
+    printf 'security-observation-v3\n' > "$STAGE/ARMED.pending" || return 1
     mv "$STAGE/ARMED.pending" "$STAGE/ARMED" || return 1
     sync
-    echo 'RESULT: ARMED — factory executable unchanged; startup restores itself before the one-session test'
+    echo 'RESULT: DIAGNOSTIC ARMED — factory executable unchanged; startup restores itself before observation'
     echo 'Allow the updater to finish, then use Resume. Keep the stick connected for logs.'
 }
 if run > "$REPORT" 2>&1; then

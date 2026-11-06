@@ -8,6 +8,13 @@ on:
 permissions:
   contents: read
 jobs:
+  security-observation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise exact observation library against native fixture
+        run: python3 tests/test-security-probe.py deploy-usb/payload/security-probe.c
   service-lifecycle:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -29,6 +36,8 @@ jobs:
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard
           python3 tests/test-file-guard.py /tmp/file-guard
+      - name: Check observation-only security library interposition
+        run: python3 tests/test-security-probe.py deploy-usb/payload/security-probe.c
       - name: Check explicit dependency on a copied executable
         run: |
           python3 tests/test-elf-dependency.py tools/add-handler-dependency.py

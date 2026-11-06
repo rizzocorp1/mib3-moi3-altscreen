@@ -3,12 +3,12 @@
 # No set -e: a test failure must not make ExecStartPre fail/reboot repeatedly.
 R='@ROOT@'
 BASE="$R/lge/app_rw/smartlink/carplay"
-STAGE="$BASE/.moi3-altscreen-once-v2"
+STAGE="$BASE/.moi3-security-probe-v3"
 STARTUP="$BASE/carplay.sh"
 ORIGINAL="$STAGE/factory-carplay.sh"
 GUARD="$STAGE/file-guard"
 TARGET="$BASE/carplay"
-RAM="$R/run/moi3-altscreen-once-v2"
+RAM="$R/run/moi3-security-probe-v3"
 LOG="$STAGE/boot-status.txt"
 status() {
     printf '%s\n' "$*" >> "$LOG" 2>/dev/null || true
@@ -56,10 +56,6 @@ if ! matches "$TARGET" '@CARPLAY_SHA@' || ! matches "$STAGE/carplay-once" '@PATC
     status 'ABORT: executable or handler hash mismatch'
     exit 0
 fi
-if [ ! -f "$R/lib/systemd/system/multi-display.service" ] || [ -L "$R/lib/systemd/system/multi-display.service" ]; then
-    status 'ABORT: native encoder service is not the expected regular unit file'
-    exit 0
-fi
 if [ -e "$RAM" ] || [ -L "$RAM" ] || ! mkdir -m 700 "$RAM"; then
     status 'ABORT: RAM test directory already exists or cannot be created'
     exit 0
@@ -77,7 +73,7 @@ if ! matches "$STAGE/managed-log-collector.sh" '@COLLECTOR_SHA@'; then
     status 'ABORT: collector checksum mismatch; native executable retained'
     exit 0
 fi
-if ! systemd-run --unit=moi3-altscreen-log-v2 --property=RuntimeMaxSec=330 /bin/sh "$STAGE/managed-log-collector.sh" "$STAGE" "$RAM/logger-ready" @LOG_ITERATIONS@ "$R" >> "$LOG" 2>&1; then
+if ! systemd-run --unit=moi3-security-log-v3 --property=RuntimeMaxSec=330 /bin/sh "$STAGE/managed-log-collector.sh" "$STAGE" "$RAM/logger-ready" @LOG_ITERATIONS@ "$R" >> "$LOG" 2>&1; then
     status 'ABORT: independent logger could not start; native executable retained'
     exit 0
 fi
@@ -101,17 +97,5 @@ if ! matches "$TARGET" '@PATCH_SHA@'; then
     status 'ABORT: mounted executable checksum mismatch'
     exit 0
 fi
-# Stop only the native video encoder for this session; do not disable the unit.
-# The cluster ECU continues to render its own gauges and warning overlays.
-if ! systemctl stop multi-display.service; then
-    umount "$TARGET" 2>/dev/null || true
-    status 'ABORT: native encoder stop failed; removed test mount'
-    exit 0
-fi
-if systemctl is-active --quiet multi-display.service; then
-    umount "$TARGET" 2>/dev/null || true
-    status 'ABORT: native encoder still active; removed test mount'
-    exit 0
-fi
-status 'ACTIVE: one-session CarPlay copy mounted; native encoder stopped until reboot'
+status 'DIAGNOSTIC ACTIVE: observation-only CarPlay copy mounted; native encoder unchanged'
 exit 0
