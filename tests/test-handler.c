@@ -109,7 +109,49 @@ static void test_receiver(void) {
         assert(!g_alt_thread_created && g_alt_listen_fd==-1 && g_alt_client_fd==-1 && !g_alt_aes_valid);
     }
 }
+typedef struct { const char *items[16]; int64_t count; } FeatureArray;
+static FeatureArray feature_copy;
+static void *feature_stock, *feature_committed;
+static int feature_fail_copy, feature_fail_append;
+static void *feature_string(const void *a,const char *s,uint32_t e) {(void)a;(void)e;return (void *)s;}
+static const void *feature_get(const void *d,const void *k) {(void)d;(void)k;return feature_stock;}
+static void feature_set(void *d,const void *k,const void *v) {(void)d;(void)k;feature_committed=(void *)v;}
+static void feature_release(const void *p) {(void)p;}
+static void *feature_clone(const void *a,int64_t n,const void *p) {
+    (void)a;(void)n;if(feature_fail_copy)return NULL;feature_copy=*(const FeatureArray *)p;return &feature_copy;
+}
+static int64_t feature_count(const void *p) {return ((const FeatureArray *)p)->count;}
+static const void *feature_at(const void *p,int64_t n) {return ((const FeatureArray *)p)->items[n];}
+static int feature_cstring(const void *p,char *b,int64_t n,uint32_t e) {(void)e;return snprintf(b,(size_t)n,"%s",(const char *)p)<n;}
+static int32_t feature_append(void **p,const char *s,size_t n) {
+    (void)n;if(feature_fail_append)return -1;
+    if(!*p){memset(&feature_copy,0,sizeof(feature_copy));*p=&feature_copy;}
+    FeatureArray *a=*p;assert(a->count<16);a->items[a->count++]=s;return 0;
+}
+static void test_factory_features(void) {
+    s_CFStringCreateWithCString=feature_string;s_CFDictionaryGetValue=feature_get;
+    s_CFDictionarySetValue=feature_set;s_CFRelease=feature_release;
+    s_CFArrayCreateMutableCopy=feature_clone;s_CFArrayGetCount=feature_count;
+    s_CFArrayGetValueAtIndex=feature_at;s_CFStringGetCString=feature_cstring;
+    s_CFArrayEnsureCreatedAndAppendCString=feature_append;
+    FeatureArray original={{"factoryNavigation","factoryFeature"},2};feature_stock=&original;
+    set_reference_enabled_features(&original,0);
+    assert(feature_committed==&feature_copy && feature_copy.count==3 && original.count==2);
+    assert(!strcmp(feature_copy.items[0],"factoryNavigation") && !strcmp(feature_copy.items[2],"altScreen"));
+    FeatureArray augmented=feature_copy;feature_stock=&augmented;
+    set_reference_enabled_features(&original,1);assert(feature_copy.count==4 && augmented.count==3);
+    augmented=feature_copy;feature_stock=&augmented;
+    set_reference_enabled_features(&original,1);assert(feature_copy.count==4);
+    feature_committed=NULL;feature_fail_copy=1;
+    set_reference_enabled_features(&original,1);assert(!feature_committed);feature_fail_copy=0;
+    feature_stock=&original;feature_fail_append=1;
+    set_reference_enabled_features(&original,1);assert(!feature_committed && original.count==2);
+    feature_fail_append=0;feature_stock=NULL;
+    set_reference_enabled_features(&original,0);assert(feature_copy.count==1);
+    puts("PASS: factory features preserved, deduplicated and unchanged on allocation failure");
+}
 int main(int argc,char **argv) {
+    test_factory_features();
     test_mux();test_parser();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));

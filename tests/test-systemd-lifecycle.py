@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix='moi3-lifecycle-') as directory:
     root=Path(directory);root.chmod(0o755)
     def script(name,content):
         file=root/name;file.write_text('#!/bin/sh\nset -eu\n'+content);file.chmod(0o755);return file
-    legacy=script('legacy.sh',f'touch {root}/legacy-ready\nsleep 2\ntouch {root}/legacy-survived\n')
+    legacy=script('legacy.sh',f'touch {root}/legacy-ready\nwhile [ ! -f {root}/main-started ]; do sleep .1; done\nsleep .5\ntouch {root}/legacy-survived\n')
     managed=script('managed.sh',f'touch {root}/managed-ready\nsleep 2\ntouch {root}/managed-survived\n')
     pre=script('pre.sh',f'''/bin/sh {legacy} &
 systemd-run --unit={logger} /bin/sh {managed}

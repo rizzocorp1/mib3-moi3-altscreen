@@ -277,19 +277,34 @@ static int check_viewareas_enabled(void) {
 }
 
 static void set_reference_enabled_features(void *dict, int enable_viewareas) {
-    if (!dict || !s_CFArrayEnsureCreatedAndAppendCString) return;
-    void *enabled_features = NULL;
-    s_CFArrayEnsureCreatedAndAppendCString(&enabled_features, "altScreen", (size_t)-1);
-    if (enable_viewareas) {
-        s_CFArrayEnsureCreatedAndAppendCString(&enabled_features, "viewAreas", (size_t)-1);
-    }
+    if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
+        !s_CFDictionarySetValue || !s_CFRelease || !s_CFArrayGetCount ||
+        !s_CFArrayGetValueAtIndex || !s_CFStringGetCString) return;
     void *k_enabled = s_cf("enabledFeatures");
-    if (k_enabled && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(dict, k_enabled, enabled_features);
-        if (s_CFRelease) s_CFRelease(k_enabled);
+    if (!k_enabled) return;
+    void *stock = (void *)s_CFDictionaryGetValue(dict, k_enabled);
+    void *enabled_features = stock ? array_clone(stock) : NULL;
+    if (stock && !enabled_features) { s_CFRelease(k_enabled); return; }
+    const char *wanted[] = {"altScreen", "viewAreas"};
+    int ok = 1;
+    for (int feature = 0; feature < (enable_viewareas ? 2 : 1); feature++) {
+        int found = 0;
+        int64_t count = enabled_features ? s_CFArrayGetCount(enabled_features) : 0;
+        for (int64_t i = 0; i < count; i++) {
+            char value[128];
+            if (s_CFStringGetCString(s_CFArrayGetValueAtIndex(enabled_features, i), value,
+                                    sizeof(value), 0x08000100) && !strcmp(value, wanted[feature])) {
+                found = 1; break;
+            }
+        }
+        if (!found && s_CFArrayEnsureCreatedAndAppendCString(&enabled_features,
+                       wanted[feature], (size_t)-1) != 0) { ok = 0; break; }
     }
+    /* Commit only the complete copy; allocation failure leaves stock untouched. */
+    if (ok && enabled_features) s_CFDictionarySetValue(dict, k_enabled, enabled_features);
+    s_CFRelease(k_enabled);
     if (enabled_features && s_CFRelease) s_CFRelease(enabled_features);
-    log_msg("SERVERINFO", "enabledFeatures configurado com ['altScreen'%s]", enable_viewareas ? ", 'viewAreas'" : "");
+    log_msg("SERVERINFO", "enabledFeatures: factory list preserved, augmentation %s", ok ? "complete" : "aborted");
 }
 
 static void add_reference_viewarea(void *alt) {
@@ -1318,7 +1333,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
     log_msg("SETUP", "Stock AirPlayReceiverSessionSetup ret=%d, outResponse=%p",
             ret, (outResponse ? *outResponse : NULL));
 
-    if (ret == 0 && outResponse && *outResponse) {
+    if (ret == 0 && has_alt && outResponse && *outResponse) {
         int use_va = check_viewareas_enabled();
         set_reference_enabled_features(*outResponse, use_va);
 
