@@ -397,7 +397,9 @@ int32_t AES_CBCFrame_Init(void *ctx, const uint8_t key[16], const uint8_t iv[16]
         real_AES_CBCFrame_Init = (AES_CBCFrame_Init_fn)dlsym(RTLD_NEXT, "AES_CBCFrame_Init");
     }
 
-    if (key && !encrypt) {
+    if (!real_AES_CBCFrame_Init) return -1;
+    int32_t result = real_AES_CBCFrame_Init(ctx, key, iv, encrypt);
+    if (result == 0 && key && !encrypt) {
         pthread_mutex_lock(&g_crypto_lock);
         memcpy(g_master_key, key, 16);
         g_master_valid = 1;
@@ -405,10 +407,7 @@ int32_t AES_CBCFrame_Init(void *ctx, const uint8_t key[16], const uint8_t iv[16]
         log_msg("CRYPTO", "Chave mestre CarPlay AES-128 capturada com sucesso!");
     }
 
-    if (real_AES_CBCFrame_Init) {
-        return real_AES_CBCFrame_Init(ctx, key, iv, encrypt);
-    }
-    return 0;
+    return result;
 }
 
 /* =============================================================================
