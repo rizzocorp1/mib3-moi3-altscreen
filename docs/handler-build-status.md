@@ -1,22 +1,15 @@
-# Handler engineering status
+# Atlas MU0841 experimental test status
 
-Corrected source is in PR #4, branch fix/handler-offline. This is not an installable vehicle payload. Pre-existing .so files in the upstream repository have not been rebuilt and do not correspond to our edits.
+The first engineering-container vehicle probe completed as root. The installed CarPlay executable, startup script and OS-release hashes exactly match the extracted MU0841 baseline. The user accepted the known four speech-data resets. No repeated entry-point-only probe is required.
 
-## Completed validation
+A local-only one-session AltScreen test package is built: moi3-altscreen-once-0841-EXPERIMENTAL.zip, SHA-256 b95dc78e908a893d724008adf320c4982700229223294196694adb73d5c5d6cd. It includes a firmware-derived CarPlay copy and must not be published. Its Data/Meta bytes match the audited engineering container, it contains only MIB3OI_POST_SCRIPT, all seven declared payload hashes verify, and its generated scripts match the current templates.
 
-GitHub Actions run 42157534258 compiled the entire changed handler as a Linux host shared library and compiled the test harness with AddressSanitizer and UndefinedBehaviorSanitizer. Packet tests covered PCR encoding at multiple PES/TS boundary sizes, payload reconstruction and clock wrap. AVC tests covered zero-length/truncated NALs, one-byte NAL lengths, malformed config rejection and IDR parameter-set insertion after an AUD. Receiver tests covered missing/failed crypto prerequisites, blocked accept shutdown, connected receive shutdown, failed decryption and 25 start/stop cycles. A generated 1280x480 H.264 fixture passed through the actual muxer and FFmpeg decoded the resulting MPEG-TS with one counted frame.
+The handler is built against the matching factory glibc 2.23 libraries and uses incoming screen NTP intervals with monotonic fallback. A static AArch64 helper preserves Linux ownership, modes, ACLs and extended attributes for the narrow startup-file backup and atomic replacement. This avoids requiring GNU tar for the new installer; the older whole-scope snapshot prototype still requires GNU tar and is not used here.
 
-These checks establish host behavior only. They do not validate AArch64 factory ABI compatibility or cluster reception.
+The test copies the executable, adds an explicit handler dependency without instruction patches, and prepares a RAM copy for a one-session bind mount. The original executable is never overwritten on disk. The bootstrap restores the original startup script before consuming the activation ticket or mounting the test copy. It stops the native multi-display encoder for the session without disabling its service. Reboot removes the mount and returns to the factory path. Explicit startup restoration and log-only modes are included; backup/test assets are retained for review.
 
-## Factory inspection and target build
+GitHub Actions run 42261364228 passed at source commit 8a18ef16c743c38b3fa1148c4776539124bde683. It covers handler sanitizers, malformed AVC/crypto/receiver tests, relative frame timing, all 30 frames of a moving H.264 mux/decode fixture, real file copy/restore with ACLs and xattrs, explicit executable dependency loading without LD_PRELOAD, recovery-first boot ordering/ticket consumption, mount/service failure paths, setup refusal, arming and explicit restoration. Service and mount operations are mocked in host integration checks; no vehicle activation is claimed.
 
-The matching 0841 archive has downloaded successfully and passed its integrity test. Its manifest includes US variants. See factory-0841-audit.md for its hash, extracted runtime and hook evidence, successful factory-linked AArch64 candidate, signature checks and rejected recovery carriers.
+Remaining hardware questions: SMACK execution/mapping permissions, normal-boot mount behavior, iPhone negotiation and encrypted frame reception, actual cluster reception and view geometry. The session-level encoder stop is not a production navigation-focus handoff implementation. The test may fail or reboot infotainment; automatic recovery is designed and host-tested, not hardware-proven. It is a narrow startup recovery mechanism, not a complete partition or vehicle backup, and does not undo the earlier speech resets.
 
-GitHub Actions run 42168729717 passed sanitizer checks and a 30-frame moving H.264 mux/decode test after the factory-based derivation return-type correction.
-
-tools/build-target-windows.ps1 records compiler, source, factory-library and output hashes for the local AArch64 build. The candidate imports only GLIBC_2.17 symbols from the factory glibc 2.23 runtime. It has not been executed on the vehicle.
-
-The remaining gaps are the one-shot launch/restore mechanism, native cluster-channel ownership and hand-back, incoming frame timing, concurrent-session behavior and on-car validation. The engineering USB trigger deletes four speech paths before our backup entry point. The two R9900 recovery packages contain bootloader writes and are unsuitable substitutes. No claim of complete stock rollback is made.
-
-The container-free summary-hook probe avoids the engineering package and contains no firmware or deletion script. It is an execution/menu-path experiment only; no general no-update route to the summary screen is established. See summary-probe.md. The user explicitly declined the speech-reset route.
-
+See altscreen-test.md for the parked test and recovery instructions. Do not run old upstream precompiled payloads or install the R9900 recovery packages.
