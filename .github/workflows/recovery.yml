@@ -1,0 +1,20 @@
+name: Recovery regression tests
+on:
+  pull_request:
+    branches: [development]
+  push:
+    branches: [development, recovery/stock-snapshot]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mock-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check shell syntax and scoped restore
+        run: |
+          sh -n recovery/stock-snapshot.sh
+          sh recovery/test-snapshot.sh
+          sh -n recovery/usb-entry.sh
+          sh recovery/test-usb-entry.sh
