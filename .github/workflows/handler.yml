@@ -28,6 +28,7 @@ jobs:
       - name: Check recovery-first one-shot boot
         run: |
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/oneshot-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/oneshot-usb.sh.in recovery/oneshot-boot.sh.in
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |

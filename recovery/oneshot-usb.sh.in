@@ -1,8 +1,9 @@
 #!/bin/sh
 # Generated activation entry; known engineering-container speech resets precede it.
 umask 077
+R='@ROOT@'
 USB=''
-for candidate in /tmp/USB/PORT1/PART1 /tmp/USB/PORT2/PART1; do
+for candidate in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
     if [ -f "$candidate/ALTSCREEN_TEST_ONCE.txt" ] && [ -f "$candidate/fix_hw_partnumber.sh" ]; then
         [ -z "$USB" ] || exit 0
         USB=$candidate
@@ -12,7 +13,7 @@ done
 REPORT="$USB/altscreen-setup.txt"
 [ ! -L "$REPORT" ] || exit 0
 run() {
-    BASE=/lge/app_rw/smartlink/carplay
+    BASE="$R/lge/app_rw/smartlink/carplay"
     STAGE="$BASE/.moi3-altscreen-once-v1"
     TARGET="$BASE/carplay"
     STARTUP="$BASE/carplay.sh"
@@ -26,7 +27,44 @@ run() {
     for marker in PROBE_ONLY.txt SUMMARY_PROBE_ONLY.txt REVERT.txt; do
         [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed/old USB files'; return 1; }
     done
-    matches "$TARGET" '@CARPLAY_SHA@' && matches "$STARTUP" '@STARTUP_SHA@' && matches /etc/os-release '@OS_SHA@' || { echo 'ABORT: vehicle baseline mismatch'; return 1; }
+    matches "$R/etc/os-release" '@OS_SHA@' && matches "$USB/payload/file-guard" '@GUARD_SHA@' || { echo 'ABORT: OS/helper checksum mismatch'; return 1; }
+    if [ -e "$USB/COLLECT_ONLY.txt" ] && [ -e "$USB/RESTORE_FACTORY_STARTUP.txt" ]; then
+        echo 'ABORT: choose collection or restoration, not both'; return 1
+    fi
+    if [ -f "$USB/COLLECT_ONLY.txt" ] && [ ! -L "$USB/COLLECT_ONLY.txt" ]; then
+        [ ! -L "$STAGE" ] || return 1
+        for name in boot-status.txt; do
+            if [ -f "$STAGE/$name" ] && [ ! -L "$STAGE/$name" ] && [ ! -L "$USB/$name" ]; then cp "$STAGE/$name" "$USB/$name" || return 1; fi
+        done
+        for source in "$R/data/lge/smartlink/carplay/carplay-handler.log" "$BASE/carplay-handler.log" "$R/tmp/carplay-handler.log"; do
+            if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$USB/altscreen-handler.log" ]; then cp "$source" "$USB/altscreen-handler.log" || return 1; fi
+        done
+        echo 'RESULT: COLLECTION ONLY — no activation or restoration attempted'
+        return 0
+    fi
+    if [ -f "$USB/RESTORE_FACTORY_STARTUP.txt" ] && [ ! -L "$USB/RESTORE_FACTORY_STARTUP.txt" ]; then
+        matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' || { echo 'ABORT: verified baseline backup missing'; return 1; }
+        if ! matches "$STARTUP" '@STARTUP_SHA@' && ! matches "$STARTUP" '@BOOT_SHA@'; then
+            echo 'ABORT: unknown startup contents; refusing to overwrite'; return 1
+        fi
+        if ! matches "$TARGET" '@CARPLAY_SHA@' && ! matches "$TARGET" '@PATCH_SHA@'; then
+            echo 'ABORT: unknown CarPlay executable'; return 1
+        fi
+        RECOVERY="$R/tmp/moi3-recovery-$$"
+        [ ! -e "$RECOVERY" ] && [ ! -L "$RECOVERY" ] || return 1
+        cp "$USB/payload/file-guard" "$RECOVERY" && chmod 700 "$RECOVERY" || return 1
+        matches "$RECOVERY" '@GUARD_SHA@' || return 1
+        "$RECOVERY" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" || return 1
+        "$RECOVERY" replace "$STAGE/factory-carplay.sh" "$STARTUP" || return 1
+        matches "$STARTUP" '@STARTUP_SHA@' || return 1
+        if matches "$TARGET" '@PATCH_SHA@'; then umount "$TARGET" || return 1; fi
+        matches "$TARGET" '@CARPLAY_SHA@' || return 1
+        rm -f "$STAGE/ARMED" "$STAGE/ARMED.pending"
+        sync
+        echo 'RESULT: FACTORY STARTUP RESTORED — backup/log assets retained; use normal updater completion/Resume'
+        return 0
+    fi
+    matches "$TARGET" '@CARPLAY_SHA@' && matches "$STARTUP" '@STARTUP_SHA@' || { echo 'ABORT: vehicle baseline mismatch'; return 1; }
     matches "$USB/payload/file-guard" '@GUARD_SHA@' && matches "$USB/payload/carplay-once" '@PATCH_SHA@' && matches "$USB/payload/altscreen_handler.so" '@HANDLER_SHA@' && matches "$USB/payload/oneshot-boot.sh" '@BOOT_SHA@' || { echo 'ABORT: USB payload checksum mismatch'; return 1; }
     [ ! -e "$STAGE" ] && [ ! -L "$STAGE" ] || { echo 'ABORT: previous test assets exist; preserve and review them'; return 1; }
     # Stage new files only. If app_rw is read-only, fail without remounting it.
@@ -43,7 +81,7 @@ run() {
     "$GUARD" clone "$STARTUP" "$STAGE/startup-new.sh" || return 1
     "$GUARD" replace "$USB/payload/oneshot-boot.sh" "$STAGE/startup-new.sh" || return 1
     "$GUARD" create "$USB/payload/carplay-once" "$STAGE/carplay-once" "$TARGET" || return 1
-    "$GUARD" create "$USB/payload/altscreen_handler.so" "$STAGE/altscreen_handler.so" /lge/app_rw/lib64/libAirPlay.so || return 1
+    "$GUARD" create "$USB/payload/altscreen_handler.so" "$STAGE/altscreen_handler.so" "$R/lge/app_rw/lib64/libAirPlay.so" || return 1
     matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$GUARD" '@GUARD_SHA@' && matches "$STAGE/carplay-once" '@PATCH_SHA@' && matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@' && matches "$STAGE/startup-new.sh" '@BOOT_SHA@' || { echo 'ABORT: staged checksum mismatch'; return 1; }
     "$GUARD" same-meta "$STARTUP" "$STAGE/factory-carplay.sh" || return 1
     # USB contains a copy of the baseline bytes; Linux metadata remains in the
