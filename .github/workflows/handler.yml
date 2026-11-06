@@ -22,6 +22,9 @@ jobs:
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard
           python3 tests/test-file-guard.py /tmp/file-guard
+      - name: Check explicit dependency on a copied executable
+        run: |
+          python3 tests/test-elf-dependency.py tools/add-handler-dependency.py
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |
