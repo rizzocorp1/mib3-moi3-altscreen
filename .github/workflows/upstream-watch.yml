@@ -1,0 +1,51 @@
+name: Track upstream research
+on:
+  schedule:
+    - cron: '23 14 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+concurrency:
+  group: upstream-watch
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      FORK: ${{ github.repository }}
+    steps:
+      - name: Fast-forward mirror and propose review
+        shell: bash
+        run: |
+          set -euo pipefail
+          upstream=lipedesign/mib3-moi3-altscreen
+          sha=$(gh api "repos/$upstream/commits/main" --jq .sha)
+          ours=$(gh api "repos/$FORK/git/ref/heads/main" --jq .object.sha)
+          if [ "$sha" != "$ours" ]; then
+            gh api --method PATCH "repos/$FORK/git/refs/heads/main" -f sha="$sha" -F force=false
+          fi
+          ahead=$(gh api "repos/$FORK/compare/development...main" --jq .ahead_by)
+          if [ "$ahead" -gt 0 ]; then
+            count=$(gh pr list --repo "$FORK" --base development --head main --state open --json number --jq length)
+            if [ "$count" -eq 0 ]; then
+              gh pr create --repo "$FORK" --base development --head main \
+                --title 'Review upstream MOI3 updates' \
+                --body "Upstream main is now $sha. Review changes and run offline validation before merging. No automatic merge is enabled."
+            fi
+          fi
+      - name: Track companion repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          for repo in moi3-cluster-pipeline-re mib3-moi3-lg-research; do
+            sha=$(gh api "repos/lipedesign/$repo/commits/HEAD" --jq .sha)
+            title="Upstream research: $repo at $sha"
+            count=$(gh issue list --repo "$FORK" --state all --search "$sha in:title" --json number --jq length)
+            if [ "$count" -eq 0 ]; then
+              gh issue create --repo "$FORK" --title "$title" \
+                --body "Review https://github.com/lipedesign/$repo/commit/$sha for changes relevant to our MOI3 work. The first run records the current baseline; later runs report newly observed heads."
+            fi
+          done
