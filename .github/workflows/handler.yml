@@ -21,8 +21,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-          ffmpeg -v error -f lavfi -i color=size=1280x480:rate=30 -frames:v 1 -c:v libx264 -f h264 /tmp/frame.h264
+          ffmpeg -v error -f lavfi -i testsrc2=size=1280x480:rate=30 -frames:v 30 -c:v libx264 -preset ultrafast -tune zerolatency -x264-params aud=1:keyint=10 -f h264 /tmp/frame.h264
           timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts
-          ffmpeg -v error -i /tmp/cluster.ts -frames:v 1 -f null -
+          ffmpeg -v error -i /tmp/cluster.ts -f null -
           count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
-          test "$count" = 1
+          test "$count" = 30

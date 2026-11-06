@@ -115,7 +115,27 @@ int main(int argc,char **argv) {
         FILE *in=fopen(argv[1],"rb"); assert(in); size_t length=fread(captured,1,sizeof(captured),in);
         assert(!ferror(in) && feof(in));fclose(in);assert(length>0);
         uint8_t *frame=malloc((size_t)length);assert(frame);memcpy(frame,captured,(size_t)length);
-        reset_capture(90000);emit_pat_packet();emit_pmt_packet();mux_and_stream_h264_frame(frame,(size_t)length,90000);free(frame);
+        reset_capture(90000);
+        size_t start=0; unsigned frames=0;
+        /* Fixture encoder emits AUD NALs: preserve one access unit per PES and
+         * advance both PCR and PTS by 3000 ticks for each 30-fps frame. */
+        for(size_t i=0;i+4<length;i++) {
+            size_t prefix=0;
+            if(frame[i]==0 && frame[i+1]==0 && frame[i+2]==1) prefix=3;
+            else if(frame[i]==0 && frame[i+1]==0 && frame[i+2]==0 && frame[i+3]==1) prefix=4;
+            if(!prefix) continue;
+            if((frame[i+prefix]&31)==9 && i>start) {
+                expected_rtp=90000+frames*3000;
+                if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
+                mux_and_stream_h264_frame(frame+start,i-start,expected_rtp);
+                frames++;start=i;
+            }
+            i+=prefix-1;
+        }
+        expected_rtp=90000+frames*3000;
+        if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
+        mux_and_stream_h264_frame(frame+start,length-start,expected_rtp);free(frame);frames++;
+        printf("Fixture access units muxed: %u\n",frames);
         FILE *out=fopen(argv[2],"wb");assert(out);assert(fwrite(captured,1,captured_len,out)==captured_len);fclose(out);
     }
     puts("PASS: PCR/PES, malformed AVC, config length, IDR parameter sets, crypto failures and receiver restart/stop");
