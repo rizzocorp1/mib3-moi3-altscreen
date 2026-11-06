@@ -1,5 +1,8 @@
 # Atlas MU0841 AltScreen v2 experiment
 
+> V2 VEHICLE RESULT: This package is retired. Its boot script restored factory startup but aborted before mounting the test copy or stopping the encoder: factory systemd-run rejected TimeoutStopSec=5. CarPlay and factory turn-by-turn remained functional. Retained v1 logs prove v1 activated and the iPhone requested stream 111, but the receiver refused crypto prerequisites. No video reception or cluster map is established. The source removes the unsupported option and adds non-secret security-path diagnostics; no replacement USB is ready. The source now differs from the archived v2 ZIP below.
+
+
 The user confirmed wired CarPlay and factory Apple Maps turn-by-turn working after explicit v1 recovery. This confirms the reported affected functions recovered, not a complete vehicle audit.
 
 V1 is retired. Its vehicle test did not show maps and temporarily disrupted CarPlay; only its setup report returned. Whether the test bootstrap actually activated is unresolved. An ExecStartPre collector lifecycle problem was suspected, but a current systemd 255 runner allowed that background child to survive, so termination on the factory manager is not established.

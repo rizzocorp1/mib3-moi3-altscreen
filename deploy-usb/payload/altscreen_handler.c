@@ -430,6 +430,28 @@ int32_t AES_CBCFrame_Init(void *ctx, const uint8_t key[16], const uint8_t iv[16]
     return result;
 }
 
+/* Observability only: preserve native security setup and never log key bytes.
+ * Signatures/return values verified against this MU0841 library's call sites. */
+typedef int32_t (*session_security_fn)(void *, const uint8_t *, const uint8_t *);
+static session_security_fn real_session_security = NULL;
+int32_t AirPlayReceiverSessionSetSecurityInfo(void *session, const uint8_t *key, const uint8_t *iv) {
+    if (!real_session_security)
+        real_session_security = (session_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetSecurityInfo");
+    int32_t result = real_session_security ? real_session_security(session, key, iv) : -1;
+    log_msg("SECURITY", "Native legacy session security: key_present=%d iv_present=%d status=%d",
+            key != NULL, iv != NULL, result);
+    return result;
+}
+typedef int32_t (*homekit_security_fn)(void *, void *);
+static homekit_security_fn real_homekit_security = NULL;
+int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *context) {
+    if (!real_homekit_security)
+        real_homekit_security = (homekit_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetHomeKitSecurityContext");
+    int32_t result = real_homekit_security ? real_homekit_security(session, context) : -1;
+    log_msg("SECURITY", "Native HomeKit session context: present=%d status=%d", context != NULL, result);
+    return result;
+}
+
 /* =============================================================================
  * Camada 3: MPEG-TS & RTP Multicast Pipeline para [ff14::2:4]:42800 (eth0.5)
  * PIDs Fixos de Hardware do AID: Program 100, PMT 1000, Video/PCR PID 17
@@ -1059,18 +1081,24 @@ static int start_alt_receiver(uint64_t connection_id) {
     stop_alt_receiver_locked();
     pthread_mutex_lock(&g_crypto_lock);
     uint8_t key[16] = {0}, iv[16] = {0};
+    int master_present = g_master_valid;
+    int derive_present = s_AirPlay_DeriveAESKeySHA512ForScreen != NULL;
+    int init_present = s_AES_CTR_Init != NULL;
+    int update_present = s_AES_CTR_Update != NULL;
+    int32_t init_status = -1;
     int ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen &&
         s_AES_CTR_Init && s_AES_CTR_Update;
     if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(
         g_master_key, sizeof(g_master_key), connection_id, key, iv);
-    if (ready) ready = s_AES_CTR_Init(&g_alt_aes, key, iv) == 0;
+    if (ready) { init_status = s_AES_CTR_Init(&g_alt_aes, key, iv); ready = init_status == 0; }
     memset(key, 0, sizeof(key));
     memset(iv, 0, sizeof(iv));
     if (!ready) {
         memset(&g_alt_aes, 0, sizeof(g_alt_aes));
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
-        log_msg("RECV111", "Refusing stream: crypto prerequisites/initialization failed");
+        log_msg("RECV111", "Refusing stream: AES prerequisites master=%d derive=%d init=%d update=%d init_status=%d",
+                master_present, derive_present, init_present, update_present, init_status);
         return -1;
     }
     g_alt_aes_valid = 1;

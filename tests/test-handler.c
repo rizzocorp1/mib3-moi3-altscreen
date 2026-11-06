@@ -150,8 +150,34 @@ static void test_factory_features(void) {
     set_reference_enabled_features(&original,0);assert(feature_copy.count==1);
     puts("PASS: factory features preserved, deduplicated and unchanged on allocation failure");
 }
+static int32_t native_security_status;
+static void *expected_security_session, *expected_security_context;
+static const uint8_t *expected_security_key, *expected_security_iv;
+static int32_t native_security_stub(void *s,const uint8_t *k,const uint8_t *v) {
+    assert(s==expected_security_session && k==expected_security_key && v==expected_security_iv);
+    return native_security_status;
+}
+static int32_t native_homekit_stub(void *s,void *c) {
+    assert(s==expected_security_session && c==expected_security_context);return native_security_status;
+}
+static void test_security_observers(void) {
+    uint8_t key[16]={1},iv[16]={2};int session,context;
+    expected_security_session=&session;expected_security_context=&context;
+    expected_security_key=key;expected_security_iv=iv;
+    real_session_security=native_security_stub;real_homekit_security=native_homekit_stub;
+    for(int i=0;i<2;i++) {
+        native_security_status=i ? -37 : 0;
+        assert(AirPlayReceiverSessionSetSecurityInfo(&session,key,iv)==native_security_status);
+        assert(AirPlayReceiverSessionSetHomeKitSecurityContext(&session,&context)==native_security_status);
+        assert(key[0]==1 && iv[0]==2);
+    }
+    expected_security_context=NULL;
+    assert(AirPlayReceiverSessionSetHomeKitSecurityContext(&session,NULL)==native_security_status);
+    puts("PASS: security observers preserve native arguments, keys and success/failure returns");
+}
 int main(int argc,char **argv) {
     test_factory_features();
+    test_security_observers();
     test_mux();test_parser();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
