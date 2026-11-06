@@ -1,4 +1,6 @@
 # Atlas MU0841 experimental test status
+> RETIRED AFTER VEHICLE FAILURE (2026-11-06): The v1 package below did not produce cluster maps and temporarily disrupted CarPlay. Explicit startup recovery completed; factory turn-by-turn verification is pending. Do not deploy this ZIP again. Host tests below did not establish successful vehicle operation. Replacement logging and feature-preservation changes are in development.
+
 
 The first engineering-container vehicle probe completed as root. The installed CarPlay executable, startup script and OS-release hashes exactly match the extracted MU0841 baseline. The user accepted the known four speech-data resets. No repeated entry-point-only probe is required.
 

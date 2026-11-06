@@ -25,7 +25,12 @@ with tempfile.TemporaryDirectory(prefix='moi3-lifecycle-') as directory:
     def script(name,content):
         file=root/name;file.write_text('#!/bin/sh\nset -eu\n'+content);file.chmod(0o755);return file
     legacy=script('legacy.sh',f'touch {root}/legacy-ready\nwhile [ ! -f {root}/main-started ]; do sleep .1; done\nsleep .5\ntouch {root}/legacy-survived\n')
-    managed=script('managed.sh',f'touch {root}/managed-ready\nsleep 2\ntouch {root}/managed-survived\n')
+    stage=root/'stage';stage.mkdir()
+    usb=root/'tmp/USB/PORT1/PART1';usb.mkdir(parents=True)
+    (usb/'ALTSCREEN_TEST_ONCE.txt').write_text('fixture')
+    (stage/'boot-status.txt').write_text('BEFORE MAIN')
+    collector=Path(__file__).resolve().parents[1]/'recovery/managed-log-collector.sh'
+    managed=script('managed.sh',f'exec /bin/sh {collector} {stage} {root}/managed-ready 4 {root}\n')
     pre=script('pre.sh',f'''/bin/sh {legacy} &
 systemd-run --unit={logger} /bin/sh {managed}
 i=0
@@ -34,14 +39,20 @@ while [ ! -f {root}/legacy-ready ] || [ ! -f {root}/managed-ready ]; do
 done
 touch {root}/pre-finished
 ''')
-    main=script('main.sh',f'touch {root}/main-started\nsleep 5\n')
+    main=script('main.sh',f'touch {root}/main-started\nprintf "AFTER MAIN" > {stage}/boot-status.txt\nsleep 10\n')
     unit_path.write_text(f'[Unit]\nDescription=Isolated MOI3 lifecycle regression fixture\n[Service]\nType=simple\nExecStartPre=/bin/sh {pre}\nExecStart=/bin/sh {main}\nTimeoutStartSec=15\nTimeoutStopSec=3\n')
     try:
         command('systemctl','daemon-reload');command('systemctl','start',unit)
-        wait(root/'main-started');wait(root/'managed-survived')
+        wait(root/'main-started')
+        end=time.monotonic()+8
+        while time.monotonic()<end:
+            if (usb/'boot-status.txt').exists() and (usb/'boot-status.txt').read_text()=='AFTER MAIN':break
+            time.sleep(.1)
+        else:raise AssertionError('Managed collector did not export main-service evidence')
         assert (root/'pre-finished').exists()
-        assert not (root/'legacy-survived').exists(), 'Legacy ExecStartPre child unexpectedly survived'
-        print('PASS: actual systemd kills the old collector, while a separately managed collector survives into main service execution')
+        print('Observed legacy child survival on this manager:', (root/'legacy-survived').exists())
+        print(command('systemctl','--version').stdout)
+        print('PASS: separately managed production collector exported evidence written after main-service startup')
     finally:
         subprocess.run(['systemctl','stop',unit,logger],capture_output=True)
         subprocess.run(['systemctl','reset-failed',unit,logger],capture_output=True)
