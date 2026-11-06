@@ -313,10 +313,10 @@ static void add_reference_viewarea(void *alt) {
     set_i64(view, "originXPixels", 0);
     set_i64(view, "originYPixels", 0);
 
-    set_i64(safe, "widthPixels", 1280);
-    set_i64(safe, "heightPixels", 480);
-    set_i64(safe, "originXPixels", 0);
-    set_i64(safe, "originYPixels", 0);
+    set_i64(safe, "widthPixels", 320);
+    set_i64(safe, "heightPixels", 320);
+    set_i64(safe, "originXPixels", 480);
+    set_i64(safe, "originYPixels", 64);
 
     void *k_safe = s_cf("safeArea");
     if (k_safe && s_CFDictionarySetValue) {
@@ -585,6 +585,7 @@ static void emit_pmt_packet(void) {
 
 static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k) {
     if (!frame_data || frame_len == 0) return;
+    g_rtp_ts = (uint32_t)pts_90k;
 
     size_t pes_header_len = 14;
     size_t pes_total_len = pes_header_len + frame_len;
@@ -633,7 +634,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
             ts_pkt[4] = 0x07;
             ts_pkt[5] = 0x10;
 
-            uint64_t pcr_base = pts_90k * 300;
+            uint64_t pcr_base = pts_90k & ((1ULL << 33) - 1);
             ts_pkt[6] = (uint8_t)((pcr_base >> 25) & 0xFF);
             ts_pkt[7] = (uint8_t)((pcr_base >> 17) & 0xFF);
             ts_pkt[8] = (uint8_t)((pcr_base >> 9) & 0xFF);
@@ -695,55 +696,79 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
  * ============================================================================= */
 static uint8_t g_sps_pps_buf[512];
 static size_t g_sps_pps_len = 0;
+static unsigned int g_nal_length_bytes = 4;
 
 static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
-    if (!avcc || len < 7) return;
+    g_sps_pps_len = 0;
+    if (!avcc || len < 7 || avcc[0] != 1) return;
+    unsigned int length_bytes = (avcc[4] & 3) + 1;
+    if (length_bytes == 3) return; /* reserved by AVCDecoderConfigurationRecord */
+    uint8_t config[sizeof(g_sps_pps_buf)];
 
     size_t out_pos = 0;
     uint8_t num_sps = avcc[5] & 0x1F;
     size_t pos = 6;
 
-    for (int i = 0; i < num_sps && pos + 2 <= len; i++) {
+    if (!num_sps) return;
+    for (int i = 0; i < num_sps; i++) {
+        if (pos + 2 > len) return;
         uint16_t sps_len = ((uint16_t)avcc[pos] << 8) | avcc[pos + 1];
         pos += 2;
-        if (pos + sps_len > len) break;
+        if (!sps_len || sps_len > len - pos) return;
 
-        if (out_pos + 4 + sps_len < sizeof(g_sps_pps_buf)) {
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x01;
-            memcpy(&g_sps_pps_buf[out_pos], &avcc[pos], sps_len);
+        if (out_pos + 4 + sps_len <= sizeof(config)) {
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x01;
+            memcpy(&config[out_pos], &avcc[pos], sps_len);
             out_pos += sps_len;
-        }
+        } else return;
         pos += sps_len;
     }
 
     if (pos < len) {
         uint8_t num_pps = avcc[pos++];
-        for (int i = 0; i < num_pps && pos + 2 <= len; i++) {
+        if (!num_pps) return;
+        for (int i = 0; i < num_pps; i++) {
+            if (pos + 2 > len) return;
             uint16_t pps_len = ((uint16_t)avcc[pos] << 8) | avcc[pos + 1];
             pos += 2;
-            if (pos + pps_len > len) break;
+            if (!pps_len || pps_len > len - pos) return;
 
-            if (out_pos + 4 + pps_len < sizeof(g_sps_pps_buf)) {
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x01;
-                memcpy(&g_sps_pps_buf[out_pos], &avcc[pos], pps_len);
+            if (out_pos + 4 + pps_len <= sizeof(config)) {
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x01;
+                memcpy(&config[out_pos], &avcc[pos], pps_len);
                 out_pos += pps_len;
-            }
+            } else return;
             pos += pps_len;
         }
-    }
+    } else return;
 
+    memcpy(g_sps_pps_buf, config, out_pos);
+    g_nal_length_bytes = length_bytes;
     g_sps_pps_len = out_pos;
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
 }
 
 static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestamp) {
-    if (!data || len < 4) return 0;
+    if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
+    /* Validate the entire access unit before emitting anything. In particular,
+     * zero-length NALs must not read data[len], and partial frames are rejected. */
+    size_t checked = 0, nals = 0;
+    int is_keyframe = 0;
+    while (checked < len) {
+        if (len - checked < g_nal_length_bytes) return -1;
+        uint32_t n = 0;
+        for (unsigned int i = 0; i < g_nal_length_bytes; i++) n = (n << 8) | data[checked++];
+        if (!n || n > len - checked) return -1;
+        if ((data[checked] & 0x1F) == 5) is_keyframe = 1;
+        checked += n;
+        nals++;
+    }
 
     init_cluster_network();
 
@@ -754,31 +779,20 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
                 len, (unsigned long long)timestamp);
     }
 
-    size_t annexb_capacity = len + g_sps_pps_len + 64;
+    size_t annexb_capacity = len + nals * (4 - g_nal_length_bytes) + g_sps_pps_len;
     uint8_t *annexb_frame = (uint8_t *)malloc(annexb_capacity);
     if (!annexb_frame) return 0;
 
     size_t annexb_pos = 0;
-    int is_keyframe = 0;
+    if (is_keyframe) {
+        memcpy(annexb_frame, g_sps_pps_buf, g_sps_pps_len);
+        annexb_pos = g_sps_pps_len;
+    }
 
     size_t in_pos = 0;
-    while (in_pos + 4 <= len) {
-        uint32_t nal_len = ((uint32_t)data[in_pos] << 24) |
-                           ((uint32_t)data[in_pos + 1] << 16) |
-                           ((uint32_t)data[in_pos + 2] << 8) |
-                           ((uint32_t)data[in_pos + 3]);
-        in_pos += 4;
-        if (in_pos + nal_len > len) break;
-
-        uint8_t nal_type = data[in_pos] & 0x1F;
-        if (nal_type == 5) {
-            is_keyframe = 1;
-        }
-
-        if (is_keyframe && annexb_pos == 0 && g_sps_pps_len > 0) {
-            memcpy(&annexb_frame[annexb_pos], g_sps_pps_buf, g_sps_pps_len);
-            annexb_pos += g_sps_pps_len;
-        }
+    while (in_pos < len) {
+        uint32_t nal_len = 0;
+        for (unsigned int i = 0; i < g_nal_length_bytes; i++) nal_len = (nal_len << 8) | data[in_pos++];
 
         annexb_frame[annexb_pos++] = 0x00;
         annexb_frame[annexb_pos++] = 0x00;
@@ -810,7 +824,16 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
 static int g_alt_listen_fd = -1;
 static int g_alt_client_fd = -1;
 static pthread_t g_alt_thread;
-static volatile int g_alt_thread_running = 0;
+static int g_alt_thread_running = 0; /* protected by g_crypto_lock */
+static int g_alt_thread_created = 0;
+static pthread_mutex_t g_receiver_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static int receiver_active(void) {
+    pthread_mutex_lock(&g_crypto_lock);
+    int active = g_alt_thread_running;
+    pthread_mutex_unlock(&g_crypto_lock);
+    return active;
+}
 
 static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
@@ -837,11 +860,16 @@ static void *alt_receiver_thread(void *arg) {
     }
 
     pthread_mutex_lock(&g_crypto_lock);
+    if (!g_alt_thread_running) {
+        close(c);
+        pthread_mutex_unlock(&g_crypto_lock);
+        return NULL;
+    }
     g_alt_client_fd = c;
     pthread_mutex_unlock(&g_crypto_lock);
     log_msg("RECV111", ">>> IPHONE CONECTADO NO STREAM 111 (TCP fd=%d)! Recebendo quadros H.264...", c);
 
-    while (g_alt_thread_running) {
+    while (receiver_active()) {
         AirPlayScreenHeaderCompat h;
         uint8_t *body = NULL;
 
@@ -876,10 +904,12 @@ static void *alt_receiver_thread(void *arg) {
 
             case K_SCREEN_VIDEO_FRAME:
                 if (body && h.bodySize > 0) {
-                    if (g_alt_aes_valid && s_AES_CTR_Update) {
-                        s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body);
-                    }
-                    process_h264_frame(body, h.bodySize, 0);
+                    pthread_mutex_lock(&g_crypto_lock);
+                    int decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
+                        s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body) == 0;
+                    pthread_mutex_unlock(&g_crypto_lock);
+                    if (decrypt_ok) process_h264_frame(body, h.bodySize, 0);
+                    else log_msg("CRYPTO", "Dropping frame: AES state/update unavailable or failed");
                 }
                 break;
 
@@ -942,34 +972,53 @@ static int bind_listener_stream111(int port) {
     return fd;
 }
 
-static int start_alt_receiver(uint64_t connection_id) {
+/* Caller serializes start/stop. The worker owns the accepted fd; stop only
+ * shuts it down, then joins before closing the listening fd or resetting state. */
+static void stop_alt_receiver_locked(void) {
     pthread_mutex_lock(&g_crypto_lock);
-
-    if (g_alt_listen_fd >= 0) {
-        close(g_alt_listen_fd);
-        g_alt_listen_fd = -1;
+    g_alt_thread_running = 0;
+    if (g_alt_client_fd >= 0) shutdown(g_alt_client_fd, SHUT_RDWR);
+    if (g_alt_listen_fd >= 0) shutdown(g_alt_listen_fd, SHUT_RDWR);
+    pthread_mutex_unlock(&g_crypto_lock);
+    if (g_alt_thread_created) {
+        pthread_join(g_alt_thread, NULL);
+        g_alt_thread_created = 0;
     }
+    pthread_mutex_lock(&g_crypto_lock);
+    if (g_alt_listen_fd >= 0) close(g_alt_listen_fd);
+    g_alt_listen_fd = -1;
+    g_alt_aes_valid = 0;
+    memset(&g_alt_aes, 0, sizeof(g_alt_aes));
+    g_sps_pps_len = 0;
+    pthread_mutex_unlock(&g_crypto_lock);
+}
 
-    if (!g_master_valid) {
-        pthread_mutex_unlock(&g_crypto_lock);
-        log_msg("RECV111", "AVISO: Master AES key ainda nao capturada! Tentando continuar sem chave inicial...");
-    } else if (s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init) {
-        uint8_t key[16], iv[16];
-        s_AirPlay_DeriveAESKeySHA512ForScreen(g_master_key, 16, connection_id, key, iv);
+static int start_alt_receiver(uint64_t connection_id) {
+    pthread_mutex_lock(&g_receiver_lock);
+    stop_alt_receiver_locked();
+    pthread_mutex_lock(&g_crypto_lock);
+    uint8_t key[16] = {0}, iv[16] = {0};
+    int ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen &&
+        s_AES_CTR_Init && s_AES_CTR_Update;
+    if (ready) ready = s_AirPlay_DeriveAESKeySHA512ForScreen(
+        g_master_key, sizeof(g_master_key), connection_id, key, iv) == 0;
+    if (ready) ready = s_AES_CTR_Init(&g_alt_aes, key, iv) == 0;
+    memset(key, 0, sizeof(key));
+    memset(iv, 0, sizeof(iv));
+    if (!ready) {
         memset(&g_alt_aes, 0, sizeof(g_alt_aes));
-        if (s_AES_CTR_Init(&g_alt_aes, key, iv) == 0) {
-            g_alt_aes_valid = 1;
-            log_msg("RECV111", "Subchave AES-128-CTR e IV derivados para cid=%llu com sucesso!",
-                    (unsigned long long)connection_id);
-        }
-        memset(key, 0, sizeof(key));
-        memset(iv, 0, sizeof(iv));
+        pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
+        log_msg("RECV111", "Refusing stream: crypto prerequisites/derivation failed");
+        return -1;
     }
-
+    g_alt_aes_valid = 1;
     int port = 6031;
     g_alt_listen_fd = bind_listener_stream111(port);
     if (g_alt_listen_fd < 0) {
+        g_alt_aes_valid = 0;
         pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao vincular porta TCP %d: %s", port, strerror(errno));
         return -1;
     }
@@ -979,29 +1028,24 @@ static int start_alt_receiver(uint64_t connection_id) {
         close(g_alt_listen_fd);
         g_alt_listen_fd = -1;
         g_alt_thread_running = 0;
+        g_alt_aes_valid = 0;
         pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao criar alt_receiver_thread");
         return -1;
     }
 
+    g_alt_thread_created = 1;
     pthread_mutex_unlock(&g_crypto_lock);
+    pthread_mutex_unlock(&g_receiver_lock);
     log_msg("RECV111", "Servidor TCP Stream 111 ouvindo na porta %d (cid=%llu)", port, (unsigned long long)connection_id);
     return port;
 }
 
 static void stop_alt_receiver(void) {
-    pthread_mutex_lock(&g_crypto_lock);
-    g_alt_thread_running = 0;
-    if (g_alt_client_fd >= 0) {
-        close(g_alt_client_fd);
-        g_alt_client_fd = -1;
-    }
-    if (g_alt_listen_fd >= 0) {
-        close(g_alt_listen_fd);
-        g_alt_listen_fd = -1;
-    }
-    g_alt_aes_valid = 0;
-    pthread_mutex_unlock(&g_crypto_lock);
+    pthread_mutex_lock(&g_receiver_lock);
+    stop_alt_receiver_locked();
+    pthread_mutex_unlock(&g_receiver_lock);
 }
 
 /* =============================================================================
@@ -1265,6 +1309,10 @@ void AirPlayReceiverSessionTearDown(void *inSession, void *inRequest, int32_t in
 
     log_msg("TEARDOWN", "AirPlayReceiverSessionTearDown: session=%p, reason=%d", inSession, inReason);
     stop_alt_receiver();
+    pthread_mutex_lock(&g_crypto_lock);
+    memset(g_master_key, 0, sizeof(g_master_key));
+    g_master_valid = 0;
+    pthread_mutex_unlock(&g_crypto_lock);
 
     if (real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown(inSession, inRequest, inReason, outDone);
@@ -1321,6 +1369,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 /* =============================================================================
  * Ciclo de Vida da Biblioteca
  * ============================================================================= */
+#ifndef ALTSCREEN_TEST
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
@@ -1349,3 +1398,4 @@ static void altscreen_cleanup(void) {
         g_log_fp = NULL;
     }
 }
+#endif

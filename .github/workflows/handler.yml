@@ -1,0 +1,28 @@
+name: Handler regression tests
+on:
+  push:
+    branches: [fix/handler-offline]
+  pull_request:
+    branches: [development]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile actual handler with sanitizers
+        run: |
+          gcc -shared -fPIC -Wall -Wextra -O2 deploy-usb/payload/altscreen_handler.c -ldl -pthread -o /tmp/handler-host.so
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
+          timeout 30 /tmp/test-handler
+      - name: Decode generated transport stream
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -v error -f lavfi -i color=size=1280x480:rate=30 -frames:v 1 -c:v libx264 -f h264 /tmp/frame.h264
+          timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts
+          ffmpeg -v error -i /tmp/cluster.ts -frames:v 1 -f null -
+          count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
+          test "$count" = 1
