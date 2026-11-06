@@ -836,6 +836,47 @@ static int receiver_active(void) {
     return active;
 }
 
+/* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
+ * and passes it to its NTP time synchronizer. Preserve those relative intervals
+ * instead of assuming every incoming access unit arrives at exactly 30 fps. */
+static struct {
+    int started, ntp_started;
+    uint64_t monotonic_start, ntp_start, ntp_offset_us, last_us;
+} g_video_clock;
+
+static uint64_t screen_timestamp_us(const AirPlayScreenHeaderCompat *header) {
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) return g_video_clock.last_us;
+    uint64_t monotonic = (uint64_t)now.tv_sec * 1000000 + (uint64_t)now.tv_nsec / 1000;
+    if (!g_video_clock.started) {
+        g_video_clock.started = 1;
+        g_video_clock.monotonic_start = monotonic;
+    }
+    uint64_t elapsed = monotonic - g_video_clock.monotonic_start;
+    uint64_t ntp;
+    memcpy(&ntp, header->params, sizeof(ntp));
+    if (ntp) {
+        if (!g_video_clock.ntp_started) {
+            g_video_clock.ntp_started = 1;
+            g_video_clock.ntp_start = ntp;
+            g_video_clock.ntp_offset_us = elapsed;
+        }
+        uint64_t delta = ntp - g_video_clock.ntp_start;
+        if ((delta >> 32) > 86400) {
+            /* Clock moved backwards or discontinuously: rebase on arrival time. */
+            g_video_clock.ntp_start = ntp;
+            g_video_clock.ntp_offset_us = elapsed;
+            delta = 0;
+        }
+        elapsed = g_video_clock.ntp_offset_us + (delta >> 32) * 1000000 +
+            ((delta & 0xffffffffULL) * 1000000 >> 32);
+    }
+    uint64_t timestamp = 1000000 + elapsed;
+    if (timestamp < g_video_clock.last_us) timestamp = g_video_clock.last_us;
+    g_video_clock.last_us = timestamp;
+    return timestamp;
+}
+
 static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
     uint8_t *p = (uint8_t *)buf;
@@ -909,7 +950,7 @@ static void *alt_receiver_thread(void *arg) {
                     int decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
                         s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body) == 0;
                     pthread_mutex_unlock(&g_crypto_lock);
-                    if (decrypt_ok) process_h264_frame(body, h.bodySize, 0);
+                    if (decrypt_ok) process_h264_frame(body, h.bodySize, screen_timestamp_us(&h));
                     else log_msg("CRYPTO", "Dropping frame: AES state/update unavailable or failed");
                 }
                 break;
@@ -991,6 +1032,7 @@ static void stop_alt_receiver_locked(void) {
     g_alt_aes_valid = 0;
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
     g_sps_pps_len = 0;
+    memset(&g_video_clock, 0, sizeof(g_video_clock));
     pthread_mutex_unlock(&g_crypto_lock);
 }
 

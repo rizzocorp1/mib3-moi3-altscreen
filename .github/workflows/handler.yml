@@ -25,6 +25,9 @@ jobs:
       - name: Check explicit dependency on a copied executable
         run: |
           python3 tests/test-elf-dependency.py tools/add-handler-dependency.py
+      - name: Check recovery-first one-shot boot
+        run: |
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/oneshot-boot.sh.in
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |

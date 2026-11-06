@@ -1,0 +1,72 @@
+#!/bin/sh
+# Generated activation entry; known engineering-container speech resets precede it.
+umask 077
+USB=''
+for candidate in /tmp/USB/PORT1/PART1 /tmp/USB/PORT2/PART1; do
+    if [ -f "$candidate/ALTSCREEN_TEST_ONCE.txt" ] && [ -f "$candidate/fix_hw_partnumber.sh" ]; then
+        [ -z "$USB" ] || exit 0
+        USB=$candidate
+    fi
+done
+[ -n "$USB" ] || exit 0
+REPORT="$USB/altscreen-setup.txt"
+[ ! -L "$REPORT" ] || exit 0
+run() {
+    BASE=/lge/app_rw/smartlink/carplay
+    STAGE="$BASE/.moi3-altscreen-once-v1"
+    TARGET="$BASE/carplay"
+    STARTUP="$BASE/carplay.sh"
+    matches() {
+        [ -f "$1" ] && [ ! -L "$1" ] || return 1
+        actual=$(sha256sum "$1" 2>/dev/null) || return 1
+        [ "${actual%% *}" = "$2" ]
+    }
+    echo 'MOI3 MU0841 one-session AltScreen setup'
+    [ "$(id -u)" = 0 ] || { echo 'ABORT: root required'; return 1; }
+    for marker in PROBE_ONLY.txt SUMMARY_PROBE_ONLY.txt REVERT.txt; do
+        [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed/old USB files'; return 1; }
+    done
+    matches "$TARGET" '@CARPLAY_SHA@' && matches "$STARTUP" '@STARTUP_SHA@' && matches /etc/os-release '@OS_SHA@' || { echo 'ABORT: vehicle baseline mismatch'; return 1; }
+    matches "$USB/payload/file-guard" '@GUARD_SHA@' && matches "$USB/payload/carplay-once" '@PATCH_SHA@' && matches "$USB/payload/altscreen_handler.so" '@HANDLER_SHA@' && matches "$USB/payload/oneshot-boot.sh" '@BOOT_SHA@' || { echo 'ABORT: USB payload checksum mismatch'; return 1; }
+    [ ! -e "$STAGE" ] && [ ! -L "$STAGE" ] || { echo 'ABORT: previous test assets exist; preserve and review them'; return 1; }
+    # Stage new files only. If app_rw is read-only, fail without remounting it.
+    mkdir -m 700 "$STAGE" || { echo 'ABORT: staging directory not writable'; return 1; }
+    cp "$USB/payload/file-guard" "$STAGE/file-guard" && chmod 700 "$STAGE/file-guard" || return 1
+    GUARD="$STAGE/file-guard"
+    "$GUARD" meta "$BASE" "$STAGE" || { echo 'ABORT: cannot preserve directory metadata'; return 1; }
+    # The helper can execute in the updater context. Preserve the factory script's
+    # metadata on it so the privileged startup path can access it after reboot.
+    "$GUARD" create "$USB/payload/file-guard" "$STAGE/guard-ready" "$STARTUP" || return 1
+    chmod 700 "$STAGE/guard-ready" || return 1
+    mv "$STAGE/guard-ready" "$GUARD" || return 1
+    "$GUARD" clone "$STARTUP" "$STAGE/factory-carplay.sh" || return 1
+    "$GUARD" clone "$STARTUP" "$STAGE/startup-new.sh" || return 1
+    "$GUARD" replace "$USB/payload/oneshot-boot.sh" "$STAGE/startup-new.sh" || return 1
+    "$GUARD" create "$USB/payload/carplay-once" "$STAGE/carplay-once" "$TARGET" || return 1
+    "$GUARD" create "$USB/payload/altscreen_handler.so" "$STAGE/altscreen_handler.so" /lge/app_rw/lib64/libAirPlay.so || return 1
+    matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$GUARD" '@GUARD_SHA@' && matches "$STAGE/carplay-once" '@PATCH_SHA@' && matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@' && matches "$STAGE/startup-new.sh" '@BOOT_SHA@' || { echo 'ABORT: staged checksum mismatch'; return 1; }
+    "$GUARD" same-meta "$STARTUP" "$STAGE/factory-carplay.sh" || return 1
+    # USB contains a copy of the baseline bytes; Linux metadata remains in the
+    # on-unit clone because FAT32 cannot preserve Linux security xattrs.
+    [ ! -e "$USB/factory-carplay.sh.backup" ] && [ ! -L "$USB/factory-carplay.sh.backup" ] || { echo 'ABORT: existing USB backup'; return 1; }
+    cp "$STAGE/factory-carplay.sh" "$USB/factory-carplay.sh.backup" || return 1
+    matches "$USB/factory-carplay.sh.backup" '@STARTUP_SHA@' || return 1
+    sync
+    "$GUARD" replace "$STAGE/startup-new.sh" "$STARTUP" || { echo 'ABORT: startup commit failed; do not retry; inspect baseline/backup'; return 1; }
+    matches "$STARTUP" '@BOOT_SHA@' || { echo 'ABORT: startup commit checksum failed'; return 1; }
+    # Arm only after the recovery-first bootstrap is committed and verified.
+    # An interruption before this point leaves a bootstrap that restores stock
+    # without mounting the experimental executable.
+    printf 'one-session-v1\n' > "$STAGE/ARMED.pending" || return 1
+    mv "$STAGE/ARMED.pending" "$STAGE/ARMED" || return 1
+    sync
+    echo 'RESULT: ARMED — factory executable unchanged; startup restores itself before the one-session test'
+    echo 'Allow the updater to finish, then use Resume. Keep the stick connected for logs.'
+}
+if run > "$REPORT" 2>&1; then
+    echo 'SETUP COMPLETE' >> "$REPORT"
+else
+    echo 'SETUP FAILED — do not repeat or install another package; preserve this report' >> "$REPORT"
+fi
+sync
+exit 0

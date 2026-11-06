@@ -1,0 +1,112 @@
+#!/bin/sh
+# Generated for one exact baseline. Always restore startup before activation.
+# No set -e: a test failure must not make ExecStartPre fail/reboot repeatedly.
+R='@ROOT@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-altscreen-once-v1"
+STARTUP="$BASE/carplay.sh"
+ORIGINAL="$STAGE/factory-carplay.sh"
+GUARD="$STAGE/file-guard"
+TARGET="$BASE/carplay"
+RAM="$R/run/moi3-altscreen-once"
+LOG="$STAGE/boot-status.txt"
+status() { printf '%s\n' "$*" >> "$LOG" 2>/dev/null || true; }
+matches() {
+    [ -f "$1" ] && [ ! -L "$1" ] || return 1
+    actual=$(sha256sum "$1" 2>/dev/null) || return 1
+    [ "${actual%% *}" = "$2" ]
+}
+# These are the three factory startup operations. Keep native startup available
+# even if test assets are missing/corrupt and self-restoration cannot run.
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode2" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_state" 2>/dev/null || true
+status 'BOOT: entering one-shot startup'
+if ! matches "$GUARD" '@GUARD_SHA@' || ! matches "$ORIGINAL" '@STARTUP_SHA@'; then
+    status 'ABORT: recovery helper or baseline corrupt; native executable retained'
+    exit 0
+fi
+if ! "$GUARD" same-meta "$ORIGINAL" "$STARTUP"; then
+    status 'ABORT: startup metadata changed; refusing activation'
+    exit 0
+fi
+if ! "$GUARD" replace "$ORIGINAL" "$STARTUP" || ! matches "$STARTUP" '@STARTUP_SHA@'; then
+    status 'ABORT: startup restoration failed; native executable retained'
+    exit 0
+fi
+status 'RECOVERY: exact factory startup restored before any mount/service change'
+if [ ! -f "$STAGE/ARMED" ] || [ -L "$STAGE/ARMED" ]; then
+    status 'DISARMED: no activation ticket'
+    exit 0
+fi
+if [ -e "$STAGE/CONSUMED" ] || ! mv "$STAGE/ARMED" "$STAGE/CONSUMED"; then
+    status 'ABORT: cannot consume one-shot ticket'
+    exit 0
+fi
+sync
+if ! matches "$TARGET" '@CARPLAY_SHA@' || ! matches "$STAGE/carplay-once" '@PATCH_SHA@' || ! matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@'; then
+    status 'ABORT: executable or handler hash mismatch'
+    exit 0
+fi
+if [ ! -f "$R/lib/systemd/system/multi-display.service" ] || [ -L "$R/lib/systemd/system/multi-display.service" ]; then
+    status 'ABORT: native encoder service is not the expected regular unit file'
+    exit 0
+fi
+if [ -e "$RAM" ] || [ -L "$RAM" ] || ! mkdir -m 700 "$RAM"; then
+    status 'ABORT: RAM test directory already exists or cannot be created'
+    exit 0
+fi
+if ! "$GUARD" meta "$BASE" "$RAM" || ! "$GUARD" create "$STAGE/carplay-once" "$RAM/carplay" "$TARGET"; then
+    status 'ABORT: RAM copy/metadata preparation failed'
+    exit 0
+fi
+if ! matches "$RAM/carplay" '@PATCH_SHA@'; then
+    status 'ABORT: RAM executable checksum mismatch'
+    exit 0
+fi
+if ! mount --bind "$RAM/carplay" "$TARGET"; then
+    status 'ABORT: bind mount failed; native executable retained'
+    exit 0
+fi
+if ! matches "$TARGET" '@PATCH_SHA@'; then
+    umount "$TARGET" 2>/dev/null || true
+    status 'ABORT: mounted executable checksum mismatch'
+    exit 0
+fi
+# Stop only the native video encoder for this session; do not disable the unit.
+# The cluster ECU continues to render its own gauges and warning overlays.
+if ! systemctl stop multi-display.service; then
+    umount "$TARGET" 2>/dev/null || true
+    status 'ABORT: native encoder stop failed; removed test mount'
+    exit 0
+fi
+if systemctl is-active --quiet multi-display.service; then
+    umount "$TARGET" 2>/dev/null || true
+    status 'ABORT: native encoder still active; removed test mount'
+    exit 0
+fi
+status 'ACTIVE: one-session CarPlay copy mounted; native encoder stopped until reboot'
+# Bounded USB log collector. It never mounts/remounts storage or changes services.
+(
+    i=0
+    while [ "$i" -lt @LOG_ITERATIONS@ ]; do
+        for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
+            if [ -f "$usb/ALTSCREEN_TEST_ONCE.txt" ] && [ ! -L "$usb/ALTSCREEN_TEST_ONCE.txt" ]; then
+                for name in boot-status.txt; do
+                    [ -L "$usb/$name" ] || cp "$STAGE/$name" "$usb/$name" 2>/dev/null || true
+                done
+                for source in "$R/data/lge/smartlink/carplay/carplay-handler.log" "$R/lge/app_rw/smartlink/carplay/carplay-handler.log" "$R/tmp/carplay-handler.log"; do
+                    if [ -f "$source" ] && [ ! -L "$source" ]; then
+                        [ -L "$usb/altscreen-handler.log" ] || cp "$source" "$usb/altscreen-handler.log" 2>/dev/null || true
+                    fi
+                done
+                if command -v journalctl >/dev/null 2>&1 && [ ! -L "$usb/carplay-journal.txt" ]; then
+                    journalctl -u carplay.service -b -n 150 --no-pager > "$usb/carplay-journal.txt" 2>&1
+                fi
+            fi
+        done
+        i=$((i+1))
+        sleep 2
+    done
+) >/dev/null 2>&1 &
+exit 0

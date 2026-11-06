@@ -111,6 +111,19 @@ static void test_receiver(void) {
 }
 int main(int argc,char **argv) {
     test_mux();test_parser();test_receiver();
+    AirPlayScreenHeaderCompat timed={0};
+    memset(&g_video_clock,0,sizeof(g_video_clock));
+    uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);
+    uint64_t first=screen_timestamp_us(&timed);
+    ntp+=(1ULL<<30);memcpy(timed.params,&ntp,8);
+    assert(screen_timestamp_us(&timed)-first==250000);
+    ntp+=(3ULL<<30);memcpy(timed.params,&ntp,8);
+    assert(screen_timestamp_us(&timed)-first==1000000);
+    ntp=99ULL<<32;memcpy(timed.params,&ntp,8);
+    assert(screen_timestamp_us(&timed)>=first+1000000);
+    memset(&g_video_clock,0,sizeof(g_video_clock));memset(timed.params,0,8);
+    first=screen_timestamp_us(&timed);usleep(2000);
+    assert(screen_timestamp_us(&timed)>first);
     if(argc==3) {
         FILE *in=fopen(argv[1],"rb"); assert(in); size_t length=fread(captured,1,sizeof(captured),in);
         assert(!ferror(in) && feof(in));fclose(in);assert(length>0);
