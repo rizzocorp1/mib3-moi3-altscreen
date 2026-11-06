@@ -2,7 +2,7 @@
 
 This tool implements a scoped filesystem backup/restore mechanism. It is NOT a full flash image, bootloader recovery system, automatic watchdog or a guarantee of a complete stock vehicle. Nothing here has been tested on MU0841 hardware.
 
-The original upstream installer must not be used for this branch. Its generated factory script is not an authentic backup. Our entry point refuses deployment until an on-device backup, verified execution method and recovery procedure are established.
+The original upstream installer is retained unchanged as a text reference at `deploy-usb/upstream-reference/fix_hw_partnumber.sh.txt`. Its generated factory script is not an authentic backup. Our entry point now performs a USB trigger rehearsal; see `USB-REHEARSAL.md`. It does not install AltScreen or automatically call the backup tool.
 
 ## Coverage
 

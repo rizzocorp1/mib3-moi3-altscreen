@@ -16,3 +16,5 @@ jobs:
         run: |
           sh -n recovery/stock-snapshot.sh
           sh recovery/test-snapshot.sh
+          sh -n recovery/usb-entry.sh
+          sh recovery/test-usb-entry.sh
