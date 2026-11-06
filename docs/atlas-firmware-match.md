@@ -24,4 +24,4 @@ The vehicle already reports 0841. VW's bulletin says its update procedure does n
 
 ## Retrieval limitation
 
-The user signed in to MIB Vault successfully. Authenticated browser clicks register download requests but have not produced a confirmed local archive or a browser-download event through the tool. Both listings were tried. The user has been asked to save one of these archives locally so inspection can continue without uploading the firmware.
+The user signed in to MIB Vault successfully. A local partial download stopped at 1,090,458,624 bytes; its 7z header declares a complete length of 6,246,676,571 bytes. Both listings were tried, and another authenticated retry has not started a new local transfer. The user has been asked to resume the download or save a complete archive through regular Chrome. No completed archive, manifest inspection or factory binary match is claimed.

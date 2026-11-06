@@ -21,4 +21,6 @@ build-target.sh is a fail-closed target-linking recipe, not a validated build: i
 
 ## Firmware retrieval
 
-MIB Vault lists MOI3_EU_VW_R8410L_MU0841_3G0919360TH.7z (5.8 GB). The browser download attempts have not produced a confirmed local archive. The site now explicitly requires sign-in because its guest daily allowance is exhausted. No account, paid plan or credentials were created or purchased. Continue with the user's authenticated session; do not circumvent the quota or publish proprietary firmware to the public repository.
+MIB Vault lists MOI3_EU_VW_R8410L_MU0841_3G0919360TH.7z (5.8 GiB). The authenticated session works, but the local browser partial stopped at 1,090,458,624 bytes. Its 7z start header declares a complete length of 6,246,676,571 bytes. It is not extractable as a completed archive. An authenticated retry has not produced another local transfer. Resume or complete the download through normal browser controls; do not circumvent the quota or publish proprietary firmware to the public repository.
+
+tools/inspect-firmware.ps1 rejects browser partial files, checks the declared 7z length, records SHA-256, and runs 7-Zip listing and integrity checks into a new report directory. It does not execute or install firmware. A successful archive integrity check establishes neither vendor authenticity nor vehicle compatibility. After inspection, extract factory files locally and use tools/check-sysroot.mjs to inventory the hook symbols before attempting a target build.
