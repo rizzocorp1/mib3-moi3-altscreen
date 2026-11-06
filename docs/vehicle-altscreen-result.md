@@ -4,7 +4,7 @@ The first one-session test did not achieve a cluster map. The user reported wire
 
 Only altscreen-setup.txt was present on USB; it reported ARMED/SETUP COMPLETE. No boot-status, handler or journal files were present. Neither successful activation nor ticket consumption can be inferred from that alone.
 
-The explicit recovery update subsequently reported RESULT: FACTORY STARTUP RESTORED and SETUP COMPLETE, with no errors. That branch verifies backup/startup/executable hashes and restores startup metadata, removes a recognized experimental bind mount if present, and removes the activation ticket. Factory turn-by-turn has not yet been functionally checked after recovery. Keep the test stick out of the car during stock verification.
+The explicit recovery update subsequently reported RESULT: FACTORY STARTUP RESTORED and SETUP COMPLETE, with no errors. That branch verifies backup/startup/executable hashes and restores startup metadata, removes a recognized experimental bind mount if present, and removes the activation ticket. The user subsequently confirmed that factory Apple Maps turn-by-turn worked immediately after recovery, alongside restored wired CarPlay. This establishes recovery of the two reported affected functions; it does not constitute a full vehicle audit.
 
 ## Instrumentation design under investigation
 
@@ -12,4 +12,4 @@ The boot script starts a background collector in ExecStartPre. The systemd v232 
 
 Primary reference: https://github.com/systemd/systemd/blob/v232/man/systemd.service.xml
 
-The existing activation ZIP is retired from further testing. Do not ask the user to repeat activation. Before another experiment: verify stock functions, collect retained on-unit boot/handler logs without arming a test, and replace the collector with a separately managed, bounded service whose lifecycle is actually tested. Do not loosen factory metadata, signature or SMACK checks to obtain a successful activation.
+The existing activation ZIP is retired from further testing. Do not ask the user to repeat activation. The recovered baseline is functionally confirmed. The v2 installer preserves available retained v1 boot/handler logs before arming a separate v2 stage. The replacement collector runs in an independent bounded service, with readiness required before any mount or encoder stop. Its export after main-service startup is tested against a real service manager. Do not loosen factory metadata, signature or SMACK checks to obtain a successful activation.

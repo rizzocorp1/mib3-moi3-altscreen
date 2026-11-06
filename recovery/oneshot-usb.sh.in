@@ -71,6 +71,17 @@ run() {
     if [ -d "$OLD" ] && [ ! -L "$OLD" ] && [ -f "$OLD/boot-status.txt" ] && [ ! -L "$OLD/boot-status.txt" ] && [ ! -e "$USB/previous-v1-boot-status.txt" ]; then
         cp "$OLD/boot-status.txt" "$USB/previous-v1-boot-status.txt" || return 1
     fi
+    for location in data apprw tmp; do
+        case "$location" in
+            data) source="$R/data/lge/smartlink/carplay/carplay-handler.log";;
+            apprw) source="$BASE/carplay-handler.log";;
+            tmp) source="$R/tmp/carplay-handler.log";;
+        esac
+        saved="$USB/previous-v1-handler-$location.log"
+        if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -e "$saved" ] && [ ! -L "$saved" ]; then
+            cp "$source" "$saved" || return 1
+        fi
+    done
     [ ! -e "$STAGE" ] && [ ! -L "$STAGE" ] || { echo 'ABORT: previous test assets exist; preserve and review them'; return 1; }
     # Stage new files only. If app_rw is read-only, fail without remounting it.
     mkdir -m 700 "$STAGE" || { echo 'ABORT: staging directory not writable'; return 1; }

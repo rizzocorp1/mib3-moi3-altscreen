@@ -28,6 +28,7 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         values['COLLECTOR_SHA']=digest(payload/'managed-log-collector.sh')
         old_stage=base/'.moi3-altscreen-once-v1';old_stage.mkdir()
         (old_stage/'boot-status.txt').write_text('retained previous test evidence')
+        (base/'carplay-handler.log').write_text('previous v1 handler evidence')
         def render(template):
             for key,value in values.items():template=template.replace('@'+key+'@',value)
             return template
@@ -48,6 +49,7 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
             assert (stage/'ARMED').is_file() and digest(startup)==values['BOOT_SHA']
             assert (stage/'factory-carplay.sh').read_bytes()==factory
             assert (usb/'previous-v1-boot-status.txt').read_text()=='retained previous test evidence'
+            assert (usb/'previous-v1-handler-apprw.log').read_text()=='previous v1 handler evidence'
             assert (stage/'managed-log-collector.sh').read_bytes()==(payload/'managed-log-collector.sh').read_bytes()
             assert (usb/'factory-carplay.sh.backup').read_bytes()==factory
             assert target.read_bytes()==original_exec
