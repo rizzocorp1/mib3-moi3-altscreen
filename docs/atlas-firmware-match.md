@@ -18,10 +18,11 @@ This is a shared head-unit update reference, not necessarily an archive named af
 
 ## What remains to verify
 
-The manifest/variant list and component selection must still be inspected after download. Matching filename/media number is strong selection evidence, not a verified factory binary match. Obtain a hash and inspect the actual archive; do not flash it to prove compatibility. The purpose here is offline extraction of CarPlay libraries and target runtime files.
+The downloaded manifest includes US variants and the factory libraries have been inspected offline. Matching the actual unit still requires comparing its installed binary hashes. Do not flash the archive to prove compatibility; it is used for offline analysis and building.
 
 The vehicle already reports 0841. VW's bulletin says its update procedure does not apply when software is already 0841 or newer. There is no reason to reinstall stock firmware merely to develop the AltScreen handler.
 
 ## Download and manifest inspection completed
 
 The alternate (0841) archive completed at 6,246,676,571 bytes and passed its integrity test. Its manifest includes US variants. See factory-0841-audit.md for its hash and factory analysis. The unit's actual installed binary hashes are still unmeasured.
+

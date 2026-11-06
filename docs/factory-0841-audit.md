@@ -40,6 +40,14 @@ Both the stock checksum-file signature and the engineering-container checksum-fi
 
 The engineering post-script still removes four speech paths before our custom entry point. Signature verification does not remove those side effects or make a later backup cover them.
 
+## Container-free maintenance hook candidate
+
+The hardware-part-number script is invoked by the updater itself, not by the signed 206-byte speech-reset script. In this MU0841 binary, SummaryScreen::initScreen (0x3619c8) constructs the port-1 script path at 0x361d54/0x361d60, checks it with access at 0x361eb0, and calls UpdateHandler::run_cmd at 0x361ed0. The helper (0x20aba8) uses posix_spawn for /bin/sh -c and waitpid. A port-2 fallback is also present.
+
+The screen-factory switch identifies SummaryScreen as screen 27. Normal logging uses LoggingScreen, not SummaryScreen. Engineering-menu startup initially creates other screens. Reaching the real summary screen from a normal no-update menu state has NOT been established. Existing update-summary state might permit a test, but no general no-update navigation sequence is claimed.
+
+The container-free summary probe contains only a reporting script, a marker and instructions. It has no Data/Meta folders or firmware payload, refuses mixed update/activation sticks, and does not use the speech-reset or recovery packages. A host fixture verified shell syntax, report generation, unchanged factory input and refusal when Data is present. A vehicle menu-path check is still required; do not start or deliberately fail an update to reach the hook.
+
 ## Recovery packages rejected as test carriers
 
 MOI3_RECOV_R9900L_5FA919360AM.7z and MOI3_RECOV_R9900L_5FA919360AS.zip were downloaded and inspected offline. Both include conditional raw partition writes for boot components, plus Ethernet, navigation, speech and updater repair operations. Their generic wildcard manifest does not make them harmless. Neither package is used in our USB test bundle; none of their scripts or binaries has been executed.
