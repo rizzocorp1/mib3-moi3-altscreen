@@ -8,6 +8,13 @@ on:
 permissions:
   contents: read
 jobs:
+  service-lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise real service-manager lifecycle
+        run: sudo python3 tests/test-systemd-lifecycle.py
   linux:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
