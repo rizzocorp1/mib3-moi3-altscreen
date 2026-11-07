@@ -98,11 +98,17 @@ static void test_receiver(void) {
     assert(start_alt_receiver(NULL,1)==-1); assert(g_alt_listen_fd==-1);
     s_AES_CTR_Init=init_ok;
     for(int i=0;i<25;i++) {
-        assert(start_alt_receiver(NULL,1)==6031);
-        if(i%2) {
-            int fd=socket(AF_INET,SOCK_STREAM,0); assert(fd>=0);
-            struct sockaddr_in a={0}; a.sin_family=AF_INET;a.sin_port=htons(6031);a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
-            assert(connect(fd,(struct sockaddr*)&a,sizeof(a))==0);
+        int port=start_alt_receiver(NULL,1);assert(port>0);
+        if(i%3) {
+            int family=i%3==1 ? AF_INET : AF_INET6;
+            int fd=socket(family,SOCK_STREAM,0); assert(fd>=0);
+            if(family==AF_INET) {
+                struct sockaddr_in a={0};a.sin_family=AF_INET;a.sin_port=htons((uint16_t)port);a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+                assert(connect(fd,(struct sockaddr*)&a,sizeof(a))==0);
+            } else {
+                struct sockaddr_in6 a={0};a.sin6_family=AF_INET6;a.sin6_port=htons((uint16_t)port);a.sin6_addr=in6addr_loopback;
+                assert(connect(fd,(struct sockaddr*)&a,sizeof(a))==0);
+            }
             AirPlayScreenHeaderCompat h={0};h.bodySize=4;h.opcode=K_SCREEN_VIDEO_FRAME;
             uint8_t body[4]={0}; reset_capture(0);
             assert(write(fd,&h,sizeof(h))==(ssize_t)sizeof(h)); assert(write(fd,body,4)==4);

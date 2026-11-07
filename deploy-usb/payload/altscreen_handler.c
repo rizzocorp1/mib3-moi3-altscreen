@@ -63,9 +63,9 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v6.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v6.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v6.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v7.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v7.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v7.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -197,7 +197,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v6-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v7-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -899,6 +899,7 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
  * Servidor Receptor TCP Stream 111 (Porta 6031)
  * ============================================================================= */
 static int g_alt_listen_fd = -1;
+static int g_alt_listen_port;
 static int g_alt_client_fd = -1;
 static pthread_t g_alt_thread;
 static int g_alt_thread_running = 0; /* protected by g_crypto_lock */
@@ -969,11 +970,13 @@ static int read_exact(int fd, void *buf, size_t len) {
 
 static void *alt_receiver_thread(void *arg) {
     int listen_fd = (int)(intptr_t)arg;
-    log_msg("RECV111", "Aguardando conexao TCP do iPhone no Stream 111 (porta 6031)...");
+    log_msg("RECV111", "Waiting for auxiliary TCP connection on port %d",g_alt_listen_port);
 
-    int c = accept(listen_fd, NULL, NULL);
+    int c;
+    do { c=accept(listen_fd,NULL,NULL); } while(c<0 && errno==EINTR && receiver_active());
     if (c < 0) {
-        log_msg("RECV111", "Falha no accept do Stream 111: %s", strerror(errno));
+        if(!receiver_active())log_msg("RECV111","Listener closed during session teardown");
+        else log_msg("RECV111", "Auxiliary accept failed: %s", strerror(errno));
         return NULL;
     }
 
@@ -1067,7 +1070,7 @@ static int bind_listener_stream111(int port) {
         int one = 1;
         int off = 0;
         setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-        setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off));
+        int dual_status=setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &off, sizeof(off));
 
         struct sockaddr_in6 sa6;
         memset(&sa6, 0, sizeof(sa6));
@@ -1075,7 +1078,8 @@ static int bind_listener_stream111(int port) {
         sa6.sin6_addr = in6addr_any;
         sa6.sin6_port = htons((uint16_t)port);
 
-        if (bind(fd, (struct sockaddr *)&sa6, sizeof(sa6)) == 0 && listen(fd, 2) == 0) {
+        if (dual_status==0 && bind(fd, (struct sockaddr *)&sa6, sizeof(sa6)) == 0 && listen(fd, 2) == 0) {
+            log_msg("NET","Auxiliary listener family=IPv6 dual-stack requested");
             return fd;
         }
         close(fd);
@@ -1097,6 +1101,7 @@ static int bind_listener_stream111(int port) {
         close(fd);
         return -1;
     }
+    log_msg("NET","Auxiliary listener family=IPv4 fallback");
     return fd;
 }
 
@@ -1115,6 +1120,7 @@ static void stop_alt_receiver_locked(void) {
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_listen_fd >= 0) close(g_alt_listen_fd);
     g_alt_listen_fd = -1;
+    g_alt_listen_port=0;
     g_alt_aes_valid = 0;
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
     reset_homekit_stream();
@@ -1160,8 +1166,8 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
     g_alt_aes_valid = !pairing;
     g_alt_session=session;
     log_msg("CRYPTO", "AltScreen security ready: %s",pairing ? "HomeKit ChaCha20-Poly1305" : "legacy AES-CTR");
-    int port = 6031;
-    g_alt_listen_fd = bind_listener_stream111(port);
+    int port = 0;
+    g_alt_listen_fd = bind_listener_stream111(0);
     if (g_alt_listen_fd < 0) {
         g_alt_aes_valid = 0;
         reset_homekit_stream();
@@ -1171,6 +1177,17 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
         log_msg("RECV111", "Falha ao vincular porta TCP %d: %s", port, strerror(errno));
         return -1;
     }
+    struct sockaddr_storage bound;socklen_t bound_len=sizeof(bound);
+    if(getsockname(g_alt_listen_fd,(struct sockaddr *)&bound,&bound_len)==0) {
+        if(bound.ss_family==AF_INET6)port=ntohs(((struct sockaddr_in6 *)&bound)->sin6_port);
+        else if(bound.ss_family==AF_INET)port=ntohs(((struct sockaddr_in *)&bound)->sin_port);
+    }
+    if(port<=0 || port>65535) {
+        close(g_alt_listen_fd);g_alt_listen_fd=-1;g_alt_aes_valid=0;reset_homekit_stream();g_alt_session=NULL;
+        pthread_mutex_unlock(&g_crypto_lock);pthread_mutex_unlock(&g_receiver_lock);
+        log_msg("RECV111","Could not establish the actual auxiliary listener port");return -1;
+    }
+    g_alt_listen_port=port;
 
     g_alt_thread_running = 1;
     if (pthread_create(&g_alt_thread, NULL, alt_receiver_thread, (void *)(intptr_t)g_alt_listen_fd) != 0) {
@@ -1254,31 +1271,51 @@ static int contains_stream111(void *request, void **outDesc, int *outOtherCount)
     return found;
 }
 
-static void append_alt_setup_response(void *response, void *requested, int data_port) {
-    if (!response || !requested) return;
+static void log_stream_ports(const char *label,void *response) {
+    if(!s_CFArrayGetValueAtIndex)return;
+    void *streams=get_streams(response);
+    int64_t count=streams && s_CFArrayGetCount ? s_CFArrayGetCount(streams) : 0;
+    log_msg("SETUP_PORTS","%s streamCount=%lld",label,(long long)count);
+    for(int64_t i=0;i<count && i<8;i++) {
+        void *entry=(void *)s_CFArrayGetValueAtIndex(streams,i);void *key=s_cf("dataPort");int32_t error=-1;
+        int64_t port=key && s_CFDictionaryGetInt64 ? s_CFDictionaryGetInt64(entry,key,&error) : -1;
+        if(key && s_CFRelease)s_CFRelease(key);
+        log_msg("SETUP_PORTS","%s index=%lld type=%d dataPort=%lld portStatus=%d",label,(long long)i,stream_type(entry),(long long)port,error);
+    }
+}
+static int append_alt_setup_response(void *response, void *requested, int data_port) {
+    if (!response || !requested || data_port<=0 || data_port>65535 || !s_CFDictionaryCreateMutable ||
+        !s_CFArrayCreateMutable || !s_CFArrayGetCount || !s_CFArrayGetValueAtIndex ||
+        !s_CFArrayAppendValue || !s_CFDictionarySetValue || !s_CFDictionaryGetInt64 ||
+        !s_CFDictionarySetInt64 || !s_CFRelease)return 0;
 
     void *kstreams = s_cf("streams");
     void *old = (kstreams && s_CFDictionaryGetValue) ? (void *)s_CFDictionaryGetValue(response, kstreams) : NULL;
-    void *a = old ? array_clone(old) : NULL;
-    if (!a && s_CFArrayCreateMutable) {
-        a = s_CFArrayCreateMutable(NULL, 0, s_kCFLArrayCallBacks);
-    }
-    void *sd = dict_clone(requested);
+    void *a = s_CFArrayCreateMutable(NULL, 0, s_kCFLArrayCallBacks);
+    void *sd = s_CFDictionaryCreateMutable(NULL,0,s_kCFLDictKeyCallBacks,s_kCFLDictValCallBacks);
+    int success=0;
 
     if (a && sd) {
         set_i64(sd, "dataPort", data_port);
-        set_i64(sd, "streamID", K_STREAM_ALT);
-        if (s_CFArrayAppendValue) {
-            s_CFArrayAppendValue(a, sd);
-        }
-        if (s_CFDictionarySetValue && kstreams) {
-            s_CFDictionarySetValue(response, kstreams, a);
+        set_i64(sd,"type",K_STREAM_ALT);
+        void *kport=s_cf("dataPort");int32_t err=-1;
+        int64_t actual=kport ? s_CFDictionaryGetInt64(sd,kport,&err) : -1;
+        if(kport)s_CFRelease(kport);
+        if(err==0 && actual==data_port && stream_type(sd)==K_STREAM_ALT && kstreams) {
+            int64_t count=old ? s_CFArrayGetCount(old) : 0;
+            for(int64_t i=0;i<count;i++) {
+                void *entry=(void *)s_CFArrayGetValueAtIndex(old,i);
+                if(stream_type(entry)!=K_STREAM_ALT)s_CFArrayAppendValue(a,entry);
+            }
+            s_CFArrayAppendValue(a,sd);
+            s_CFDictionarySetValue(response,kstreams,a);success=1;
         }
     }
 
     if (sd && s_CFRelease) s_CFRelease(sd);
     if (a && s_CFRelease) s_CFRelease(a);
     if (kstreams && s_CFRelease) s_CFRelease(kstreams);
+    return success;
 }
 
 /* =============================================================================
@@ -1424,6 +1461,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
 
     log_msg("SETUP", "Stock AirPlayReceiverSessionSetup ret=%d, outResponse=%p",
             ret, (outResponse ? *outResponse : NULL));
+    if(ret==0 && outResponse && *outResponse)log_stream_ports("factory",*outResponse);
 
     /* Initial SETUP has no media streams. Acknowledge AltScreen there as in
      * the v1 trace that reached stream 111; leave primary media SETUP alone. */
@@ -1440,8 +1478,12 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
 
             int port = start_alt_receiver(inSession,cid);
             if (port > 0) {
-                append_alt_setup_response(*outResponse, alt_desc, port);
-                log_msg("SETUP", ">>> STREAM 111 NEGOCIADO COM SUCESSO! dataPort=%d, streamID=111 <<<", port);
+                if(append_alt_setup_response(*outResponse, alt_desc, port)) {
+                    log_msg("SETUP","Auxiliary response committed: type=111 dataPort=%d; awaiting TCP peer",port);
+                    log_stream_ports("advertised",*outResponse);
+                } else {
+                    stop_alt_receiver();log_msg("SETUP","Auxiliary response construction failed; listener closed");
+                }
             } else {
                 log_msg("SETUP", "Falha ao iniciar receptor TCP do Stream 111!");
             }

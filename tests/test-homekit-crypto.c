@@ -72,10 +72,10 @@ static void prepare(void *session,uint64_t cid) {
 }
 static void test_tcp_receiver(void *session) {
     expected_pairing=pairing_for_session(session);expected_cid=777;
-    assert(start_alt_receiver(session,777)==6031 && g_alt_chacha_valid && !g_alt_aes_valid);
+    int port=start_alt_receiver(session,777);assert(port>0 && g_alt_chacha_valid && !g_alt_aes_valid);
     int client=socket(AF_INET,SOCK_STREAM,0);assert(client>=0);
     struct timeval timeout={2,0};assert(setsockopt(client,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout))==0);
-    struct sockaddr_in address={0};address.sin_family=AF_INET;address.sin_port=htons(6031);address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+    struct sockaddr_in address={0};address.sin_family=AF_INET;address.sin_port=htons((uint16_t)port);address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
     assert(connect(client,(struct sockaddr *)&address,sizeof(address))==0);
     uint8_t config[]={1,100,0,31,0xff,0xe1,0,2,0x67,0x42,1,0,2,0x68,0xce};
     AirPlayScreenHeaderCompat header={0};header.opcode=K_SCREEN_VIDEO_CONFIG;header.bodySize=sizeof(config);

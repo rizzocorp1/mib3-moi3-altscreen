@@ -45,6 +45,10 @@ jobs:
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/test-homekit-crypto
           timeout 30 /tmp/test-homekit-crypto
+      - name: Check auxiliary SETUP response schema
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-screen-response.c -ldl -pthread -o /tmp/test-screen-response
+          timeout 30 /tmp/test-screen-response
       - name: Check atomic startup-file backup and restore
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard
@@ -64,8 +68,10 @@ jobs:
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/info-v5-usb.sh.in recovery/info-v5-boot.sh.in
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v6-boot.sh.in
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v6-usb.sh.in recovery/map-v6-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v7-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v7-usb.sh.in recovery/map-v7-boot.sh.in
       - name: Check deferred native-encoder handoff and production output gate
-        run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v6.h recovery/map-v6-log-collector.sh /tmp/file-guard
+        run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v6.h recovery/map-v7-log-collector.sh /tmp/file-guard
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |

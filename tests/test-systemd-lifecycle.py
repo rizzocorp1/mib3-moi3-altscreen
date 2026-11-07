@@ -37,6 +37,10 @@ v6_template=Path(__file__).resolve().parents[1]/'recovery/map-v6-boot.sh.in'
 if v6_template.exists():
     v6_launch=next(line for line in v6_template.read_text().splitlines() if line.startswith('if ! systemd-run '))
     assert [w for w in v6_launch.split() if w.startswith('--property=')]==properties
+v7_template=Path(__file__).resolve().parents[1]/'recovery/map-v7-boot.sh.in'
+if v7_template.exists():
+    v7_launch=next(line for line in v7_template.read_text().splitlines() if line.startswith('if ! systemd-run '))
+    assert [w for w in v7_launch.split() if w.startswith('--property=')]==properties
 property_arguments=' '.join(properties)
 unit=identifier+'.service';logger=identifier+'-logger.service'
 unit_path=Path('/run/systemd/system')/unit
