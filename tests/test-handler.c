@@ -82,6 +82,22 @@ static void test_parser(void) {
     parse_and_store_avcc(config,8); assert(!g_sps_pps_len);
     reset_capture(0); assert(process_h264_frame(one_byte,sizeof(one_byte),0)==-1); assert(!captured_len);
 }
+static void test_permitted_ports(void) {
+    int held[ALT_TCP_PORT_LAST-ALT_TCP_PORT_FIRST+1];
+    for(int i=0;i<(int)(sizeof(held)/sizeof(held[0]));i++) {
+        held[i]=bind_listener_stream111(ALT_TCP_PORT_FIRST+i);
+        assert(held[i]>=0);
+        if(i==0) {
+            int selected=bind_permitted_listener_stream111();assert(selected>=0);
+            struct sockaddr_in6 a;socklen_t n=sizeof(a);
+            assert(getsockname(selected,(struct sockaddr*)&a,&n)==0);
+            assert(ntohs(a.sin6_port)==ALT_TCP_PORT_FIRST+1);
+            close(selected);
+        }
+    }
+    assert(bind_permitted_listener_stream111()==-1);
+    for(int i=0;i<(int)(sizeof(held)/sizeof(held[0]));i++)close(held[i]);
+}
 static void test_receiver(void) {
     uint8_t key[16];memset(key,0x47,sizeof(key));
     real_AES_CBCFrame_Init=cbc_stub;g_master_valid=0;cbc_result=-42;
@@ -98,7 +114,7 @@ static void test_receiver(void) {
     assert(start_alt_receiver(NULL,1)==-1); assert(g_alt_listen_fd==-1);
     s_AES_CTR_Init=init_ok;
     for(int i=0;i<25;i++) {
-        int port=start_alt_receiver(NULL,1);assert(port>0);
+        int port=start_alt_receiver(NULL,1);assert(port>=ALT_TCP_PORT_FIRST && port<=ALT_TCP_PORT_LAST);
         if(i%3) {
             int family=i%3==1 ? AF_INET : AF_INET6;
             int fd=socket(family,SOCK_STREAM,0); assert(fd>=0);
@@ -211,7 +227,7 @@ int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_mux();test_parser();test_receiver();
+    test_mux();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);

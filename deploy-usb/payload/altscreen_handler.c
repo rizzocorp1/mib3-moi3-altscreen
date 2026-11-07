@@ -31,11 +31,11 @@
  *    - Detecta solicitacao de Stream 111 (Instrument Cluster H.264).
  *    - Deriva a subchave e IV via AirPlay_DeriveAESKeySHA512ForScreen(master_key, streamConnectionID).
  *    - Inicializa AES-CTR para decriptografia dos quadros de video.
- *    - Inicia servidor TCP local na porta 6031.
- *    - Anexa descritor de resposta do Stream 111 (dataPort = 6031, streamID = 111).
+ *    - Selects an unused TCP port in the factory-permitted 49200..49499 range.
+ *    - Returns only type 111 and the actual bound dataPort.
  *
  * 5. Receptor TCP & Pipeline MPEG-TS AID:
- *    - Thread alt_receiver_thread escuta em 0.0.0.0:6031 / [::]:6031.
+ *    - The auxiliary listener uses an available port without changing firewall rules.
  *    - Recebe pacotes de tela AirPlay (cabecalho 128B + payload).
  *    - K_SCREEN_VIDEO_CONFIG (opcode 1): extrai SPS e PPS da estrutura avcC.
  *    - K_SCREEN_VIDEO_FRAME (opcode 0): decripta com AES-CTR, converte AVCC para Annex B,
@@ -63,9 +63,9 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v7.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v7.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v7.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v8.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v8.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v8.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -197,7 +197,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v7-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v8-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -896,7 +896,7 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
 }
 
 /* =============================================================================
- * Servidor Receptor TCP Stream 111 (Porta 6031)
+ * Servidor Receptor TCP Stream 111
  * ============================================================================= */
 static int g_alt_listen_fd = -1;
 static int g_alt_listen_port;
@@ -1105,6 +1105,22 @@ static int bind_listener_stream111(int port) {
     return fd;
 }
 
+/* The factory IPv6 filter permits TCP destination/source ports 49200..49499.
+ * Port zero can select a filtered ephemeral port. Never take the primary screen
+ * port or modify firewall policy; bind exclusively and skip occupied ports.
+ * Exhaustion fails the auxiliary setup while leaving native CarPlay intact. */
+#define ALT_TCP_PORT_FIRST 49200
+#define ALT_TCP_PORT_LAST  49499
+static int bind_permitted_listener_stream111(void) {
+    for (int port=ALT_TCP_PORT_FIRST;port<=ALT_TCP_PORT_LAST;port++) {
+        int fd=bind_listener_stream111(port);
+        if(fd>=0)return fd;
+    }
+    log_msg("NET","No auxiliary listener available in permitted range %d..%d",
+            ALT_TCP_PORT_FIRST,ALT_TCP_PORT_LAST);
+    return -1;
+}
+
 /* Caller serializes start/stop. The worker owns the accepted fd; stop only
  * shuts it down, then joins before closing the listening fd or resetting state. */
 static void stop_alt_receiver_locked(void) {
@@ -1167,7 +1183,7 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
     g_alt_session=session;
     log_msg("CRYPTO", "AltScreen security ready: %s",pairing ? "HomeKit ChaCha20-Poly1305" : "legacy AES-CTR");
     int port = 0;
-    g_alt_listen_fd = bind_listener_stream111(0);
+    g_alt_listen_fd = bind_permitted_listener_stream111();
     if (g_alt_listen_fd < 0) {
         g_alt_aes_valid = 0;
         reset_homekit_stream();
@@ -1434,7 +1450,7 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
 
 /* =============================================================================
  * HOOK 2: AirPlayReceiverSessionSetup (libAirPlay.so)
- * Trata o SETUP do Stream 111 com servidor TCP local (Porta 6031)
+ * Trata o SETUP do Stream 111 com servidor TCP local
  * ============================================================================= */
 typedef int32_t (*AirPlayReceiverSessionSetup_fn)(void *inSession, void *inRequest, void **outResponse);
 static AirPlayReceiverSessionSetup_fn real_AirPlayReceiverSessionSetup = NULL;
