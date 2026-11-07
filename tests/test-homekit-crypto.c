@@ -4,16 +4,24 @@
 #include <openssl/evp.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdatomic.h>
+#include <sys/socket.h>
+static _Atomic unsigned packets;
+static ssize_t capture_packet(int fd,const void *p,size_t n,int flags,const struct sockaddr *a,socklen_t z) {
+    (void)fd;(void)p;(void)flags;(void)a;(void)z;atomic_fetch_add(&packets,1);return (ssize_t)n;
+}
+#define sendto capture_packet
 #define ALTSCREEN_TEST
 #include "../deploy-usb/payload/altscreen_handler.c"
+#undef sendto
 
 typedef struct {int refs;} Pairing;
 static Pairing pairing_a,pairing_b;
 static void *expected_pairing;
 static uint64_t expected_cid;
-static int derive_failure,tail_mode;
+static int derive_failure,tail_mode,retain_failure;
 static uint8_t reference_key[32];
-static const void *retain_pairing(const void *p){((Pairing *)p)->refs++;return p;}
+static const void *retain_pairing(const void *p){if(retain_failure)return NULL;((Pairing *)p)->refs++;return p;}
 static void release_pairing(const void *p){assert(((Pairing *)p)->refs>0);((Pairing *)p)->refs--;}
 static int32_t derive_pairing(void *context,const void *salt,size_t salt_len,const void *info,size_t info_len,size_t output_len,void *out) {
     char expected[64];snprintf(expected,sizeof(expected),"DataStream-Salt%llu",(unsigned long long)expected_cid);
@@ -62,12 +70,44 @@ static void prepare(void *session,uint64_t cid) {
     expected_cid=cid;expected_pairing=pairing_for_session(session);
     assert(expected_pairing);assert(prepare_homekit_stream(expected_pairing,cid)==0);
 }
+static void test_tcp_receiver(void *session) {
+    expected_pairing=pairing_for_session(session);expected_cid=777;
+    assert(start_alt_receiver(session,777)==6031 && g_alt_chacha_valid && !g_alt_aes_valid);
+    int client=socket(AF_INET,SOCK_STREAM,0);assert(client>=0);
+    struct timeval timeout={2,0};assert(setsockopt(client,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout))==0);
+    struct sockaddr_in address={0};address.sin_family=AF_INET;address.sin_port=htons(6031);address.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
+    assert(connect(client,(struct sockaddr *)&address,sizeof(address))==0);
+    uint8_t config[]={1,100,0,31,0xff,0xe1,0,2,0x67,0x42,1,0,2,0x68,0xce};
+    AirPlayScreenHeaderCompat header={0};header.opcode=K_SCREEN_VIDEO_CONFIG;header.bodySize=sizeof(config);
+    assert(write(client,&header,sizeof(header))==(ssize_t)sizeof(header));assert(write(client,config,sizeof(config))==(ssize_t)sizeof(config));
+    uint8_t plain[]={0,0,0,3,0x65,0xaa,0xbb},body[64];
+    header.opcode=K_SCREEN_VIDEO_FRAME;header.bodySize=sizeof(plain)+16;
+    size_t n=encrypt_reference((const uint8_t *)&header,plain,sizeof(plain),0,body);
+    g_rtp_sock=99;atomic_store(&packets,0);
+    assert(write(client,&header,sizeof(header))==(ssize_t)sizeof(header));assert(write(client,body,n)==(ssize_t)n);
+    for(int i=0;i<200 && !atomic_load(&packets);i++)usleep(10000);
+    unsigned sent=atomic_load(&packets);assert(sent>0);
+    n=encrypt_reference((const uint8_t *)&header,plain,sizeof(plain),1,body);body[n-1]^=1;
+    assert(write(client,&header,sizeof(header))==(ssize_t)sizeof(header));assert(write(client,body,n)==(ssize_t)n);
+    uint8_t byte;assert(recv(client,&byte,1,0)==0);
+    assert(atomic_load(&packets)==sent);close(client);stop_alt_receiver();g_rtp_sock=-1;
+    assert(!g_alt_chacha_valid && !g_alt_thread_created);
+}
 int main(void) {
     for(int i=0;i<32;i++)reference_key[i]=(uint8_t)(i+1);
     s_pairing_retain=retain_pairing;s_pairing_release=release_pairing;s_pairing_derive=derive_pairing;
     s_chacha_init=native_init;s_chacha_aad=native_aad;s_chacha_decrypt=native_decrypt;s_chacha_verify=native_verify;
     int session_a,session_b,unrelated;
     assert(remember_pairing(&session_a,&pairing_a)==0 && pairing_a.refs==1);
+    assert(remember_pairing(&session_b,&pairing_b)==0 && pairing_b.refs==1);
+    retain_failure=1;
+    assert(remember_pairing(&session_a,&pairing_b)==-1 && !pairing_for_session(&session_a));
+    assert(pairing_a.refs==0 && pairing_b.refs==1);retain_failure=0;
+    assert(remember_pairing(&session_a,&pairing_a)==0 && pairing_a.refs==1);
+    int extra[3];
+    assert(remember_pairing(&extra[0],&pairing_a)==0 && remember_pairing(&extra[1],&pairing_a)==0);
+    assert(remember_pairing(&extra[2],&pairing_a)==-1 && !pairing_for_session(&extra[2]));
+    assert(remember_pairing(&extra[0],NULL)==0 && remember_pairing(&extra[1],NULL)==0);
     assert(remember_pairing(&session_b,&pairing_b)==0 && pairing_b.refs==1);
     assert(pairing_for_session(&unrelated)==NULL);
     assert(remember_pairing(&session_a,&pairing_a)==0 && pairing_a.refs==1);
@@ -104,6 +144,7 @@ int main(void) {
     assert(decrypt_homekit_frame(header,128,last_body,&last_n)==-1 && !g_alt_chacha_valid);
     derive_failure=1;expected_cid=1;expected_pairing=&pairing_a;
     assert(prepare_homekit_stream(&pairing_a,1)==-1 && !g_alt_chacha_valid);derive_failure=0;
+    test_tcp_receiver(&session_a);
     assert(remember_pairing(&session_a,NULL)==0 && pairing_a.refs==0);
     assert(remember_pairing(&session_b,NULL)==0 && pairing_b.refs==0);
     assert(!pairing_for_session(&session_a));

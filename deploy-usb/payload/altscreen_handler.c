@@ -63,15 +63,16 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v2.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v2.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v2.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v4.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v4.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v4.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
 static pthread_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void log_msg(const char *tag, const char *fmt, ...) {
+    int saved_errno=errno;
     pthread_mutex_lock(&g_log_mutex);
 
     char buffer[1024];
@@ -107,6 +108,7 @@ static void log_msg(const char *tag, const char *fmt, ...) {
         fflush(g_log_fp);
     }
     pthread_mutex_unlock(&g_log_mutex);
+    errno=saved_errno;
 }
 
 /* =============================================================================
@@ -394,6 +396,7 @@ static AES_CTR_Update_fn s_AES_CTR_Update = NULL;
 
 static uint8_t g_master_key[16];
 static volatile int g_master_valid = 0;
+static void *g_master_session = NULL;
 static pthread_mutex_t g_crypto_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static aes_ctr_storage_t g_alt_aes;
@@ -420,13 +423,9 @@ int32_t AES_CBCFrame_Init(void *ctx, const uint8_t key[16], const uint8_t iv[16]
 
     if (!real_AES_CBCFrame_Init) return -1;
     int32_t result = real_AES_CBCFrame_Init(ctx, key, iv, encrypt);
-    if (result == 0 && key && !encrypt) {
-        pthread_mutex_lock(&g_crypto_lock);
-        memcpy(g_master_key, key, 16);
-        g_master_valid = 1;
-        pthread_mutex_unlock(&g_crypto_lock);
-        log_msg("CRYPTO", "Chave mestre CarPlay AES-128 capturada com sucesso!");
-    }
+    /* This generic primitive is used by multiple callers. The session setter
+     * below is the authoritative source for a session-bound legacy key. */
+    log_msg("CRYPTO", "Native CBC initialization: encrypt=%d status=%d",encrypt!=0,result);
 
     return result;
 }
@@ -439,8 +438,17 @@ int32_t AirPlayReceiverSessionSetSecurityInfo(void *session, const uint8_t *key,
     if (!real_session_security)
         real_session_security = (session_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetSecurityInfo");
     int32_t result = real_session_security ? real_session_security(session, key, iv) : -1;
+    int native_errno=errno;
+    pthread_mutex_lock(&g_crypto_lock);
+    if(result==0 && session && key && iv) {
+        memcpy(g_master_key,key,sizeof(g_master_key));g_master_valid=1;g_master_session=session;
+    } else if(g_master_session==session) {
+        secret_zero(g_master_key,sizeof(g_master_key));g_master_valid=0;g_master_session=NULL;
+    }
+    pthread_mutex_unlock(&g_crypto_lock);
     log_msg("SECURITY", "Native legacy session security: key_present=%d iv_present=%d status=%d",
             key != NULL, iv != NULL, result);
+    errno=native_errno;
     return result;
 }
 typedef int32_t (*homekit_security_fn)(void *, void *);
@@ -449,11 +457,13 @@ int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *con
     if (!real_homekit_security)
         real_homekit_security = (homekit_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetHomeKitSecurityContext");
     int32_t result = real_homekit_security ? real_homekit_security(session, context) : -1;
+    int native_errno=errno;
     if(result==0) {
         int cached=remember_pairing(session,context);
         log_msg("SECURITY", "HomeKit context cache: present=%d status=%d",context!=NULL,cached);
     }
     log_msg("SECURITY", "Native HomeKit session context: present=%d status=%d", context != NULL, result);
+    errno=native_errno;
     return result;
 }
 
@@ -1084,6 +1094,7 @@ static void stop_alt_receiver_locked(void) {
     g_alt_aes_valid = 0;
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
     reset_homekit_stream();
+    g_alt_session=NULL;
     g_sps_pps_len = 0;
     memset(&g_video_clock, 0, sizeof(g_video_clock));
     pthread_mutex_unlock(&g_crypto_lock);
@@ -1105,7 +1116,7 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
         init_status=prepare_homekit_stream(pairing,connection_id);
         ready=init_status==0;
     } else {
-        ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init && s_AES_CTR_Update;
+        ready = g_master_valid && g_master_session==session && s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init && s_AES_CTR_Update;
         if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(g_master_key,sizeof(g_master_key),connection_id,key,iv);
         if (ready) { init_status = s_AES_CTR_Init(&g_alt_aes,key,iv); ready = init_status == 0; }
     }
@@ -1129,6 +1140,7 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
     if (g_alt_listen_fd < 0) {
         g_alt_aes_valid = 0;
         reset_homekit_stream();
+        g_alt_session=NULL;
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao vincular porta TCP %d: %s", port, strerror(errno));
@@ -1142,6 +1154,7 @@ static int start_alt_receiver(void *session,uint64_t connection_id) {
         g_alt_thread_running = 0;
         g_alt_aes_valid = 0;
         reset_homekit_stream();
+        g_alt_session=NULL;
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao criar alt_receiver_thread");
@@ -1421,11 +1434,13 @@ void AirPlayReceiverSessionTearDown(void *inSession, void *inRequest, int32_t in
     }
 
     log_msg("TEARDOWN", "AirPlayReceiverSessionTearDown: session=%p, reason=%d", inSession, inReason);
-    stop_alt_receiver();
     pthread_mutex_lock(&g_crypto_lock);
-    memset(g_master_key, 0, sizeof(g_master_key));
-    g_master_valid = 0;
+    int owns_stream=g_alt_session==inSession;
+    if(g_master_session==inSession) {
+        secret_zero(g_master_key,sizeof(g_master_key));g_master_valid=0;g_master_session=NULL;
+    }
     pthread_mutex_unlock(&g_crypto_lock);
+    if(owns_stream)stop_alt_receiver();
 
     if (real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown(inSession, inRequest, inReason, outDone);

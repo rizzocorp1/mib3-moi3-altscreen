@@ -24,6 +24,10 @@ boot_template=(Path(__file__).resolve().parents[1]/'recovery/oneshot-boot.sh.in'
 launch=next(line for line in boot_template.splitlines() if line.startswith('if ! systemd-run '))
 properties=[word for word in launch.split() if word.startswith('--property=')]
 assert properties==['--property=RuntimeMaxSec=330'], 'Unreviewed factory-manager properties'
+map_template=Path(__file__).resolve().parents[1]/'recovery/map-v4-boot.sh.in'
+if map_template.exists():
+    map_launch=next(line for line in map_template.read_text().splitlines() if line.startswith('if ! systemd-run '))
+    assert [w for w in map_launch.split() if w.startswith('--property=')]==properties
 property_arguments=' '.join(properties)
 unit=identifier+'.service';logger=identifier+'-logger.service'
 unit_path=Path('/run/systemd/system')/unit

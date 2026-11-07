@@ -86,8 +86,10 @@ static void test_receiver(void) {
     uint8_t key[16];memset(key,0x47,sizeof(key));
     real_AES_CBCFrame_Init=cbc_stub;g_master_valid=0;cbc_result=-42;
     assert(AES_CBCFrame_Init(NULL,key,key,0)==-42 && !g_master_valid);
-    cbc_result=0;assert(AES_CBCFrame_Init(NULL,key,key,0)==0 && g_master_valid);
-    assert(!memcmp(g_master_key,key,sizeof(key)));
+    cbc_result=0;assert(AES_CBCFrame_Init(NULL,key,key,0)==0 && !g_master_valid);
+    /* Explicit legacy-key fixture; the generic CBC observer must not associate
+     * another caller's key with an existing CarPlay session. */
+    memcpy(g_master_key,key,sizeof(key));g_master_session=NULL;
     s_AirPlay_DeriveAESKeySHA512ForScreen=derive_ok;
     s_AES_CTR_Init=init_ok; s_AES_CTR_Update=update_bad;
     g_master_valid=0; assert(start_alt_receiver(NULL,1)==-1);
@@ -168,6 +170,8 @@ static void test_security_observers(void) {
     for(int i=0;i<2;i++) {
         native_security_status=i ? -37 : 0;
         assert(AirPlayReceiverSessionSetSecurityInfo(&session,key,iv)==native_security_status);
+        assert(g_master_valid==(i==0));
+        if(i==0)assert(g_master_session==&session && !memcmp(g_master_key,key,sizeof(key)));
         assert(AirPlayReceiverSessionSetHomeKitSecurityContext(&session,&context)==native_security_status);
         assert(key[0]==1 && iv[0]==2);
     }

@@ -5,9 +5,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import re
 
 guard=Path(sys.argv[1]).resolve()
 entry_template=Path(sys.argv[2]).read_text();boot_template=Path(sys.argv[3]).read_text()
+stage_name=re.search(r'STAGE="\$BASE/([^"\n]+)"',entry_template).group(1)
+map_mode='MAP TEST ARMED' in entry_template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'):
     with tempfile.TemporaryDirectory() as directory:
@@ -43,9 +46,9 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)
-        report=(usb/'altscreen-setup.txt').read_text();stage=base/'.moi3-security-probe-v3'
+        report=(usb/'altscreen-setup.txt').read_text();stage=base/stage_name
         if scenario=='arm-and-restore':
-            assert 'RESULT: DIAGNOSTIC ARMED' in report and 'SETUP COMPLETE' in report,report
+            assert ('RESULT: MAP TEST ARMED' if map_mode else 'RESULT: DIAGNOSTIC ARMED') in report and 'SETUP COMPLETE' in report,report
             assert (stage/'ARMED').is_file() and digest(startup)==values['BOOT_SHA']
             assert (stage/'factory-carplay.sh').read_bytes()==factory
             assert (usb/'previous-v1-boot-status.txt').read_text()=='retained previous test evidence'

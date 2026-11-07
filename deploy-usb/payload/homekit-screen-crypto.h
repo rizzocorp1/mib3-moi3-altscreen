@@ -46,6 +46,9 @@ static int remember_pairing(void *session,void *context) {
             old=g_pairings[slot].context;
             g_pairings[slot].context=(void *)owned;
             g_pairings[slot].session=context ? session : NULL;result=0;
+        } else {
+            old=g_pairings[slot].context;
+            g_pairings[slot].context=NULL;g_pairings[slot].session=NULL;
         }
     } else if(!context)result=0;
     pthread_mutex_unlock(&g_crypto_lock);
@@ -59,7 +62,7 @@ static void *pairing_for_session(void *session) {
 static void reset_homekit_stream(void) {
     secret_zero(g_alt_chacha_key,sizeof(g_alt_chacha_key));
     secret_zero(g_alt_chacha_nonce,sizeof(g_alt_chacha_nonce));
-    g_alt_chacha_valid=0;g_alt_session=NULL;
+    g_alt_chacha_valid=0;
 }
 static int prepare_homekit_stream(void *context,uint64_t connection_id) {
     reset_homekit_stream();
