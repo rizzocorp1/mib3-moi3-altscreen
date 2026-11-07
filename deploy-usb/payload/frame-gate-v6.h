@@ -1,12 +1,22 @@
 /* Root collector grants cluster-output ownership only after this process has
  * authenticated and validated an IDR. No UDP is emitted before the grant. */
 #define HANDOFF_TOKEN "AUTHENTICATED_H264_V6\n"
+#include <stddef.h>
+/* This exact AArch64 glibc 2.23 exports __fxstat(version=0), not the newer
+ * fstat symbol. Its native wrapper directly issues syscall 80. */
+#if defined(__aarch64__)
+extern int __fxstat(int,int,struct stat *);
+_Static_assert(sizeof(struct stat)==128 && offsetof(struct stat,st_mode)==16 && offsetof(struct stat,st_size)==48,"MU0841 stat ABI");
+static int handoff_stat(int fd,struct stat *st){return __fxstat(0,fd,st);}
+#else
+static int handoff_stat(int fd,struct stat *st){return fstat(fd,st);}
+#endif
 static int g_handoff_started;
 static int handoff_file_valid(const char *path) {
     int fd=open(path,O_RDONLY|O_NOFOLLOW|O_NONBLOCK|O_CLOEXEC);
     if(fd<0)return 0;
     struct stat st;char bytes[sizeof(HANDOFF_TOKEN)]={0};
-    int good=fstat(fd,&st)==0 && S_ISREG(st.st_mode) && st.st_size==(off_t)(sizeof(HANDOFF_TOKEN)-1);
+    int good=handoff_stat(fd,&st)==0 && S_ISREG(st.st_mode) && st.st_size==(off_t)(sizeof(HANDOFF_TOKEN)-1);
     ssize_t n=good ? read(fd,bytes,sizeof(bytes)) : -1;close(fd);
     return good && n==(ssize_t)(sizeof(HANDOFF_TOKEN)-1) && !memcmp(bytes,HANDOFF_TOKEN,sizeof(HANDOFF_TOKEN)-1);
 }
