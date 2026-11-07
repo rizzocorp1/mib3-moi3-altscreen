@@ -13,7 +13,9 @@ stage_name=re.search(r'STAGE="\$BASE/([^"\n]+)"',entry_template).group(1)
 map_mode='MAP TEST ARMED' in entry_template
 info_mode='STOCK INFO OBSERVATION' in entry_template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
-for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'):
+scenarios=('arm-and-restore','mixed-stick','copy-failure','wrong-baseline')
+if 'altscreen-v6-frame-ready' in entry_template:scenarios+=('stale-handoff',)
+for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
         startup=base/'carplay.sh';startup.write_bytes(b'#!/bin/sh\nexit 0\n');startup.chmod(0o755)
@@ -47,6 +49,8 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         if scenario=='mixed-stick':(usb/'PROBE_ONLY.txt').write_text('old probe')
         if scenario=='copy-failure':env['FILE_GUARD_FAIL_BEFORE_COMMIT']='1'
         if scenario=='wrong-baseline':target.write_bytes(b'unknown executable')
+        if scenario=='stale-handoff':
+            stale=root/'data/lge/smartlink/carplay/altscreen-v6-frame-ready';stale.parent.mkdir(parents=True);stale.write_text('old request')
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)

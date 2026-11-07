@@ -13,9 +13,11 @@ guard=Path(sys.argv[1]).resolve(); template=Path(sys.argv[2]).read_text()
 stage_name=re.search(r'STAGE="\$BASE/([^"\n]+)"',template).group(1)
 ram_name=re.search(r'RAM="\$R/run/([^"\n]+)"',template).group(1)
 map_mode='MAP TEST ACTIVE:' in template
+stop_mode='systemctl stop' in template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 scenarios=('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','logger-failure','logger-timeout','corrupt-collector')
-if map_mode:scenarios+=('stop-failure',)
+if stop_mode:scenarios+=('stop-failure',)
+if 'pending authenticated video' in template:scenarios+=('stale-handoff',)
 for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
@@ -42,6 +44,8 @@ for scenario in scenarios:
         if scenario=='corrupt-patch':patched.write_bytes(b'bad executable')
         if scenario=='corrupt-backup':backup.write_bytes(b'bad backup')
         if scenario=='corrupt-collector':collector.write_bytes(b'bad collector')
+        if scenario=='stale-handoff':
+            stale=root/'data/lge/smartlink/carplay/altscreen-v6-frame-ready';stale.parent.mkdir(parents=True);stale.write_text('old request')
         tools=root/'tools';tools.mkdir();events=root/'events'
         stub='''#!/usr/bin/env python3
 import os,sys
@@ -80,7 +84,7 @@ elif command=='systemctl':
             assert os.getxattr(startup,'user.startup-label')==b'factory-metadata'
             if scenario=='active':
                 assert ('MAP TEST ACTIVE:' if map_mode else 'DIAGNOSTIC ACTIVE:') in log and 'mount --bind' in history
-                assert ('systemctl stop' in history)==map_mode
+                assert ('systemctl stop' in history)==stop_mode
                 assert 'systemctl disable' not in history
                 assert target.read_bytes()==patched.read_bytes()
                 # A reboot removes the bind mount; simulate that, then show a
@@ -88,7 +92,7 @@ elif command=='systemctl':
                 target.write_bytes(factory_copy.read_bytes());events.write_text('')
                 subprocess.run(['sh',boot],env=env,check=True,timeout=15)
                 assert events.read_text()=='' and 'DISARMED' in (stage/'boot-status.txt').read_text()
-            elif scenario in ('unarmed','corrupt-patch','corrupt-collector'):
+            elif scenario in ('unarmed','corrupt-patch','corrupt-collector','stale-handoff'):
                 assert not history and target.read_bytes()==factory_copy.read_bytes()
             elif scenario in ('logger-failure','logger-timeout'):
                 assert 'ABORT' in log and 'mount --bind' not in history and 'systemctl stop' not in history

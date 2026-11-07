@@ -63,9 +63,9 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v4.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v4.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v4.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v6.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v6.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v6.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -189,6 +189,23 @@ static CFRetain_fn s_CFRetain = NULL;
 
 typedef int32_t (*CFPropertyListWriteToFilePath_fn)(const void *plist, const char *format, const char *path);
 static CFPropertyListWriteToFilePath_fn s_CFPropertyListWriteToFilePath = NULL;
+static pthread_mutex_t g_info_snapshot_lock=PTHREAD_MUTEX_INITIALIZER;
+static unsigned g_info_saved;
+static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
+    if(!s_CFPropertyListWriteToFilePath)return;
+    int saved_errno=errno;
+    pthread_mutex_lock(&g_info_snapshot_lock);
+    if(!(g_info_saved & bit)) {
+        char path[160],pending[176];
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v6-%s.plist",name);
+        snprintf(pending,sizeof(pending),"%s.pending",path);
+        int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
+        if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
+        else if(result==0)result=-1;
+        log_msg("SERVERINFO","%s snapshot status=%d",name,result);
+    }
+    pthread_mutex_unlock(&g_info_snapshot_lock);errno=saved_errno;
+}
 static const void *s_kCFLBooleanFalse = NULL;
 
 static const void *s_kCFLArrayCallBacks = NULL;
@@ -810,6 +827,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
 }
 
+#include "frame-gate-v6.h"
 static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestamp) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
     /* Validate the entire access unit before emitting anything. In particular,
@@ -826,6 +844,9 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
         nals++;
     }
 
+#ifndef ALTSCREEN_TEST
+    if(frame_gate_at("/data/lge/smartlink/carplay",is_keyframe,g_alt_chacha_valid)!=0)return 0;
+#endif
     init_cluster_network();
 
     static int s_first_frame = 0;
@@ -1029,6 +1050,9 @@ static void *alt_receiver_thread(void *arg) {
     }
 
 receiver_done:
+#ifndef ALTSCREEN_TEST
+    end_frame_gate_at("/data/lge/smartlink/carplay");
+#endif
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_client_fd == c) g_alt_client_fd = -1;
@@ -1095,6 +1119,7 @@ static void stop_alt_receiver_locked(void) {
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
     reset_homekit_stream();
     g_alt_session=NULL;
+    g_handoff_started=0;
     g_sps_pps_len = 0;
     memset(&g_video_clock, 0, sizeof(g_video_clock));
     pthread_mutex_unlock(&g_crypto_lock);
@@ -1282,6 +1307,7 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
     init_cf_symbols();
 
     /* 1. Clona o dicionario base do servidor para mutacao */
+    save_info_snapshot(base,"stock-info",1);
     void *info = dict_clone(base);
     if (!info) return base;
 
@@ -1362,10 +1388,7 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
     }
     if (k_displays && s_CFRelease) s_CFRelease(k_displays);
 
-    if (s_CFPropertyListWriteToFilePath) {
-        int32_t dump_status=s_CFPropertyListWriteToFilePath(info,"binary1","/data/lge/smartlink/carplay/server_info_v62.plist");
-        log_msg("SERVERINFO","Capability snapshot status=%d",dump_status);
-    }
+    save_info_snapshot(info,"advertised-info",2);
 
     if (s_CFRelease) s_CFRelease(base);
     if (outErr) *outErr = 0;
@@ -1402,9 +1425,14 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
     log_msg("SETUP", "Stock AirPlayReceiverSessionSetup ret=%d, outResponse=%p",
             ret, (outResponse ? *outResponse : NULL));
 
-    if (ret == 0 && has_alt && outResponse && *outResponse) {
+    /* Initial SETUP has no media streams. Acknowledge AltScreen there as in
+     * the v1 trace that reached stream 111; leave primary media SETUP alone. */
+    void *requested_streams=inRequest ? get_streams(inRequest) : NULL;
+    int initial_setup=inRequest && (!requested_streams || (s_CFArrayGetCount && s_CFArrayGetCount(requested_streams)==0));
+    if (ret == 0 && (has_alt || initial_setup) && outResponse && *outResponse) {
         int use_va = check_viewareas_enabled();
         set_reference_enabled_features(*outResponse, use_va);
+        log_msg("SETUP","AltScreen acknowledgement: initial=%d auxiliary=%d",initial_setup,has_alt);
 
         if (has_alt && alt_desc) {
             uint64_t cid = stream_connection_id(alt_desc);

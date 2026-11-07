@@ -114,9 +114,10 @@ static void test_receiver(void) {
 typedef struct { const char *items[16]; int64_t count; } FeatureArray;
 static FeatureArray feature_copy;
 static void *feature_stock, *feature_committed;
+static void *requested_stream_array;
 static int feature_fail_copy, feature_fail_append;
 static void *feature_string(const void *a,const char *s,uint32_t e) {(void)a;(void)e;return (void *)s;}
-static const void *feature_get(const void *d,const void *k) {(void)d;(void)k;return feature_stock;}
+static const void *feature_get(const void *d,const void *k) {(void)d;return !strcmp(k,"streams") ? requested_stream_array : feature_stock;}
 static void feature_set(void *d,const void *k,const void *v) {(void)d;(void)k;feature_committed=(void *)v;}
 static void feature_release(const void *p) {(void)p;}
 static void *feature_clone(const void *a,int64_t n,const void *p) {
@@ -179,9 +180,31 @@ static void test_security_observers(void) {
     assert(AirPlayReceiverSessionSetHomeKitSecurityContext(&session,NULL)==native_security_status);
     puts("PASS: security observers preserve native arguments, keys and success/failure returns");
 }
+static void *setup_session,*setup_request,*setup_response;
+static int32_t setup_result;
+static int32_t setup_stub(void *session,void *request,void **response) {
+    assert(session==setup_session && request==setup_request);
+    if(response)*response=setup_response;return setup_result;
+}
+static void test_initial_acknowledgement(void) {
+    int session,request,response;void *out=NULL;
+    setup_session=&session;setup_request=&request;setup_response=&response;setup_result=0;
+    real_AirPlayReceiverSessionSetup=setup_stub;feature_stock=NULL;feature_committed=NULL;
+    requested_stream_array=NULL;
+    assert(AirPlayReceiverSessionSetup(&session,&request,&out)==0 && out==&response);
+    assert(feature_committed==&feature_copy && feature_copy.count==1 && !strcmp(feature_copy.items[0],"altScreen"));
+    FeatureArray primary={{"native-primary-stream"},1};requested_stream_array=&primary;feature_committed=NULL;
+    assert(AirPlayReceiverSessionSetup(&session,&request,&out)==0 && !feature_committed);
+    requested_stream_array=NULL;setup_result=-77;feature_committed=NULL;
+    assert(AirPlayReceiverSessionSetup(&session,&request,&out)==-77 && !feature_committed);
+    setup_result=0;setup_request=NULL;
+    assert(AirPlayReceiverSessionSetup(&session,NULL,&out)==0 && !feature_committed);
+    puts("PASS: initial SETUP acknowledges AltScreen; primary media, failed SETUP and NULL request remain unchanged");
+}
 int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
+    test_initial_acknowledgement();
     test_mux();test_parser();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
