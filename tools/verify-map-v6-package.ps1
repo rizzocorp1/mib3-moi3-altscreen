@@ -23,6 +23,7 @@ try {
     $main=[Text.Encoding]::UTF8.GetString((Bytes $test 'Meta/main.mnf'))|ConvertFrom-Json
     if($main.Release -ne 'MOI3_EU_SE_E9400L' -or $main.Includes.Count -ne 1 -or $main.Includes[0].PackageName -ne 'MIB3OI_POST_SCRIPT'){throw 'Unexpected update components'}
     $manifest=[Text.Encoding]::UTF8.GetString((Bytes $test 'build-manifest.json'))|ConvertFrom-Json
+    if($manifest.deferredHandoff -ne $true){throw 'Missing deferred encoder handoff'}
     if($manifest.purpose -ne 'homekit-altscreen-map-test' -or $manifest.clusterOutput -ne $true -or $manifest.nativeEncoderStop -ne $true){throw 'Package is not the reviewed HomeKit map test'}
     if($manifest.format -ne 'moi3-altscreen-map-v6' -or $manifest.software -ne '0841' -or $manifest.unit -ne '3G5035842B'){throw 'Wrong test identity'}
     $required=@('fix_hw_partnumber.sh','payload/oneshot-boot.sh','payload/managed-log-collector.sh','payload/file-guard','payload/carplay-once','payload/altscreen_handler.so','ALTSCREEN_TEST_ONCE.txt','READ-ME-FIRST.txt')
