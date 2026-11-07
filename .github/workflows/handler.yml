@@ -32,6 +32,10 @@ jobs:
           gcc -shared -fPIC -Wall -Wextra -O2 deploy-usb/payload/altscreen_handler.c -ldl -pthread -o /tmp/handler-host.so
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
           timeout 30 /tmp/test-handler
+      - name: Check authenticated HomeKit screen framing against OpenSSL
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/test-homekit-crypto
+          timeout 30 /tmp/test-homekit-crypto
       - name: Check atomic startup-file backup and restore
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard

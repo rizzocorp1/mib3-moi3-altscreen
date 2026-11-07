@@ -398,9 +398,10 @@ static pthread_mutex_t g_crypto_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static aes_ctr_storage_t g_alt_aes;
 static volatile int g_alt_aes_valid = 0;
+#include "homekit-screen-crypto.h"
 
 static void init_crypto_symbols(void) {
-    if (s_AirPlay_DeriveAESKeySHA512ForScreen) return;
+    init_homekit_symbols();
     s_AirPlay_DeriveAESKeySHA512ForScreen = (AirPlay_DeriveAESKeySHA512ForScreen_fn)dlsym(
         RTLD_DEFAULT, "AirPlay_DeriveAESKeySHA512ForScreen"
     );
@@ -448,6 +449,10 @@ int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *con
     if (!real_homekit_security)
         real_homekit_security = (homekit_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetHomeKitSecurityContext");
     int32_t result = real_homekit_security ? real_homekit_security(session, context) : -1;
+    if(result==0) {
+        int cached=remember_pairing(session,context);
+        log_msg("SECURITY", "HomeKit context cache: present=%d status=%d",context!=NULL,cached);
+    }
     log_msg("SECURITY", "Native HomeKit session context: present=%d status=%d", context != NULL, result);
     return result;
 }
@@ -987,11 +992,17 @@ static void *alt_receiver_thread(void *arg) {
             case K_SCREEN_VIDEO_FRAME:
                 if (body && h.bodySize > 0) {
                     pthread_mutex_lock(&g_crypto_lock);
-                    int decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
+                    size_t plaintext_size=h.bodySize;
+                    int decrypt_ok;
+                    if(g_alt_chacha_valid)decrypt_ok=decrypt_homekit_frame(&h,sizeof(h),body,&plaintext_size)==0;
+                    else decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
                         s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body) == 0;
                     pthread_mutex_unlock(&g_crypto_lock);
-                    if (decrypt_ok) process_h264_frame(body, h.bodySize, screen_timestamp_us(&h));
-                    else log_msg("CRYPTO", "Dropping frame: AES state/update unavailable or failed");
+                    if (decrypt_ok) process_h264_frame(body, plaintext_size, screen_timestamp_us(&h));
+                    else {
+                        log_msg("CRYPTO", "Frame rejected: security state, decryption or authentication failed; closing receiver");
+                        free(body);body=NULL;goto receiver_done;
+                    }
                 }
                 break;
 
@@ -1007,6 +1018,7 @@ static void *alt_receiver_thread(void *arg) {
         }
     }
 
+receiver_done:
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_client_fd == c) g_alt_client_fd = -1;
@@ -1071,12 +1083,13 @@ static void stop_alt_receiver_locked(void) {
     g_alt_listen_fd = -1;
     g_alt_aes_valid = 0;
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
+    reset_homekit_stream();
     g_sps_pps_len = 0;
     memset(&g_video_clock, 0, sizeof(g_video_clock));
     pthread_mutex_unlock(&g_crypto_lock);
 }
 
-static int start_alt_receiver(uint64_t connection_id) {
+static int start_alt_receiver(void *session,uint64_t connection_id) {
     pthread_mutex_lock(&g_receiver_lock);
     stop_alt_receiver_locked();
     pthread_mutex_lock(&g_crypto_lock);
@@ -1086,11 +1099,16 @@ static int start_alt_receiver(uint64_t connection_id) {
     int init_present = s_AES_CTR_Init != NULL;
     int update_present = s_AES_CTR_Update != NULL;
     int32_t init_status = -1;
-    int ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen &&
-        s_AES_CTR_Init && s_AES_CTR_Update;
-    if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(
-        g_master_key, sizeof(g_master_key), connection_id, key, iv);
-    if (ready) { init_status = s_AES_CTR_Init(&g_alt_aes, key, iv); ready = init_status == 0; }
+    void *pairing=pairing_for_session(session);
+    int ready;
+    if(pairing) {
+        init_status=prepare_homekit_stream(pairing,connection_id);
+        ready=init_status==0;
+    } else {
+        ready = g_master_valid && s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init && s_AES_CTR_Update;
+        if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(g_master_key,sizeof(g_master_key),connection_id,key,iv);
+        if (ready) { init_status = s_AES_CTR_Init(&g_alt_aes,key,iv); ready = init_status == 0; }
+    }
     memset(key, 0, sizeof(key));
     memset(iv, 0, sizeof(iv));
     if (!ready) {
@@ -1099,13 +1117,18 @@ static int start_alt_receiver(uint64_t connection_id) {
         pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Refusing stream: AES prerequisites master=%d derive=%d init=%d update=%d init_status=%d",
                 master_present, derive_present, init_present, update_present, init_status);
+        log_msg("RECV111", "HomeKit path: context=%d derive=%d cipher=%d status=%d",pairing!=NULL,
+                s_pairing_derive!=NULL,s_chacha_init && s_chacha_aad && s_chacha_decrypt && s_chacha_verify,init_status);
         return -1;
     }
-    g_alt_aes_valid = 1;
+    g_alt_aes_valid = !pairing;
+    g_alt_session=session;
+    log_msg("CRYPTO", "AltScreen security ready: %s",pairing ? "HomeKit ChaCha20-Poly1305" : "legacy AES-CTR");
     int port = 6031;
     g_alt_listen_fd = bind_listener_stream111(port);
     if (g_alt_listen_fd < 0) {
         g_alt_aes_valid = 0;
+        reset_homekit_stream();
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao vincular porta TCP %d: %s", port, strerror(errno));
@@ -1118,6 +1141,7 @@ static int start_alt_receiver(uint64_t connection_id) {
         g_alt_listen_fd = -1;
         g_alt_thread_running = 0;
         g_alt_aes_valid = 0;
+        reset_homekit_stream();
         pthread_mutex_unlock(&g_crypto_lock);
         pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao criar alt_receiver_thread");
@@ -1372,7 +1396,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
             uint64_t cid = stream_connection_id(alt_desc);
             log_msg("SETUP", ">>> SOLICITACAO DE STREAM 111 DETECTADA! cid=%llu <<<", (unsigned long long)cid);
 
-            int port = start_alt_receiver(cid);
+            int port = start_alt_receiver(inSession,cid);
             if (port > 0) {
                 append_alt_setup_response(*outResponse, alt_desc, port);
                 log_msg("SETUP", ">>> STREAM 111 NEGOCIADO COM SUCESSO! dataPort=%d, streamID=111 <<<", port);
@@ -1406,6 +1430,7 @@ void AirPlayReceiverSessionTearDown(void *inSession, void *inRequest, int32_t in
     if (real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown(inSession, inRequest, inReason, outDone);
     }
+    remember_pairing(inSession,NULL);
 }
 
 /* =============================================================================
@@ -1474,6 +1499,7 @@ __attribute__((destructor))
 static void altscreen_cleanup(void) {
     log_msg("CLEANUP", "altscreen_handler.so finalizado (PID: %d)", getpid());
     stop_alt_receiver();
+    for(int i=0;i<4;i++)if(g_pairings[i].session)remember_pairing(g_pairings[i].session,NULL);
     if (g_rtp_sock >= 0) {
         close(g_rtp_sock);
         g_rtp_sock = -1;

@@ -90,13 +90,13 @@ static void test_receiver(void) {
     assert(!memcmp(g_master_key,key,sizeof(key)));
     s_AirPlay_DeriveAESKeySHA512ForScreen=derive_ok;
     s_AES_CTR_Init=init_ok; s_AES_CTR_Update=update_bad;
-    g_master_valid=0; assert(start_alt_receiver(1)==-1);
+    g_master_valid=0; assert(start_alt_receiver(NULL,1)==-1);
     assert(pthread_mutex_trylock(&g_crypto_lock)==0); pthread_mutex_unlock(&g_crypto_lock);
     g_master_valid=1; s_AES_CTR_Init=init_bad;
-    assert(start_alt_receiver(1)==-1); assert(g_alt_listen_fd==-1);
+    assert(start_alt_receiver(NULL,1)==-1); assert(g_alt_listen_fd==-1);
     s_AES_CTR_Init=init_ok;
     for(int i=0;i<25;i++) {
-        assert(start_alt_receiver(1)==6031);
+        assert(start_alt_receiver(NULL,1)==6031);
         if(i%2) {
             int fd=socket(AF_INET,SOCK_STREAM,0); assert(fd>=0);
             struct sockaddr_in a={0}; a.sin_family=AF_INET;a.sin_port=htons(6031);a.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
