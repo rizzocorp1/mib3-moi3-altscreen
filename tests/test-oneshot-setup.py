@@ -11,6 +11,7 @@ guard=Path(sys.argv[1]).resolve()
 entry_template=Path(sys.argv[2]).read_text();boot_template=Path(sys.argv[3]).read_text()
 stage_name=re.search(r'STAGE="\$BASE/([^"\n]+)"',entry_template).group(1)
 map_mode='MAP TEST ARMED' in entry_template
+info_mode='STOCK INFO OBSERVATION' in entry_template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'):
     with tempfile.TemporaryDirectory() as directory:
@@ -21,6 +22,9 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
         library=base.parents[1]/'lib64/libAirPlay.so';library.parent.mkdir();library.write_bytes(b'original library');library.chmod(0o755)
         os.setxattr(library,'user.library-label',b'library')
         release=root/'etc/os-release';release.parent.mkdir();release.write_bytes(b'ID=test-fixture\n')
+        if info_mode:
+            prior=root/'data/lge/smartlink/carplay/server_info_v62.plist';prior.parent.mkdir(parents=True)
+            prior.write_bytes(b'prior modified snapshot fixture')
         usb=root/'tmp/USB/PORT1/PART1';usb.mkdir(parents=True);payload=usb/'payload';payload.mkdir()
         shutil.copyfile(guard,payload/'file-guard')
         (payload/'carplay-once').write_bytes(b'test executable')
@@ -53,6 +57,7 @@ for scenario in ('arm-and-restore','mixed-stick','copy-failure','wrong-baseline'
             assert (stage/'factory-carplay.sh').read_bytes()==factory
             assert (usb/'previous-v1-boot-status.txt').read_text()=='retained previous test evidence'
             assert (usb/'previous-v1-handler-apprw.log').read_text()=='previous v1 handler evidence'
+            if info_mode:assert (usb/'previous-modified-info.plist').read_bytes()==prior.read_bytes()
             assert (stage/'managed-log-collector.sh').read_bytes()==(payload/'managed-log-collector.sh').read_bytes()
             assert (usb/'factory-carplay.sh.backup').read_bytes()==factory
             assert target.read_bytes()==original_exec

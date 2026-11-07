@@ -187,7 +187,7 @@ static CFStringGetCString_fn s_CFStringGetCString = NULL;
 static CFRelease_fn s_CFRelease = NULL;
 static CFRetain_fn s_CFRetain = NULL;
 
-typedef int32_t (*CFPropertyListWriteToFilePath_fn)(void *plist, const char *path, ...);
+typedef int32_t (*CFPropertyListWriteToFilePath_fn)(const void *plist, const char *format, const char *path);
 static CFPropertyListWriteToFilePath_fn s_CFPropertyListWriteToFilePath = NULL;
 static const void *s_kCFLBooleanFalse = NULL;
 
@@ -1363,7 +1363,8 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
     if (k_displays && s_CFRelease) s_CFRelease(k_displays);
 
     if (s_CFPropertyListWriteToFilePath) {
-        s_CFPropertyListWriteToFilePath(info, "/data/lge/smartlink/carplay/server_info_v62.plist", 0);
+        int32_t dump_status=s_CFPropertyListWriteToFilePath(info,"binary1","/data/lge/smartlink/carplay/server_info_v62.plist");
+        log_msg("SERVERINFO","Capability snapshot status=%d",dump_status);
     }
 
     if (s_CFRelease) s_CFRelease(base);

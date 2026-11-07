@@ -15,13 +15,22 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Exercise exact observation library against native fixture
         run: python3 tests/test-security-probe.py deploy-usb/payload/security-probe.c
+  stock-info-observation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise stock-info pass-through and bounded binary snapshots
+        run: python3 tests/test-info-probe.py deploy-usb/payload/info-probe-v5.c
   service-lifecycle:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Exercise real service-manager lifecycle
-        run: sudo python3 tests/test-systemd-lifecycle.py
+        run: |
+          sudo python3 tests/test-systemd-lifecycle.py
+          sudo python3 tests/test-systemd-lifecycle.py recovery/info-v5-log-collector.sh
   linux:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -51,6 +60,8 @@ jobs:
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/oneshot-usb.sh.in recovery/oneshot-boot.sh.in
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v4-boot.sh.in
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v4-usb.sh.in recovery/map-v4-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/info-v5-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/info-v5-usb.sh.in recovery/info-v5-boot.sh.in
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |
