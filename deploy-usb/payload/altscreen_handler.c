@@ -63,15 +63,16 @@
 #include <pthread.h>
 #include <errno.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v4.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v4.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v4.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
 static pthread_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void log_msg(const char *tag, const char *fmt, ...) {
+    int saved_errno=errno;
     pthread_mutex_lock(&g_log_mutex);
 
     char buffer[1024];
@@ -79,6 +80,9 @@ static void log_msg(const char *tag, const char *fmt, ...) {
     va_start(args, fmt);
     vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
+
+    /* journald provides a second path if SMACK denies our file locations. */
+    fprintf(stderr, "[ALTSCREEN][%s] %s\n", tag, buffer);
 
     if (g_kmsg_fd < 0) {
         g_kmsg_fd = open("/dev/kmsg", O_WRONLY | O_CLOEXEC);
@@ -104,6 +108,7 @@ static void log_msg(const char *tag, const char *fmt, ...) {
         fflush(g_log_fp);
     }
     pthread_mutex_unlock(&g_log_mutex);
+    errno=saved_errno;
 }
 
 /* =============================================================================
@@ -182,7 +187,7 @@ static CFStringGetCString_fn s_CFStringGetCString = NULL;
 static CFRelease_fn s_CFRelease = NULL;
 static CFRetain_fn s_CFRetain = NULL;
 
-typedef int32_t (*CFPropertyListWriteToFilePath_fn)(void *plist, const char *path, ...);
+typedef int32_t (*CFPropertyListWriteToFilePath_fn)(const void *plist, const char *format, const char *path);
 static CFPropertyListWriteToFilePath_fn s_CFPropertyListWriteToFilePath = NULL;
 static const void *s_kCFLBooleanFalse = NULL;
 
@@ -277,19 +282,34 @@ static int check_viewareas_enabled(void) {
 }
 
 static void set_reference_enabled_features(void *dict, int enable_viewareas) {
-    if (!dict || !s_CFArrayEnsureCreatedAndAppendCString) return;
-    void *enabled_features = NULL;
-    s_CFArrayEnsureCreatedAndAppendCString(&enabled_features, "altScreen", (size_t)-1);
-    if (enable_viewareas) {
-        s_CFArrayEnsureCreatedAndAppendCString(&enabled_features, "viewAreas", (size_t)-1);
-    }
+    if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
+        !s_CFDictionarySetValue || !s_CFRelease || !s_CFArrayGetCount ||
+        !s_CFArrayGetValueAtIndex || !s_CFStringGetCString) return;
     void *k_enabled = s_cf("enabledFeatures");
-    if (k_enabled && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(dict, k_enabled, enabled_features);
-        if (s_CFRelease) s_CFRelease(k_enabled);
+    if (!k_enabled) return;
+    void *stock = (void *)s_CFDictionaryGetValue(dict, k_enabled);
+    void *enabled_features = stock ? array_clone(stock) : NULL;
+    if (stock && !enabled_features) { s_CFRelease(k_enabled); return; }
+    const char *wanted[] = {"altScreen", "viewAreas"};
+    int ok = 1;
+    for (int feature = 0; feature < (enable_viewareas ? 2 : 1); feature++) {
+        int found = 0;
+        int64_t count = enabled_features ? s_CFArrayGetCount(enabled_features) : 0;
+        for (int64_t i = 0; i < count; i++) {
+            char value[128];
+            if (s_CFStringGetCString(s_CFArrayGetValueAtIndex(enabled_features, i), value,
+                                    sizeof(value), 0x08000100) && !strcmp(value, wanted[feature])) {
+                found = 1; break;
+            }
+        }
+        if (!found && s_CFArrayEnsureCreatedAndAppendCString(&enabled_features,
+                       wanted[feature], (size_t)-1) != 0) { ok = 0; break; }
     }
+    /* Commit only the complete copy; allocation failure leaves stock untouched. */
+    if (ok && enabled_features) s_CFDictionarySetValue(dict, k_enabled, enabled_features);
+    s_CFRelease(k_enabled);
     if (enabled_features && s_CFRelease) s_CFRelease(enabled_features);
-    log_msg("SERVERINFO", "enabledFeatures configurado com ['altScreen'%s]", enable_viewareas ? ", 'viewAreas'" : "");
+    log_msg("SERVERINFO", "enabledFeatures: factory list preserved, augmentation %s", ok ? "complete" : "aborted");
 }
 
 static void add_reference_viewarea(void *alt) {
@@ -313,10 +333,10 @@ static void add_reference_viewarea(void *alt) {
     set_i64(view, "originXPixels", 0);
     set_i64(view, "originYPixels", 0);
 
-    set_i64(safe, "widthPixels", 1280);
-    set_i64(safe, "heightPixels", 480);
-    set_i64(safe, "originXPixels", 0);
-    set_i64(safe, "originYPixels", 0);
+    set_i64(safe, "widthPixels", 320);
+    set_i64(safe, "heightPixels", 320);
+    set_i64(safe, "originXPixels", 480);
+    set_i64(safe, "originYPixels", 64);
 
     void *k_safe = s_cf("safeArea");
     if (k_safe && s_CFDictionarySetValue) {
@@ -362,7 +382,9 @@ typedef union {
     unsigned char bytes[512];
 } aes_ctr_storage_t;
 
-typedef int32_t (*AirPlay_DeriveAESKeySHA512ForScreen_fn)(
+/* MU0841 libAirPlay.so: the factory call site ignores x0 after derivation;
+ * the routine has no status return. AES_CTR_Init does return an OSStatus. */
+typedef void (*AirPlay_DeriveAESKeySHA512ForScreen_fn)(
     const uint8_t *master_key, size_t key_len, uint64_t connection_id, uint8_t *out_key, uint8_t *out_iv
 );
 typedef int32_t (*AES_CTR_Init_fn)(void *ctx, const uint8_t *key, const uint8_t *iv);
@@ -374,13 +396,15 @@ static AES_CTR_Update_fn s_AES_CTR_Update = NULL;
 
 static uint8_t g_master_key[16];
 static volatile int g_master_valid = 0;
+static void *g_master_session = NULL;
 static pthread_mutex_t g_crypto_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static aes_ctr_storage_t g_alt_aes;
 static volatile int g_alt_aes_valid = 0;
+#include "homekit-screen-crypto.h"
 
 static void init_crypto_symbols(void) {
-    if (s_AirPlay_DeriveAESKeySHA512ForScreen) return;
+    init_homekit_symbols();
     s_AirPlay_DeriveAESKeySHA512ForScreen = (AirPlay_DeriveAESKeySHA512ForScreen_fn)dlsym(
         RTLD_DEFAULT, "AirPlay_DeriveAESKeySHA512ForScreen"
     );
@@ -397,18 +421,50 @@ int32_t AES_CBCFrame_Init(void *ctx, const uint8_t key[16], const uint8_t iv[16]
         real_AES_CBCFrame_Init = (AES_CBCFrame_Init_fn)dlsym(RTLD_NEXT, "AES_CBCFrame_Init");
     }
 
-    if (key && !encrypt) {
-        pthread_mutex_lock(&g_crypto_lock);
-        memcpy(g_master_key, key, 16);
-        g_master_valid = 1;
-        pthread_mutex_unlock(&g_crypto_lock);
-        log_msg("CRYPTO", "Chave mestre CarPlay AES-128 capturada com sucesso!");
-    }
+    if (!real_AES_CBCFrame_Init) return -1;
+    int32_t result = real_AES_CBCFrame_Init(ctx, key, iv, encrypt);
+    /* This generic primitive is used by multiple callers. The session setter
+     * below is the authoritative source for a session-bound legacy key. */
+    log_msg("CRYPTO", "Native CBC initialization: encrypt=%d status=%d",encrypt!=0,result);
 
-    if (real_AES_CBCFrame_Init) {
-        return real_AES_CBCFrame_Init(ctx, key, iv, encrypt);
+    return result;
+}
+
+/* Observability only: preserve native security setup and never log key bytes.
+ * Signatures/return values verified against this MU0841 library's call sites. */
+typedef int32_t (*session_security_fn)(void *, const uint8_t *, const uint8_t *);
+static session_security_fn real_session_security = NULL;
+int32_t AirPlayReceiverSessionSetSecurityInfo(void *session, const uint8_t *key, const uint8_t *iv) {
+    if (!real_session_security)
+        real_session_security = (session_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetSecurityInfo");
+    int32_t result = real_session_security ? real_session_security(session, key, iv) : -1;
+    int native_errno=errno;
+    pthread_mutex_lock(&g_crypto_lock);
+    if(result==0 && session && key && iv) {
+        memcpy(g_master_key,key,sizeof(g_master_key));g_master_valid=1;g_master_session=session;
+    } else if(g_master_session==session) {
+        secret_zero(g_master_key,sizeof(g_master_key));g_master_valid=0;g_master_session=NULL;
     }
-    return 0;
+    pthread_mutex_unlock(&g_crypto_lock);
+    log_msg("SECURITY", "Native legacy session security: key_present=%d iv_present=%d status=%d",
+            key != NULL, iv != NULL, result);
+    errno=native_errno;
+    return result;
+}
+typedef int32_t (*homekit_security_fn)(void *, void *);
+static homekit_security_fn real_homekit_security = NULL;
+int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *context) {
+    if (!real_homekit_security)
+        real_homekit_security = (homekit_security_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionSetHomeKitSecurityContext");
+    int32_t result = real_homekit_security ? real_homekit_security(session, context) : -1;
+    int native_errno=errno;
+    if(result==0) {
+        int cached=remember_pairing(session,context);
+        log_msg("SECURITY", "HomeKit context cache: present=%d status=%d",context!=NULL,cached);
+    }
+    log_msg("SECURITY", "Native HomeKit session context: present=%d status=%d", context != NULL, result);
+    errno=native_errno;
+    return result;
 }
 
 /* =============================================================================
@@ -585,6 +641,7 @@ static void emit_pmt_packet(void) {
 
 static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k) {
     if (!frame_data || frame_len == 0) return;
+    g_rtp_ts = (uint32_t)pts_90k;
 
     size_t pes_header_len = 14;
     size_t pes_total_len = pes_header_len + frame_len;
@@ -633,7 +690,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
             ts_pkt[4] = 0x07;
             ts_pkt[5] = 0x10;
 
-            uint64_t pcr_base = pts_90k * 300;
+            uint64_t pcr_base = pts_90k & ((1ULL << 33) - 1);
             ts_pkt[6] = (uint8_t)((pcr_base >> 25) & 0xFF);
             ts_pkt[7] = (uint8_t)((pcr_base >> 17) & 0xFF);
             ts_pkt[8] = (uint8_t)((pcr_base >> 9) & 0xFF);
@@ -695,55 +752,79 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
  * ============================================================================= */
 static uint8_t g_sps_pps_buf[512];
 static size_t g_sps_pps_len = 0;
+static unsigned int g_nal_length_bytes = 4;
 
 static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
-    if (!avcc || len < 7) return;
+    g_sps_pps_len = 0;
+    if (!avcc || len < 7 || avcc[0] != 1) return;
+    unsigned int length_bytes = (avcc[4] & 3) + 1;
+    if (length_bytes == 3) return; /* reserved by AVCDecoderConfigurationRecord */
+    uint8_t config[sizeof(g_sps_pps_buf)];
 
     size_t out_pos = 0;
     uint8_t num_sps = avcc[5] & 0x1F;
     size_t pos = 6;
 
-    for (int i = 0; i < num_sps && pos + 2 <= len; i++) {
+    if (!num_sps) return;
+    for (int i = 0; i < num_sps; i++) {
+        if (pos + 2 > len) return;
         uint16_t sps_len = ((uint16_t)avcc[pos] << 8) | avcc[pos + 1];
         pos += 2;
-        if (pos + sps_len > len) break;
+        if (!sps_len || sps_len > len - pos) return;
 
-        if (out_pos + 4 + sps_len < sizeof(g_sps_pps_buf)) {
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x00;
-            g_sps_pps_buf[out_pos++] = 0x01;
-            memcpy(&g_sps_pps_buf[out_pos], &avcc[pos], sps_len);
+        if (out_pos + 4 + sps_len <= sizeof(config)) {
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x00;
+            config[out_pos++] = 0x01;
+            memcpy(&config[out_pos], &avcc[pos], sps_len);
             out_pos += sps_len;
-        }
+        } else return;
         pos += sps_len;
     }
 
     if (pos < len) {
         uint8_t num_pps = avcc[pos++];
-        for (int i = 0; i < num_pps && pos + 2 <= len; i++) {
+        if (!num_pps) return;
+        for (int i = 0; i < num_pps; i++) {
+            if (pos + 2 > len) return;
             uint16_t pps_len = ((uint16_t)avcc[pos] << 8) | avcc[pos + 1];
             pos += 2;
-            if (pos + pps_len > len) break;
+            if (!pps_len || pps_len > len - pos) return;
 
-            if (out_pos + 4 + pps_len < sizeof(g_sps_pps_buf)) {
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x00;
-                g_sps_pps_buf[out_pos++] = 0x01;
-                memcpy(&g_sps_pps_buf[out_pos], &avcc[pos], pps_len);
+            if (out_pos + 4 + pps_len <= sizeof(config)) {
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x00;
+                config[out_pos++] = 0x01;
+                memcpy(&config[out_pos], &avcc[pos], pps_len);
                 out_pos += pps_len;
-            }
+            } else return;
             pos += pps_len;
         }
-    }
+    } else return;
 
+    memcpy(g_sps_pps_buf, config, out_pos);
+    g_nal_length_bytes = length_bytes;
     g_sps_pps_len = out_pos;
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
 }
 
 static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestamp) {
-    if (!data || len < 4) return 0;
+    if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
+    /* Validate the entire access unit before emitting anything. In particular,
+     * zero-length NALs must not read data[len], and partial frames are rejected. */
+    size_t checked = 0, nals = 0;
+    int is_keyframe = 0;
+    while (checked < len) {
+        if (len - checked < g_nal_length_bytes) return -1;
+        uint32_t n = 0;
+        for (unsigned int i = 0; i < g_nal_length_bytes; i++) n = (n << 8) | data[checked++];
+        if (!n || n > len - checked) return -1;
+        if ((data[checked] & 0x1F) == 5) is_keyframe = 1;
+        checked += n;
+        nals++;
+    }
 
     init_cluster_network();
 
@@ -754,31 +835,20 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
                 len, (unsigned long long)timestamp);
     }
 
-    size_t annexb_capacity = len + g_sps_pps_len + 64;
+    size_t annexb_capacity = len + nals * (4 - g_nal_length_bytes) + g_sps_pps_len;
     uint8_t *annexb_frame = (uint8_t *)malloc(annexb_capacity);
     if (!annexb_frame) return 0;
 
     size_t annexb_pos = 0;
-    int is_keyframe = 0;
+    if (is_keyframe) {
+        memcpy(annexb_frame, g_sps_pps_buf, g_sps_pps_len);
+        annexb_pos = g_sps_pps_len;
+    }
 
     size_t in_pos = 0;
-    while (in_pos + 4 <= len) {
-        uint32_t nal_len = ((uint32_t)data[in_pos] << 24) |
-                           ((uint32_t)data[in_pos + 1] << 16) |
-                           ((uint32_t)data[in_pos + 2] << 8) |
-                           ((uint32_t)data[in_pos + 3]);
-        in_pos += 4;
-        if (in_pos + nal_len > len) break;
-
-        uint8_t nal_type = data[in_pos] & 0x1F;
-        if (nal_type == 5) {
-            is_keyframe = 1;
-        }
-
-        if (is_keyframe && annexb_pos == 0 && g_sps_pps_len > 0) {
-            memcpy(&annexb_frame[annexb_pos], g_sps_pps_buf, g_sps_pps_len);
-            annexb_pos += g_sps_pps_len;
-        }
+    while (in_pos < len) {
+        uint32_t nal_len = 0;
+        for (unsigned int i = 0; i < g_nal_length_bytes; i++) nal_len = (nal_len << 8) | data[in_pos++];
 
         annexb_frame[annexb_pos++] = 0x00;
         annexb_frame[annexb_pos++] = 0x00;
@@ -810,7 +880,57 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
 static int g_alt_listen_fd = -1;
 static int g_alt_client_fd = -1;
 static pthread_t g_alt_thread;
-static volatile int g_alt_thread_running = 0;
+static int g_alt_thread_running = 0; /* protected by g_crypto_lock */
+static int g_alt_thread_created = 0;
+static pthread_mutex_t g_receiver_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static int receiver_active(void) {
+    pthread_mutex_lock(&g_crypto_lock);
+    int active = g_alt_thread_running;
+    pthread_mutex_unlock(&g_crypto_lock);
+    return active;
+}
+
+/* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
+ * and passes it to its NTP time synchronizer. Preserve those relative intervals
+ * instead of assuming every incoming access unit arrives at exactly 30 fps. */
+static struct {
+    int started, ntp_started;
+    uint64_t monotonic_start, ntp_start, ntp_offset_us, last_us;
+} g_video_clock;
+
+static uint64_t screen_timestamp_us(const AirPlayScreenHeaderCompat *header) {
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) return g_video_clock.last_us;
+    uint64_t monotonic = (uint64_t)now.tv_sec * 1000000 + (uint64_t)now.tv_nsec / 1000;
+    if (!g_video_clock.started) {
+        g_video_clock.started = 1;
+        g_video_clock.monotonic_start = monotonic;
+    }
+    uint64_t elapsed = monotonic - g_video_clock.monotonic_start;
+    uint64_t ntp;
+    memcpy(&ntp, header->params, sizeof(ntp));
+    if (ntp) {
+        if (!g_video_clock.ntp_started) {
+            g_video_clock.ntp_started = 1;
+            g_video_clock.ntp_start = ntp;
+            g_video_clock.ntp_offset_us = elapsed;
+        }
+        uint64_t delta = ntp - g_video_clock.ntp_start;
+        if ((delta >> 32) > 86400) {
+            /* Clock moved backwards or discontinuously: rebase on arrival time. */
+            g_video_clock.ntp_start = ntp;
+            g_video_clock.ntp_offset_us = elapsed;
+            delta = 0;
+        }
+        elapsed = g_video_clock.ntp_offset_us + (delta >> 32) * 1000000 +
+            ((delta & 0xffffffffULL) * 1000000 >> 32);
+    }
+    uint64_t timestamp = 1000000 + elapsed;
+    if (timestamp < g_video_clock.last_us) timestamp = g_video_clock.last_us;
+    g_video_clock.last_us = timestamp;
+    return timestamp;
+}
 
 static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
@@ -837,11 +957,16 @@ static void *alt_receiver_thread(void *arg) {
     }
 
     pthread_mutex_lock(&g_crypto_lock);
+    if (!g_alt_thread_running) {
+        close(c);
+        pthread_mutex_unlock(&g_crypto_lock);
+        return NULL;
+    }
     g_alt_client_fd = c;
     pthread_mutex_unlock(&g_crypto_lock);
     log_msg("RECV111", ">>> IPHONE CONECTADO NO STREAM 111 (TCP fd=%d)! Recebendo quadros H.264...", c);
 
-    while (g_alt_thread_running) {
+    while (receiver_active()) {
         AirPlayScreenHeaderCompat h;
         uint8_t *body = NULL;
 
@@ -876,10 +1001,18 @@ static void *alt_receiver_thread(void *arg) {
 
             case K_SCREEN_VIDEO_FRAME:
                 if (body && h.bodySize > 0) {
-                    if (g_alt_aes_valid && s_AES_CTR_Update) {
-                        s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body);
+                    pthread_mutex_lock(&g_crypto_lock);
+                    size_t plaintext_size=h.bodySize;
+                    int decrypt_ok;
+                    if(g_alt_chacha_valid)decrypt_ok=decrypt_homekit_frame(&h,sizeof(h),body,&plaintext_size)==0;
+                    else decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
+                        s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body) == 0;
+                    pthread_mutex_unlock(&g_crypto_lock);
+                    if (decrypt_ok) process_h264_frame(body, plaintext_size, screen_timestamp_us(&h));
+                    else {
+                        log_msg("CRYPTO", "Frame rejected: security state, decryption or authentication failed; closing receiver");
+                        free(body);body=NULL;goto receiver_done;
                     }
-                    process_h264_frame(body, h.bodySize, 0);
                 }
                 break;
 
@@ -895,6 +1028,7 @@ static void *alt_receiver_thread(void *arg) {
         }
     }
 
+receiver_done:
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_client_fd == c) g_alt_client_fd = -1;
@@ -942,34 +1076,73 @@ static int bind_listener_stream111(int port) {
     return fd;
 }
 
-static int start_alt_receiver(uint64_t connection_id) {
+/* Caller serializes start/stop. The worker owns the accepted fd; stop only
+ * shuts it down, then joins before closing the listening fd or resetting state. */
+static void stop_alt_receiver_locked(void) {
     pthread_mutex_lock(&g_crypto_lock);
-
-    if (g_alt_listen_fd >= 0) {
-        close(g_alt_listen_fd);
-        g_alt_listen_fd = -1;
+    g_alt_thread_running = 0;
+    if (g_alt_client_fd >= 0) shutdown(g_alt_client_fd, SHUT_RDWR);
+    if (g_alt_listen_fd >= 0) shutdown(g_alt_listen_fd, SHUT_RDWR);
+    pthread_mutex_unlock(&g_crypto_lock);
+    if (g_alt_thread_created) {
+        pthread_join(g_alt_thread, NULL);
+        g_alt_thread_created = 0;
     }
+    pthread_mutex_lock(&g_crypto_lock);
+    if (g_alt_listen_fd >= 0) close(g_alt_listen_fd);
+    g_alt_listen_fd = -1;
+    g_alt_aes_valid = 0;
+    memset(&g_alt_aes, 0, sizeof(g_alt_aes));
+    reset_homekit_stream();
+    g_alt_session=NULL;
+    g_sps_pps_len = 0;
+    memset(&g_video_clock, 0, sizeof(g_video_clock));
+    pthread_mutex_unlock(&g_crypto_lock);
+}
 
-    if (!g_master_valid) {
-        pthread_mutex_unlock(&g_crypto_lock);
-        log_msg("RECV111", "AVISO: Master AES key ainda nao capturada! Tentando continuar sem chave inicial...");
-    } else if (s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init) {
-        uint8_t key[16], iv[16];
-        s_AirPlay_DeriveAESKeySHA512ForScreen(g_master_key, 16, connection_id, key, iv);
+static int start_alt_receiver(void *session,uint64_t connection_id) {
+    pthread_mutex_lock(&g_receiver_lock);
+    stop_alt_receiver_locked();
+    pthread_mutex_lock(&g_crypto_lock);
+    uint8_t key[16] = {0}, iv[16] = {0};
+    int master_present = g_master_valid;
+    int derive_present = s_AirPlay_DeriveAESKeySHA512ForScreen != NULL;
+    int init_present = s_AES_CTR_Init != NULL;
+    int update_present = s_AES_CTR_Update != NULL;
+    int32_t init_status = -1;
+    void *pairing=pairing_for_session(session);
+    int ready;
+    if(pairing) {
+        init_status=prepare_homekit_stream(pairing,connection_id);
+        ready=init_status==0;
+    } else {
+        ready = g_master_valid && g_master_session==session && s_AirPlay_DeriveAESKeySHA512ForScreen && s_AES_CTR_Init && s_AES_CTR_Update;
+        if (ready) s_AirPlay_DeriveAESKeySHA512ForScreen(g_master_key,sizeof(g_master_key),connection_id,key,iv);
+        if (ready) { init_status = s_AES_CTR_Init(&g_alt_aes,key,iv); ready = init_status == 0; }
+    }
+    memset(key, 0, sizeof(key));
+    memset(iv, 0, sizeof(iv));
+    if (!ready) {
         memset(&g_alt_aes, 0, sizeof(g_alt_aes));
-        if (s_AES_CTR_Init(&g_alt_aes, key, iv) == 0) {
-            g_alt_aes_valid = 1;
-            log_msg("RECV111", "Subchave AES-128-CTR e IV derivados para cid=%llu com sucesso!",
-                    (unsigned long long)connection_id);
-        }
-        memset(key, 0, sizeof(key));
-        memset(iv, 0, sizeof(iv));
+        pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
+        log_msg("RECV111", "Refusing stream: AES prerequisites master=%d derive=%d init=%d update=%d init_status=%d",
+                master_present, derive_present, init_present, update_present, init_status);
+        log_msg("RECV111", "HomeKit path: context=%d derive=%d cipher=%d status=%d",pairing!=NULL,
+                s_pairing_derive!=NULL,s_chacha_init && s_chacha_aad && s_chacha_decrypt && s_chacha_verify,init_status);
+        return -1;
     }
-
+    g_alt_aes_valid = !pairing;
+    g_alt_session=session;
+    log_msg("CRYPTO", "AltScreen security ready: %s",pairing ? "HomeKit ChaCha20-Poly1305" : "legacy AES-CTR");
     int port = 6031;
     g_alt_listen_fd = bind_listener_stream111(port);
     if (g_alt_listen_fd < 0) {
+        g_alt_aes_valid = 0;
+        reset_homekit_stream();
+        g_alt_session=NULL;
         pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao vincular porta TCP %d: %s", port, strerror(errno));
         return -1;
     }
@@ -979,29 +1152,26 @@ static int start_alt_receiver(uint64_t connection_id) {
         close(g_alt_listen_fd);
         g_alt_listen_fd = -1;
         g_alt_thread_running = 0;
+        g_alt_aes_valid = 0;
+        reset_homekit_stream();
+        g_alt_session=NULL;
         pthread_mutex_unlock(&g_crypto_lock);
+        pthread_mutex_unlock(&g_receiver_lock);
         log_msg("RECV111", "Falha ao criar alt_receiver_thread");
         return -1;
     }
 
+    g_alt_thread_created = 1;
     pthread_mutex_unlock(&g_crypto_lock);
+    pthread_mutex_unlock(&g_receiver_lock);
     log_msg("RECV111", "Servidor TCP Stream 111 ouvindo na porta %d (cid=%llu)", port, (unsigned long long)connection_id);
     return port;
 }
 
 static void stop_alt_receiver(void) {
-    pthread_mutex_lock(&g_crypto_lock);
-    g_alt_thread_running = 0;
-    if (g_alt_client_fd >= 0) {
-        close(g_alt_client_fd);
-        g_alt_client_fd = -1;
-    }
-    if (g_alt_listen_fd >= 0) {
-        close(g_alt_listen_fd);
-        g_alt_listen_fd = -1;
-    }
-    g_alt_aes_valid = 0;
-    pthread_mutex_unlock(&g_crypto_lock);
+    pthread_mutex_lock(&g_receiver_lock);
+    stop_alt_receiver_locked();
+    pthread_mutex_unlock(&g_receiver_lock);
 }
 
 /* =============================================================================
@@ -1193,7 +1363,8 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
     if (k_displays && s_CFRelease) s_CFRelease(k_displays);
 
     if (s_CFPropertyListWriteToFilePath) {
-        s_CFPropertyListWriteToFilePath(info, "/data/lge/smartlink/carplay/server_info_v62.plist", 0);
+        int32_t dump_status=s_CFPropertyListWriteToFilePath(info,"binary1","/data/lge/smartlink/carplay/server_info_v62.plist");
+        log_msg("SERVERINFO","Capability snapshot status=%d",dump_status);
     }
 
     if (s_CFRelease) s_CFRelease(base);
@@ -1231,7 +1402,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
     log_msg("SETUP", "Stock AirPlayReceiverSessionSetup ret=%d, outResponse=%p",
             ret, (outResponse ? *outResponse : NULL));
 
-    if (ret == 0 && outResponse && *outResponse) {
+    if (ret == 0 && has_alt && outResponse && *outResponse) {
         int use_va = check_viewareas_enabled();
         set_reference_enabled_features(*outResponse, use_va);
 
@@ -1239,7 +1410,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
             uint64_t cid = stream_connection_id(alt_desc);
             log_msg("SETUP", ">>> SOLICITACAO DE STREAM 111 DETECTADA! cid=%llu <<<", (unsigned long long)cid);
 
-            int port = start_alt_receiver(cid);
+            int port = start_alt_receiver(inSession,cid);
             if (port > 0) {
                 append_alt_setup_response(*outResponse, alt_desc, port);
                 log_msg("SETUP", ">>> STREAM 111 NEGOCIADO COM SUCESSO! dataPort=%d, streamID=111 <<<", port);
@@ -1264,11 +1435,18 @@ void AirPlayReceiverSessionTearDown(void *inSession, void *inRequest, int32_t in
     }
 
     log_msg("TEARDOWN", "AirPlayReceiverSessionTearDown: session=%p, reason=%d", inSession, inReason);
-    stop_alt_receiver();
+    pthread_mutex_lock(&g_crypto_lock);
+    int owns_stream=g_alt_session==inSession;
+    if(g_master_session==inSession) {
+        secret_zero(g_master_key,sizeof(g_master_key));g_master_valid=0;g_master_session=NULL;
+    }
+    pthread_mutex_unlock(&g_crypto_lock);
+    if(owns_stream)stop_alt_receiver();
 
     if (real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown(inSession, inRequest, inReason, outDone);
     }
+    remember_pairing(inSession,NULL);
 }
 
 /* =============================================================================
@@ -1321,6 +1499,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 /* =============================================================================
  * Ciclo de Vida da Biblioteca
  * ============================================================================= */
+#ifndef ALTSCREEN_TEST
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
@@ -1336,6 +1515,7 @@ __attribute__((destructor))
 static void altscreen_cleanup(void) {
     log_msg("CLEANUP", "altscreen_handler.so finalizado (PID: %d)", getpid());
     stop_alt_receiver();
+    for(int i=0;i<4;i++)if(g_pairings[i].session)remember_pairing(g_pairings[i].session,NULL);
     if (g_rtp_sock >= 0) {
         close(g_rtp_sock);
         g_rtp_sock = -1;
@@ -1349,3 +1529,5 @@ static void altscreen_cleanup(void) {
         g_log_fp = NULL;
     }
 }
+#endif
+

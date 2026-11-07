@@ -1,0 +1,76 @@
+name: Handler regression tests
+on:
+  push:
+    branches: [fix/handler-offline]
+  pull_request:
+    branches: [development]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security-observation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise exact observation library against native fixture
+        run: python3 tests/test-security-probe.py deploy-usb/payload/security-probe.c
+  stock-info-observation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise stock-info pass-through and bounded binary snapshots
+        run: python3 tests/test-info-probe.py deploy-usb/payload/info-probe-v5.c
+  service-lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Exercise real service-manager lifecycle
+        run: |
+          sudo python3 tests/test-systemd-lifecycle.py
+          sudo python3 tests/test-systemd-lifecycle.py recovery/info-v5-log-collector.sh
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile actual handler with sanitizers
+        run: |
+          gcc -shared -fPIC -Wall -Wextra -O2 deploy-usb/payload/altscreen_handler.c -ldl -pthread -o /tmp/handler-host.so
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
+          timeout 30 /tmp/test-handler
+      - name: Check authenticated HomeKit screen framing against OpenSSL
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/test-homekit-crypto
+          timeout 30 /tmp/test-homekit-crypto
+      - name: Check atomic startup-file backup and restore
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/file-guard
+          python3 tests/test-file-guard.py /tmp/file-guard
+      - name: Check observation-only security library interposition
+        run: python3 tests/test-security-probe.py deploy-usb/payload/security-probe.c
+      - name: Check explicit dependency on a copied executable
+        run: |
+          python3 tests/test-elf-dependency.py tools/add-handler-dependency.py
+      - name: Check recovery-first one-shot boot
+        run: |
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/oneshot-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/oneshot-usb.sh.in recovery/oneshot-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v4-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v4-usb.sh.in recovery/map-v4-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/info-v5-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/info-v5-usb.sh.in recovery/info-v5-boot.sh.in
+      - name: Decode generated transport stream
+        timeout-minutes: 6
+        run: |
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            sudo timeout 120 apt-get update -qq
+            sudo timeout 180 apt-get install -y -qq ffmpeg
+          fi
+          ffmpeg -v error -f lavfi -i testsrc2=size=1280x480:rate=30 -frames:v 30 -c:v libx264 -preset ultrafast -tune zerolatency -x264-params aud=1:keyint=10 -f h264 /tmp/frame.h264
+          timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts
+          ffmpeg -v error -i /tmp/cluster.ts -f null -
+          count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
+          test "$count" = 30
