@@ -37,6 +37,8 @@ with tempfile.TemporaryDirectory() as directory:
         root=workspace/scenario;root.mkdir();stage=root/'stage';stage.mkdir()
         data=root/'data/lge/smartlink/carplay';data.mkdir(parents=True)
         request=data/'altscreen-v15-frame-ready';grant=data/'altscreen-v15-encoder-ready';expired=data/'altscreen-v15-expired'
+        private_video=b'MOI3VC1\n'+b'fixture-video-only'
+        (data/'map-v15-video.bin').write_bytes(private_video);(data/'map-v15-video.ready').write_text('MOI3VC1\n')
         usb=root/'tmp/USB/PORT1/PART1';usb.mkdir(parents=True);(usb/'ALTSCREEN_TEST_ONCE.txt').write_text('fixture')
         for name,source in [('file-guard',guard),('packet-audit',audit)]:shutil.copyfile(source,stage/name);(stage/name).chmod(0o700)
         (stage/'boot-status.txt').write_text('fixture\n');(root/'native-active').write_text('active')
@@ -98,6 +100,8 @@ elif action=='is-active':sys.exit(0 if (r/'native-active').exists() else 3)
             else:assert (root/'native-active').exists()
             if scenario=='reconnect':assert events().count('stop multi-display.service')==2 and events().count('start multi-display.service')==2
             assert (usb/'boot-status.txt').read_text()==status()
+            assert (usb/'map-v15-video.bin').read_bytes()==private_video
+            assert not (data/'map-v15-video.bin').exists() and not (data/'map-v15-video.ready').exists()
         finally:
             if writer:writer.close()
             if process.poll() is None:process.kill();process.wait()

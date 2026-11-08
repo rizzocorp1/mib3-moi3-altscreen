@@ -23,9 +23,13 @@ one-shot with normal reboot restoration and an approximately ten-minute lease.
 
 This release does NOT fix two-second updates or colored artifacts. The v14
 timing/reference diagnostics, two-second reference-picture fallback, packet
-observer and tested ownership/restoration are retained. No map video payloads
-are captured in this release. Private raw-capture work for decoder diagnosis
-is separate; do not mistake layout improvements for a video-decoder fix.
+observer and tested ownership/restoration are retained. One short PRIVATE map-video capture is included for offline decoding: at most
+three seconds,90 access units or2 MiB, whichever comes first. It begins at a
+substantial authenticated IDR after output handoff, never contains pairing
+keys/audio, and is copied to map-v15-video.bin on the USB only when complete.
+After a checksum-verified USB copy the capture is removed from the unit.
+It may show your location/route: keep it private and never upload it to GitHub.
+Do not mistake layout improvements for a video-decoder fix.
 
 ## Parked test: begin with Apple Maps
 

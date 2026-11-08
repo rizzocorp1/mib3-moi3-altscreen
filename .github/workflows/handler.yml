@@ -45,6 +45,10 @@ jobs:
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-layout.c -ldl -pthread -o /tmp/test-layout
           timeout 30 /tmp/test-layout
+      - name: Check bounded private video capture
+        run: |
+          gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-private-capture.c -ldl -pthread -o /tmp/test-private-capture
+          timeout 30 /tmp/test-private-capture
       - name: Check authenticated HomeKit screen framing against OpenSSL
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/test-homekit-crypto

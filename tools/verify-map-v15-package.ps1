@@ -30,6 +30,7 @@ try {
     }
     $sourceDirectory=Split-Path $HandlerSource
     $sources=@{
+        privateCapture=Join-Path $sourceDirectory 'capture-v15.h'
         layout=Join-Path $sourceDirectory 'layout-v15.h'
         videoObserver=Join-Path $sourceDirectory 'video-observe-v14.h'
         auxiliaryRefresh=Join-Path $sourceDirectory 'aux-refresh-v15.h'

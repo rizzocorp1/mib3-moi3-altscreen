@@ -28,6 +28,25 @@ export_reports() {
             [ -f "$stage/$name" ] && [ ! -L "$stage/$name" ] || continue
             [ -L "$usb/$name" ] || cp "$stage/$name" "$usb/$name" 2>/dev/null || true
         done
+        # One completed bounded private video capture. Never keys/audio or a
+        # partial write; fixed paths only, no follow of symlinks.
+        capture="$data/map-v15-video.bin"
+        capture_ready="$data/map-v15-video.ready"
+        if [ -f "$capture_ready" ] && [ ! -L "$capture_ready" ] && [ "$(cat "$capture_ready")" = MOI3VC1 ] &&
+           [ -f "$capture" ] && [ ! -L "$capture" ] && [ ! -L "$usb/map-v15-video.bin" ]; then
+            capture_size=$(stat -c %s "$capture" 2>/dev/null || printf 0)
+            case "$capture_size" in ''|*[!0-9]*) capture_size=0;; esac
+            if [ "$capture_size" -gt 8 ] && [ "$capture_size" -le 2097152 ]; then
+                if [ "$(head -c 8 "$capture" 2>/dev/null)" = MOI3VC1 ] && cp "$capture" "$usb/map-v15-video.bin" 2>/dev/null; then
+                    capture_hash=$(sha256sum "$capture" 2>/dev/null)
+                    usb_capture_hash=$(sha256sum "$usb/map-v15-video.bin" 2>/dev/null)
+                    if [ -n "$capture_hash" ] && [ "${capture_hash%% *}" = "${usb_capture_hash%% *}" ]; then
+                        rm -f "$capture" "$capture_ready"
+                        printf '%s\n' 'PRIVATE CAPTURE EXPORTED: bounded map imagery verified on USB and removed from unit; do not publish' >> "$stage/boot-status.txt"
+                    fi
+                fi
+            fi
+        fi
         for name in stock-info advertised-info; do
             source="$data/map-v15-$name.plist"
             if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$usb/map-v15-$name.plist" ]; then

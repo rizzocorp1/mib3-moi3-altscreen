@@ -821,6 +821,8 @@ static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *
     }
     return 0;
 }
+#include "capture-v15.h"
+
 static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
     if(validate_h264_frame(data,len,&nals,&is_keyframe)!=0)return -1;
@@ -867,6 +869,7 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     }
 
     uint64_t pts_90k = timestamp ? (timestamp * 90 / 1000) : (g_total_frames_sent * 3000);
+    capture_video(annexb_frame,annexb_pos,pts_90k,timestamp,is_keyframe);
     mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k);
 
     free(annexb_frame);
@@ -1103,6 +1106,7 @@ static void *alt_receiver_thread(void *arg) {
     }
 
 receiver_done:
+    capture_finish();
     pthread_mutex_lock(&g_crypto_lock);
     unsigned refresh_attempts=g_aux_attempts,refresh_results=g_aux_results,refresh_errors=g_aux_errors;
     aux_refresh_invalidate_locked();pthread_mutex_unlock(&g_crypto_lock);

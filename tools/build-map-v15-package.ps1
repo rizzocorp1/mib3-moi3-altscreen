@@ -88,9 +88,10 @@ $manifest=[ordered]@{
     deferredHandoff=$true
     transportProfile=@{sourcePort=42989;program=1;transportStreamId=100;pmtPid=1000;videoPcrPid=17;rtpIdentifier=100000;rtpClock='monotonic-ms';datagramBytes=1140;tsSlots=6}
     authenticatedBuffer=@{maximumBytes=16777216;maximumAccessUnits=256;plaintextOnDisk=$false}
+    privatePixelCapture=@{maximumBytes=2097152;maximumFrames=90;maximumDurationMicroseconds=3000000;keysOrAudio=$false;publish=$false}
     streamScopedTeardown=$true
     factoryHashes=$expected;files=$fileHashes
-    sourceHashes=@{layout=File-Digest (Join-Path (Split-Path $HandlerSource) 'layout-v15.h');videoObserver=File-Digest (Join-Path (Split-Path $HandlerSource) 'video-observe-v14.h');auxiliaryRefresh=File-Digest (Join-Path (Split-Path $HandlerSource) 'aux-refresh-v15.h');packetAudit=File-Digest $auditSource;handler=File-Digest $HandlerSource;homekitCrypto=File-Digest (Join-Path (Split-Path $HandlerSource) 'homekit-screen-crypto.h');deferredVideo=File-Digest (Join-Path (Split-Path $HandlerSource) 'deferred-video-v9.h');frameGate=File-Digest (Join-Path (Split-Path $HandlerSource) 'frame-gate-v15.h');fileGuard=File-Digest $guardSource;patcher=File-Digest (Join-Path $PSScriptRoot 'add-handler-dependency.py')}
+    sourceHashes=@{privateCapture=File-Digest (Join-Path (Split-Path $HandlerSource) 'capture-v15.h');layout=File-Digest (Join-Path (Split-Path $HandlerSource) 'layout-v15.h');videoObserver=File-Digest (Join-Path (Split-Path $HandlerSource) 'video-observe-v14.h');auxiliaryRefresh=File-Digest (Join-Path (Split-Path $HandlerSource) 'aux-refresh-v15.h');packetAudit=File-Digest $auditSource;handler=File-Digest $HandlerSource;homekitCrypto=File-Digest (Join-Path (Split-Path $HandlerSource) 'homekit-screen-crypto.h');deferredVideo=File-Digest (Join-Path (Split-Path $HandlerSource) 'deferred-video-v9.h');frameGate=File-Digest (Join-Path (Split-Path $HandlerSource) 'frame-gate-v15.h');fileGuard=File-Digest $guardSource;patcher=File-Digest (Join-Path $PSScriptRoot 'add-handler-dependency.py')}
     compilerVersion=(& $Zig version);containerSha256=File-Digest $containerPath
     hardwareValidated=$false;knownSpeechResets=$true;completeVehicleRollback=$false
 }
