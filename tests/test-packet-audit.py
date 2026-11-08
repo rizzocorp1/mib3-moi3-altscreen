@@ -46,14 +46,14 @@ fclose(out);puts("PASS: bounded RTP/TS metadata, CRC/profile fields, truncated/r
         sender=socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
         for _ in range(5):sender.sendto(payload,('::1',42800));time.sleep(.03)
         for _ in range(100):
-            if 'encoderGrant=0' in report.read_text():break
+            if 'encoderGrant=0 direction=outgoing' in report.read_text():break
             time.sleep(.01)
-        assert 'encoderGrant=0' in report.read_text()
+        assert 'encoderGrant=0 direction=outgoing' in report.read_text()
         grant.write_text('ready')
         for _ in range(5):sender.sendto(payload,('::1',42800));time.sleep(.03)
         sender.close();receiver.close();stdout,stderr=process.communicate(timeout=6);assert process.returncode==0,(stdout,stderr)
         metadata=report.read_text();assert 'AUDIT ACTIVE' in metadata and 'ssrc=100000' in metadata and 'PAT flow=' in metadata and 'PMT flow=' in metadata and 'SPS flow=' in metadata and 'AUDIT COMPLETE' in metadata
-        assert 'encoderGrant=0' in metadata and 'encoderGrant=1' in metadata
+        assert 'encoderGrant=0 direction=outgoing' in metadata and 'encoderGrant=1 direction=outgoing' in metadata
         assert '::1' not in metadata and 'ff14::2:4' not in metadata
     finally:
         if process.poll() is None:process.kill();process.wait()
