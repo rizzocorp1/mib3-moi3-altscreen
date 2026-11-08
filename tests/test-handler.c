@@ -88,13 +88,23 @@ static void test_mux(void) {
     const size_t sizes[]={1,161,162,163,345,346,347,2000};
     uint8_t frame[2000],pes[4096]; memset(frame,0x65,sizeof(frame));
     for(size_t i=0;i<sizeof(sizes)/sizeof(sizes[0]);i++) {
-        reset_capture(90000); mux_and_stream_h264_frame(frame,sizes[i],90000);
+        reset_capture(90000); mux_and_stream_h264_frame(frame,sizes[i],90000,0);
         assert(pcr(captured)==90000);
         assert(video_payload(pes)==sizes[i]+14);
         assert(!memcmp(pes+14,frame,sizes[i]));
     }
-    reset_capture(0xffffffff); mux_and_stream_h264_frame(frame,2000,(1ULL<<33)-1);
+    reset_capture(0xffffffff); mux_and_stream_h264_frame(frame,2000,(1ULL<<33)-1,0);
     assert(pcr(captured)==(1ULL<<33)-1);
+}
+static void test_source_signals(void) {
+    uint8_t frame[2000]={0},pes[4096];g_video_discontinuity=1;
+    reset_capture(90000);mux_and_stream_h264_frame(frame,sizeof(frame),90000,1);
+    assert(captured[5]==0xd0 && !g_video_discontinuity && pcr(captured)==90000);
+    assert(video_payload(pes)==sizeof(frame)+14&&!memcmp(pes+14,frame,sizeof(frame)));
+    reset_capture(93000);mux_and_stream_h264_frame(frame,sizeof(frame),93000,0);assert(captured[5]==0x10);
+    reset_capture(96000);mux_and_stream_h264_frame(frame,sizeof(frame),96000,1);assert(captured[5]==0x50);
+    close_cluster_socket();assert(g_video_discontinuity);
+    reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1);assert(captured[5]==0xd0);
 }
 static void test_parser(void) {
     uint8_t config[]={1,66,0,30,0xff,0xe1,0,2,0x67,0x42,1,0,2,0x68,0xce};
@@ -264,10 +274,11 @@ static void test_initial_acknowledgement(void) {
     puts("PASS: initial SETUP acknowledges AltScreen; primary media, failed SETUP and NULL request remain unchanged");
 }
 int main(int argc,char **argv) {
+    assert(PRIVATE_CAPTURE_ENABLED==0);
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_revoked_port_release();test_factory_source_port();test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
+    test_revoked_port_release();test_factory_source_port();test_factory_transport_profile();test_mux();test_source_signals();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);
@@ -327,14 +338,14 @@ int main(int argc,char **argv) {
             if((frame[i+prefix]&31)==9 && i>start) {
                 expected_rtp=90000+frames*3000;
                 if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
-                mux_and_stream_h264_frame(frame+start,i-start,expected_rtp);
+                mux_and_stream_h264_frame(frame+start,i-start,expected_rtp,frames%10==0);
                 frames++;start=i;
             }
             i+=prefix-1;
         }
         expected_rtp=90000+frames*3000;
         if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
-        mux_and_stream_h264_frame(frame+start,length-start,expected_rtp);free(frame);frames++;
+        mux_and_stream_h264_frame(frame+start,length-start,expected_rtp,frames%10==0);free(frame);frames++;
         printf("Fixture access units muxed: %u\n",frames);
         FILE *out=fopen(argv[2],"wb");assert(out);assert(fwrite(captured,1,captured_len,out)==captured_len);fclose(out);
     }

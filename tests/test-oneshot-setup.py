@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import re
+import shlex
 
 guard=Path(sys.argv[1]).resolve()
 entry_template=Path(sys.argv[2]).read_text();boot_template=Path(sys.argv[3]).read_text()
@@ -17,6 +18,7 @@ scenarios=('arm-and-restore','mixed-stick','copy-failure','wrong-baseline')
 marker_match=re.search(r'altscreen-(v[0-9]+)-frame-ready',entry_template)
 marker=marker_match.group(1) if marker_match else 'v6'
 if marker_match:scenarios+=('stale-handoff',)
+if '@CLEANUP_SHA@' in entry_template:scenarios+=('insufficient-space',)
 for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
@@ -36,8 +38,17 @@ for scenario in scenarios:
         (payload/'managed-log-collector.sh').write_bytes(b'collector fixture')
         (payload/'packet-audit').write_bytes(b'audit fixture')
         (usb/'ALTSCREEN_TEST_ONCE.txt').write_text('one session')
+        if scenario=='insufficient-space':
+            wrapper='#!/bin/sh\nif [ "$1" = available ]; then echo 0; exit 0; fi\nexec '+shlex.quote(str(guard))+' "$@"\n'
+            (payload/'file-guard').write_text(wrapper);(payload/'file-guard').chmod(0o755)
         values={'ROOT':str(root),'GUARD_SHA':digest(payload/'file-guard'),'STARTUP_SHA':digest(startup),'CARPLAY_SHA':digest(target),'OS_SHA':digest(release),'PATCH_SHA':digest(payload/'carplay-once'),'HANDLER_SHA':digest(payload/'altscreen_handler.so'),'AUDIT_SHA':digest(payload/'packet-audit'),'LOG_ITERATIONS':'0'}
         values['COLLECTOR_SHA']=digest(payload/'managed-log-collector.sh')
+        if '@CLEANUP_SHA@' in entry_template:
+            cleanup=(Path(sys.argv[2]).parent/'cleanup-v17.sh.in').read_text()
+            for key,value in values.items():cleanup=cleanup.replace('@'+key+'@',value)
+            (payload/'cleanup-old-tests.sh').write_text(cleanup)
+            values['CLEANUP_SHA']=digest(payload/'cleanup-old-tests.sh')
+
         old_stage=base/'.moi3-altscreen-once-v1';old_stage.mkdir()
         (old_stage/'boot-status.txt').write_text('retained previous test evidence')
         (base/'carplay-handler.log').write_text('previous v1 handler evidence')

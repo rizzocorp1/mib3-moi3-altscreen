@@ -70,8 +70,13 @@ static int parent_fd(const char *path) {
     int fd=open(p,O_RDONLY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW);if(fd<0)fail("open parent");return fd;
 }
 #include "video-export-v16.h"
+#include "resource-audit-v17.h"
 
 int main(int argc,char **argv) {
+    if(argc==3 && !strcmp(argv[1],"available"))return resource_available(argv[2]);
+    if(argc==3 && !strcmp(argv[1],"space"))return resource_space(argv[2]);
+    if(argc==3 && !strcmp(argv[1],"size"))return resource_size(argv[2]);
+    if(argc==3 && !strcmp(argv[1],"inventory"))return resource_inventory(argv[2]);
     if(argc==5 && !strcmp(argv[1],"video-export"))return video_export(argv[2],argv[3],argv[4]);
     if(argc<4){fprintf(stderr,"usage: file-guard clone|replace|same-meta|meta SOURCE DEST [REFERENCE]\n");return 2;}
     const char *action=argv[1],*source=argv[2],*dest=argv[3];
