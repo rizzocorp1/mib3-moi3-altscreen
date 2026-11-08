@@ -28,13 +28,18 @@ run() {
         [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed/old USB files'; return 1; }
     done
     matches "$R/etc/os-release" '@OS_SHA@' && matches "$USB/payload/file-guard" '@GUARD_SHA@' || { echo 'ABORT: OS/helper checksum mismatch'; return 1; }
+    # FAT USB mounts may be non-executable. Use a verified transient native copy.
+    EARLY_GUARD="$R/tmp/moi3-v17-preflight-$$"
+    [ ! -e "$EARLY_GUARD" ] && [ ! -L "$EARLY_GUARD" ] || return 1
+    (set -C; cat "$USB/payload/file-guard" > "$EARLY_GUARD") && chmod 700 "$EARLY_GUARD" || return 1
+    matches "$EARLY_GUARD" '@GUARD_SHA@' || return 1
     # Retrieve the already recorded diagnostic before arming another test.
     # Only the verified native helper handles private video data.
     for capture_version in v15 v16 v17; do
         capture="$R/data/lge/smartlink/carplay/map-$capture_version-video.bin"
         capture_ready="$R/data/lge/smartlink/carplay/map-$capture_version-video.ready"
         if [ -f "$capture" ] && [ ! -L "$capture" ] && [ -f "$capture_ready" ] && [ ! -L "$capture_ready" ]; then
-            if ! "$USB/payload/file-guard" video-export "$capture" "$capture_ready" "$USB/map-$capture_version-video.bin"; then
+            if ! "$EARLY_GUARD" video-export "$capture" "$capture_ready" "$USB/map-$capture_version-video.bin"; then
                 printf 'PRIVATE CAPTURE RECOVERY FAILED: version=%s; source preserved where possible\n' "$capture_version"
             fi
         elif [ -e "$capture" ] || [ -L "$capture" ] || [ -e "$capture_ready" ] || [ -L "$capture_ready" ]; then
@@ -91,7 +96,7 @@ run() {
     space_ok=1
     for filesystem in "$BASE" "$R/data"; do
         [ -d "$filesystem" ] && [ ! -L "$filesystem" ] || continue
-        available=$("$USB/payload/file-guard" available "$filesystem") || { space_ok=0;continue; }
+        available=$("$EARLY_GUARD" available "$filesystem") || { space_ok=0;continue; }
         case "$available" in ''|*[!0-9]*) space_ok=0;continue;; esac
         printf 'Filesystem=%s availableBytes=%s requiredBytes=33554432\n' "$filesystem" "$available" >> "$space_report"
         if [ "$available" -lt 33554432 ]; then space_ok=0;fi
@@ -162,5 +167,6 @@ if run > "$REPORT" 2>&1; then
 else
     echo 'SETUP FAILED — do not repeat or install another package; preserve this report' >> "$REPORT"
 fi
+[ -z "$EARLY_GUARD" ] || rm -f "$EARLY_GUARD"
 sync
 exit 0

@@ -68,6 +68,7 @@ for scenario in scenarios:
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)
+        assert not list((root/'tmp').glob('moi3-v17-preflight-*'))
         report=(usb/'altscreen-setup.txt').read_text();stage=base/stage_name
         if scenario=='arm-and-restore':
             assert ('RESULT: MAP TEST ARMED' if map_mode else 'RESULT: DIAGNOSTIC ARMED') in report and 'SETUP COMPLETE' in report,report
