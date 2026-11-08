@@ -27,7 +27,8 @@ if(!strcmp(v[2],"request")){int r=frame_gate_at(v[1],1,1);assert(r==1||r==0);}
 else if(!strcmp(v[2],"end"))end_frame_gate_at(v[1]);
 else if(!strcmp(v[2],"grant")){assert(frame_gate_at(v[1],0,1)==1);assert(frame_gate_at(v[1],1,1)==0);assert(frame_gate_at(v[1],0,1)==0);}
 else if(!strcmp(v[2],"expired"))assert(frame_gate_at(v[1],1,1)==-1);
-else abort();return 0;}
+else {abort();}
+return 0;}
 '''.replace('HEADER',str(header))
 with tempfile.TemporaryDirectory() as directory:
     workspace=Path(directory);(workspace/'gate.c').write_text(driver);binary=workspace/'gate'
