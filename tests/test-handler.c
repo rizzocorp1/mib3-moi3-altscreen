@@ -251,6 +251,10 @@ static void test_initial_acknowledgement(void) {
     requested_stream_array=NULL;
     assert(AirPlayReceiverSessionSetup(&session,&request,&out)==0 && out==&response);
     assert(feature_committed==&feature_copy && feature_copy.count==1 && !strcmp(feature_copy.items[0],"altScreen"));
+    g_layout_advertised=1;feature_committed=NULL;
+    assert(AirPlayReceiverSessionSetup(&session,&request,&out)==0);
+    assert(feature_copy.count==2 && !strcmp(feature_copy.items[1],"viewAreas"));
+    g_layout_advertised=0;
     FeatureArray primary={{"native-primary-stream"},1};requested_stream_array=&primary;feature_committed=NULL;
     assert(AirPlayReceiverSessionSetup(&session,&request,&out)==0 && !feature_committed);
     requested_stream_array=NULL;setup_result=-77;feature_committed=NULL;

@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v14.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v14.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v14.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v15.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v15.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v15.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v14-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v15-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -294,22 +294,17 @@ static void *array_clone(void *arr) {
 /* =============================================================================
  * ViewAreas e enabledFeatures (AltScreen Apple CarPlay Specification)
  * ============================================================================= */
-static int check_viewareas_enabled(void) {
-    if (access("/data/lge/smartlink/carplay/ENABLE_VIEWAREAS", F_OK) == 0) return 1;
-    if (access("/tmp/USB/PORT1/PART1/ENABLE_VIEWAREAS.txt", F_OK) == 0) return 1;
-    if (access("/tmp/usbmnt/ENABLE_VIEWAREAS.txt", F_OK) == 0) return 1;
-    return 0; /* Padrao 0: modo nativo altScreen limpo e fail-safe sem viewAreas */
-}
+#include "layout-v15.h"
 
-static void set_reference_enabled_features(void *dict, int enable_viewareas) {
+static int set_reference_enabled_features(void *dict, int enable_viewareas) {
     if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
         !s_CFDictionarySetValue || !s_CFRelease || !s_CFArrayGetCount ||
-        !s_CFArrayGetValueAtIndex || !s_CFStringGetCString) return;
+        !s_CFArrayGetValueAtIndex || !s_CFStringGetCString) return 0;
     void *k_enabled = s_cf("enabledFeatures");
-    if (!k_enabled) return;
+    if (!k_enabled) return 0;
     void *stock = (void *)s_CFDictionaryGetValue(dict, k_enabled);
     void *enabled_features = stock ? array_clone(stock) : NULL;
-    if (stock && !enabled_features) { s_CFRelease(k_enabled); return; }
+    if (stock && !enabled_features) { s_CFRelease(k_enabled); return 0; }
     const char *wanted[] = {"altScreen", "viewAreas"};
     int ok = 1;
     for (int feature = 0; feature < (enable_viewareas ? 2 : 1); feature++) {
@@ -330,68 +325,7 @@ static void set_reference_enabled_features(void *dict, int enable_viewareas) {
     s_CFRelease(k_enabled);
     if (enabled_features && s_CFRelease) s_CFRelease(enabled_features);
     log_msg("SERVERINFO", "enabledFeatures: factory list preserved, augmentation %s", ok ? "complete" : "aborted");
-}
-
-static void add_reference_viewarea(void *alt) {
-    if (!alt || !s_CFDictionaryCreateMutable || !s_CFArrayCreateMutable || !s_kCFLBooleanFalse) {
-        log_msg("SERVERINFO", "add_reference_viewarea ignorado: simbolos CFLite boolean/dict incompletos");
-        return;
-    }
-
-    void *view = s_CFDictionaryCreateMutable(NULL, 0, s_kCFLDictKeyCallBacks, s_kCFLDictValCallBacks);
-    void *safe = s_CFDictionaryCreateMutable(NULL, 0, s_kCFLDictKeyCallBacks, s_kCFLDictValCallBacks);
-    void *areas = s_CFArrayCreateMutable(NULL, 0, s_kCFLArrayCallBacks);
-    if (!view || !safe || !areas) {
-        if (view && s_CFRelease) s_CFRelease(view);
-        if (safe && s_CFRelease) s_CFRelease(safe);
-        if (areas && s_CFRelease) s_CFRelease(areas);
-        return;
-    }
-
-    set_i64(view, "widthPixels", 1280);
-    set_i64(view, "heightPixels", 480);
-    set_i64(view, "originXPixels", 0);
-    set_i64(view, "originYPixels", 0);
-
-    set_i64(safe, "widthPixels", 320);
-    set_i64(safe, "heightPixels", 320);
-    set_i64(safe, "originXPixels", 480);
-    set_i64(safe, "originYPixels", 64);
-
-    void *k_safe = s_cf("safeArea");
-    if (k_safe && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(view, k_safe, safe);
-        if (s_CFRelease) s_CFRelease(k_safe);
-    }
-
-    void *k_drawUI = s_cf("drawUIOutsideSafeArea");
-    if (k_drawUI && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(view, k_drawUI, s_kCFLBooleanFalse);
-        if (s_CFRelease) s_CFRelease(k_drawUI);
-    }
-
-    void *k_trans = s_cf("viewAreaTransitionControl");
-    if (k_trans && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(view, k_trans, s_kCFLBooleanFalse);
-        if (s_CFRelease) s_CFRelease(k_trans);
-    }
-
-    if (s_CFArrayAppendValue) {
-        s_CFArrayAppendValue(areas, view);
-    }
-
-    void *k_va = s_cf("viewAreas");
-    if (k_va && s_CFDictionarySetValue) {
-        s_CFDictionarySetValue(alt, k_va, areas);
-        if (s_CFRelease) s_CFRelease(k_va);
-    }
-
-    set_i64(alt, "initialViewArea", 0);
-    log_msg("SERVERINFO", "ViewAreas configurado: 1280x480 (safeArea=1280x480@0,0, initialViewArea=0)");
-
-    if (areas && s_CFRelease) s_CFRelease(areas);
-    if (safe && s_CFRelease) s_CFRelease(safe);
-    if (view && s_CFRelease) s_CFRelease(view);
+    return ok;
 }
 
 /* =============================================================================
@@ -868,7 +802,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v14.h"
+#include "frame-gate-v15.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -992,7 +926,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v14.h"
+#include "aux-refresh-v15.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1509,7 +1443,7 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
     }
 
     /* 3. Define root enabledFeatures */
-    int use_va = check_viewareas_enabled();
+    int use_va = 0;
     set_reference_enabled_features(info, use_va);
 
     /* 4. Extrai e clona o array de displays */
@@ -1538,10 +1472,11 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
             set_i64(alt, "widthPhysical", 320);
             set_i64(alt, "heightPhysical", 120);
             set_str(alt, "uuid", ALT_UUID_DEFAULT);
-            set_str(alt, "initialURL", ALT_URL_DEFAULT);
+            set_str(alt, "initialURL", ALT_TOP_URL);
 
             void *urls = NULL;
             if (s_CFArrayEnsureCreatedAndAppendCString) {
+                s_CFArrayEnsureCreatedAndAppendCString(&urls, ALT_TOP_URL, (size_t)-1);
                 s_CFArrayEnsureCreatedAndAppendCString(&urls, ALT_URL_DEFAULT, (size_t)-1);
                 s_CFArrayEnsureCreatedAndAppendCString(&urls, ALT_URL_MAP, (size_t)-1);
                 s_CFArrayEnsureCreatedAndAppendCString(&urls, ALT_URL_INSTRUCTIONCARD, (size_t)-1);
@@ -1553,15 +1488,21 @@ void *AirPlayCopyServerInfo(void *session, void *properties, int32_t *outErr) {
                 if (urls && s_CFRelease) s_CFRelease(urls);
             }
 
-            if (use_va) {
-                add_reference_viewarea(alt);
-            }
+            void *prepared=layout_prepare_displays(stock_displays,alt);
+            if(prepared && set_reference_enabled_features(info,1)) {
+                s_CFRelease(displays);displays=prepared;prepared=NULL;use_va=1;
+                log_msg("LAYOUT","Top-aligned maneuver request; auxiliary safeArea=%d,%d,%dx%d; primary geometry preserved; app response unvalidated",ALT_SAFE_X,ALT_SAFE_Y,ALT_SAFE_W,ALT_SAFE_H);
+            } else log_msg("LAYOUT","Complete view-area construction failed; using prior map-only display schema");
+            if(prepared)s_CFRelease(prepared);
 
             if (s_CFArrayAppendValue) {
-                s_CFArrayAppendValue(displays, alt);
-                if (s_CFDictionarySetValue) {
-                    s_CFDictionarySetValue(info, k_displays, displays);
+                if(!use_va)s_CFArrayAppendValue(displays, alt);
+                if(!layout_object(info,"displays",displays)) {
+                    if(alt)s_CFRelease(alt);s_CFRelease(displays);s_CFRelease(k_displays);s_CFRelease(info);
+                    log_msg("LAYOUT","Display transaction not committed; returning factory info");
+                    return base;
                 }
+                if(use_va){pthread_mutex_lock(&g_info_snapshot_lock);g_layout_advertised=1;pthread_mutex_unlock(&g_info_snapshot_lock);}
                 log_msg("SERVERINFO", ">>> DISPLAY 1 (Cluster AID 1280x480, Type 111, AltScreen%s) ANUNCIADO NO RTSP GET /info! <<<",
                         use_va ? "+viewAreas" : "");
             }
@@ -1614,7 +1555,7 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
     void *requested_streams=inRequest ? get_streams(inRequest) : NULL;
     int initial_setup=inRequest && (!requested_streams || (s_CFArrayGetCount && s_CFArrayGetCount(requested_streams)==0));
     if (ret == 0 && (has_alt || initial_setup) && outResponse && *outResponse) {
-        int use_va = check_viewareas_enabled();
+        int use_va = layout_advertised();
         set_reference_enabled_features(*outResponse, use_va);
         log_msg("SETUP","AltScreen acknowledgement: initial=%d auxiliary=%d",initial_setup,has_alt);
 
@@ -1753,7 +1694,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v14 (session lease recovery) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v15 (session lease recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();

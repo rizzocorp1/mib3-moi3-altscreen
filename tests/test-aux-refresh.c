@@ -22,9 +22,10 @@ static struct {void *queue,*context;void (*run)(void*);} jobs[8];static int queu
 static void asynchronous(void *q,void *context,void (*run)(void*)){assert(queued<8);jobs[queued].queue=q;jobs[queued].context=context;jobs[queued++].run=run;}
 static int32_t send_command(void *session,void *request,void *completion,void *context){
     Object *s=session,*r=request;assert(s->kind==3&&s->refs>=2&&r->count==2&&!completion&&!context);
-    assert(aux_string_equals(request,"type","forceKeyFrame"));
+    int layout=aux_string_equals(request,"type","showUI");
+    assert(layout || aux_string_equals(request,"type","forceKeyFrame"));
     Object *key=string(NULL,"params",0);const Object *params=get(r,key);release(key);
-    assert(params&&params->count==1&&aux_string_equals(params,"uuid",ALT_UUID_DEFAULT));
+    assert(params&&params->count==(layout?2:1)&&aux_string_equals(params,"uuid",ALT_UUID_DEFAULT) && (!layout || aux_string_equals(params,"url",ALT_TOP_URL)));
     native_calls++;
     pthread_mutex_lock(&native_lock);
     if(block_native){native_entered=1;pthread_cond_signal(&native_condition);while(!release_native)pthread_cond_wait(&native_condition,&native_lock);}
@@ -62,6 +63,14 @@ int main(void){
     invalidate();assert(other->refs==2);
     pthread_mutex_lock(&native_lock);release_native=1;pthread_cond_signal(&native_condition);pthread_mutex_unlock(&native_lock);
     assert(pthread_join(worker,NULL)==0 && g_aux_results==0 && other->refs==1 && live==2);
+    block_native=0;invalidate();g_layout_advertised=1;
+    assert(aux_refresh_tick_at(300000)==1 && ((AuxRefreshJob*)jobs[0].context)->layout);
+    run_one();assert(g_aux_layout_attempted && g_aux_attempts==0);
+    assert(aux_refresh_tick_at(302000)==1 && !((AuxRefreshJob*)jobs[0].context)->layout);
+    run_one();assert(g_aux_attempts==1);
+    invalidate();assert(aux_refresh_tick_at(304000)==1 && ((AuxRefreshJob*)jobs[0].context)->layout);
+    int before=native_calls;invalidate();run_one();assert(native_calls==before);
+    g_layout_advertised=0;
     g_alt_session=NULL;g_alt_thread_running=0;release(session);release(other);assert(live==0&&!queued&&!g_aux_queued_total);
     puts("PASS: auxiliary UUID only, no pre-grant command, native submission errors preserve video, asynchronous coalescing/rate limit, retained lifetime, stale/security cancellation, bounded queue, session-bound lifetime beyond90 attempts, missing params/allocation/retain failures reject without leaks");
 }
