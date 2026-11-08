@@ -18,7 +18,7 @@ attempted=0
 # Capture must be live before the experiment can activate. Never change NIC
 # membership, promiscuity or firewall policy; keep only bounded packet metadata.
 if [ -z "$root" ]; then
-    "$stage/packet-audit" eth0.5 "$stage/packet-audit.txt" "$stage/packet-audit-ready" 300 > "$stage/packet-audit-errors.txt" 2>&1 &
+    "$stage/packet-audit" eth0.5 "$stage/packet-audit.txt" "$stage/packet-audit-ready" 300 "$grant" > "$stage/packet-audit-errors.txt" 2>&1 &
     audit_pid=$!
     attempts=0
     while [ ! -f "$stage/packet-audit-ready" ] && [ "$attempts" -lt 3 ] && kill -0 "$audit_pid" 2>/dev/null; do

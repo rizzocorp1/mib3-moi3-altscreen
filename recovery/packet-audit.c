@@ -15,9 +15,9 @@
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
-typedef struct {unsigned port,kind;uint32_t ssrc,first_ts,last_ts;uint16_t seq;
+typedef struct {unsigned port,kind,grant;uint32_t ssrc,first_ts,last_ts;uint16_t seq;
     uint64_t source_tag,packets,bytes,gaps;int pat,pmt,sps;} Flow;
-static Flow flows[16];static unsigned used;
+static Flow flows[16];static unsigned used,g_grant;
 static uint16_t be16(const uint8_t *p){return (uint16_t)((p[0]<<8)|p[1]);}
 static uint32_t be32(const uint8_t *p){return ((uint32_t)p[0]<<24)|((uint32_t)p[1]<<16)|((uint32_t)p[2]<<8)|p[3];}
 static uint64_t tag(const uint8_t *p){uint64_t v=14695981039346656037ULL;for(int i=0;i<16;i++){v^=p[i];v*=1099511628211ULL;}return v;}
@@ -32,7 +32,8 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
         if(next==0 || next==43 || next==60)length=((size_t)p[offset+1]+1)*8;
         else if(next==44){if(be16(p+offset+2)&0xfff8)return;length=8;}
         else return;
-        if(length>end-offset)return;offset+=length;next=following;
+        if(length>end-offset)return;
+        offset+=length;next=following;
     }
     if(next!=17 || offset+8>end)return;
     const uint8_t *udp=p+offset;size_t udp_n=be16(udp+4);
@@ -44,12 +45,13 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
     size_t payload_n=rn-header;
     if(r[0]&0x20){if(!payload_n || !r[rn-1] || r[rn-1]>payload_n)return;payload_n-=r[rn-1];}
     uint32_t ssrc=be32(r+8);unsigned port=be16(udp);uint64_t source=tag(p+8);unsigned index;
-    for(index=0;index<used;index++)if(flows[index].port==port && flows[index].ssrc==ssrc && flows[index].kind==kind && flows[index].source_tag==source)break;
+    for(index=0;index<used;index++)if(flows[index].port==port && flows[index].ssrc==ssrc && flows[index].kind==kind && flows[index].source_tag==source && flows[index].grant==g_grant)break;
     if(index==used){
-        if(used==16)return;used++;
-        flows[index]=(Flow){.port=port,.kind=kind,.ssrc=ssrc,.source_tag=source,.first_ts=be32(r+4)};
+        if(used==16)return;
+        used++;
+        flows[index]=(Flow){.port=port,.kind=kind,.ssrc=ssrc,.source_tag=source,.grant=g_grant,.first_ts=be32(r+4)};
         static const uint8_t group[16]={0xff,0x14,0,0,0,0,0,0,0,0,0,0,0,2,0,4};
-        fprintf(out,"FLOW %u direction=%s sourcePort=%u sourceTag=%016llx ssrc=%u pt=%u marker=%u rtpBytes=%zu tsSlots=%zu clusterGroup=%d\n",index,kind==PACKET_OUTGOING?"outgoing":"incoming",port,(unsigned long long)source,ssrc,r[1]&127,r[1]>>7,rn,payload_n/188,!memcmp(p+24,group,16));
+        fprintf(out,"FLOW %u encoderGrant=%u direction=%s sourcePort=%u sourceTag=%016llx ssrc=%u pt=%u marker=%u rtpBytes=%zu tsSlots=%zu clusterGroup=%d\n",index,g_grant,kind==PACKET_OUTGOING?"outgoing":"incoming",port,(unsigned long long)source,ssrc,r[1]&127,r[1]>>7,rn,payload_n/188,!memcmp(p+24,group,16));
     }
     Flow *f=&flows[index];uint16_t seq=be16(r+2);
     if(f->packets && (uint16_t)(f->seq+1)!=seq)f->gaps++;
@@ -77,12 +79,13 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
             f->pmt=1;fprintf(out,"PMT flow=%u program=%u pcrPid=%u firstStreamType=%u firstStreamPid=%u crcValid=%d\n",index,be16(section+3),be16(section+8)&0x1fff,section[es],be16(section+es+1)&0x1fff,crc(section,length)==0);
         }
     }
+    fflush(out);
 }
 static void summary(FILE *out){for(unsigned i=0;i<used;i++){Flow *f=&flows[i];fprintf(out,"COUNT flow=%u packets=%llu bytes=%llu rtpDelta=%u sequenceDiscontinuities=%llu\n",i,(unsigned long long)f->packets,(unsigned long long)f->bytes,f->last_ts-f->first_ts,(unsigned long long)f->gaps);}fflush(out);}
 static uint64_t milliseconds(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (uint64_t)t.tv_sec*1000+t.tv_nsec/1000000;}
 #ifndef PACKET_AUDIT_TEST
 int main(int argc,char **argv){
-    if(argc!=5)return 2;
+    if(argc!=5 && argc!=6)return 2;
     char *tail=NULL;long seconds=strtol(argv[4],&tail,10);if(!tail || *tail || seconds<1 || seconds>300)return 2;
     unsigned index=if_nametoindex(argv[1]);if(!index){perror("audit interface");return 1;}
     int fd=socket(AF_PACKET,SOCK_DGRAM|SOCK_CLOEXEC,htons(ETH_P_IPV6));if(fd<0){perror("audit socket");return 1;}
@@ -98,7 +101,7 @@ int main(int argc,char **argv){
     while(milliseconds()-start<(uint64_t)seconds*1000){
         struct pollfd event={.fd=fd,.events=POLLIN};int result=poll(&event,1,100);
         if(result<0){if(errno==EINTR)continue;break;}
-        if(result>0){uint8_t packet[65536];struct sockaddr_ll from;socklen_t length=sizeof(from);ssize_t n=recvfrom(fd,packet,sizeof(packet),0,(struct sockaddr*)&from,&length);if(n>0)observe(out,packet,(size_t)n,from.sll_pkttype);}
+        if(result>0){g_grant=argc==6 && access(argv[5],F_OK)==0;uint8_t packet[65536];struct sockaddr_ll from;socklen_t length=sizeof(from);ssize_t n=recvfrom(fd,packet,sizeof(packet),0,(struct sockaddr*)&from,&length);if(n>0)observe(out,packet,(size_t)n,from.sll_pkttype);}
         if(milliseconds()-last>=5000){summary(out);last=milliseconds();}
     }
     summary(out);fprintf(out,"AUDIT COMPLETE flows=%u\n",used);fclose(out);close(fd);return 0;
