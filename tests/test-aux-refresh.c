@@ -52,9 +52,9 @@ int main(void){
     fail_dictionary=1;assert(aux_refresh_tick_at(230000)==-1&&!queued&&live==2);fail_dictionary=0;
     drop_params=1;assert(aux_refresh_tick_at(233000)==-1&&!queued&&live==2);drop_params=0; /* never send an unscoped command */
     fail_retain=1;assert(aux_refresh_tick_at(236000)==-1&&!queued&&live==2);fail_retain=0;
-    g_aux_attempts=90;assert(aux_refresh_tick_at(239000)==0&&!queued);invalidate();
+    g_aux_attempts=90;assert(aux_refresh_tick_at(239000)==1&&queued==1);invalidate();run_one();assert(native_calls==2);
     assert(aux_refresh_tick_at(242000)==1);g_alt_chacha_valid=0;run_one();assert(native_calls==2&&live==2);
-    g_alt_chacha_valid=1;assert(aux_refresh_tick_at(245000)==1);g_handoff_started=0;run_one();assert(native_calls==2&&live==2);
+    g_alt_chacha_valid=1;assert(aux_refresh_tick_at(245000)==1);g_handoff_started=0;invalidate();run_one();assert(native_calls==2&&live==2);
     g_handoff_started=1;invalidate();assert(aux_refresh_tick_at(250000)==1);
     block_native=1;pthread_t worker;assert(pthread_create(&worker,NULL,run_worker,NULL)==0);
     pthread_mutex_lock(&native_lock);while(!native_entered)pthread_cond_wait(&native_condition,&native_lock);pthread_mutex_unlock(&native_lock);
@@ -63,5 +63,5 @@ int main(void){
     pthread_mutex_lock(&native_lock);release_native=1;pthread_cond_signal(&native_condition);pthread_mutex_unlock(&native_lock);
     assert(pthread_join(worker,NULL)==0 && g_aux_results==0 && other->refs==1 && live==2);
     g_alt_session=NULL;g_alt_thread_running=0;release(session);release(other);assert(live==0&&!queued&&!g_aux_queued_total);
-    puts("PASS: auxiliary UUID only, no pre-grant command, native submission errors preserve video, asynchronous coalescing/rate limit, retained lifetime, stale/security cancellation, bounded queue/attempts, missing params/allocation/retain failures reject without leaks");
+    puts("PASS: auxiliary UUID only, no pre-grant command, native submission errors preserve video, asynchronous coalescing/rate limit, retained lifetime, stale/security cancellation, bounded queue, session-bound lifetime beyond90 attempts, missing params/allocation/retain failures reject without leaks");
 }

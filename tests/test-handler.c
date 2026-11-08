@@ -78,6 +78,12 @@ static void test_factory_source_port(void) {
     assert(bind_cluster_source(second)==-1 && errno==EADDRINUSE);
     close(first);assert(bind_cluster_source(second)==0);close(second);
 }
+static void test_revoked_port_release(void) {
+    char directory[]="/tmp/lease-port-XXXXXX";assert(mkdtemp(directory));
+    g_rtp_sock=socket(AF_INET6,SOCK_DGRAM,0);assert(g_rtp_sock>=0&&bind_cluster_source(g_rtp_sock)==0);g_rtp_owned=1;
+    release_cluster_output_if_unleased(directory);assert(g_rtp_sock==-1&&!g_rtp_owned);
+    int probe=socket(AF_INET6,SOCK_DGRAM,0);assert(probe>=0&&bind_cluster_source(probe)==0);close(probe);rmdir(directory);
+}
 static void test_mux(void) {
     const size_t sizes[]={1,161,162,163,345,346,347,2000};
     uint8_t frame[2000],pes[4096]; memset(frame,0x65,sizeof(frame));
@@ -257,7 +263,7 @@ int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_factory_source_port();test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
+    test_revoked_port_release();test_factory_source_port();test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);

@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v12.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v12.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v12.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v13.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v13.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v13.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v12-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v13-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -492,6 +492,7 @@ int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *con
  * PIDs Fixos de Hardware do AID: Program 1, transport ID 100, PMT 1000, Video/PCR PID 17
  * ============================================================================= */
 static int g_rtp_sock = -1;
+static int g_rtp_owned;
 static struct sockaddr_in6 g_cluster_dest_addr;
 static uint16_t g_rtp_seq = 0;
 static uint32_t g_rtp_ts = 0;
@@ -553,6 +554,7 @@ static void init_cluster_network(void) {
         log_msg("NET_ERR","Cluster interface/source-port setup failed: ifindex=%u errno=%d",ifindex,errno);
         close(g_rtp_sock);g_rtp_sock=-1;return;
     }
+    g_rtp_owned=1;
     log_msg("NET","Cluster socket bound exclusively: sourcePort=42989 interface=eth0.5");
 
     memset(&g_cluster_dest_addr, 0, sizeof(g_cluster_dest_addr));
@@ -863,7 +865,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v12.h"
+#include "frame-gate-v13.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -934,6 +936,20 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     return 0;
 }
 
+static void aux_refresh_invalidate_locked(void);
+static void close_cluster_socket(void) {
+    if(g_rtp_owned && g_rtp_sock>=0)close(g_rtp_sock);
+    g_rtp_sock=-1;g_rtp_owned=0;
+}
+static void release_cluster_output_if_unleased(const char *directory) {
+    char grant[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,directory);
+    if(g_rtp_owned && !handoff_file_valid(grant)) {
+        close_cluster_socket();deferred_video_clear();end_frame_gate_at(directory);
+        pthread_mutex_lock(&g_crypto_lock);aux_refresh_invalidate_locked();pthread_mutex_unlock(&g_crypto_lock);
+        log_msg("HANDOFF","Output lease revoked; custom UDP port released");
+    }
+}
+
 static int process_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int idr;
     if(validate_h264_frame(data,len,&nals,&idr)!=0) {
@@ -972,7 +988,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v12.h"
+#include "aux-refresh-v13.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1019,6 +1035,9 @@ static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
     uint8_t *p = (uint8_t *)buf;
     while (total < len && receiver_active()) {
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
+        release_cluster_output_if_unleased(g_frame_directory);
+#endif
 #if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_REFRESH)
         aux_refresh_tick();
 #endif
@@ -1109,7 +1128,7 @@ static void *alt_receiver_thread(void *arg) {
                     if (decrypt_ok) {
                         g_authenticated_frames++;
                         if(g_authenticated_frames<=3)log_msg("CRYPTO","Authenticated video access unit: bytes=%zu",plaintext_size);
-                        if(process_h264_frame(body,plaintext_size,screen_timestamp_us(&h))<0)
+                        if(process_h264_frame(body,plaintext_size,screen_timestamp_us(&h))<0 && !frame_gate_revoked_at(g_frame_directory))
                             log_msg("VIDEO_ERR","Authenticated access unit was not accepted by output pipeline");
                     }
                     else {
@@ -1132,6 +1151,10 @@ static void *alt_receiver_thread(void *arg) {
     }
 
 receiver_done:
+    pthread_mutex_lock(&g_crypto_lock);
+    unsigned refresh_attempts=g_aux_attempts,refresh_results=g_aux_results,refresh_errors=g_aux_errors;
+    aux_refresh_invalidate_locked();pthread_mutex_unlock(&g_crypto_lock);
+    close_cluster_socket(); /* Release port BEFORE the monitor can restart native output. */
     deferred_video_clear();
 #if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
     end_frame_gate_at(g_frame_directory);
@@ -1140,9 +1163,6 @@ receiver_done:
         (unsigned long long)g_received_frames,(unsigned long long)g_authenticated_frames,
         (unsigned long long)g_invalid_frames,(unsigned long long)g_idr_frames,(unsigned long long)g_aud_frames,
         (unsigned long long)g_total_frames_sent,(unsigned long long)g_sent_packets,(unsigned long long)g_send_errors);
-    pthread_mutex_lock(&g_crypto_lock);
-    unsigned refresh_attempts=g_aux_attempts,refresh_results=g_aux_results,refresh_errors=g_aux_errors;
-    pthread_mutex_unlock(&g_crypto_lock);
     log_msg("AUX_REFRESH","attempts=%u submissions=%u errors=%u",refresh_attempts,refresh_results,refresh_errors);
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
@@ -1223,6 +1243,7 @@ static void stop_alt_receiver_locked(void) {
         g_alt_thread_created = 0;
     }
     pthread_mutex_lock(&g_crypto_lock);
+    close_cluster_socket();
     if (g_alt_listen_fd >= 0) close(g_alt_listen_fd);
     g_alt_listen_fd = -1;
     g_alt_listen_port=0;
@@ -1714,7 +1735,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v12 (auxiliary keyframe recovery) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v13 (session lease recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();

@@ -90,8 +90,13 @@ static void summary(FILE *out){fprintf(out,"SEEN raw=%llu ipv6=%llu targetUdp=%l
 static uint64_t milliseconds(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (uint64_t)t.tv_sec*1000+t.tv_nsec/1000000;}
 #ifndef PACKET_AUDIT_TEST
 int main(int argc,char **argv){
+    if(argc==2 && !strcmp(argv[1],"--port-free")) {
+        int probe=socket(AF_INET6,SOCK_DGRAM|SOCK_CLOEXEC,0);if(probe<0)return 2;
+        struct sockaddr_in6 local={0};local.sin6_family=AF_INET6;local.sin6_port=htons(42989);
+        int result=bind(probe,(struct sockaddr*)&local,sizeof(local));close(probe);return result==0?0:1;
+    }
     if(argc!=5 && argc!=6)return 2;
-    char *tail=NULL;long seconds=strtol(argv[4],&tail,10);if(!tail || *tail || seconds<1 || seconds>300)return 2;
+    char *tail=NULL;long seconds=strtol(argv[4],&tail,10);if(!tail || *tail || seconds<1 || seconds>600)return 2;
     unsigned index=if_nametoindex(argv[1]);if(!index){perror("audit interface");return 1;}
     /* Outgoing Linux taps are delivered to ETH_P_ALL subscribers. The
      * parser below still admits only bounded IPv6/UDP42800 metadata. */
