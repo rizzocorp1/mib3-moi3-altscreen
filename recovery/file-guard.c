@@ -69,7 +69,10 @@ static int parent_fd(const char *path) {
     char *slash=strrchr(p,'/');if(!slash)strcpy(p,".");else if(slash==p)slash[1]=0;else *slash=0;
     int fd=open(p,O_RDONLY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW);if(fd<0)fail("open parent");return fd;
 }
+#include "video-export-v16.h"
+
 int main(int argc,char **argv) {
+    if(argc==5 && !strcmp(argv[1],"video-export"))return video_export(argv[2],argv[3],argv[4]);
     if(argc<4){fprintf(stderr,"usage: file-guard clone|replace|same-meta|meta SOURCE DEST [REFERENCE]\n");return 2;}
     const char *action=argv[1],*source=argv[2],*dest=argv[3];
     int is_meta=!strcmp(action,"meta"),is_same=!strcmp(action,"same-meta"),is_replace=!strcmp(action,"replace"),is_create=!strcmp(action,"create");
@@ -111,4 +114,3 @@ int main(int argc,char **argv) {
     if(!ok)fail("copy/replace");
     return 0;
 }
-
