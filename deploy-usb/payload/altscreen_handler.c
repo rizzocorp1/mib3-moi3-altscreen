@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v13.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v13.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v13.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v14.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v14.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v14.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v13-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v14-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -802,6 +802,8 @@ static uint8_t g_sps_pps_buf[512];
 static size_t g_sps_pps_len = 0;
 static unsigned int g_nal_length_bytes = 4;
 
+#include "video-observe-v14.h"
+
 static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     g_sps_pps_len = 0;
     if (!avcc || len < 7 || avcc[0] != 1) return;
@@ -855,6 +857,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     memcpy(g_sps_pps_buf, config, out_pos);
     g_nal_length_bytes = length_bytes;
     g_sps_pps_len = out_pos;
+    video_observe_config(g_sps_pps_buf,g_sps_pps_len);
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
     /* Codec parameter sets describe decoder format, not picture/map pixels.
      * Bound the record so the next vehicle result can establish profile/level
@@ -865,7 +868,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v13.h"
+#include "frame-gate-v14.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -957,6 +960,7 @@ static int process_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp)
         if(g_invalid_frames<=3)log_msg("H264_ERR","Rejected malformed access unit: bytes=%zu",len);
         return -1;
     }
+    video_observe_frame(data,len,g_nal_length_bytes,g_authenticated_frames);
     if(idr)g_idr_frames++;
     uint32_t nal_mask=0;size_t nal_pos=0;
     while(nal_pos<len){uint32_t length=0;for(unsigned i=0;i<g_nal_length_bytes;i++)length=(length<<8)|data[nal_pos++];nal_mask|=1u<<(data[nal_pos]&31);nal_pos+=length;}
@@ -988,13 +992,14 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v13.h"
+#include "aux-refresh-v14.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
  * instead of assuming every incoming access unit arrives at exactly 30 fps. */
 static struct {
     int started, ntp_started;
+    uint64_t samples,clamps,rebases,raw_repeats,previous_raw,last_sample,max_drift_us;
     uint64_t monotonic_start, ntp_start, ntp_offset_us, last_us;
 } g_video_clock;
 
@@ -1007,8 +1012,11 @@ static uint64_t screen_timestamp_us(const AirPlayScreenHeaderCompat *header) {
         g_video_clock.monotonic_start = monotonic;
     }
     uint64_t elapsed = monotonic - g_video_clock.monotonic_start;
+    uint64_t arrival_elapsed=elapsed;
     uint64_t ntp;
     memcpy(&ntp, header->params, sizeof(ntp));
+    if(g_video_clock.samples && ntp==g_video_clock.previous_raw)g_video_clock.raw_repeats++;
+    g_video_clock.previous_raw=ntp;
     if (ntp) {
         if (!g_video_clock.ntp_started) {
             g_video_clock.ntp_started = 1;
@@ -1020,13 +1028,23 @@ static uint64_t screen_timestamp_us(const AirPlayScreenHeaderCompat *header) {
             /* Clock moved backwards or discontinuously: rebase on arrival time. */
             g_video_clock.ntp_start = ntp;
             g_video_clock.ntp_offset_us = elapsed;
+            g_video_clock.rebases++;
             delta = 0;
         }
         elapsed = g_video_clock.ntp_offset_us + (delta >> 32) * 1000000 +
             ((delta & 0xffffffffULL) * 1000000 >> 32);
     }
     uint64_t timestamp = 1000000 + elapsed;
-    if (timestamp < g_video_clock.last_us) timestamp = g_video_clock.last_us;
+    if (timestamp < g_video_clock.last_us){timestamp=g_video_clock.last_us;g_video_clock.clamps++;}
+    uint64_t drift=elapsed>arrival_elapsed?elapsed-arrival_elapsed:arrival_elapsed-elapsed;
+    if(drift>g_video_clock.max_drift_us)g_video_clock.max_drift_us=drift;
+    g_video_clock.samples++;
+    if(g_video_clock.samples<=3 || g_video_clock.samples%300==0)
+        log_msg("VIDEO_CLOCK","samples=%llu arrivalElapsedUs=%llu sourceElapsedUs=%llu outputStepUs=%llu maxDriftUs=%llu rawRepeats=%llu clamps=%llu rebases=%llu (relative timing only)",
+            (unsigned long long)g_video_clock.samples,(unsigned long long)arrival_elapsed,(unsigned long long)elapsed,
+            (unsigned long long)(timestamp-g_video_clock.last_sample),(unsigned long long)g_video_clock.max_drift_us,
+            (unsigned long long)g_video_clock.raw_repeats,(unsigned long long)g_video_clock.clamps,(unsigned long long)g_video_clock.rebases);
+    g_video_clock.last_sample=timestamp;
     g_video_clock.last_us = timestamp;
     return timestamp;
 }
@@ -1255,7 +1273,7 @@ static void stop_alt_receiver_locked(void) {
     g_received_frames=g_authenticated_frames=g_invalid_frames=g_idr_frames=g_aud_frames=0;
     g_total_frames_sent=g_total_bytes_sent=g_sent_packets=g_send_errors=0;
     g_sps_pps_len = 0;
-    memset(&g_video_clock, 0, sizeof(g_video_clock));
+    memset(&g_video_clock, 0, sizeof(g_video_clock));video_observe_reset();
     pthread_mutex_unlock(&g_crypto_lock);
 }
 
@@ -1735,7 +1753,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v13 (session lease recovery) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v14 (session lease recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();

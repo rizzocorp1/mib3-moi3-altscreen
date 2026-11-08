@@ -19,8 +19,8 @@ def hashes(path):
 
 with tempfile.TemporaryDirectory() as temp:
     root=Path(temp)
-    for profile,options in [('baseline','cabac=0:8x8dct=0'),('high','cabac=1:8x8dct=1')]:
-        source=root/(profile+'.h264');fixture=root/(profile+'.avcc');output=root/(profile+'.ts')
+    for label,profile,options in [('baseline','baseline','cabac=0:8x8dct=0'),('high','high','cabac=1:8x8dct=1'),('high-multiref','high','cabac=1:8x8dct=1:ref=4')]:
+        source=root/(label+'.h264');fixture=root/(label+'.avcc');output=root/(label+'.ts')
         run('ffmpeg','-v','error','-f','lavfi','-i','testsrc2=size=1280x480:rate=25',
             '-frames:v','60','-c:v','libx264','-profile:v',profile,'-level:v','3.1',
             '-preset','veryfast','-tune','zerolatency','-x264-params',
@@ -47,4 +47,4 @@ with tempfile.TemporaryDirectory() as temp:
         run(sys.argv[1],'--avcc-fixture',str(fixture),str(output))
         before,after=hashes(source),hashes(output)
         assert len(before)==60 and after==before,(profile,len(before),len(after))
-        print('PASS:',profile,'60/60 pictures pixel-identical through actual AVC conversion; one IDR, no AUDs, 59 dependent pictures')
+        print('PASS:',label,'60/60 pictures pixel-identical through actual AVC conversion; one IDR, no AUDs, 59 dependent pictures')

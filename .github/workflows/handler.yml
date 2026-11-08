@@ -78,14 +78,16 @@ jobs:
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/info-v5-usb.sh.in recovery/info-v5-boot.sh.in
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v6-boot.sh.in
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v6-usb.sh.in recovery/map-v6-boot.sh.in
-          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v13-boot.sh.in
-          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v13-usb.sh.in recovery/map-v13-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v14-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v14-usb.sh.in recovery/map-v14-boot.sh.in
       - name: Check deferred native-encoder handoff and production output gate
         run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v12.h recovery/map-v12-log-collector.sh /tmp/file-guard
       - name: Check v13 session lease and native restoration
         run: |
           gcc -O2 -Wall -Wextra -Werror recovery/packet-audit.c -o /tmp/packet-audit
           python3 tests/test-lease-v13.py deploy-usb/payload/frame-gate-v13.h recovery/map-v13-log-collector.sh /tmp/file-guard /tmp/packet-audit
+      - name: Check v14 session lease
+        run: python3 tests/test-lease-v14.py deploy-usb/payload/frame-gate-v14.h recovery/map-v14-log-collector.sh /tmp/file-guard /tmp/packet-audit
       - name: Check read-only cluster packet audit
         run: |
           gcc -O2 -Wall -Wextra -Werror recovery/packet-audit.c -o /tmp/packet-audit

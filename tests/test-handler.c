@@ -274,22 +274,35 @@ int main(int argc,char **argv) {
     assert(screen_timestamp_us(&timed)-first==1000000);
     ntp=99ULL<<32;memcpy(timed.params,&ntp,8);
     assert(screen_timestamp_us(&timed)>=first+1000000);
+    assert(g_video_clock.rebases==1);
+    (void)screen_timestamp_us(&timed);assert(g_video_clock.raw_repeats==1);
     memset(&g_video_clock,0,sizeof(g_video_clock));memset(timed.params,0,8);
     first=screen_timestamp_us(&timed);usleep(2000);
     assert(screen_timestamp_us(&timed)>first);
+    /* Metadata observation must remain bounded even for unsupported/truncated
+     * syntax. Sanitizers exercise every prefix of deterministic noisy data. */
+    uint8_t noise[256];for(unsigned i=0;i<256;i++)noise[i]=(uint8_t)(i*73+19);
+    for(size_t n=0;n<=sizeof(noise);n++) {
+        video_observe_parameter(noise,n);video_observe_config(noise,n);
+        video_observe_frame(noise,n,4,100);
+    }
+    video_observe_reset();
     if(argc==4 && !strcmp(argv[1],"--avcc-fixture")) {
         FILE *in=fopen(argv[2],"rb");assert(in);
         uint32_t n;assert(fread(&n,4,1,in)==1 && n<=512);
         uint8_t config[512];assert(fread(config,1,n,in)==n);
-        reset_capture(90000);parse_and_store_avcc(config,n);assert(g_sps_pps_len);
+        reset_capture(90000);video_observe_reset();parse_and_store_avcc(config,n);assert(g_sps_pps_len);
         unsigned frames=0;
         while(fread(&n,4,1,in)==1) {
             assert(n && n<1024*1024);uint8_t *frame=malloc(n);assert(frame);
             assert(fread(frame,1,n,in)==n);
+            video_observe_frame(frame,n,4,frames+1);
             assert(emit_h264_frame(frame,n,1000000+(uint64_t)frames*40000)==0);
             free(frame);frames++;
         }
         assert(feof(in)&&!ferror(in));fclose(in);assert(frames==60);
+        assert(g_video_observe.slices==60 && g_video_observe.parse_fail==0);
+        assert(g_video_observe.reference_gaps==0);
         FILE *out=fopen(argv[3],"wb");assert(out);
         assert(fwrite(captured,1,captured_len,out)==captured_len);fclose(out);
         puts("PASS: actual AVC parameter parsing, length-prefix conversion, IDR parameter insertion and RTP/TS output");
