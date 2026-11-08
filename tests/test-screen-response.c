@@ -15,6 +15,51 @@ static const void *get(const void *d,const void *k){assert(!strcmp(k,"streams"))
 static void set(void *d,const void *k,const void *v){assert(!strcmp(k,"streams"));((Object *)d)->streams=(Object *)v;}
 static void set_number(void *d,const void *k,int64_t n){Object *o=d;if(fail_number)return;assert(o->count<8);o->keys[o->count]=k;o->numbers[o->count++]=n;}
 static int64_t get_number(const void *d,const void *k,int32_t *error){const Object *o=d;for(int i=0;i<o->count;i++)if(!strcmp(o->keys[i],k)){if(error)*error=0;return o->numbers[i];}if(error)*error=-1;return 0;}
+static uint32_t teardown_array_id(void){return 1;}
+static uint32_t teardown_dict_id(void){return 2;}
+static const void *teardown_dict_typed(const void *p,const void *key,uint32_t type,int32_t *error) {
+    (void)error;const Object *o=p;
+    return !strcmp(key,"streams") && o->streams && o->streams->kind==(int)type?o->streams:NULL;
+}
+static const void *teardown_array_typed(const void *p,int64_t index,uint32_t type,int32_t *error) {
+    const Object *o=p;const Object *v=o->items[index];*error=!v || v->kind!=(int)type;return *error?NULL:v;
+}
+static void *expected_teardown_session,*expected_teardown_request;
+static uint8_t *expected_teardown_done;static int teardown_calls,pairing_releases;
+static void teardown_native(void *session,void *request,int32_t reason,uint8_t *done) {
+    assert(session==expected_teardown_session && request==expected_teardown_request && done==expected_teardown_done);
+    assert(reason==-123);teardown_calls++;if(done)*done=request?0:1;
+}
+static const void *teardown_retain(const void *p){return p;}
+static void teardown_release(const void *p){(void)p;pairing_releases++;}
+static void exercise_teardown(void *session,void *request) {
+    uint8_t done=255;expected_teardown_session=session;expected_teardown_request=request;expected_teardown_done=&done;
+    AirPlayReceiverSessionTearDown(session,request,-123,&done);assert(done==(request?0:1));
+}
+static void test_scoped_teardown(void) {
+    s_teardown_array_type=teardown_array_id;s_teardown_dict_type=teardown_dict_id;
+    s_teardown_dict_get=teardown_dict_typed;s_teardown_array_get=teardown_array_typed;
+    real_AirPlayReceiverSessionTearDown=teardown_native;s_pairing_retain=teardown_retain;s_pairing_release=teardown_release;
+    int session,other,context;assert(remember_pairing(&session,&context)==0);
+    Object primary={.kind=2,.count=1,.keys={"type"},.numbers={110}};
+    Object audio={.kind=2,.count=1,.keys={"type"},.numbers={101}};
+    Object auxiliary={.kind=2,.count=1,.keys={"type"},.numbers={111}};
+    Object array={.kind=1,.count=2,.items={&primary,&audio}};
+    Object request={.kind=2,.streams=&array};
+    g_alt_session=&session;g_alt_chacha_valid=1;g_master_session=&session;g_master_valid=1;
+    exercise_teardown(&session,&request);
+    assert(g_alt_session==&session && g_alt_chacha_valid && g_master_valid && pairing_for_session(&session)==&context && !pairing_releases);
+    exercise_teardown(&other,NULL);assert(g_alt_session==&session && g_alt_chacha_valid && !pairing_releases);
+    array.items[0]=&auxiliary;array.count=1;exercise_teardown(&session,&request);
+    assert(!g_alt_chacha_valid && !g_alt_session && g_master_valid && pairing_for_session(&session)==&context && !pairing_releases);
+    g_alt_session=&session;g_alt_chacha_valid=1;exercise_teardown(&session,NULL);
+    assert(!g_alt_chacha_valid && !g_master_valid && !pairing_for_session(&session) && pairing_releases==1);
+    int aux=0;array.count=0;assert(teardown_scope(&request,&aux)==1);
+    array.count=1;array.items[0]=&array;assert(teardown_scope(&request,&aux)==1);
+    array.count=65;assert(teardown_scope(&request,&aux)==1);
+    assert(teardown_calls==4);
+    puts("PASS: primary/audio teardown preserves auxiliary crypto and pairing; auxiliary teardown stops only auxiliary receiver; full/unrelated session teardown and malformed requests handled");
+}
 int main(void){
     s_CFStringCreateWithCString=str;s_CFRelease=release;s_CFDictionaryGetValue=get;s_CFDictionarySetValue=set;
     s_CFDictionaryCreateMutable=new_dict;s_CFArrayCreateMutable=new_array;s_CFArrayGetCount=count;
@@ -37,5 +82,6 @@ int main(void){
     fail_array=fail_dict=fail_number=0;
     response.streams=NULL;assert(append_alt_setup_response(&response,&request,45678)==1 && response.streams->count==1);
     assert(!append_alt_setup_response(&response,&request,0) && !append_alt_setup_response(&response,&request,65536));
+    test_scoped_teardown();
     puts("PASS: minimal type/dataPort reply, no request echo or invented streamID, duplicate auxiliary replacement, primary preservation and allocation failure");
 }

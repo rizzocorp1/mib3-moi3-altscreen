@@ -1,8 +1,10 @@
 """Real production C gate + root collector + metadata helper; mocked systemctl.
 No host services or mounts are changed."""
 from pathlib import Path
-import os,shutil,subprocess,sys,tempfile
+import os,shutil,subprocess,sys,tempfile,re
 header=Path(sys.argv[1]).resolve();collector=Path(sys.argv[2]).resolve();guard=Path(sys.argv[3]).resolve()
+protocol='V9' if 'AUTHENTICATED_H264_V9' in header.read_text() else 'V6'
+marker='v9' if protocol=='V9' else 'v6'
 driver=r'''
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -14,7 +16,7 @@ driver=r'''
 #include <sys/stat.h>
 #include <errno.h>
 #include <assert.h>
-static void log_msg(const char *a,const char *b){(void)a;(void)b;}
+static void log_msg(const char *a,const char *b,...){(void)a;(void)b;}
 #include "HEADER"
 int main(int n,char **v){
     assert(n==3);
@@ -35,14 +37,14 @@ with tempfile.TemporaryDirectory() as directory:
     for scenario in ('no-video','ended-before-grant','success','stop-failure','still-active','clone-failure'):
         root=workspace/scenario;root.mkdir();stage=root/'stage';stage.mkdir()
         data=root/'data/lge/smartlink/carplay';data.mkdir(parents=True)
-        request=data/'altscreen-v6-frame-ready';grant=data/'altscreen-v6-encoder-ready'
+        request=data/('altscreen-'+marker+'-frame-ready');grant=data/('altscreen-'+marker+'-encoder-ready')
         shutil.copyfile(guard,stage/'file-guard');(stage/'file-guard').chmod(0o700)
         (stage/'boot-status.txt').write_text('fixture\n')
         subprocess.run([binary,str(data),'unauthenticated'],check=True);assert not request.exists()
         subprocess.run([binary,str(data),'non-IDR'],check=True);assert not request.exists()
         if scenario!='no-video':
             subprocess.run([binary,str(data),'request'],check=True)
-            assert request.read_text()=='AUTHENTICATED_H264_V6\n'
+            assert request.read_text()=='AUTHENTICATED_H264_'+protocol+'\n'
             os.setxattr(request,'user.handoff',b'preserve')
         if scenario=='clone-failure':grant.write_text('existing grant must not be overwritten')
         if scenario=='ended-before-grant':subprocess.run([binary,str(data),'end'],check=True);assert not request.exists()

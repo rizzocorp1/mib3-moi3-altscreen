@@ -85,6 +85,14 @@ static void test_tcp_receiver(void *session) {
     size_t n=encrypt_reference((const uint8_t *)&header,plain,sizeof(plain),0,body);
     g_rtp_sock=99;atomic_store(&packets,0);
     assert(write(client,&header,sizeof(header))==(ssize_t)sizeof(header));assert(write(client,body,n)==(ssize_t)n);
+#ifdef ALTSCREEN_TEST_WITH_GATE
+    usleep(250000);assert(atomic_load(&packets)==0);
+    char path[512];snprintf(path,sizeof(path),"%s/altscreen-v9-frame-ready",g_frame_directory);
+    assert(access(path,F_OK)==0);
+    snprintf(path,sizeof(path),"%s/altscreen-v9-encoder-ready",g_frame_directory);
+    int grant_fd=open(path,O_WRONLY|O_CREAT|O_EXCL,0600);assert(grant_fd>=0);
+    assert(write(grant_fd,HANDOFF_TOKEN,sizeof(HANDOFF_TOKEN)-1)==sizeof(HANDOFF_TOKEN)-1);close(grant_fd);
+#endif
     for(int i=0;i<200 && !atomic_load(&packets);i++)usleep(10000);
     unsigned sent=atomic_load(&packets);assert(sent>0);
     n=encrypt_reference((const uint8_t *)&header,plain,sizeof(plain),1,body);body[n-1]^=1;
@@ -94,6 +102,9 @@ static void test_tcp_receiver(void *session) {
     assert(!g_alt_chacha_valid && !g_alt_thread_created);
 }
 int main(void) {
+#ifdef ALTSCREEN_TEST_WITH_GATE
+    char gate_directory[]="/tmp/homekit-gate-XXXXXX";assert(mkdtemp(gate_directory));g_frame_directory=gate_directory;
+#endif
     for(int i=0;i<32;i++)reference_key[i]=(uint8_t)(i+1);
     s_pairing_retain=retain_pairing;s_pairing_release=release_pairing;s_pairing_derive=derive_pairing;
     s_chacha_init=native_init;s_chacha_aad=native_aad;s_chacha_decrypt=native_decrypt;s_chacha_verify=native_verify;
@@ -148,5 +159,9 @@ int main(void) {
     assert(remember_pairing(&session_a,NULL)==0 && pairing_a.refs==0);
     assert(remember_pairing(&session_b,NULL)==0 && pairing_b.refs==0);
     assert(!pairing_for_session(&session_a));
+#ifdef ALTSCREEN_TEST_WITH_GATE
+    char cleanup[512];snprintf(cleanup,sizeof(cleanup),"%s/altscreen-v9-frame-ready",g_frame_directory);unlink(cleanup);
+    snprintf(cleanup,sizeof(cleanup),"%s/altscreen-v9-encoder-ready",g_frame_directory);unlink(cleanup);rmdir(g_frame_directory);
+#endif
     puts("PASS: HomeKit session ownership, CID derivation, 520 authenticated frames, buffered tails, nonce carry, corrupt header/body/tag, wrong key, replay and derive failure");
 }

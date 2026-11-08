@@ -62,10 +62,11 @@
 #include <time.h>
 #include <pthread.h>
 #include <errno.h>
+#include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v8.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v8.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v8.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v9.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v9.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v9.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -131,7 +132,7 @@ static void log_msg(const char *tag, const char *fmt, ...) {
 #define CLUSTER_MULTICAST_PORT       42800
 #define RTP_PACKET_SIZE              1140
 #define TS_PACKET_SIZE               188
-#define CLUSTER_PROGRAM_NUMBER       100   /* 0x0064 */
+#define CLUSTER_PROGRAM_NUMBER       1   /* Matching MU0841 PMT program number. */
 #define CLUSTER_PMT_PID              1000  /* 0x03E8 */
 #define CLUSTER_VIDEO_PID            17    /* 0x0011 */
 #define CLUSTER_PCR_PID              17    /* 0x0011 */
@@ -197,7 +198,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v8-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v9-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -486,7 +487,7 @@ int32_t AirPlayReceiverSessionSetHomeKitSecurityContext(void *session, void *con
 
 /* =============================================================================
  * Camada 3: MPEG-TS & RTP Multicast Pipeline para [ff14::2:4]:42800 (eth0.5)
- * PIDs Fixos de Hardware do AID: Program 100, PMT 1000, Video/PCR PID 17
+ * PIDs Fixos de Hardware do AID: Program 1, transport ID 100, PMT 1000, Video/PCR PID 17
  * ============================================================================= */
 static int g_rtp_sock = -1;
 static struct sockaddr_in6 g_cluster_dest_addr;
@@ -501,6 +502,8 @@ static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
 
 static uint64_t g_total_frames_sent = 0;
+static uint64_t g_received_frames,g_authenticated_frames,g_invalid_frames,g_idr_frames;
+static uint64_t g_sent_packets,g_send_errors;
 static uint64_t g_total_bytes_sent = 0;
 
 static uint32_t ts_crc32(const uint8_t *data, size_t len) {
@@ -555,26 +558,41 @@ static void rtp_flush_buffer(int marker) {
     if (g_rtp_ts_in_buf == 0 || g_rtp_sock < 0) return;
 
     g_rtp_buf[0] = 0x80;
-    g_rtp_buf[1] = 33 | (marker ? 0x80 : 0x00);
+    g_rtp_buf[1] = 33; /* Matching factory profile: no per-frame RTP marker. */
+    (void)marker;
     g_rtp_buf[2] = (uint8_t)(g_rtp_seq >> 8);
     g_rtp_buf[3] = (uint8_t)(g_rtp_seq & 0xFF);
     g_rtp_seq++;
 
+    struct timespec rtp_now;
+    if(clock_gettime(CLOCK_MONOTONIC,&rtp_now)==0)
+        g_rtp_ts=(uint32_t)((uint64_t)rtp_now.tv_sec*1000+(uint64_t)rtp_now.tv_nsec/1000000);
     g_rtp_buf[4] = (uint8_t)((g_rtp_ts >> 24) & 0xFF);
     g_rtp_buf[5] = (uint8_t)((g_rtp_ts >> 16) & 0xFF);
     g_rtp_buf[6] = (uint8_t)((g_rtp_ts >> 8) & 0xFF);
     g_rtp_buf[7] = (uint8_t)(g_rtp_ts & 0xFF);
 
-    g_rtp_buf[8]  = 0x41;
-    g_rtp_buf[9]  = 0x49;
-    g_rtp_buf[10] = 0x44;
-    g_rtp_buf[11] = 0x31;
+    /* MU0841 TransportStream constructor uses identifier 100000 (0x186a0).
+     * Its RTP clock is monotonic milliseconds, separate from 90 kHz PES/PCR. */
+    g_rtp_buf[8]=0x00;g_rtp_buf[9]=0x01;g_rtp_buf[10]=0x86;g_rtp_buf[11]=0xa0;
 
-    size_t payload_size = 12 + (g_rtp_ts_in_buf * TS_PACKET_SIZE);
+    /* Factory datagrams always contain six TS slots. Pad with proper null TS
+     * packets rather than carrying uninitialized or prior frame bytes. */
+    for(int i=g_rtp_ts_in_buf;i<6;i++) {
+        uint8_t *null_packet=&g_rtp_buf[12+i*TS_PACKET_SIZE];
+        memset(null_packet,0xff,TS_PACKET_SIZE);
+        null_packet[0]=0x47;null_packet[1]=0x1f;null_packet[2]=0xff;null_packet[3]=0x10;
+    }
+    size_t payload_size = RTP_PACKET_SIZE;
     ssize_t sent = sendto(g_rtp_sock, g_rtp_buf, payload_size, 0,
                           (struct sockaddr *)&g_cluster_dest_addr, sizeof(g_cluster_dest_addr));
-    if (sent > 0) {
-        g_total_bytes_sent += (uint64_t)sent;
+    if(sent==(ssize_t)payload_size) {
+        g_total_bytes_sent+=(uint64_t)sent;g_sent_packets++;
+        if(g_sent_packets==1)log_msg("RTP","First cluster UDP datagram sent: bytes=%zu",payload_size);
+    } else {
+        g_send_errors++;
+        if(g_send_errors<=3 || g_send_errors%300==0)
+            log_msg("RTP_ERR","Cluster send failed: errno=%d sent=%zd expected=%zu failures=%llu",errno,sent,payload_size,(unsigned long long)g_send_errors);
     }
     g_rtp_ts_in_buf = 0;
 }
@@ -601,8 +619,8 @@ static void emit_pat_packet(void) {
     pkt[5] = 0x00;
     pkt[6] = 0xB0;
     pkt[7] = 0x0D;
-    pkt[8] = 0x00; pkt[9] = 0x01;
-    pkt[10] = 0xC1;
+    pkt[8] = 0x00; pkt[9] = 0x64; /* Factory transport-stream ID 100. */
+    pkt[10] = 0xDB;
     pkt[11] = 0x00; pkt[12] = 0x00;
 
     pkt[13] = (uint8_t)((CLUSTER_PROGRAM_NUMBER >> 8) & 0xFF);
@@ -635,7 +653,7 @@ static void emit_pmt_packet(void) {
     pkt[7] = 0x12;
     pkt[8] = (uint8_t)((CLUSTER_PROGRAM_NUMBER >> 8) & 0xFF);
     pkt[9] = (uint8_t)(CLUSTER_PROGRAM_NUMBER & 0xFF);
-    pkt[10] = 0xC1;
+    pkt[10] = 0xC3;
     pkt[11] = 0x00; pkt[12] = 0x00;
 
     pkt[13] = 0xE0 | (uint8_t)((CLUSTER_PCR_PID >> 8) & 0x1F);
@@ -658,7 +676,7 @@ static void emit_pmt_packet(void) {
 
 static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k) {
     if (!frame_data || frame_len == 0) return;
-    g_rtp_ts = (uint32_t)pts_90k;
+    /* RTP timestamp is assigned at datagram send time. */
 
     size_t pes_header_len = 14;
     size_t pes_total_len = pes_header_len + frame_len;
@@ -752,7 +770,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
     }
 
     free(pes_buf);
-    g_rtp_ts = (uint32_t)pts_90k;
+    /* RTP timestamp is assigned at datagram send time. */
     rtp_flush_buffer(1);
     g_total_frames_sent++;
 
@@ -827,26 +845,28 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
 }
 
-#include "frame-gate-v6.h"
-static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestamp) {
+#include "frame-gate-v9.h"
+#include "deferred-video-v9.h"
+static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
     /* Validate the entire access unit before emitting anything. In particular,
      * zero-length NALs must not read data[len], and partial frames are rejected. */
-    size_t checked = 0, nals = 0;
-    int is_keyframe = 0;
+    size_t checked = 0;*nals=0;
+    *is_keyframe=0;
     while (checked < len) {
         if (len - checked < g_nal_length_bytes) return -1;
         uint32_t n = 0;
         for (unsigned int i = 0; i < g_nal_length_bytes; i++) n = (n << 8) | data[checked++];
         if (!n || n > len - checked) return -1;
-        if ((data[checked] & 0x1F) == 5) is_keyframe = 1;
+        if ((data[checked] & 0x1F) == 5) *is_keyframe = 1;
         checked += n;
-        nals++;
+        (*nals)++;
     }
-
-#ifndef ALTSCREEN_TEST
-    if(frame_gate_at("/data/lge/smartlink/carplay",is_keyframe,g_alt_chacha_valid)!=0)return 0;
-#endif
+    return 0;
+}
+static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
+    size_t nals;int is_keyframe;
+    if(validate_h264_frame(data,len,&nals,&is_keyframe)!=0)return -1;
     init_cluster_network();
 
     static int s_first_frame = 0;
@@ -893,6 +913,21 @@ static int process_h264_frame(const uint8_t *data, size_t len, uint64_t timestam
 
     free(annexb_frame);
     return 0;
+}
+
+static int process_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
+    size_t nals;int idr;
+    if(validate_h264_frame(data,len,&nals,&idr)!=0) {
+        g_invalid_frames++;
+        if(g_invalid_frames<=3)log_msg("H264_ERR","Rejected malformed access unit: bytes=%zu",len);
+        return -1;
+    }
+    if(idr)g_idr_frames++;
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
+    return deferred_video_submit(g_frame_directory,data,len,timestamp,idr,g_alt_chacha_valid,emit_h264_frame);
+#else
+    return emit_h264_frame(data,len,timestamp);
+#endif
 }
 
 /* =============================================================================
@@ -957,7 +992,15 @@ static uint64_t screen_timestamp_us(const AirPlayScreenHeaderCompat *header) {
 static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
     uint8_t *p = (uint8_t *)buf;
-    while (total < len) {
+    while (total < len && receiver_active()) {
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
+        if(deferred_video_flush(g_frame_directory,emit_h264_frame)<0)
+            log_msg("HANDOFF","Pending authenticated video could not be released");
+#endif
+        struct pollfd event={.fd=fd,.events=POLLIN};
+        int ready=poll(&event,1,100);
+        if(ready==0)continue;
+        if(ready<0){if(errno==EINTR)continue;return -1;}
         ssize_t n = read(fd, p + total, len - total);
         if (n <= 0) {
             if (n < 0 && (errno == EINTR || errno == EAGAIN)) continue;
@@ -965,7 +1008,7 @@ static int read_exact(int fd, void *buf, size_t len) {
         }
         total += (size_t)n;
     }
-    return 1;
+    return total==len ? 1:0;
 }
 
 static void *alt_receiver_thread(void *arg) {
@@ -1019,6 +1062,7 @@ static void *alt_receiver_thread(void *arg) {
             case K_SCREEN_VIDEO_CONFIG:
                 if (body && h.bodySize > 0) {
                     log_msg("RECV111", "VideoConfig recebido: bodySize=%u bytes", h.bodySize);
+                    deferred_video_clear();g_handoff_started=0;
                     parse_and_store_avcc(body, h.bodySize);
                 }
                 break;
@@ -1026,13 +1070,19 @@ static void *alt_receiver_thread(void *arg) {
             case K_SCREEN_VIDEO_FRAME:
                 if (body && h.bodySize > 0) {
                     pthread_mutex_lock(&g_crypto_lock);
+                    g_received_frames++;
                     size_t plaintext_size=h.bodySize;
                     int decrypt_ok;
                     if(g_alt_chacha_valid)decrypt_ok=decrypt_homekit_frame(&h,sizeof(h),body,&plaintext_size)==0;
                     else decrypt_ok = g_alt_aes_valid && s_AES_CTR_Update &&
                         s_AES_CTR_Update(&g_alt_aes, body, h.bodySize, body) == 0;
                     pthread_mutex_unlock(&g_crypto_lock);
-                    if (decrypt_ok) process_h264_frame(body, plaintext_size, screen_timestamp_us(&h));
+                    if (decrypt_ok) {
+                        g_authenticated_frames++;
+                        if(g_authenticated_frames<=3)log_msg("CRYPTO","Authenticated video access unit: bytes=%zu",plaintext_size);
+                        if(process_h264_frame(body,plaintext_size,screen_timestamp_us(&h))<0)
+                            log_msg("VIDEO_ERR","Authenticated access unit was not accepted by output pipeline");
+                    }
                     else {
                         log_msg("CRYPTO", "Frame rejected: security state, decryption or authentication failed; closing receiver");
                         free(body);body=NULL;goto receiver_done;
@@ -1053,9 +1103,14 @@ static void *alt_receiver_thread(void *arg) {
     }
 
 receiver_done:
-#ifndef ALTSCREEN_TEST
-    end_frame_gate_at("/data/lge/smartlink/carplay");
+    deferred_video_clear();
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
+    end_frame_gate_at(g_frame_directory);
 #endif
+    log_msg("SUMMARY","received=%llu authenticated=%llu invalid=%llu idr=%llu muxed=%llu udpPackets=%llu udpErrors=%llu",
+        (unsigned long long)g_received_frames,(unsigned long long)g_authenticated_frames,
+        (unsigned long long)g_invalid_frames,(unsigned long long)g_idr_frames,
+        (unsigned long long)g_total_frames_sent,(unsigned long long)g_sent_packets,(unsigned long long)g_send_errors);
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_client_fd == c) g_alt_client_fd = -1;
@@ -1141,7 +1196,9 @@ static void stop_alt_receiver_locked(void) {
     memset(&g_alt_aes, 0, sizeof(g_alt_aes));
     reset_homekit_stream();
     g_alt_session=NULL;
-    g_handoff_started=0;
+    g_handoff_started=0;deferred_video_clear();
+    g_received_frames=g_authenticated_frames=g_invalid_frames=g_idr_frames=0;
+    g_total_frames_sent=g_total_bytes_sent=g_sent_packets=g_send_errors=0;
     g_sps_pps_len = 0;
     memset(&g_video_clock, 0, sizeof(g_video_clock));
     pthread_mutex_unlock(&g_crypto_lock);
@@ -1235,7 +1292,7 @@ static void stop_alt_receiver(void) {
 /* =============================================================================
  * Inspecao de SETUP do CarPlay: Detecao de Stream 111
  * ============================================================================= */
-static int stream_type(void *d) {
+static int stream_type(const void *d) {
     if (!d || !s_CFDictionaryGetInt64) return -1;
     void *k = s_cf("type");
     if (!k) return -1;
@@ -1515,24 +1572,58 @@ int32_t AirPlayReceiverSessionSetup(void *inSession, void *inRequest, void **out
 typedef void (*AirPlayReceiverSessionTearDown_fn)(void *inSession, void *inRequest, int32_t inReason, uint8_t *outDone);
 static AirPlayReceiverSessionTearDown_fn real_AirPlayReceiverSessionTearDown = NULL;
 
+/* Matching MU0841 native teardown treats a nonempty typed streams array as a
+ * partial teardown (outDone=0). Missing/empty streams ends the whole session.
+ * Do not destroy the auxiliary receiver or retained pairing on primary/audio
+ * teardown; app transitions can tear down those streams independently. */
+typedef uint32_t (*cf_type_id_fn)(void);
+typedef const void *(*cf_dict_typed_fn)(const void *,const void *,uint32_t,int32_t *);
+typedef const void *(*cf_array_typed_fn)(const void *,int64_t,uint32_t,int32_t *);
+static cf_type_id_fn s_teardown_array_type,s_teardown_dict_type;
+static cf_dict_typed_fn s_teardown_dict_get;
+static cf_array_typed_fn s_teardown_array_get;
+static int teardown_scope(void *request,int *auxiliary) {
+    *auxiliary=0;
+    if(!request)return 1;
+    if(!s_teardown_dict_get)s_teardown_dict_get=(cf_dict_typed_fn)dlsym(RTLD_DEFAULT,"CFDictionaryGetTypedValue");
+    if(!s_teardown_array_get)s_teardown_array_get=(cf_array_typed_fn)dlsym(RTLD_DEFAULT,"CFArrayGetTypedValueAtIndex");
+    if(!s_teardown_array_type)s_teardown_array_type=(cf_type_id_fn)dlsym(RTLD_DEFAULT,"CFArrayGetTypeID");
+    if(!s_teardown_dict_type)s_teardown_dict_type=(cf_type_id_fn)dlsym(RTLD_DEFAULT,"CFDictionaryGetTypeID");
+    if(!s_teardown_dict_get || !s_teardown_array_get || !s_teardown_array_type || !s_teardown_dict_type ||
+       !s_CFArrayGetCount || !s_CFDictionaryGetInt64)return 1;
+    void *key=s_cf("streams");
+    const void *streams=key?s_teardown_dict_get(request,key,s_teardown_array_type(),NULL):NULL;
+    if(key && s_CFRelease)s_CFRelease(key);
+    if(!streams)return 1;
+    int64_t count=s_CFArrayGetCount(streams);
+    if(count<=0)return 1;
+    if(count>64)return 1; /* Invalid/unbounded request: fail closed. */
+    for(int64_t i=0;i<count;i++) {
+        int32_t error=0;
+        const void *stream=s_teardown_array_get(streams,i,s_teardown_dict_type(),&error);
+        if(error || !stream)return 1;
+        if(stream_type(stream)==K_STREAM_ALT)*auxiliary=1;
+    }
+    return 0;
+}
 void AirPlayReceiverSessionTearDown(void *inSession, void *inRequest, int32_t inReason, uint8_t *outDone) {
     if (!real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown = (AirPlayReceiverSessionTearDown_fn)dlsym(RTLD_NEXT, "AirPlayReceiverSessionTearDown");
     }
-
-    log_msg("TEARDOWN", "AirPlayReceiverSessionTearDown: session=%p, reason=%d", inSession, inReason);
+    int auxiliary=0,whole=teardown_scope(inRequest,&auxiliary);
+    log_msg("TEARDOWN", "scope=%s auxiliary=%d reason=%d",whole?"session":"streams",auxiliary,inReason);
+    if(inRequest)log_stream_ports("teardown",inRequest);
     pthread_mutex_lock(&g_crypto_lock);
     int owns_stream=g_alt_session==inSession;
-    if(g_master_session==inSession) {
+    if(whole && g_master_session==inSession) {
         secret_zero(g_master_key,sizeof(g_master_key));g_master_valid=0;g_master_session=NULL;
     }
     pthread_mutex_unlock(&g_crypto_lock);
-    if(owns_stream)stop_alt_receiver();
-
+    if(owns_stream && (whole || auxiliary))stop_alt_receiver();
     if (real_AirPlayReceiverSessionTearDown) {
         real_AirPlayReceiverSessionTearDown(inSession, inRequest, inReason, outDone);
     }
-    remember_pairing(inSession,NULL);
+    if(whole)remember_pairing(inSession,NULL);
 }
 
 /* =============================================================================

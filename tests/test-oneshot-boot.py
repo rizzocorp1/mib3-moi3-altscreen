@@ -17,6 +17,7 @@ stop_mode='systemctl stop' in template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 scenarios=('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','logger-failure','logger-timeout','corrupt-collector')
 if stop_mode:scenarios+=('stop-failure',)
+marker='v9' if 'altscreen-v9-frame-ready' in template else 'v6'
 if 'pending authenticated video' in template:scenarios+=('stale-handoff',)
 for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
@@ -45,7 +46,7 @@ for scenario in scenarios:
         if scenario=='corrupt-backup':backup.write_bytes(b'bad backup')
         if scenario=='corrupt-collector':collector.write_bytes(b'bad collector')
         if scenario=='stale-handoff':
-            stale=root/'data/lge/smartlink/carplay/altscreen-v6-frame-ready';stale.parent.mkdir(parents=True);stale.write_text('old request')
+            stale=root/('data/lge/smartlink/carplay/altscreen-'+marker+'-frame-ready');stale.parent.mkdir(parents=True);stale.write_text('old request')
         tools=root/'tools';tools.mkdir();events=root/'events'
         stub='''#!/usr/bin/env python3
 import os,sys

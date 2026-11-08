@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <sys/socket.h>
+#include <time.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,9 +13,13 @@ static ssize_t capture_sendto(int fd, const void *buf, size_t n, int flags,
                              const struct sockaddr *addr, socklen_t alen) {
     (void)fd; (void)flags; (void)addr; (void)alen;
     const uint8_t *p=buf;
-    assert(n>=12 && (n-12)%188==0);
+    assert(n==1140 && (n-12)%188==0);
+    assert(p[1]==33);
+    assert(p[8]==0 && p[9]==1 && p[10]==0x86 && p[11]==0xa0);
     uint32_t ts=((uint32_t)p[4]<<24)|((uint32_t)p[5]<<16)|((uint32_t)p[6]<<8)|p[7];
-    assert(ts==expected_rtp);
+    struct timespec now;assert(clock_gettime(CLOCK_MONOTONIC,&now)==0);
+    uint32_t ms=(uint32_t)((uint64_t)now.tv_sec*1000+(uint64_t)now.tv_nsec/1000000);
+    assert((uint32_t)(ms-ts)<2000);
     assert(captured_len+n-12<=sizeof(captured));
     memcpy(captured+captured_len,p+12,n-12); captured_len+=n-12;
     return (ssize_t)n;
@@ -49,6 +54,21 @@ static size_t video_payload(uint8_t *out) {
         assert(offset<=188); memcpy(out+pos,p+offset,188-offset); pos+=188-offset;
     }
     return pos;
+}
+/* Field values independently decoded from MU0841 TransportStream PAT/PMT;
+ * capture_sendto also checks the factory RTP clock/identifier/datagram size. */
+static void test_factory_transport_profile(void) {
+    reset_capture(0);emit_pat_packet();emit_pmt_packet();rtp_flush_buffer(0);
+    assert(captured_len==6*188);
+    const uint8_t *pat=captured,*pmt=captured+188;
+    assert(pat[0]==0x47 && pat[1]==0x40 && pat[2]==0);
+    assert(pat[8]==0 && pat[9]==100 && pat[10]==0xdb);
+    assert(pat[13]==0 && pat[14]==1 && pat[15]==0xe3 && pat[16]==0xe8);
+    assert(ts_crc32(pat+5,16)==0);
+    assert(pmt[1]==0x43 && pmt[2]==0xe8 && pmt[8]==0 && pmt[9]==1 && pmt[10]==0xc3);
+    assert(pmt[13]==0xe0 && pmt[14]==17 && pmt[17]==0x1b && pmt[18]==0xe0 && pmt[19]==17);
+    assert(ts_crc32(pmt+5,21)==0);
+    for(int i=2;i<6;i++){const uint8_t *p=captured+i*188;assert(p[0]==0x47 && p[1]==0x1f && p[2]==0xff && p[3]==0x10);}
 }
 static void test_mux(void) {
     const size_t sizes[]={1,161,162,163,345,346,347,2000};
@@ -229,7 +249,7 @@ int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_mux();test_parser();test_permitted_ports();test_receiver();
+    test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);
