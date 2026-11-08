@@ -277,6 +277,23 @@ int main(int argc,char **argv) {
     memset(&g_video_clock,0,sizeof(g_video_clock));memset(timed.params,0,8);
     first=screen_timestamp_us(&timed);usleep(2000);
     assert(screen_timestamp_us(&timed)>first);
+    if(argc==4 && !strcmp(argv[1],"--avcc-fixture")) {
+        FILE *in=fopen(argv[2],"rb");assert(in);
+        uint32_t n;assert(fread(&n,4,1,in)==1 && n<=512);
+        uint8_t config[512];assert(fread(config,1,n,in)==n);
+        reset_capture(90000);parse_and_store_avcc(config,n);assert(g_sps_pps_len);
+        unsigned frames=0;
+        while(fread(&n,4,1,in)==1) {
+            assert(n && n<1024*1024);uint8_t *frame=malloc(n);assert(frame);
+            assert(fread(frame,1,n,in)==n);
+            assert(emit_h264_frame(frame,n,1000000+(uint64_t)frames*40000)==0);
+            free(frame);frames++;
+        }
+        assert(feof(in)&&!ferror(in));fclose(in);assert(frames==60);
+        FILE *out=fopen(argv[3],"wb");assert(out);
+        assert(fwrite(captured,1,captured_len,out)==captured_len);fclose(out);
+        puts("PASS: actual AVC parameter parsing, length-prefix conversion, IDR parameter insertion and RTP/TS output");
+    }
     if(argc==3) {
         FILE *in=fopen(argv[1],"rb"); assert(in); size_t length=fread(captured,1,sizeof(captured),in);
         assert(!ferror(in) && feof(in));fclose(in);assert(length>0);
