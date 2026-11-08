@@ -16,7 +16,7 @@
 #include <time.h>
 #include <unistd.h>
 typedef struct {unsigned port,kind,grant;uint32_t ssrc,first_ts,last_ts;uint16_t seq;
-    uint64_t source_tag,packets,bytes,gaps;int pat,pmt,sps;} Flow;
+    uint64_t source_tag,packets,bytes,gaps;int pat,pmt,sps,aud;} Flow;
 static Flow flows[16];static unsigned used,g_grant;
 static uint64_t raw_packets,ipv6_packets,target_udp_packets,rtp_packets;
 static uint16_t be16(const uint8_t *p){return (uint16_t)((p[0]<<8)|p[1]);}
@@ -65,10 +65,11 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
         unsigned mode=(t[3]>>4)&3;if(mode!=1 && mode!=3)continue;
         size_t o=4;if(mode==3){o+=1+(size_t)t[4];if(o>=188)continue;}
         unsigned pid=be16(t+1)&0x1fff;
-        if(pid==17 && !f->sps){
+        if(pid==17 && (!f->sps || !f->aud)){
             for(size_t j=o;j+7<=188;j++){
-                if(t[j]==0 && t[j+1]==0 && t[j+2]==1 && (t[j+3]&31)==7){
-                    f->sps=1;fprintf(out,"SPS flow=%u profile=%u compatibility=%u level=%u\n",index,t[j+4],t[j+5],t[j+6]);break;
+                if(t[j]==0 && t[j+1]==0 && t[j+2]==1 && (t[j+3]&31)==9 && !f->aud){f->aud=1;fprintf(out,"AUD flow=%u found=1\n",index);}
+                if(t[j]==0 && t[j+1]==0 && t[j+2]==1 && (t[j+3]&31)==7 && !f->sps){
+                    f->sps=1;fprintf(out,"SPS flow=%u profile=%u compatibility=%u level=%u\n",index,t[j+4],t[j+5],t[j+6]);
                 }
             }
         }
@@ -85,7 +86,7 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
     }
     fflush(out);
 }
-static void summary(FILE *out){fprintf(out,"SEEN raw=%llu ipv6=%llu targetUdp=%llu rtp=%llu\n",(unsigned long long)raw_packets,(unsigned long long)ipv6_packets,(unsigned long long)target_udp_packets,(unsigned long long)rtp_packets);for(unsigned i=0;i<used;i++){Flow *f=&flows[i];fprintf(out,"COUNT flow=%u packets=%llu bytes=%llu rtpDelta=%u sequenceDiscontinuities=%llu lastSeq=%u lastTimestamp=%u\n",i,(unsigned long long)f->packets,(unsigned long long)f->bytes,f->last_ts-f->first_ts,(unsigned long long)f->gaps,f->seq,f->last_ts);}fflush(out);}
+static void summary(FILE *out){fprintf(out,"SEEN raw=%llu ipv6=%llu targetUdp=%llu rtp=%llu\n",(unsigned long long)raw_packets,(unsigned long long)ipv6_packets,(unsigned long long)target_udp_packets,(unsigned long long)rtp_packets);for(unsigned i=0;i<used;i++){Flow *f=&flows[i];fprintf(out,"COUNT flow=%u packets=%llu bytes=%llu rtpDelta=%u sequenceDiscontinuities=%llu lastSeq=%u lastTimestamp=%u audSeen=%d\n",i,(unsigned long long)f->packets,(unsigned long long)f->bytes,f->last_ts-f->first_ts,(unsigned long long)f->gaps,f->seq,f->last_ts,f->aud);}fflush(out);}
 static uint64_t milliseconds(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (uint64_t)t.tv_sec*1000+t.tv_nsec/1000000;}
 #ifndef PACKET_AUDIT_TEST
 int main(int argc,char **argv){

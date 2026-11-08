@@ -64,17 +64,19 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v11.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v11.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v11.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v12.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v12.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v12.log"
 
 static FILE *g_log_fp = NULL;
+static int g_log_closed;
 static int g_kmsg_fd = -1;
 static pthread_mutex_t g_log_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void log_msg(const char *tag, const char *fmt, ...) {
     int saved_errno=errno;
     pthread_mutex_lock(&g_log_mutex);
+    if(g_log_closed){pthread_mutex_unlock(&g_log_mutex);errno=saved_errno;return;}
 
     char buffer[1024];
     va_list args;
@@ -198,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v11-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v12-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -502,7 +504,7 @@ static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
 
 static uint64_t g_total_frames_sent = 0;
-static uint64_t g_received_frames,g_authenticated_frames,g_invalid_frames,g_idr_frames;
+static uint64_t g_received_frames,g_authenticated_frames,g_invalid_frames,g_idr_frames,g_aud_frames;
 static uint64_t g_sent_packets,g_send_errors;
 static uint64_t g_total_bytes_sent = 0;
 
@@ -861,7 +863,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v11.h"
+#include "frame-gate-v12.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -940,6 +942,11 @@ static int process_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp)
         return -1;
     }
     if(idr)g_idr_frames++;
+    uint32_t nal_mask=0;size_t nal_pos=0;
+    while(nal_pos<len){uint32_t length=0;for(unsigned i=0;i<g_nal_length_bytes;i++)length=(length<<8)|data[nal_pos++];nal_mask|=1u<<(data[nal_pos]&31);nal_pos+=length;}
+    if(nal_mask&(1u<<9))g_aud_frames++;
+    if(g_authenticated_frames<=3 || idr || g_authenticated_frames%300==0)
+        log_msg("H264_META","accessUnitBytes=%zu nalCount=%zu nalTypeMask=0x%x idr=%d aud=%d",len,nals,nal_mask,idr,(nal_mask&(1u<<9))!=0);
 #if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
     return deferred_video_submit(g_frame_directory,data,len,timestamp,idr,g_alt_chacha_valid,emit_h264_frame);
 #else
@@ -964,6 +971,8 @@ static int receiver_active(void) {
     pthread_mutex_unlock(&g_crypto_lock);
     return active;
 }
+
+#include "aux-refresh-v12.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1010,6 +1019,9 @@ static int read_exact(int fd, void *buf, size_t len) {
     size_t total = 0;
     uint8_t *p = (uint8_t *)buf;
     while (total < len && receiver_active()) {
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_REFRESH)
+        aux_refresh_tick();
+#endif
 #if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
         if(deferred_video_flush(g_frame_directory,emit_h264_frame)<0)
             log_msg("HANDOFF","Pending authenticated video could not be released");
@@ -1124,10 +1136,14 @@ receiver_done:
 #if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
     end_frame_gate_at(g_frame_directory);
 #endif
-    log_msg("SUMMARY","received=%llu authenticated=%llu invalid=%llu idr=%llu muxed=%llu udpPackets=%llu udpErrors=%llu",
+    log_msg("SUMMARY","received=%llu authenticated=%llu invalid=%llu idr=%llu aud=%llu muxed=%llu udpPackets=%llu udpErrors=%llu",
         (unsigned long long)g_received_frames,(unsigned long long)g_authenticated_frames,
-        (unsigned long long)g_invalid_frames,(unsigned long long)g_idr_frames,
+        (unsigned long long)g_invalid_frames,(unsigned long long)g_idr_frames,(unsigned long long)g_aud_frames,
         (unsigned long long)g_total_frames_sent,(unsigned long long)g_sent_packets,(unsigned long long)g_send_errors);
+    pthread_mutex_lock(&g_crypto_lock);
+    unsigned refresh_attempts=g_aux_attempts,refresh_results=g_aux_results,refresh_errors=g_aux_errors;
+    pthread_mutex_unlock(&g_crypto_lock);
+    log_msg("AUX_REFRESH","attempts=%u submissions=%u errors=%u",refresh_attempts,refresh_results,refresh_errors);
     log_msg("RECV111", "Stream 111 desconectado.");
     pthread_mutex_lock(&g_crypto_lock);
     if (g_alt_client_fd == c) g_alt_client_fd = -1;
@@ -1198,6 +1214,7 @@ static int bind_permitted_listener_stream111(void) {
 static void stop_alt_receiver_locked(void) {
     pthread_mutex_lock(&g_crypto_lock);
     g_alt_thread_running = 0;
+    aux_refresh_invalidate_locked();
     if (g_alt_client_fd >= 0) shutdown(g_alt_client_fd, SHUT_RDWR);
     if (g_alt_listen_fd >= 0) shutdown(g_alt_listen_fd, SHUT_RDWR);
     pthread_mutex_unlock(&g_crypto_lock);
@@ -1214,7 +1231,7 @@ static void stop_alt_receiver_locked(void) {
     reset_homekit_stream();
     g_alt_session=NULL;
     g_handoff_started=0;deferred_video_clear();
-    g_received_frames=g_authenticated_frames=g_invalid_frames=g_idr_frames=0;
+    g_received_frames=g_authenticated_frames=g_invalid_frames=g_idr_frames=g_aud_frames=0;
     g_total_frames_sent=g_total_bytes_sent=g_sent_packets=g_send_errors=0;
     g_sps_pps_len = 0;
     memset(&g_video_clock, 0, sizeof(g_video_clock));
@@ -1697,7 +1714,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v11 (outgoing capture correction) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v12 (auxiliary keyframe recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();
@@ -1714,6 +1731,8 @@ static void altscreen_cleanup(void) {
         close(g_rtp_sock);
         g_rtp_sock = -1;
     }
+    pthread_mutex_lock(&g_log_mutex);
+    g_log_closed=1;
     if (g_kmsg_fd >= 0) {
         close(g_kmsg_fd);
         g_kmsg_fd = -1;
@@ -1722,6 +1741,7 @@ static void altscreen_cleanup(void) {
         fclose(g_log_fp);
         g_log_fp = NULL;
     }
+    pthread_mutex_unlock(&g_log_mutex);
 }
 #endif
 
