@@ -23,7 +23,8 @@ static int handoff_file_valid(const char *path) {
     int good=handoff_stat(fd,&st)==0 && S_ISREG(st.st_mode) && st.st_size==(off_t)(sizeof(HANDOFF_TOKEN)-1);
     ssize_t n=good ? read(fd,bytes,sizeof(bytes)) : -1;
     if(!good && g_handoff_last_error!=-1)log_msg("HANDOFF","Grant/request metadata invalid or stat failed");
-    if(!good)g_handoff_last_error=-1;close(fd);
+    if(!good)g_handoff_last_error=-1;
+    close(fd);
     return good && n==(ssize_t)(sizeof(HANDOFF_TOKEN)-1) && !memcmp(bytes,HANDOFF_TOKEN,sizeof(HANDOFF_TOKEN)-1);
 }
 static int frame_gate_at(const char *directory,int idr,int authenticated) {
