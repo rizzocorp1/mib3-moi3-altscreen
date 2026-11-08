@@ -843,6 +843,13 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     g_nal_length_bytes = length_bytes;
     g_sps_pps_len = out_pos;
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
+    /* Codec parameter sets describe decoder format, not picture/map pixels.
+     * Bound the record so the next vehicle result can establish profile/level
+     * and dimensions without capturing a video frame. */
+    char codec_hex[129];size_t codec_n=g_sps_pps_len<64?g_sps_pps_len:64;
+    for(size_t i=0;i<codec_n;i++)snprintf(codec_hex+i*2,3,"%02x",g_sps_pps_buf[i]);
+    codec_hex[codec_n*2]=0;
+    log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
 #include "frame-gate-v9.h"
