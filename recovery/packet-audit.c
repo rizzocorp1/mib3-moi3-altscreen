@@ -51,7 +51,7 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
         used++;
         flows[index]=(Flow){.port=port,.kind=kind,.ssrc=ssrc,.source_tag=source,.grant=g_grant,.first_ts=be32(r+4)};
         static const uint8_t group[16]={0xff,0x14,0,0,0,0,0,0,0,0,0,0,0,2,0,4};
-        fprintf(out,"FLOW %u encoderGrant=%u direction=%s sourcePort=%u sourceTag=%016llx ssrc=%u pt=%u marker=%u rtpBytes=%zu tsSlots=%zu clusterGroup=%d\n",index,g_grant,kind==PACKET_OUTGOING?"outgoing":"incoming",port,(unsigned long long)source,ssrc,r[1]&127,r[1]>>7,rn,payload_n/188,!memcmp(p+24,group,16));
+        fprintf(out,"FLOW %u encoderGrant=%u direction=%s sourcePort=%u sourceTag=%016llx ssrc=%u pt=%u marker=%u rtpBytes=%zu tsSlots=%zu clusterGroup=%d firstSeq=%u firstTimestamp=%u hopLimit=%u trafficClass=%u\n",index,g_grant,kind==PACKET_OUTGOING?"outgoing":"incoming",port,(unsigned long long)source,ssrc,r[1]&127,r[1]>>7,rn,payload_n/188,!memcmp(p+24,group,16),be16(r+2),be32(r+4),p[7],((p[0]&15)<<4)|(p[1]>>4));
     }
     Flow *f=&flows[index];uint16_t seq=be16(r+2);
     if(f->packets && (uint16_t)(f->seq+1)!=seq)f->gaps++;
@@ -81,7 +81,7 @@ static void observe(FILE *out,const uint8_t *p,size_t n,unsigned kind) {
     }
     fflush(out);
 }
-static void summary(FILE *out){for(unsigned i=0;i<used;i++){Flow *f=&flows[i];fprintf(out,"COUNT flow=%u packets=%llu bytes=%llu rtpDelta=%u sequenceDiscontinuities=%llu\n",i,(unsigned long long)f->packets,(unsigned long long)f->bytes,f->last_ts-f->first_ts,(unsigned long long)f->gaps);}fflush(out);}
+static void summary(FILE *out){for(unsigned i=0;i<used;i++){Flow *f=&flows[i];fprintf(out,"COUNT flow=%u packets=%llu bytes=%llu rtpDelta=%u sequenceDiscontinuities=%llu lastSeq=%u lastTimestamp=%u\n",i,(unsigned long long)f->packets,(unsigned long long)f->bytes,f->last_ts-f->first_ts,(unsigned long long)f->gaps,f->seq,f->last_ts);}fflush(out);}
 static uint64_t milliseconds(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (uint64_t)t.tv_sec*1000+t.tv_nsec/1000000;}
 #ifndef PACKET_AUDIT_TEST
 int main(int argc,char **argv){
