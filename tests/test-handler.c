@@ -70,6 +70,14 @@ static void test_factory_transport_profile(void) {
     assert(ts_crc32(pmt+5,21)==0);
     for(int i=2;i<6;i++){const uint8_t *p=captured+i*188;assert(p[0]==0x47 && p[1]==0x1f && p[2]==0xff && p[3]==0x10);}
 }
+static void test_factory_source_port(void) {
+    int first=socket(AF_INET6,SOCK_DGRAM,0),second=socket(AF_INET6,SOCK_DGRAM,0);assert(first>=0&&second>=0);
+    assert(bind_cluster_source(first)==0);
+    struct sockaddr_in6 address;socklen_t size=sizeof(address);
+    assert(getsockname(first,(struct sockaddr*)&address,&size)==0 && ntohs(address.sin6_port)==42989);
+    assert(bind_cluster_source(second)==-1 && errno==EADDRINUSE);
+    close(first);assert(bind_cluster_source(second)==0);close(second);
+}
 static void test_mux(void) {
     const size_t sizes[]={1,161,162,163,345,346,347,2000};
     uint8_t frame[2000],pes[4096]; memset(frame,0x65,sizeof(frame));
@@ -249,7 +257,7 @@ int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
+    test_factory_source_port();test_factory_transport_profile();test_mux();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);

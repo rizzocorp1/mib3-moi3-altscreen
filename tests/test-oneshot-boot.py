@@ -17,7 +17,8 @@ stop_mode='systemctl stop' in template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 scenarios=('active','unarmed','corrupt-patch','corrupt-backup','mount-failure','logger-failure','logger-timeout','corrupt-collector')
 if stop_mode:scenarios+=('stop-failure',)
-marker='v9' if 'altscreen-v9-frame-ready' in template else 'v6'
+marker_match=re.search(r'altscreen-(v[0-9]+)-frame-ready',template)
+marker=marker_match.group(1) if marker_match else 'v6'
 if 'pending authenticated video' in template:scenarios+=('stale-handoff',)
 for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
@@ -32,10 +33,11 @@ for scenario in scenarios:
         patched=stage/'carplay-once';patched.write_bytes(b'experimental executable')
         handler=stage/'altscreen_handler.so';handler.write_bytes(b'handler')
         collector=stage/'managed-log-collector.sh';collector.write_bytes(b'collector fixture')
+        audit=stage/'packet-audit';audit.write_bytes(b'audit fixture')
         local_guard=stage/'file-guard';shutil.copyfile(guard,local_guard);local_guard.chmod(0o700)
         (root/'run').mkdir()
         units=root/'lib/systemd/system';units.mkdir(parents=True);(units/'multi-display.service').write_text('[Service]\n')
-        values={'ROOT':str(root),'GUARD_SHA':digest(local_guard),'STARTUP_SHA':digest(backup),'CARPLAY_SHA':digest(target),'PATCH_SHA':digest(patched),'HANDLER_SHA':digest(handler),'COLLECTOR_SHA':digest(collector),'LOG_ITERATIONS':'1'}
+        values={'ROOT':str(root),'GUARD_SHA':digest(local_guard),'STARTUP_SHA':digest(backup),'CARPLAY_SHA':digest(target),'PATCH_SHA':digest(patched),'HANDLER_SHA':digest(handler),'COLLECTOR_SHA':digest(collector),'AUDIT_SHA':digest(audit),'LOG_ITERATIONS':'1'}
         rendered=template
         for key,value in values.items():rendered=rendered.replace('@'+key+'@',value)
         assert '@ROOT@' not in rendered

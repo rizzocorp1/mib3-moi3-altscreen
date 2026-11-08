@@ -3,8 +3,8 @@ No host services or mounts are changed."""
 from pathlib import Path
 import os,shutil,subprocess,sys,tempfile,re
 header=Path(sys.argv[1]).resolve();collector=Path(sys.argv[2]).resolve();guard=Path(sys.argv[3]).resolve()
-protocol='V9' if 'AUTHENTICATED_H264_V9' in header.read_text() else 'V6'
-marker='v9' if protocol=='V9' else 'v6'
+protocol=re.search(r'AUTHENTICATED_H264_(V[0-9]+)',header.read_text()).group(1)
+marker=protocol.lower()
 driver=r'''
 #define _GNU_SOURCE
 #include <stdio.h>

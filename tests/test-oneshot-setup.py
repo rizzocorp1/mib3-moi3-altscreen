@@ -14,8 +14,9 @@ map_mode='MAP TEST ARMED' in entry_template
 info_mode='STOCK INFO OBSERVATION' in entry_template
 digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 scenarios=('arm-and-restore','mixed-stick','copy-failure','wrong-baseline')
-marker='v9' if 'altscreen-v9-frame-ready' in entry_template else 'v6'
-if ('altscreen-v6-frame-ready' in entry_template or 'altscreen-v9-frame-ready' in entry_template):scenarios+=('stale-handoff',)
+marker_match=re.search(r'altscreen-(v[0-9]+)-frame-ready',entry_template)
+marker=marker_match.group(1) if marker_match else 'v6'
+if marker_match:scenarios+=('stale-handoff',)
 for scenario in scenarios:
     with tempfile.TemporaryDirectory() as directory:
         root=Path(directory);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
@@ -33,8 +34,9 @@ for scenario in scenarios:
         (payload/'carplay-once').write_bytes(b'test executable')
         (payload/'altscreen_handler.so').write_bytes(b'test handler')
         (payload/'managed-log-collector.sh').write_bytes(b'collector fixture')
+        (payload/'packet-audit').write_bytes(b'audit fixture')
         (usb/'ALTSCREEN_TEST_ONCE.txt').write_text('one session')
-        values={'ROOT':str(root),'GUARD_SHA':digest(payload/'file-guard'),'STARTUP_SHA':digest(startup),'CARPLAY_SHA':digest(target),'OS_SHA':digest(release),'PATCH_SHA':digest(payload/'carplay-once'),'HANDLER_SHA':digest(payload/'altscreen_handler.so'),'LOG_ITERATIONS':'0'}
+        values={'ROOT':str(root),'GUARD_SHA':digest(payload/'file-guard'),'STARTUP_SHA':digest(startup),'CARPLAY_SHA':digest(target),'OS_SHA':digest(release),'PATCH_SHA':digest(payload/'carplay-once'),'HANDLER_SHA':digest(payload/'altscreen_handler.so'),'AUDIT_SHA':digest(payload/'packet-audit'),'LOG_ITERATIONS':'0'}
         values['COLLECTOR_SHA']=digest(payload/'managed-log-collector.sh')
         old_stage=base/'.moi3-altscreen-once-v1';old_stage.mkdir()
         (old_stage/'boot-status.txt').write_text('retained previous test evidence')

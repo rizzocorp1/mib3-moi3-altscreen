@@ -74,10 +74,14 @@ jobs:
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/info-v5-usb.sh.in recovery/info-v5-boot.sh.in
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v6-boot.sh.in
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v6-usb.sh.in recovery/map-v6-boot.sh.in
-          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v9-boot.sh.in
-          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v9-usb.sh.in recovery/map-v9-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v10-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v10-usb.sh.in recovery/map-v10-boot.sh.in
       - name: Check deferred native-encoder handoff and production output gate
-        run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v9.h recovery/map-v9-log-collector.sh /tmp/file-guard
+        run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v10.h recovery/map-v10-log-collector.sh /tmp/file-guard
+      - name: Check read-only cluster packet audit
+        run: |
+          gcc -O2 -Wall -Wextra -Werror recovery/packet-audit.c -o /tmp/packet-audit
+          sudo python3 tests/test-packet-audit.py /tmp/packet-audit recovery/packet-audit.c
       - name: Decode generated transport stream
         timeout-minutes: 6
         run: |

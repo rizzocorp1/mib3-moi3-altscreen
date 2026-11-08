@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v9.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v9.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v9.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v10.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v10.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v10.log"
 
 static FILE *g_log_fp = NULL;
 static int g_kmsg_fd = -1;
@@ -198,7 +198,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v9-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v10-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -520,6 +520,14 @@ static uint32_t ts_crc32(const uint8_t *data, size_t len) {
     return crc;
 }
 
+/* Source port comes from the matching factory ShareServer call (0xa7ed).
+ * Acquire it exclusively only after the authenticated encoder grant; do not
+ * take over a live factory sender or silently choose an ephemeral source. */
+static int bind_cluster_source(int fd) {
+    struct sockaddr_in6 source={0};source.sin6_family=AF_INET6;
+    source.sin6_addr=in6addr_any;source.sin6_port=htons(42989);
+    return bind(fd,(struct sockaddr *)&source,sizeof(source));
+}
 static void init_cluster_network(void) {
     if (g_rtp_sock >= 0) return;
 
@@ -539,10 +547,11 @@ static void init_cluster_network(void) {
     setsockopt(g_rtp_sock, SOL_SOCKET, SO_PRIORITY, &prio, sizeof(prio));
 
     unsigned int ifindex = if_nametoindex("eth0.5");
-    if (ifindex == 0) ifindex = if_nametoindex("eth0");
-    if (ifindex > 0) {
-        setsockopt(g_rtp_sock, IPPROTO_IPV6, IPV6_MULTICAST_IF, &ifindex, sizeof(ifindex));
+    if(ifindex==0 || setsockopt(g_rtp_sock,IPPROTO_IPV6,IPV6_MULTICAST_IF,&ifindex,sizeof(ifindex))!=0 || bind_cluster_source(g_rtp_sock)!=0) {
+        log_msg("NET_ERR","Cluster interface/source-port setup failed: ifindex=%u errno=%d",ifindex,errno);
+        close(g_rtp_sock);g_rtp_sock=-1;return;
     }
+    log_msg("NET","Cluster socket bound exclusively: sourcePort=42989 interface=eth0.5");
 
     memset(&g_cluster_dest_addr, 0, sizeof(g_cluster_dest_addr));
     g_cluster_dest_addr.sin6_family = AF_INET6;
@@ -852,7 +861,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v9.h"
+#include "frame-gate-v10.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -875,6 +884,7 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
     if(validate_h264_frame(data,len,&nals,&is_keyframe)!=0)return -1;
     init_cluster_network();
+    if(g_rtp_sock<0)return -1;
 
     static int s_first_frame = 0;
     if (!s_first_frame) {
@@ -1687,12 +1697,12 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so v6.2 (AltScreen Gen-2 Cluster Streamer) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v10 (transport comparison) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();
     init_crypto_symbols();
-    init_cluster_network();
+    /* Network socket ownership starts only after the root encoder grant. */
 }
 
 __attribute__((destructor))

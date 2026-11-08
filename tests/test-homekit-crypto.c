@@ -87,9 +87,9 @@ static void test_tcp_receiver(void *session) {
     assert(write(client,&header,sizeof(header))==(ssize_t)sizeof(header));assert(write(client,body,n)==(ssize_t)n);
 #ifdef ALTSCREEN_TEST_WITH_GATE
     usleep(250000);assert(atomic_load(&packets)==0);
-    char path[512];snprintf(path,sizeof(path),"%s/altscreen-v9-frame-ready",g_frame_directory);
+    char path[512];snprintf(path,sizeof(path),"%s/" HANDOFF_REQUEST_FILE,g_frame_directory);
     assert(access(path,F_OK)==0);
-    snprintf(path,sizeof(path),"%s/altscreen-v9-encoder-ready",g_frame_directory);
+    snprintf(path,sizeof(path),"%s/" HANDOFF_GRANT_FILE,g_frame_directory);
     int grant_fd=open(path,O_WRONLY|O_CREAT|O_EXCL,0600);assert(grant_fd>=0);
     assert(write(grant_fd,HANDOFF_TOKEN,sizeof(HANDOFF_TOKEN)-1)==sizeof(HANDOFF_TOKEN)-1);close(grant_fd);
 #endif
@@ -160,8 +160,8 @@ int main(void) {
     assert(remember_pairing(&session_b,NULL)==0 && pairing_b.refs==0);
     assert(!pairing_for_session(&session_a));
 #ifdef ALTSCREEN_TEST_WITH_GATE
-    char cleanup[512];snprintf(cleanup,sizeof(cleanup),"%s/altscreen-v9-frame-ready",g_frame_directory);unlink(cleanup);
-    snprintf(cleanup,sizeof(cleanup),"%s/altscreen-v9-encoder-ready",g_frame_directory);unlink(cleanup);rmdir(g_frame_directory);
+    char cleanup[512];snprintf(cleanup,sizeof(cleanup),"%s/" HANDOFF_REQUEST_FILE,g_frame_directory);unlink(cleanup);
+    snprintf(cleanup,sizeof(cleanup),"%s/" HANDOFF_GRANT_FILE,g_frame_directory);unlink(cleanup);rmdir(g_frame_directory);
 #endif
     puts("PASS: HomeKit session ownership, CID derivation, 520 authenticated frames, buffered tails, nonce carry, corrupt header/body/tag, wrong key, replay and derive failure");
 }
