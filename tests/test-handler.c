@@ -83,20 +83,22 @@ static void test_parser(void) {
     reset_capture(0); assert(process_h264_frame(one_byte,sizeof(one_byte),0)==-1); assert(!captured_len);
 }
 static void test_permitted_ports(void) {
-    int held[ALT_TCP_PORT_LAST-ALT_TCP_PORT_FIRST+1];
+    int held[ALT_TCP_PORT_LAST-ALT_TCP_PORT_FIRST+1],release_index=-1;
+    /* CI may already have sockets/TIME_WAIT in the permitted ephemeral range.
+     * Reserve every available port; occupied ports must also be skipped. */
     for(int i=0;i<(int)(sizeof(held)/sizeof(held[0]));i++) {
         held[i]=bind_listener_stream111(ALT_TCP_PORT_FIRST+i);
-        assert(held[i]>=0);
-        if(i==0) {
-            int selected=bind_permitted_listener_stream111();assert(selected>=0);
-            struct sockaddr_in6 a;socklen_t n=sizeof(a);
-            assert(getsockname(selected,(struct sockaddr*)&a,&n)==0);
-            assert(ntohs(a.sin6_port)==ALT_TCP_PORT_FIRST+1);
-            close(selected);
-        }
+        if(held[i]>=0)release_index=i;
     }
+    assert(release_index>=0);
     assert(bind_permitted_listener_stream111()==-1);
-    for(int i=0;i<(int)(sizeof(held)/sizeof(held[0]));i++)close(held[i]);
+    close(held[release_index]);held[release_index]=-1;
+    int selected=bind_permitted_listener_stream111();assert(selected>=0);
+    struct sockaddr_in6 a;socklen_t n=sizeof(a);
+    assert(getsockname(selected,(struct sockaddr*)&a,&n)==0);
+    assert(ntohs(a.sin6_port)==ALT_TCP_PORT_FIRST+release_index);
+    close(selected);
+    for(int i=0;i<(int)(sizeof(held)/sizeof(held[0]));i++)if(held[i]>=0)close(held[i]);
 }
 static void test_receiver(void) {
     uint8_t key[16];memset(key,0x47,sizeof(key));
