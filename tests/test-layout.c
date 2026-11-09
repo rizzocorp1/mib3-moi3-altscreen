@@ -66,7 +66,7 @@ int main(void) {
     assert(field(p,"widthPixels")->number==784&&field(p,"heightPixels")->number==468&&field(p,"primaryInputDevice")->number==7);
     const LayoutObject *areas=field(c,"viewAreas"),*view=lat(areas,0),*safe=field(view,"safeArea");
     assert(field(view,"widthPixels")->number==1280&&field(view,"heightPixels")->number==480);
-    assert(field(safe,"originXPixels")->number==480&&field(safe,"originYPixels")->number==64&&field(safe,"widthPixels")->number==320&&field(safe,"heightPixels")->number==320);
+    assert(field(safe,"originXPixels")->number==464&&field(safe,"originYPixels")->number==64&&field(safe,"widthPixels")->number==352&&field(safe,"heightPixels")->number==320);
     assert(field(c,"initialViewArea")->number==0&&lcount(field(c,"adjacentViewAreas"))==0);
     assert(!field(view,"viewAreaTransitionControl")&&!field(view,"drawUIOutsideSafeArea"));
     assert(!field(primary,"viewAreas")&&!field(alt,"viewAreas"));lr(prepared);assert(layout_live==baseline);

@@ -6,7 +6,7 @@ digest=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 for scenario in ('normal','active','changed-program','changed-baseline','changed-metadata','copy-failure','unknown-archive','conflicting-backup','source-symlink','wrong-current','budget'):
     with tempfile.TemporaryDirectory() as temp:
         root=Path(temp);base=root/'lge/app_rw/smartlink/carplay';base.mkdir(parents=True)
-        (root/'data').mkdir();stage=base/'.moi3-altscreen-map-v18';stage.mkdir();old=base/'.moi3-altscreen-map-v16';old.mkdir()
+        (root/'data').mkdir();stage=base/'.moi3-altscreen-map-v19';stage.mkdir();old=base/'.moi3-altscreen-map-v16';old.mkdir()
         usb=root/'tmp/USB/PORT1/PART1';usb.mkdir(parents=True);tools=root/'tools';tools.mkdir()
         startup=base/'carplay.sh';startup.write_bytes(b'factory startup');startup.chmod(0o755);os.setxattr(startup,'user.factory',b'preserve')
         binary=base/'carplay';binary.write_bytes(b'factory executable')
@@ -33,16 +33,16 @@ for scenario in ('normal','active','changed-program','changed-baseline','changed
             victim=root/'unrelated';program.rename(victim);program.symlink_to(victim)
         if scenario=='copy-failure':
             cp=tools/'cp';cp.write_text('#!/bin/sh\nexit 1\n');cp.chmod(0o755)
-        archive=usb/'moi3-obsolete-programs-v18'
+        archive=usb/'moi3-obsolete-programs-v19'
         if scenario in ('unknown-archive','conflicting-backup'):
             archive.mkdir()
             if scenario=='unknown-archive':(archive/'user-file').write_bytes(b'preserve user backup')
             else:
-                (archive/'BACKUP_SCOPE.txt').write_text('MOI3_OBSOLETE_TEST_PROGRAMS_V18\n');(archive/'v16').mkdir()
+                (archive/'BACKUP_SCOPE.txt').write_text('MOI3_OBSOLETE_TEST_PROGRAMS_V19\n');(archive/'v16').mkdir()
                 (archive/'v16'/('carplay-once.'+expected+'.backup')).write_bytes(b'preserve conflicting backup')
         env=dict(os.environ,PATH=str(tools)+':'+os.environ['PATH'])
         result=subprocess.run(['sh',path,stage,usb,root],env=env,capture_output=True,timeout=20)
-        report=(usb/'housekeeping-v18.txt').read_text()
+        report=(usb/'housekeeping-v19.txt').read_text()
         assert old.is_dir() and (old/'factory-carplay.sh').exists() and (old/'boot-status.txt').read_bytes()==b'preserve diagnostic evidence'
         assert (old/'user-custom-file').read_bytes()==b'preserve custom content' and (base/'pairing-data').read_bytes()==b'never touch secret pairing data'
         if scenario=='normal':

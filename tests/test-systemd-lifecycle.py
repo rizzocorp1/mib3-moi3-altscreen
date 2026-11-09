@@ -41,7 +41,7 @@ v7_template=Path(__file__).resolve().parents[1]/'recovery/map-v7-boot.sh.in'
 if v7_template.exists():
     v7_launch=next(line for line in v7_template.read_text().splitlines() if line.startswith('if ! systemd-run '))
     assert [w for w in v7_launch.split() if w.startswith('--property=')]==properties
-lease_template=Path(__file__).resolve().parents[1]/'recovery/map-v18-boot.sh.in'
+lease_template=Path(__file__).resolve().parents[1]/'recovery/map-v19-boot.sh.in'
 if lease_template.exists():
     lease_launch=next(line for line in lease_template.read_text().splitlines() if line.startswith('if ! systemd-run '))
     lease_properties=[w for w in lease_launch.split() if w.startswith('--property=')]
