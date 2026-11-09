@@ -88,23 +88,43 @@ static void test_mux(void) {
     const size_t sizes[]={1,161,162,163,345,346,347,2000};
     uint8_t frame[2000],pes[4096]; memset(frame,0x65,sizeof(frame));
     for(size_t i=0;i<sizeof(sizes)/sizeof(sizes[0]);i++) {
-        reset_capture(90000); mux_and_stream_h264_frame(frame,sizes[i],90000,0);
+        reset_capture(90000); mux_and_stream_h264_frame(frame,sizes[i],90000,0,90000);
         assert(pcr(captured)==90000);
         assert(video_payload(pes)==sizes[i]+14);
         assert(!memcmp(pes+14,frame,sizes[i]));
     }
-    reset_capture(0xffffffff); mux_and_stream_h264_frame(frame,2000,(1ULL<<33)-1,0);
+    reset_capture(0xffffffff); mux_and_stream_h264_frame(frame,2000,(1ULL<<33)-1,0,(1ULL<<33)-1);
     assert(pcr(captured)==(1ULL<<33)-1);
 }
 static void test_source_signals(void) {
     uint8_t frame[2000]={0},pes[4096];g_video_discontinuity=1;
-    reset_capture(90000);mux_and_stream_h264_frame(frame,sizeof(frame),90000,1);
+    reset_capture(90000);mux_and_stream_h264_frame(frame,sizeof(frame),90000,1,90000);
     assert(captured[5]==0xd0 && !g_video_discontinuity && pcr(captured)==90000);
     assert(video_payload(pes)==sizeof(frame)+14&&!memcmp(pes+14,frame,sizeof(frame)));
-    reset_capture(93000);mux_and_stream_h264_frame(frame,sizeof(frame),93000,0);assert(captured[5]==0x10);
-    reset_capture(96000);mux_and_stream_h264_frame(frame,sizeof(frame),96000,1);assert(captured[5]==0x50);
+    reset_capture(93000);mux_and_stream_h264_frame(frame,sizeof(frame),93000,0,93000);assert(captured[5]==0x10);
+    reset_capture(96000);mux_and_stream_h264_frame(frame,sizeof(frame),96000,1,96000);assert(captured[5]==0x50);
     close_cluster_socket();assert(g_video_discontinuity);
-    reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1);assert(captured[5]==0xd0);
+    reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1,99000);assert(captured[5]==0xd0);
+}
+static void test_local_transport_clock(void) {
+    transport_clock_v18 clock={0};uint64_t pts,pcr_ticks,value;
+    assert(transport_clock_at(&clock,8000000,&pts)==0&&pts==90000);
+    assert(transport_clock_at(&clock,8000007,&pcr_ticks)==0&&pcr_ticks==90630);
+    assert(transport_clock_at(&clock,8000006,&value)==-1);
+    assert(transport_clock_at(&clock,8000033,&value)==0&&value==92970);
+    assert(transport_clock_at(&clock,8000033,&value)==0&&value==92970);
+    assert(transport_clock_at(&clock,UINT64_MAX,&value)==-1);
+    uint8_t frame[2000]={0},pes[4096];reset_capture(0);
+    mux_and_stream_h264_frame(frame,sizeof(frame),pts,0,pcr_ticks);
+    assert(pcr(captured)==pcr_ticks&&video_payload(pes)==sizeof(frame)+14);
+    uint64_t encoded_pts=((uint64_t)((pes[9]>>1)&7)<<30)|((uint64_t)pes[10]<<22)|
+        ((uint64_t)(pes[11]>>1)<<15)|((uint64_t)pes[12]<<7)|(pes[13]>>1);
+    assert(encoded_pts==pts&&memcmp(pes+14,frame,sizeof(frame))==0);
+    reset_capture(0);mux_and_stream_h264_frame(frame,sizeof(frame),(1ULL<<33)-90,0,(1ULL<<33)+90);
+    assert(pcr(captured)==90);
+    transport_clock_reset(&clock);assert(!clock.started);
+    assert(transport_clock_at(&clock,12,&value)==0&&value==90000);
+    g_transport_clock=clock;close_cluster_socket();assert(!g_transport_clock.started&&g_video_discontinuity);
 }
 static void test_parser(void) {
     uint8_t config[]={1,66,0,30,0xff,0xe1,0,2,0x67,0x42,1,0,2,0x68,0xce};
@@ -278,7 +298,7 @@ int main(int argc,char **argv) {
     test_factory_features();
     test_security_observers();
     test_initial_acknowledgement();
-    test_revoked_port_release();test_factory_source_port();test_factory_transport_profile();test_mux();test_source_signals();test_parser();test_permitted_ports();test_receiver();
+    test_revoked_port_release();test_factory_source_port();test_factory_transport_profile();test_mux();test_source_signals();test_local_transport_clock();test_parser();test_permitted_ports();test_receiver();
     AirPlayScreenHeaderCompat timed={0};
     memset(&g_video_clock,0,sizeof(g_video_clock));
     uint64_t ntp=100ULL<<32;memcpy(timed.params,&ntp,8);
@@ -338,14 +358,14 @@ int main(int argc,char **argv) {
             if((frame[i+prefix]&31)==9 && i>start) {
                 expected_rtp=90000+frames*3000;
                 if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
-                mux_and_stream_h264_frame(frame+start,i-start,expected_rtp,frames%10==0);
+                mux_and_stream_h264_frame(frame+start,i-start,expected_rtp,frames%10==0,expected_rtp);
                 frames++;start=i;
             }
             i+=prefix-1;
         }
         expected_rtp=90000+frames*3000;
         if(frames%10==0){emit_pat_packet();emit_pmt_packet();}
-        mux_and_stream_h264_frame(frame+start,length-start,expected_rtp,frames%10==0);free(frame);frames++;
+        mux_and_stream_h264_frame(frame+start,length-start,expected_rtp,frames%10==0,expected_rtp);free(frame);frames++;
         printf("Fixture access units muxed: %u\n",frames);
         FILE *out=fopen(argv[2],"wb");assert(out);assert(fwrite(captured,1,captured_len,out)==captured_len);fclose(out);
     }

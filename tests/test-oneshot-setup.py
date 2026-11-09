@@ -44,7 +44,7 @@ for scenario in scenarios:
         values={'ROOT':str(root),'GUARD_SHA':digest(payload/'file-guard'),'STARTUP_SHA':digest(startup),'CARPLAY_SHA':digest(target),'OS_SHA':digest(release),'PATCH_SHA':digest(payload/'carplay-once'),'HANDLER_SHA':digest(payload/'altscreen_handler.so'),'AUDIT_SHA':digest(payload/'packet-audit'),'LOG_ITERATIONS':'0'}
         values['COLLECTOR_SHA']=digest(payload/'managed-log-collector.sh')
         if '@CLEANUP_SHA@' in entry_template:
-            cleanup=(Path(sys.argv[2]).parent/'cleanup-v17.sh.in').read_text()
+            cleanup=(Path(sys.argv[2]).parent/('cleanup-'+marker+'.sh.in')).read_text()
             for key,value in values.items():cleanup=cleanup.replace('@'+key+'@',value)
             (payload/'cleanup-old-tests.sh').write_text(cleanup)
             values['CLEANUP_SHA']=digest(payload/'cleanup-old-tests.sh')
@@ -68,7 +68,7 @@ for scenario in scenarios:
         subprocess.run(['sh','-n',entry],check=True)
         result=subprocess.run(['sh',entry],env=env,capture_output=True,timeout=20)
         assert result.returncode==0,(scenario,result.stderr)
-        assert not list((root/'tmp').glob('moi3-v17-preflight-*'))
+        assert not list((root/'tmp').glob('moi3-*-preflight-*'))
         report=(usb/'altscreen-setup.txt').read_text();stage=base/stage_name
         if scenario=='arm-and-restore':
             assert ('RESULT: MAP TEST ARMED' if map_mode else 'RESULT: DIAGNOSTIC ARMED') in report and 'SETUP COMPLETE' in report,report

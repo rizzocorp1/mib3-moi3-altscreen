@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v17.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v17.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v17.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v18.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v18.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v18.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v17-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v18-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -294,7 +294,7 @@ static void *array_clone(void *arr) {
 /* =============================================================================
  * ViewAreas e enabledFeatures (AltScreen Apple CarPlay Specification)
  * ============================================================================= */
-#include "layout-v17.h"
+#include "layout-v18.h"
 
 static int set_reference_enabled_features(void *dict, int enable_viewareas) {
     if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
@@ -435,6 +435,8 @@ static uint8_t g_pat_cc = 0;
 static uint8_t g_pmt_cc = 0;
 static uint8_t g_video_cc = 0;
 static int g_video_discontinuity=1;
+#include "transport-clock-v18.h"
+static transport_clock_v18 g_transport_clock;
 
 static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
@@ -622,7 +624,7 @@ static void emit_pmt_packet(void) {
     rtp_queue_ts_packet(pkt);
 }
 
-static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k, int random_access) {
+static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k, int random_access, uint64_t pcr_90k) {
     if (!frame_data || frame_len == 0) return;
     /* RTP timestamp is assigned at datagram send time. */
 
@@ -675,7 +677,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
             if(g_video_discontinuity)log_msg("TS_SIGNAL","New source clock marked discontinuous; IDR randomAccess=%d",random_access!=0);
             g_video_discontinuity=0;
 
-            uint64_t pcr_base = pts_90k & ((1ULL << 33) - 1);
+            uint64_t pcr_base = pcr_90k & ((1ULL << 33) - 1);
             ts_pkt[6] = (uint8_t)((pcr_base >> 25) & 0xFF);
             ts_pkt[7] = (uint8_t)((pcr_base >> 17) & 0xFF);
             ts_pkt[8] = (uint8_t)((pcr_base >> 9) & 0xFF);
@@ -805,7 +807,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v17.h"
+#include "frame-gate-v18.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -825,13 +827,15 @@ static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *
     return 0;
 }
 #define PRIVATE_CAPTURE_ENABLED 0
-#include "capture-v17.h"
+#include "capture-v18.h"
 
 static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
     if(validate_h264_frame(data,len,&nals,&is_keyframe)!=0)return -1;
     init_cluster_network();
     if(g_rtp_sock<0)return -1;
+    uint64_t pts_90k;
+    if(transport_clock_now(&g_transport_clock,&pts_90k)<0){log_msg("TRANSPORT_CLOCK_ERR","Local enqueue clock failed; picture not sent");return -1;}
 
     static int s_first_frame = 0;
     if (!s_first_frame) {
@@ -872,9 +876,14 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
         emit_pmt_packet();
     }
 
-    uint64_t pts_90k = timestamp ? (timestamp * 90 / 1000) : (g_total_frames_sent * 3000);
+    uint64_t pcr_90k;
+    if(transport_clock_now(&g_transport_clock,&pcr_90k)<0){free(annexb_frame);log_msg("TRANSPORT_CLOCK_ERR","Local packetization clock failed; picture not sent");return -1;}
+    if(g_total_frames_sent<3 || g_total_frames_sent%300==0)
+        log_msg("TRANSPORT_CLOCK","mode=local-enqueue-packetize pts90k=%llu pcr90k=%llu queueToPacketUs=%llu phoneRelativeUs=%llu",
+            (unsigned long long)pts_90k,(unsigned long long)pcr_90k,
+            (unsigned long long)((pcr_90k-pts_90k)*1000/90),(unsigned long long)timestamp);
     if(PRIVATE_CAPTURE_ENABLED)capture_video(annexb_frame,annexb_pos,pts_90k,timestamp,is_keyframe);
-    mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k,is_keyframe);
+    mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k,is_keyframe,pcr_90k);
 
     free(annexb_frame);
     return 0;
@@ -884,6 +893,7 @@ static void aux_refresh_invalidate_locked(void);
 static void close_cluster_socket(void) {
     if(g_rtp_owned && g_rtp_sock>=0)close(g_rtp_sock);
     g_rtp_sock=-1;g_rtp_owned=0;g_video_discontinuity=1;
+    transport_clock_reset(&g_transport_clock);
 }
 static void release_cluster_output_if_unleased(const char *directory) {
     char grant[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,directory);
@@ -933,7 +943,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v17.h"
+#include "aux-refresh-v18.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1702,7 +1712,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v17 (session lease recovery) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v18 (session lease recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();
