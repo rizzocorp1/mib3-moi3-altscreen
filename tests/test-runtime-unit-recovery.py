@@ -15,6 +15,7 @@ def wait(f):
 with tempfile.TemporaryDirectory() as tmp:
  r=Path(tmp);stage=r/'stage';stage.mkdir();data=r/'data/lge/smartlink/carplay';data.mkdir(parents=True);usb=r/'tmp/USB/PORT1/PART1';usb.mkdir(parents=True);(usb/'ALTSCREEN_TEST_ONCE.txt').write_text('fixture')
  import shutil
+ shutil.copyfile(collector,stage/"managed-log-collector.sh")
  for name,source in (('file-guard',guard),('packet-audit',audit)):shutil.copyfile(source,stage/name);(stage/name).chmod(0o755)
  token=b'AUTHENTICATED_H264_V28\n';request=data/'altscreen-v28-frame-ready';grant=data/'altscreen-v28-encoder-ready';expired=data/'altscreen-v28-expired';request.write_bytes(token)
  (stage/'boot-status.txt').write_text('fixture\n');(r/'native-active').write_text('yes');tools=r/'tools';tools.mkdir()
