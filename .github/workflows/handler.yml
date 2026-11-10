@@ -166,7 +166,7 @@ jobs:
         run: python3 tests/test-packet-timing-v23.py recovery/packet-timing-v23.c
       - name: Verify actual passive packet capture and bounded lifetime
         run: |
-          sudo unshare --net python3 tests/test-packet-audit.py /tmp/timing-v23 recovery/packet-timing-v23.c
+          sudo unshare --net sh -c 'ip link set lo up; python3 tests/test-packet-audit.py /tmp/timing-v23 recovery/packet-timing-v23.c'
           sudo unshare --net python3 tests/test-packet-audit-vlan.py /tmp/timing-v23 --isolated
       - name: Verify factory-first setup, refusal and restoration
         run: |
