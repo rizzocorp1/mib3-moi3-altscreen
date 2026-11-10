@@ -1,0 +1,21 @@
+#!/bin/sh
+R='@ROOT@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-codec-test-v20"
+LOG="$STAGE/boot-status.txt"
+GUARD="$STAGE/file-guard"
+matches() { [ -f "$1" ] && [ ! -L "$1" ] || return 1;actual=$(sha256sum "$1") || return 1;[ "${actual%% *}" = "$2" ]; }
+status() { printf '%s\n' "$*" >> "$LOG"; }
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode2" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_state" 2>/dev/null || true
+if ! matches "$GUARD" '@GUARD_SHA@' || ! matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@';then exit 0;fi
+if ! "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" || ! "$GUARD" replace "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" || ! matches "$BASE/carplay.sh" '@STARTUP_SHA@';then status 'ABORT: exact startup restoration failed';exit 0;fi
+status 'RECOVERY: exact factory startup restored before any video/service change'
+if [ ! -f "$STAGE/ARMED" ] || [ -L "$STAGE/ARMED" ] || [ -e "$STAGE/CONSUMED" ];then status 'DISARMED';exit 0;fi
+mv "$STAGE/ARMED" "$STAGE/CONSUMED" || exit 0
+if ! matches "$BASE/carplay" '@CARPLAY_SHA@' || ! matches "$STAGE/synthetic-player" '@PLAYER_SHA@' || ! matches "$STAGE/controller.sh" '@CONTROLLER_SHA@';then status 'ABORT: staged checksum mismatch; native operation retained';exit 0;fi
+if systemd-run --unit=moi3-codec-v20 --property=RuntimeMaxSec=180 --property=TimeoutStopSec=10 --property=KillMode=control-group "--property=ExecStopPost=/bin/sh $STAGE/controller.sh $STAGE --restore $R" /bin/sh "$STAGE/controller.sh" "$STAGE" --monitor "$R" >> "$LOG" 2>&1;then
+ status 'CODEC MONITOR STARTED: bounded unit with restoration post-stop; no executable bind mounts'
+else status 'ABORT: monitor could not start; factory sender untouched';fi
+exit 0

@@ -1,0 +1,40 @@
+#!/bin/sh
+# Read-only collection of retained V20 state. Never launches playback/services.
+umask 077
+R='@ROOT@'
+USB=''
+for path in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+ if [ -f "$path/COLLECT_CODEC_V20.txt" ] && [ ! -L "$path/COLLECT_CODEC_V20.txt" ];then [ -z "$USB" ] || exit 0;USB=$path;fi
+done
+[ -n "$USB" ] || exit 0
+REPORT="$USB/codec-v20-intake.txt"
+[ ! -L "$REPORT" ] && [ ! -L "$USB/boot-status-v20.txt" ] && [ ! -L "$USB/codec-player-v20.log" ] && [ ! -L "$USB/codec-v20-journal.txt" ] || exit 0
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-codec-test-v20"
+run() {
+ echo 'MOI3 V20 COLLECTION ONLY: no activation, no service changes, no startup edits'
+ [ "$(id -u)" = 0 ] || { echo 'ABORT: root required';return 1; }
+ for marker in CODEC_TEST_V20.txt ALTSCREEN_TEST_ONCE.txt RESTORE_FACTORY_STARTUP.txt;do [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed USB modes';return 1;};done
+ [ -d "$STAGE" ] && [ ! -L "$STAGE" ] || { echo 'STAGE ABSENT OR SYMLINK: no unit-side V20 stage readable';return 0; }
+ for name in ARMED ARMED.pending CONSUMED OWNED;do
+  if [ -L "$STAGE/$name" ];then printf 'MARKER %s symlink; not followed\n' "$name"
+  elif [ -f "$STAGE/$name" ];then printf 'MARKER %s present\n' "$name"
+  else printf 'MARKER %s absent\n' "$name";fi
+ done
+ for name in carplay carplay.sh;do
+  if [ -f "$BASE/$name" ] && [ ! -L "$BASE/$name" ];then printf 'CURRENT %s ' "$name";sha256sum "$BASE/$name";fi
+ done
+ for name in file-guard factory-carplay.sh startup-new.sh synthetic-player controller.sh;do
+  if [ -f "$STAGE/$name" ] && [ ! -L "$STAGE/$name" ];then printf 'STAGED %s ' "$name";sha256sum "$STAGE/$name";else printf 'STAGED %s absent or unsafe\n' "$name";fi
+ done
+ if [ -f "$STAGE/boot-status.txt" ] && [ ! -L "$STAGE/boot-status.txt" ];then cp "$STAGE/boot-status.txt" "$USB/boot-status-v20.txt" || echo 'BOOT REPORT COPY FAILED';else echo 'BOOT REPORT ABSENT';fi
+ if [ -f "$STAGE/codec-player.log" ] && [ ! -L "$STAGE/codec-player.log" ];then cp "$STAGE/codec-player.log" "$USB/codec-player-v20.log" || echo 'PLAYER REPORT COPY FAILED';else echo 'PLAYER REPORT ABSENT';fi
+ if command -v systemctl >/dev/null 2>&1;then
+  echo 'READ-ONLY UNIT STATUS';systemctl show moi3-codec-v20.service multi-display.service carplay.service --property=Id --property=LoadState --property=ActiveState --property=SubState --property=Result --property=ExecMainStatus --property=ExecStopPost --property=RuntimeMaxUSec --property=TimeoutStopUSec || true
+ fi
+ if command -v journalctl >/dev/null 2>&1;then journalctl --no-pager -u moi3-codec-v20.service -n 100 > "$USB/codec-v20-journal.txt" 2>&1 || echo 'JOURNAL COLLECTION FAILED';fi
+ echo 'COLLECTION COMPLETE; V20 assets and startup retained unchanged'
+}
+run > "$REPORT" 2>&1
+sync
+exit 0

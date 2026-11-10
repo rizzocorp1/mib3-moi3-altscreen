@@ -1,0 +1,108 @@
+#!/bin/sh
+# Generated for one exact baseline. Always restore startup before activation.
+# No set -e: a test failure must not make ExecStartPre fail/reboot repeatedly.
+R='@ROOT@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-altscreen-map-v7"
+STARTUP="$BASE/carplay.sh"
+ORIGINAL="$STAGE/factory-carplay.sh"
+GUARD="$STAGE/file-guard"
+TARGET="$BASE/carplay"
+RAM="$R/run/moi3-altscreen-map-v7"
+LOG="$STAGE/boot-status.txt"
+status() {
+    printf '%s\n' "$*" >> "$LOG" 2>/dev/null || true
+    # Export early aborts too, even when the independent collector cannot start.
+    for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
+        if [ -f "$usb/ALTSCREEN_TEST_ONCE.txt" ] && [ ! -L "$usb/boot-status.txt" ]; then
+            cp "$LOG" "$usb/boot-status.txt" 2>/dev/null || true
+        fi
+    done
+}
+matches() {
+    [ -f "$1" ] && [ ! -L "$1" ] || return 1
+    actual=$(sha256sum "$1" 2>/dev/null) || return 1
+    [ "${actual%% *}" = "$2" ]
+}
+# These are the three factory startup operations. Keep native startup available
+# even if test assets are missing/corrupt and self-restoration cannot run.
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode2" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_state" 2>/dev/null || true
+status 'BOOT: entering one-shot startup'
+if ! matches "$GUARD" '@GUARD_SHA@' || ! matches "$ORIGINAL" '@STARTUP_SHA@'; then
+    status 'ABORT: recovery helper or baseline corrupt; native executable retained'
+    exit 0
+fi
+if ! "$GUARD" same-meta "$ORIGINAL" "$STARTUP"; then
+    status 'ABORT: startup metadata changed; refusing activation'
+    exit 0
+fi
+if ! "$GUARD" replace "$ORIGINAL" "$STARTUP" || ! matches "$STARTUP" '@STARTUP_SHA@'; then
+    status 'ABORT: startup restoration failed; native executable retained'
+    exit 0
+fi
+status 'RECOVERY: exact factory startup restored before any mount/service change'
+if [ ! -f "$STAGE/ARMED" ] || [ -L "$STAGE/ARMED" ]; then
+    status 'DISARMED: no activation ticket'
+    exit 0
+fi
+if [ -e "$STAGE/CONSUMED" ] || ! mv "$STAGE/ARMED" "$STAGE/CONSUMED"; then
+    status 'ABORT: cannot consume one-shot ticket'
+    exit 0
+fi
+sync
+if ! matches "$TARGET" '@CARPLAY_SHA@' || ! matches "$STAGE/carplay-once" '@PATCH_SHA@' || ! matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@'; then
+    status 'ABORT: executable or handler hash mismatch'
+    exit 0
+fi
+for marker in altscreen-v6-frame-ready altscreen-v6-encoder-ready; do
+    path="$R/data/lge/smartlink/carplay/$marker"
+    if [ -e "$path" ] || [ -L "$path" ]; then
+        status 'ABORT: stale handoff marker; native executable retained'
+        exit 0
+    fi
+done
+if [ -e "$RAM" ] || [ -L "$RAM" ] || ! mkdir -m 700 "$RAM"; then
+    status 'ABORT: RAM test directory already exists or cannot be created'
+    exit 0
+fi
+if ! "$GUARD" meta "$BASE" "$RAM" || ! "$GUARD" create "$STAGE/carplay-once" "$RAM/carplay" "$TARGET"; then
+    status 'ABORT: RAM copy/metadata preparation failed'
+    exit 0
+fi
+if ! matches "$RAM/carplay" '@PATCH_SHA@'; then
+    status 'ABORT: RAM executable checksum mismatch'
+    exit 0
+fi
+# The logger is owned by its own bounded unit, not the CarPlay service cgroup.
+if ! matches "$STAGE/managed-log-collector.sh" '@COLLECTOR_SHA@'; then
+    status 'ABORT: collector checksum mismatch; native executable retained'
+    exit 0
+fi
+if ! systemd-run --unit=moi3-altscreen-log-v7 --property=RuntimeMaxSec=330 /bin/sh "$STAGE/managed-log-collector.sh" "$STAGE" "$RAM/logger-ready" @LOG_ITERATIONS@ "$R" >> "$LOG" 2>&1; then
+    status 'ABORT: independent logger could not start; native executable retained'
+    exit 0
+fi
+i=0
+while [ ! -f "$RAM/logger-ready" ] && [ "$i" -lt 5 ]; do
+    sleep 1
+    i=$((i+1))
+done
+if [ ! -f "$RAM/logger-ready" ] || [ -L "$RAM/logger-ready" ]; then
+    status 'ABORT: independent logger readiness timed out; native executable retained'
+    exit 0
+fi
+status 'LOGGER: independent service ready before any mount or encoder stop'
+systemctl show carplay.service multi-display.service >> "$LOG" 2>&1 || true
+if ! mount --bind "$RAM/carplay" "$TARGET"; then
+    status 'ABORT: bind mount failed; native executable retained'
+    exit 0
+fi
+if ! matches "$TARGET" '@PATCH_SHA@'; then
+    umount "$TARGET" 2>/dev/null || true
+    status 'ABORT: mounted executable checksum mismatch'
+    exit 0
+fi
+status 'MAP TEST ACTIVE: native encoder retained pending authenticated video handoff'
+exit 0

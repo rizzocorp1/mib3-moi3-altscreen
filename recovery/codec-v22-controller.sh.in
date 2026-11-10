@@ -1,0 +1,79 @@
+#!/bin/sh
+R=${3:-}
+STAGE=$1
+MODE=$2
+[ "$STAGE" = "$R/lge/app_rw/smartlink/carplay/.moi3-codec-test-v22" ] || exit 2
+PLAYER="$STAGE/synthetic-player"
+LOG="$STAGE/codec-player.log"
+OWNED="$STAGE/OWNED"
+player_pid=''
+matches() { [ -f "$1" ] && [ ! -L "$1" ] || return 1;actual=$(sha256sum "$1") || return 1;[ "${actual%% *}" = "$2" ]; }
+usb_present() { [ -f "$1/CODEC_TEST_V22.txt" ] && [ ! -L "$1/CODEC_TEST_V22.txt" ]; }
+export_reports() {
+ for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do
+  if usb_present "$usb"; then
+   for name in boot-status.txt codec-player.log; do
+    [ ! -L "$STAGE/$name" ] && [ -f "$STAGE/$name" ] && [ ! -L "$usb/$name" ] && cp "$STAGE/$name" "$usb/$name" || true
+   done
+  fi
+ done
+}
+restore_native() {
+ [ -e "$OWNED" ] || return 0
+ [ ! -L "$OWNED" ] && [ "$(cat "$OWNED")" = CODEC_V22_OWNERSHIP ] || { echo 'RESTORE REFUSED: unknown ownership marker';return 1; }
+ matches "$PLAYER" '@PLAYER_SHA@' || { echo 'RESTORE WAIT: player/probe changed; use normal reboot';return 1; }
+ i=0
+ while [ "$i" -lt 5 ]; do
+  if "$PLAYER" --port-free; then
+   if systemctl start multi-display.service && systemctl is-active --quiet multi-display.service; then
+    rm -f "$OWNED";echo 'NATIVE RESTORED: exclusive output released; factory service active';return 0
+   fi
+  fi
+  i=$((i+1));sleep 1
+ done
+ echo 'RESTORE WAIT: port busy or service restart failed; normal reboot required';return 1
+}
+[ ! -L "$LOG" ] || exit 2
+if [ "$MODE" = --restore ]; then
+ restore_native >> "$LOG" 2>&1;status=$?;export_reports;exit "$status"
+fi
+[ "$MODE" = --monitor ] || exit 2
+run() {
+ matches "$PLAYER" '@PLAYER_SHA@' || { echo 'ABORT: player checksum mismatch';return 1; }
+ matches "$R/lge/app_rw/smartlink/carplay/carplay" '@CARPLAY_SHA@' && matches "$R/lge/app_rw/smartlink/carplay/carplay.sh" '@STARTUP_SHA@' || { echo 'ABORT: native baseline mismatch';return 1; }
+ matches "$STAGE/baseline-ref1-p.synthetic" '@CLIP1_SHA@' && matches "$STAGE/high-ref1-p.synthetic" '@CLIP2_SHA@' && matches "$STAGE/high-ref4-p.synthetic" '@CLIP3_SHA@' && matches "$STAGE/high-intra.synthetic" '@CLIP4_SHA@' || { echo 'ABORT: clip checksum mismatch';return 1; }
+ "$PLAYER" --validate "$STAGE" || return 1
+ [ ! -e "$OWNED" ] && [ ! -L "$OWNED" ] || { echo 'ABORT: prior ownership marker exists';return 1; }
+ mkdir "$R/run/moi3-codec-v22-lock" || { echo 'ABORT: controller already ran';return 1; }
+ echo 'READY: finish updater/Resume and normal mode, remove USB for at least five seconds, then reinsert while parked'
+ export_reports
+ absent=0;triggered=0;i=0
+ while [ "$i" -lt 120 ]; do
+  present=0;for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1"; do if usb_present "$usb";then present=1;fi;done
+  if [ "$present" = 0 ];then absent=$((absent+1));fi
+  if [ "$present" = 1 ] && [ "$absent" -ge 3 ];then triggered=1;break;fi
+  if [ "$present" = 1 ];then absent=0;fi
+  i=$((i+1));sleep 1
+ done
+ [ "$triggered" = 1 ] || { echo 'TIMEOUT: USB trigger not observed; factory sender untouched';return 0; }
+ systemctl is-active --quiet multi-display.service || { echo 'ABORT: factory sender was not active; no takeover';return 1; }
+ (set -C;printf 'CODEC_V22_OWNERSHIP\n' > "$OWNED") || return 1
+ if ! systemctl stop multi-display.service || systemctl is-active --quiet multi-display.service; then echo 'ABORT: factory stop not confirmed';return 1;fi
+ "$PLAYER" --port-free || { echo 'ABORT: source port occupied; no playback';return 1; }
+ echo 'PLAYBACK START: 32-second Baseline timing run (counter repeats every eight seconds); no CarPlay connection needed'
+ "$PLAYER" --play "$STAGE" & player_pid=$!
+ wait "$player_pid";result=$?;player_pid=''
+ echo "PLAYBACK EXIT status=$result"
+ return "$result"
+}
+cleanup() {
+ trap - EXIT INT TERM
+ if [ -n "$player_pid" ];then kill -TERM "$player_pid" 2>/dev/null || true;sleep 1;kill -KILL "$player_pid" 2>/dev/null || true;wait "$player_pid" 2>/dev/null || true;fi
+ restore_native || true
+ export_reports
+}
+trap 'cleanup >> "$LOG" 2>&1' EXIT
+trap 'exit 2' INT TERM
+run >> "$LOG" 2>&1
+result=$?
+exit "$result"
