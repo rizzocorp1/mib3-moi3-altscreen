@@ -107,7 +107,7 @@ static void test_source_signals(void) {
     reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1,99000);assert(captured[5]==0xd0);
 }
 static void test_local_transport_clock(void) {
-    transport_clock_v27 clock={0};uint64_t pts,pcr_ticks,value;
+    transport_clock_v28 clock={0};uint64_t pts,pcr_ticks,value;
     assert(transport_clock_at(&clock,8000000,&pts)==0&&pts==90000);
     assert(transport_clock_at(&clock,8000007,&pcr_ticks)==0&&pcr_ticks==90630);
     assert(transport_clock_at(&clock,8000006,&value)==-1);

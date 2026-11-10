@@ -48,7 +48,7 @@ int main(void){
  assert(send_us[1]-send_us[0]>=33333 && send_us[2]-send_us[1]>=33333);
  for(unsigned i=0;i<3;i++)assert(pts_seen[i]-pcr_seen[i]==9000);
  printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu with source-paced delivery and 100ms presentation lead\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);rmdir(dir);
- reset();char stale[]="/tmp/v27-stale-XXXXXX";assert(mkdtemp(stale));g_handoff_started=0;
+ reset();char stale[]="/tmp/v28-stale-XXXXXX";assert(mkdtemp(stale));g_handoff_started=0;
  assert(deferred_video_submit(stale,idr,sizeof(idr),1000000,1,1,emit_h264_frame)==0);
  snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,stale);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,stale);
  f=fopen(grant,"w");assert(f);fputs(HANDOFF_TOKEN,f);fclose(f);fake_us+=2000000;
