@@ -9,7 +9,7 @@ root=${4:-}
 case "$iterations" in ''|*[!0-9]*) exit 2;; esac
 [ "$iterations" -ge 1 ] && [ "$iterations" -le 300 ] || exit 2
 [ -d "$stage" ] && [ ! -L "$stage" ] || exit 2
-[ ! -e "$ready" ] && [ ! -L "$ready" ] || exit 2
+if [ "${5:-}" != --recover ]; then [ ! -e "$ready" ] && [ ! -L "$ready" ] || exit 2; fi
 umask 077
 data="$root/data/lge/smartlink/carplay"
 request="$data/altscreen-v27-frame-ready"

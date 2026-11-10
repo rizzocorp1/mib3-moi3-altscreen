@@ -29,5 +29,7 @@ with tempfile.TemporaryDirectory() as tmp:
   writer.close();writer=None;wait(lambda:(r/'native-active').exists());assert expired.read_bytes()==token and not grant.exists()
   print('PASS A4: real monitor SIGKILL independently revokes grant, waits for external writer port release, then restores native sender')
  finally:
+  print((stage/"boot-status.txt").read_text())
+  print(subprocess.run(["journalctl","-u",unit,"--no-pager","-n","30"],capture_output=True,text=True).stdout)
   if writer:writer.close()
   subprocess.run(['systemctl','stop',unit],capture_output=True);subprocess.run(['systemctl','reset-failed',unit],capture_output=True)
