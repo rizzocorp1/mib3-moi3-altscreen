@@ -40,7 +40,9 @@ with tempfile.TemporaryDirectory() as tmp:
  print('PASS: all four valid fixtures accepted; malformed/aliased/nonregular data refused without network activation')
  if '--network' not in sys.argv:sys.exit(0)
  assert os.geteuid()==0
+ subprocess.run(['ip','link','set','lo','up'],check=True)
  subprocess.run(['ip','link','add','eth0.5','type','dummy'],check=True)
+ subprocess.run(['ip','link','set','eth0.5','multicast','on'],check=True)
  subprocess.run(['ip','link','set','eth0.5','up'],check=True)
  subprocess.run(['ip','-6','addr','add','fd00:20::1/64','dev','eth0.5','nodad'],check=True)
  subprocess.run(['ip','-6','route','add','ff00::/8','dev','eth0.5'],check=True)

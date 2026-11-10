@@ -40,7 +40,7 @@ jobs:
         run: |
           gcc -shared -fPIC -Wall -Wextra -O2 deploy-usb/payload/altscreen_handler.c -ldl -pthread -o /tmp/handler-host.so
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/test-handler
-          timeout 30 /tmp/test-handler
+          sudo unshare --net sh -c 'ip link set lo up; timeout 30 /tmp/test-handler'
       - name: Check complete display layout and allocation failures
         run: |
           gcc -g -O1 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-layout.c -ldl -pthread -o /tmp/test-layout
@@ -113,11 +113,11 @@ jobs:
             sudo timeout 180 apt-get install -y -qq ffmpeg
           fi
           ffmpeg -v error -f lavfi -i testsrc2=size=1280x480:rate=30 -frames:v 30 -c:v libx264 -preset ultrafast -tune zerolatency -x264-params aud=1:keyint=10 -f h264 /tmp/frame.h264
-          timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts
+          sudo unshare --net sh -c 'ip link set lo up; timeout 30 /tmp/test-handler /tmp/frame.h264 /tmp/cluster.ts'
           ffmpeg -v error -i /tmp/cluster.ts -f null -
           count=$(ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames -of csv=p=0 /tmp/cluster.ts | head -1)
           test "$count" = 30
-          python3 tests/test-interframe.py /tmp/test-handler
+          sudo unshare --net sh -c 'ip link set lo up; python3 tests/test-interframe.py /tmp/test-handler'
 
   synthetic-codec-player:
     runs-on: ubuntu-24.04
@@ -128,8 +128,10 @@ jobs:
         run: |
           gcc -O2 -Wall -Wextra -Werror tools/synthetic-player-v20.c -o /tmp/synthetic-player
           gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/codec-file-guard
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          if ! command -v ffmpeg >/dev/null; then
+            sudo timeout 90 apt-get update -qq -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20
+            sudo timeout 120 apt-get install -y -qq ffmpeg
+          fi
       - name: Check staging and recovery-first startup
         run: python3 tests/test-codec-v20-setup.py /tmp/codec-file-guard recovery
       - name: Check controller refusal and restoration
