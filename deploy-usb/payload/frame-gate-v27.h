@@ -44,6 +44,7 @@ static int frame_gate_revoked_at(const char *directory) {
 }
 static int frame_gate_at(const char *directory,int idr,int authenticated) {
     if(!authenticated)return 1;
+    if(handoff_lifetime_expired())return -1;
     struct timespec now;
     if(clock_gettime(CLOCK_MONOTONIC,&now)!=0 || now.tv_sec<0)return -1;
     uint64_t ms=(uint64_t)now.tv_sec*1000+(uint64_t)now.tv_nsec/1000000;

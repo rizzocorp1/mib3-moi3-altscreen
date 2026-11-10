@@ -23,6 +23,10 @@ jobs:
           timeout 30 /tmp/crypto
           gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-layout.c -ldl -pthread -o /tmp/layout
           /tmp/layout
+          gcc -O1 -g -fsanitize=address,undefined tests/test-aux-refresh.c -ldl -pthread -o /tmp/refresh
+          /tmp/refresh
+          gcc -O1 -g -fsanitize=address,undefined tests/test-screen-response.c -ldl -pthread -o /tmp/response
+          /tmp/response
           python3 tests/test-advertised-fps.py deploy-usb/payload/altscreen_handler.c tests/test-layout.c
       - name: Decode every dependent picture from actual production conversion and mux
         run: |
@@ -38,5 +42,6 @@ jobs:
         run: |
           gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
           gcc -O2 recovery/packet-audit.c -o /tmp/packets
+          sudo python3 tests/test-map-v27-export.py recovery/map-v27-log-collector.sh
           sudo python3 tests/test-map-crash-recovery.py recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets
           python3 tests/test-lease-v27.py deploy-usb/payload/frame-gate-v27.h recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets

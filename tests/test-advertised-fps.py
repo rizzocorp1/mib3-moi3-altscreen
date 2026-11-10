@@ -4,9 +4,17 @@ import sys,tempfile,subprocess
 handler=Path(sys.argv[1]).resolve();fixture=Path(sys.argv[2]).read_text().split('int main(void)',1)[0]
 fixture=fixture.replace('#include "../deploy-usb/payload/altscreen_handler.c"','#include "'+str(handler)+'"')
 main=r'''
+static void *lacopy(const void *a,int64_t n,const void *original){
+ (void)a;(void)n;const LayoutObject *o=original;LayoutObject *c=la(NULL,0,NULL);if(c)for(int i=0;i<o->count;i++)lappend(c,o->items[i]);return c;
+}
+static int32_t lacstring(void **arr,const char *text,size_t len){
+ (void)len;if(!*arr)*arr=la(NULL,0,NULL);if(!*arr)return -1;LayoutObject *s=ls(NULL,text,0);if(!s)return -1;lappend(*arr,s);lr(s);return 0;
+}
+static int lcstring(const void *s,char *out,int64_t cap,uint32_t enc){(void)enc;const LayoutObject *o=s;if(o->kind!=1 || strlen(o->text)>=(size_t)cap)return 0;strcpy(out,o->text);return 1;}
 static LayoutObject *native_root;
 static void *native_info(void *s,void *p,int32_t *err){(void)s;(void)p;*err=0;native_root->refs++;return native_root;}
 int main(void){
+ s_CFArrayCreateMutableCopy=lacopy;s_CFArrayEnsureCreatedAndAppendCString=lacstring;s_CFStringGetCString=lcstring;
  s_CFStringCreateWithCString=ls;s_CFDictionaryCreateMutable=ld;s_CFDictionaryCreateMutableCopy=lcopy;
  s_CFDictionarySetValue=lset;s_CFDictionaryGetValue=lg;s_CFDictionarySetInt64=ln;s_CFDictionaryGetInt64=lgetn;
  s_CFArrayCreateMutable=la;s_CFArrayAppendValue=lappend;s_CFArrayGetCount=lcount;s_CFArrayGetValueAtIndex=lat;s_CFRelease=lr;
