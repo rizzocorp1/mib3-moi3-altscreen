@@ -1,0 +1,42 @@
+name: V27 transport repair validation
+on:
+  push:
+    branches: [fix/v27-transport-recovery]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  transport:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Timing, allocation, UDP failure, IDR recovery and unchanged configuration
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-transport-repair.c -ldl -pthread -o /tmp/repair
+          /tmp/repair
+      - name: Full handler and crypto regressions
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/handler
+          sudo unshare --net sh -c 'ip link set lo up; timeout 40 /tmp/handler'
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/crypto
+          timeout 30 /tmp/crypto
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-layout.c -ldl -pthread -o /tmp/layout
+          /tmp/layout
+          python3 tests/test-advertised-fps.py deploy-usb/payload/altscreen_handler.c tests/test-layout.c
+      - name: Decode every dependent picture from actual production conversion and mux
+        run: |
+          python3 -m pip install --timeout 20 --retries 1 --only-binary=:all: --target /tmp/codec-pyav av==19.0.2
+          python3 tests/test-interframe.py /tmp/handler
+          python3 tests/test-transport-decode.py /tmp/handler
+  recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Real systemd SIGKILL with separate output writer
+        run: |
+          gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
+          gcc -O2 recovery/packet-audit.c -o /tmp/packets
+          sudo python3 tests/test-map-crash-recovery.py recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets
+          python3 tests/test-lease-v27.py deploy-usb/payload/frame-gate-v27.h recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets

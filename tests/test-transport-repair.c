@@ -1,0 +1,64 @@
+/* Regression: inspect actual mux output and faults after delayed ownership. */
+#define _GNU_SOURCE
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/socket.h>
+#include <unistd.h>
+static uint64_t fake_us=10000000,pts_seen[16];static unsigned seen;
+static int fail_allocation=-1,fail_send;
+static int audit_sleep(const struct timespec *t,struct timespec *unused){(void)unused;fake_us+=(uint64_t)t->tv_sec*1000000+t->tv_nsec/1000;return 0;}
+static void *audit_malloc(size_t n){if(fail_allocation==0)return NULL;if(fail_allocation>0)fail_allocation--;return malloc(n);}
+static int audit_clock(clockid_t id,struct timespec *t){(void)id;t->tv_sec=fake_us/1000000;t->tv_nsec=(fake_us%1000000)*1000;return 0;}
+static ssize_t audit_send(int fd,const void *bytes,size_t n,int flags,const struct sockaddr *a,socklen_t length){
+ (void)fd;(void)flags;(void)a;(void)length;
+ if(fail_send){errno=ENOBUFS;return -1;}
+ const uint8_t *r=bytes;assert(n==1140);
+ for(size_t i=12;i+188<=n;i+=188){const uint8_t *t=r+i;if((((t[1]&31)<<8)|t[2])!=17 || !(t[1]&64))continue;
+  size_t o=4;if((t[3]&0x30)==0x30)o+=1+t[4];assert(o+14<=188);const uint8_t *p=t+o;assert(!p[0]&&!p[1]&&p[2]==1&&p[3]==0xe0);
+  uint64_t pts=((uint64_t)((p[9]>>1)&7)<<30)|((uint64_t)p[10]<<22)|((uint64_t)(p[11]>>1)<<15)|((uint64_t)p[12]<<7)|(p[13]>>1);
+  assert(seen<16);pts_seen[seen++]=pts;
+ }return (ssize_t)n;
+}
+#define ALTSCREEN_TEST
+#define malloc audit_malloc
+#define clock_gettime audit_clock
+#define sendto audit_send
+#define nanosleep audit_sleep
+#include "../deploy-usb/payload/altscreen_handler.c"
+#undef malloc
+#undef clock_gettime
+#undef sendto
+static const uint8_t idr[]={0,0,0,2,0x65,0xaa},dependent[]={0,0,0,2,0x41,0xbb};
+static void reset(void){seen=0;fail_allocation=-1;fail_send=0;g_rtp_sock=99;g_rtp_owned=0;g_rtp_ts_in_buf=0;g_total_frames_sent=0;g_send_errors=0;g_video_discontinuity=1;g_wait_output_idr=1;g_output_failed=0;g_handoff_deadline_ms=0;transport_clock_reset(&g_transport_clock);g_nal_length_bytes=4;g_sps_pps_len=12;memcpy(g_sps_pps_buf,"\0\0\0\1\x67\x42\0\x1f\0\0\0\1",12);}
+int main(void){
+ reset();char dir[]="/tmp/v25-audit-XXXXXX";assert(mkdtemp(dir));g_handoff_started=0;
+ assert(deferred_video_submit(dir,idr,sizeof(idr),1000000,1,1,emit_h264_frame)==0);fake_us+=33333;
+ assert(deferred_video_submit(dir,dependent,sizeof(dependent),1033333,0,1,emit_h264_frame)==0);fake_us+=33333;
+ assert(deferred_video_submit(dir,dependent,sizeof(dependent),1066666,0,1,emit_h264_frame)==0);assert(g_deferred_count==3&&!seen);
+ char grant[512],request[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,dir);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,dir);
+ FILE *f=fopen(grant,"w");assert(f);assert(fwrite(HANDOFF_TOKEN,1,sizeof(HANDOFF_TOKEN)-1,f)==sizeof(HANDOFF_TOKEN)-1);fclose(f);fake_us+=1000000;
+ assert(deferred_video_flush(dir,emit_h264_frame)==1);assert(seen==3&&g_total_frames_sent==3);assert(pts_seen[1]-pts_seen[0]>=2880 && pts_seen[1]-pts_seen[0]<=3060);assert(pts_seen[2]-pts_seen[1]>=2880 && pts_seen[2]-pts_seen[1]<=3060);assert(fake_us>=11133332);
+ printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu when drained in one millisecond\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);rmdir(dir);
+ reset();fail_allocation=0;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2a: AnnexB allocation failure propagates");
+ reset();fail_allocation=1;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2b: PES allocation failure propagates");
+ reset();fail_send=1;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_send_errors>0&&g_total_frames_sent==0&&g_wait_output_idr);puts("PASS A3: UDP failure propagates without false frame success");
+
+ assert(emit_h264_frame(dependent,sizeof(dependent),1033333)==0 && g_total_frames_sent==0);
+ fail_send=0;assert(emit_h264_frame(idr,sizeof(idr),1066666)==0 && g_total_frames_sent==1 && !g_wait_output_idr);
+ puts("PASS: dependent frames withheld after output hole; fresh IDR recovers");
+ reset();uint64_t a,b;assert(transport_picture_time(&g_transport_clock,1000000,&a,&b)==0);
+ fake_us+=500000;assert(transport_picture_time(&g_transport_clock,1033333,&a,&b)==-1);
+ puts("PASS: excessive lateness requests reference recovery instead of catch-up burst");
+ reset();uint8_t config[]={1,66,0,30,0xff,0xe1,0,2,0x67,0x42,1,0,2,0x68,0xce};
+ parse_and_store_avcc(config,sizeof(config));g_wait_output_idr=0;g_handoff_started=1;
+ parse_and_store_avcc(config,sizeof(config));assert(!g_wait_output_idr && g_handoff_started);
+ config[14]^=1;parse_and_store_avcc(config,sizeof(config));assert(g_wait_output_idr);
+ config[0]=0;parse_and_store_avcc(config,sizeof(config));assert(!g_sps_pps_len);
+ puts("PASS: identical decoder configuration preserves playback; changed/invalid config cannot continue dependent output");
+ g_rtp_sock=-1;return 0;
+}

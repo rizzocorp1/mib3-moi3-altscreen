@@ -1,5 +1,5 @@
 /*
- * altscreen_handler.c v6.1 â€” Genuine CarPlay AltScreen Gen-2 Cluster Streamer
+ * altscreen_handler.c v6.1 — Genuine CarPlay AltScreen Gen-2 Cluster Streamer
  * =============================================================================
  * Arquitetura de Producao IRC-Parity (MIB3 MOI3 LG AArch64 / Linux glibc 2.17+):
  *
@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v25.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v25.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v25.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v27.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v27.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v27.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v25-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v27-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -294,7 +294,7 @@ static void *array_clone(void *arr) {
 /* =============================================================================
  * ViewAreas e enabledFeatures (AltScreen Apple CarPlay Specification)
  * ============================================================================= */
-#include "layout-v25.h"
+#include "layout-v27.h"
 
 static int set_reference_enabled_features(void *dict, int enable_viewareas) {
     if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
@@ -435,8 +435,8 @@ static uint8_t g_pat_cc = 0;
 static uint8_t g_pmt_cc = 0;
 static uint8_t g_video_cc = 0;
 static int g_video_discontinuity=1;
-#include "transport-clock-v25.h"
-static transport_clock_v25 g_transport_clock;
+#include "transport-clock-v27.h"
+static transport_clock_v27 g_transport_clock;
 
 static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
@@ -444,6 +444,7 @@ static int g_rtp_ts_in_buf = 0;
 static uint64_t g_total_frames_sent = 0;
 static uint64_t g_received_frames,g_authenticated_frames,g_invalid_frames,g_idr_frames,g_aud_frames;
 static uint64_t g_sent_packets,g_send_errors;
+static int g_output_failed,g_wait_output_idr=1;
 static uint64_t g_total_bytes_sent = 0;
 
 static uint32_t ts_crc32(const uint8_t *data, size_t len) {
@@ -505,7 +506,8 @@ static void init_cluster_network(void) {
 }
 
 static void rtp_flush_buffer(int marker) {
-    if (g_rtp_ts_in_buf == 0 || g_rtp_sock < 0) return;
+    if (g_rtp_ts_in_buf == 0) return;
+    if(g_rtp_sock<0 || g_output_failed){g_output_failed=1;g_rtp_ts_in_buf=0;return;}
 
     g_rtp_buf[0] = 0x80;
     g_rtp_buf[1] = 33; /* Matching factory profile: no per-frame RTP marker. */
@@ -540,7 +542,7 @@ static void rtp_flush_buffer(int marker) {
         g_total_bytes_sent+=(uint64_t)sent;g_sent_packets++;
         if(g_sent_packets==1)log_msg("RTP","First cluster UDP datagram sent: bytes=%zu",payload_size);
     } else {
-        g_send_errors++;
+        g_output_failed=1;g_send_errors++;
         if(g_send_errors<=3 || g_send_errors%300==0)
             log_msg("RTP_ERR","Cluster send failed: errno=%d sent=%zd expected=%zu failures=%llu",errno,sent,payload_size,(unsigned long long)g_send_errors);
     }
@@ -548,6 +550,7 @@ static void rtp_flush_buffer(int marker) {
 }
 
 static void rtp_queue_ts_packet(const uint8_t *ts_pkt) {
+    if(g_output_failed)return;
     memcpy(&g_rtp_buf[12 + (g_rtp_ts_in_buf * TS_PACKET_SIZE)], ts_pkt, TS_PACKET_SIZE);
     g_rtp_ts_in_buf++;
     if (g_rtp_ts_in_buf == 6) {
@@ -624,14 +627,14 @@ static void emit_pmt_packet(void) {
     rtp_queue_ts_packet(pkt);
 }
 
-static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k, int random_access, uint64_t pcr_90k) {
-    if (!frame_data || frame_len == 0) return;
+static int mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_len, uint64_t pts_90k, int random_access, uint64_t pcr_90k) {
+    if (!frame_data || frame_len == 0) return -1;
     /* RTP timestamp is assigned at datagram send time. */
 
     size_t pes_header_len = 14;
     size_t pes_total_len = pes_header_len + frame_len;
     uint8_t *pes_buf = (uint8_t *)malloc(pes_total_len);
-    if (!pes_buf) return;
+    if (!pes_buf) {g_output_failed=1;return -1;}
 
     pes_buf[0] = 0x00;
     pes_buf[1] = 0x00;
@@ -725,6 +728,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
     free(pes_buf);
     /* RTP timestamp is assigned at datagram send time. */
     rtp_flush_buffer(1);
+    if(g_output_failed)return -1;
     g_total_frames_sent++;
 
     if (g_total_frames_sent <= 5 || g_total_frames_sent % 300 == 0) {
@@ -733,6 +737,7 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
                 (unsigned long long)g_total_bytes_sent,
                 CLUSTER_MULTICAST_IP, CLUSTER_MULTICAST_PORT);
     }
+    return 0;
 }
 
 /* =============================================================================
@@ -745,7 +750,9 @@ static unsigned int g_nal_length_bytes = 4;
 #include "video-observe-v14.h"
 
 static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
-    g_sps_pps_len = 0;
+    uint8_t old_config[sizeof(g_sps_pps_buf)];
+    size_t old_len=g_sps_pps_len;unsigned old_width=g_nal_length_bytes;
+    memcpy(old_config,g_sps_pps_buf,old_len);g_sps_pps_len=0;
     if (!avcc || len < 7 || avcc[0] != 1) return;
     unsigned int length_bytes = (avcc[4] & 3) + 1;
     if (length_bytes == 3) return; /* reserved by AVCDecoderConfigurationRecord */
@@ -797,6 +804,8 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     memcpy(g_sps_pps_buf, config, out_pos);
     g_nal_length_bytes = length_bytes;
     g_sps_pps_len = out_pos;
+    if(old_len==out_pos && old_width==length_bytes && !memcmp(old_config,config,out_pos))return;
+    g_wait_output_idr=1;
     video_observe_config(g_sps_pps_buf,g_sps_pps_len);
     log_msg("AVCC", "SPS/PPS extraidos com sucesso! Tamanho total: %zu bytes", g_sps_pps_len);
     /* Codec parameter sets describe decoder format, not picture/map pixels.
@@ -808,7 +817,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v25.h"
+#include "frame-gate-v27.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -828,15 +837,24 @@ static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *
     return 0;
 }
 #define PRIVATE_CAPTURE_ENABLED 0
-#include "capture-v25.h"
+#include "capture-v27.h"
 
 static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
     if(validate_h264_frame(data,len,&nals,&is_keyframe)!=0)return -1;
     init_cluster_network();
     if(g_rtp_sock<0)return -1;
-    uint64_t pts_90k;
-    if(transport_clock_now(&g_transport_clock,&pts_90k)<0){log_msg("TRANSPORT_CLOCK_ERR","Local enqueue clock failed; picture not sent");return -1;}
+    if(g_wait_output_idr && !is_keyframe)return 0;
+    if(g_wait_output_idr)transport_picture_reset(&g_transport_clock);
+    uint64_t pts_90k,pcr_90k;
+    if(transport_picture_time(&g_transport_clock,timestamp,&pts_90k,&pcr_90k)<0){
+        g_wait_output_idr=1;g_video_discontinuity=1;
+        log_msg("TRANSPORT_RESYNC","Picture timing invalid/late; awaiting a fresh IDR");return -1;
+    }
+#if !defined(ALTSCREEN_TEST) || defined(ALTSCREEN_TEST_WITH_GATE)
+    if(frame_gate_at(g_frame_directory,is_keyframe,1)!=0)return -1;
+#endif
+    g_output_failed=0;
 
     static int s_first_frame = 0;
     if (!s_first_frame) {
@@ -847,7 +865,7 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
 
     size_t annexb_capacity = len + nals * (4 - g_nal_length_bytes) + g_sps_pps_len;
     uint8_t *annexb_frame = (uint8_t *)malloc(annexb_capacity);
-    if (!annexb_frame) return 0;
+    if (!annexb_frame) {g_wait_output_idr=1;g_video_discontinuity=1;return -1;}
 
     size_t annexb_pos = 0;
     if (is_keyframe) {
@@ -877,24 +895,24 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
         emit_pmt_packet();
     }
 
-    uint64_t pcr_90k;
-    if(transport_clock_now(&g_transport_clock,&pcr_90k)<0){free(annexb_frame);log_msg("TRANSPORT_CLOCK_ERR","Local packetization clock failed; picture not sent");return -1;}
-    if(g_total_frames_sent<3 || g_total_frames_sent%300==0)
-        log_msg("TRANSPORT_CLOCK","mode=local-enqueue-packetize pts90k=%llu pcr90k=%llu queueToPacketUs=%llu phoneRelativeUs=%llu",
-            (unsigned long long)pts_90k,(unsigned long long)pcr_90k,
-            (unsigned long long)((pcr_90k-pts_90k)*1000/90),(unsigned long long)timestamp);
-    if(PRIVATE_CAPTURE_ENABLED)capture_video(annexb_frame,annexb_pos,pts_90k,timestamp,is_keyframe);
-    mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k,is_keyframe,pcr_90k);
 
+    if(g_total_frames_sent<3 || g_total_frames_sent%300==0)
+        log_msg("TRANSPORT_CLOCK","mode=source-paced-100ms-lead pts90k=%llu pcr90k=%llu queueToPacketUs=%llu phoneRelativeUs=%llu",
+            (unsigned long long)pts_90k,(unsigned long long)pcr_90k,
+            (unsigned long long)((pts_90k-pcr_90k)*1000/90),(unsigned long long)timestamp);
+    if(PRIVATE_CAPTURE_ENABLED)capture_video(annexb_frame,annexb_pos,pts_90k,timestamp,is_keyframe);
+    int result=mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k,is_keyframe,pcr_90k);
     free(annexb_frame);
-    return 0;
+    if(result<0){g_rtp_ts_in_buf=0;g_wait_output_idr=1;g_video_discontinuity=1;}
+    else g_wait_output_idr=0;
+    return result;
 }
 
 static void aux_refresh_invalidate_locked(void);
 static void close_cluster_socket(void) {
     if(g_rtp_owned && g_rtp_sock>=0)close(g_rtp_sock);
     g_rtp_sock=-1;g_rtp_owned=0;g_video_discontinuity=1;
-    transport_clock_reset(&g_transport_clock);
+    transport_clock_reset(&g_transport_clock);g_wait_output_idr=1;
 }
 static void release_cluster_output_if_unleased(const char *directory) {
     char grant[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,directory);
@@ -908,7 +926,7 @@ static void release_cluster_output_if_unleased(const char *directory) {
 static int process_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int idr;
     if(validate_h264_frame(data,len,&nals,&idr)!=0) {
-        g_invalid_frames++;
+        g_wait_output_idr=1;g_video_discontinuity=1;g_invalid_frames++;
         if(g_invalid_frames<=3)log_msg("H264_ERR","Rejected malformed access unit: bytes=%zu",len);
         return -1;
     }
@@ -944,7 +962,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v25.h"
+#include "aux-refresh-v27.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1080,8 +1098,12 @@ static void *alt_receiver_thread(void *arg) {
             case K_SCREEN_VIDEO_CONFIG:
                 if (body && h.bodySize > 0) {
                     log_msg("RECV111", "VideoConfig recebido: bodySize=%u bytes", h.bodySize);
-                    deferred_video_clear();g_handoff_started=0;
+                    uint8_t old[sizeof(g_sps_pps_buf)];size_t old_len=g_sps_pps_len;unsigned old_width=g_nal_length_bytes;
+                    memcpy(old,g_sps_pps_buf,old_len);
                     parse_and_store_avcc(body, h.bodySize);
+                    if(old_len!=g_sps_pps_len || old_width!=g_nal_length_bytes || memcmp(old,g_sps_pps_buf,old_len)){
+                        deferred_video_clear();g_wait_output_idr=1;g_video_discontinuity=1;
+                    }
                 }
                 break;
 
@@ -1713,7 +1735,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v25 (gated keyframe requests; checked report export) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v27 (10fps auxiliary request; periodic IDRs retained) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();
