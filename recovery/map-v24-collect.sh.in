@@ -1,0 +1,70 @@
+#!/bin/sh
+# Read retained V24 reports only. No service, startup or map changes.
+umask 077
+R='@ROOT@'
+USB=''
+for path in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+ if [ -f "$path/COLLECT_MAP_V24.txt" ] && [ ! -L "$path/COLLECT_MAP_V24.txt" ];then [ -z "$USB" ] || exit 0;USB=$path;fi
+done
+[ -n "$USB" ] && [ ! -L "$USB/v24-recovery-intake.txt" ] || exit 0
+for marker in ALTSCREEN_TEST_ONCE.txt CODEC_TEST_V23.txt RESTORE_FACTORY_STARTUP.txt;do
+ [ ! -e "$USB/$marker" ] || exit 0
+done
+PYTHON=''
+for command in python3 python;do if command -v "$command" >/dev/null 2>&1;then PYTHON=$command;break;fi;done
+[ -n "$PYTHON" ] || { printf 'ABORT: Python unavailable\n' > "$USB/v24-recovery-intake.txt";exit 0; }
+"$PYTHON" - "$R" "$USB" > "$USB/v24-recovery-intake.txt" 2>&1 <<'PYRECOVER'
+from __future__ import print_function
+import os,sys,stat,json,zlib,base64,hashlib
+root,usb=sys.argv[1:3]
+if os.geteuid()!=0:raise SystemExit('ABORT: root required')
+stage='/lge/app_rw/smartlink/carplay/.moi3-altscreen-map-v24/'
+paths=[stage+'boot-status.txt',stage+'packet-audit.txt',stage+'carplay-journal.txt',
+ '/data/lge/smartlink/carplay/carplay-handler-v24.log',
+ '/lge/app_rw/smartlink/carplay/carplay-handler-v24.log','/tmp/carplay-handler-v24.log',
+ '/data/lge/smartlink/carplay/map-v24-stock-info.plist','/data/lge/smartlink/carplay/map-v24-advertised-info.plist']
+records=[];total=0
+for relative in paths:
+ path=root+relative
+ try:
+  info=os.lstat(path)
+  if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1 or info.st_size>2097152:
+   records.append({'name':relative,'state':'unsafe-or-oversize'});continue
+  # Refuse a symlink in any parent component too.
+  if os.path.realpath(path)!=os.path.abspath(path):
+   records.append({'name':relative,'state':'unsafe-parent'});continue
+  fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+  try:
+   current=os.fstat(fd)
+   if (info.st_ino,info.st_dev)!=(current.st_ino,current.st_dev):raise ValueError('source changed during open')
+   chunks=[];size=0
+   while True:
+    b=os.read(fd,min(65536,2097153-size))
+    if not b:break
+    chunks.append(b);size+=len(b)
+    if size>2097152:raise ValueError('source exceeds bound')
+   data=b''.join(chunks)
+   after=os.fstat(fd)
+   if current.st_size!=after.st_size or current.st_mtime!=after.st_mtime or len(data)!=after.st_size:raise ValueError('source changed during read')
+  finally:os.close(fd)
+  total+=len(data)
+  if total>8388608:raise ValueError('aggregate bound exceeded')
+  record={'name':relative,'state':'read','bytes':len(data),'zeroBytes':data.count(b'\0'),'sha256':hashlib.sha256(data).hexdigest(),'zlibBase64':base64.b64encode(zlib.compress(data,6)).decode('ascii')}
+  records.append(record);print('SOURCE',relative,'bytes',record['bytes'],'zeroBytes',record['zeroBytes'],'sha256',record['sha256'])
+ except (IOError,OSError) as e:records.append({'name':relative,'state':'unavailable','error':str(e)})
+body=json.dumps({'format':'moi3-v24-retained-reports-v1','sourceBytes':total,'unitSideMutations':False,'records':records},sort_keys=True).encode('ascii')
+if len(body)>12582912:raise ValueError('encoded bound exceeded')
+out=os.path.join(usb,'v24-recovered-reports.json');pending=out+'.pending'
+if os.path.lexists(out) or os.path.lexists(pending):raise ValueError('existing output preserved')
+v=os.statvfs(usb)
+if v.f_bavail*v.f_frsize<16777216:raise ValueError('USB free space below16MiB')
+fd=os.open(pending,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,384)
+with os.fdopen(fd,'wb') as f:f.write(body);f.flush();os.fsync(f.fileno())
+with open(pending,'rb') as f:check=f.read(12582913)
+if hashlib.sha256(check).digest()!=hashlib.sha256(body).digest():raise ValueError('USB readback failed; source preserved')
+os.rename(pending,out)
+print('BUNDLE SHA256',hashlib.sha256(body).hexdigest(),'bytes',len(body))
+print('COLLECTION COMPLETE: compressed ASCII export, fsync and byte readback verified; retained files unchanged')
+PYRECOVER
+sync
+exit 0

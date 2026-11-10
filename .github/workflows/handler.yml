@@ -177,6 +177,13 @@ jobs:
           python3 tests/test-codec-v23-setup.py /tmp/guard-v23 recovery
           python3 tests/test-codec-v23-controller.py recovery/codec-v23-controller.sh.in
           sudo python3 tests/test-codec-v23-systemd.py recovery/codec-v23-controller.sh.in recovery/codec-v23.service.in
+  map-v24-report-recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Recover retained reports with independent checked export
+        run: sudo python3 tests/test-map-v24-collect.py recovery/map-v24-collect.sh.in
   codec-v20-report-collection:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
