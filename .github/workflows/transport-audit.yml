@@ -1,0 +1,17 @@
+name: Pinned V25 transport audit reproductions
+on:
+  push:
+    branches: [audit/v25-transport-20261110]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile unchanged production code with deterministic fault/clock probes
+        run: gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-transport-audit-v25.c -ldl -pthread -o /tmp/transport-audit
+      - name: Reproduce timing collapse and hidden output failures
+        run: /tmp/transport-audit
