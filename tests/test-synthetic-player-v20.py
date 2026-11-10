@@ -1,15 +1,14 @@
 """Independent generated fixtures, parser refusal, real isolated UDP and decode."""
 from pathlib import Path
 import os,sys,subprocess,tempfile,struct,re,shutil,socket,time,json,signal
+from codec_fixture_utils import make_clip,decode_hashes
 player=Path(sys.argv[1]).resolve()
 names=['baseline-ref1-p','high-ref1-p','high-ref4-p','high-intra']
 def fixtures(root):
  for n,name in enumerate(names):
   profile='baseline' if n==0 else 'high';keyint=1 if n==3 else 20;refs=4 if n==2 else 1;cabac=0 if n==0 else 1
   raw=root/(name+'.h264')
-  # Low-detail fixtures stay within the player's deliberate one-MiB file bound.
-  # Visual motion in the actual counter assets is checked separately offline.
-  subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=gray:size=1280x480:rate=10','-frames:v','80','-c:v','libx264','-preset','veryfast','-tune','zerolatency','-profile:v',profile,'-level:v','3.1','-x264-params',f'keyint={keyint}:min-keyint={keyint}:scenecut=0:bframes=0:ref={refs}:cabac={cabac}:8x8dct={cabac}:repeat-headers=1:aud=1','-f','h264',raw],check=True)
+  make_clip(raw,profile,10,80,refs,cabac,keyint)
   b=raw.read_bytes();starts=[m.start() for m in re.finditer(b'\x00\x00(?:\x00)?\x01',b) if b[m.end()]&31==9];assert len(starts)==80 and starts[0]==0
   units=[b[start:(starts[i+1] if i+1<len(starts) else len(b))] for i,start in enumerate(starts)]
   (root/(name+'.synthetic')).write_bytes(b'MOI3SYN1'+b''.join(struct.pack('<IQ',len(au),90000+i*9000)+au for i,au in enumerate(units)))
@@ -63,9 +62,9 @@ with tempfile.TemporaryDirectory() as tmp:
  # First packets span all eight-second phases instead of an immediate burst.
  assert arrivals[-1]-arrivals[0]>31
  ts=root/'controls.ts';ts.write_bytes(b''.join(p[12:] for p in packets))
- subprocess.run(['ffmpeg','-v','error','-i',ts,'-f','null','-'],check=True,timeout=20)
- count=subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-count_frames','-show_entries','stream=nb_read_frames','-of','csv=p=0',ts],text=True,timeout=20)
- assert count.strip().splitlines()[0]=='320',count
+ decoded=decode_hashes(ts);expected=[]
+ for name in names:expected.extend(decode_hashes(root/(name+'.h264')))
+ assert len(decoded)==320 and decoded==expected,(len(decoded),len(expected))
  assert subprocess.run([player,'--port-free']).returncode==0
  # Interrupt active playback: bounded exit releases the exclusive source port.
  proc=subprocess.Popen([player,'--play',root],stdout=subprocess.PIPE);time.sleep(.4);proc.terminate();proc.communicate(timeout=3)

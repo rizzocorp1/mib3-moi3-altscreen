@@ -5,6 +5,7 @@ The fixture strips AUDs, uses four-byte AVC lengths and one IDR per 60 pictures.
 """
 import re,struct,subprocess,sys,tempfile
 from pathlib import Path
+from codec_fixture_utils import make_clip,decode_hashes
 
 def run(*args):
     return subprocess.run(args,check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE).stdout
@@ -14,18 +15,13 @@ def nals(data):
     return [data[m.end():starts[i+1].start() if i+1<len(starts) else len(data)] for i,m in enumerate(starts)]
 
 def hashes(path):
-    data=run('ffmpeg','-v','error','-i',str(path),'-map','0:v:0','-fps_mode','passthrough','-f','framemd5','-')
-    return [line.rsplit(b',',1)[-1].strip() for line in data.splitlines() if line and not line.startswith(b'#')]
+    return decode_hashes(path)
 
 with tempfile.TemporaryDirectory() as temp:
     root=Path(temp)
     for label,profile,options in [('baseline','baseline','cabac=0:8x8dct=0'),('high','high','cabac=1:8x8dct=1'),('high-multiref','high','cabac=1:8x8dct=1:ref=4')]:
         source=root/(label+'.h264');fixture=root/(label+'.avcc');output=root/(label+'.ts')
-        run('ffmpeg','-v','error','-f','lavfi','-i','testsrc2=size=1280x480:rate=25',
-            '-frames:v','60','-c:v','libx264','-profile:v',profile,'-level:v','3.1',
-            '-preset','veryfast','-tune','zerolatency','-x264-params',
-            'aud=1:keyint=60:min-keyint=60:scenecut=0:bframes=0:ref=1:slices=1:'+options,
-            '-f','h264',str(source))
+        make_clip(source,profile,25,60,4 if label=='high-multiref' else 1,0 if profile=='baseline' else 1,60)
         units=[];current=[];sps=pps=None
         for nal in nals(source.read_bytes()):
             kind=nal[0]&31
