@@ -1,0 +1,22 @@
+name: Vehicle-compatible map launcher
+on:
+  push:
+    branches: [fix/v28-runtime-unit]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  startup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Recovery-first startup with legacy transient parser prohibited
+        run: |
+          gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
+          gcc -O2 recovery/packet-audit.c -o /tmp/packets
+          python3 tests/test-map-v28-boot.py /tmp/guard recovery/map-v28-boot.sh.in
+      - name: Real generated runtime-unit crash and hung-main timeout recovery
+        run: |
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v28-log-collector.sh /tmp/guard /tmp/packets recovery/map-v28-boot.sh.in
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v28-log-collector.sh /tmp/guard /tmp/packets recovery/map-v28-boot.sh.in timeout
