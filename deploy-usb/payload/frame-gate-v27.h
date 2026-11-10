@@ -18,6 +18,12 @@ static int handoff_stat(int fd,struct stat *st){return fstat(fd,st);}
 static int g_handoff_started;
 static uint64_t g_handoff_deadline_ms;
 static int g_handoff_last_error;
+static int handoff_lifetime_expired(void){
+    if(!g_handoff_deadline_ms)return 0;
+    struct timespec now;
+    if(clock_gettime(CLOCK_MONOTONIC,&now)!=0 || now.tv_sec<0)return 1;
+    return (uint64_t)now.tv_sec*1000+(uint64_t)now.tv_nsec/1000000>=g_handoff_deadline_ms;
+}
 static int handoff_file_valid(const char *path) {
     int fd=open(path,O_RDONLY|O_NOFOLLOW|O_NONBLOCK|O_CLOEXEC);
     if(fd<0) {

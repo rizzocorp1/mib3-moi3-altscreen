@@ -818,7 +818,8 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
 }
 
 #include "frame-gate-v27.h"
-#include "deferred-video-v9.h"
+static void deferred_video_need_idr(void){g_wait_output_idr=1;g_video_discontinuity=1;}
+#include "deferred-video-v27.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
     /* Validate the entire access unit before emitting anything. In particular,
@@ -916,7 +917,7 @@ static void close_cluster_socket(void) {
 }
 static void release_cluster_output_if_unleased(const char *directory) {
     char grant[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,directory);
-    if(g_rtp_owned && !handoff_file_valid(grant)) {
+    if(g_rtp_owned && (!handoff_file_valid(grant) || handoff_lifetime_expired())) {
         close_cluster_socket();deferred_video_clear();end_frame_gate_at(directory);
         pthread_mutex_lock(&g_crypto_lock);aux_refresh_invalidate_locked();pthread_mutex_unlock(&g_crypto_lock);
         log_msg("HANDOFF","Output lease revoked; custom UDP port released");

@@ -135,6 +135,11 @@ restore_native() {
         expire_lease || return 1
         printf '%s\n' 'LEASE WARNING: unknown grant retained for review; output expired' >> "$stage/boot-status.txt"
     fi
+    if systemctl is-active --quiet multi-display.service; then
+        owned=0;attempted=0
+        printf '%s\n' 'NATIVE ALREADY ACTIVE: no duplicate sender started' >> "$stage/boot-status.txt"
+        return 0
+    fi
     tries=0
     while [ "$tries" -lt 5 ]; do
         if "$stage/packet-audit" --port-free; then
