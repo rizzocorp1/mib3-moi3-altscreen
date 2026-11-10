@@ -1,0 +1,11 @@
+[Unit]
+Description=Bounded parked synthetic codec comparison
+After=carplay.service
+
+[Service]
+Type=simple
+ExecStart=/bin/sh "@STAGE@/controller.sh" "@STAGE@" --monitor "@ROOT@"
+ExecStopPost=/bin/sh "@STAGE@/controller.sh" "@STAGE@" --restore "@ROOT@"
+RuntimeMaxSec=180
+TimeoutStopSec=10
+KillMode=control-group

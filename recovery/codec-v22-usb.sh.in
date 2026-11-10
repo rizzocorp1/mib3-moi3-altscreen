@@ -1,0 +1,60 @@
+#!/bin/sh
+umask 077
+R='@ROOT@'
+USB=''
+for candidate in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+ if [ -f "$candidate/CODEC_TEST_V22.txt" ] && [ ! -L "$candidate/CODEC_TEST_V22.txt" ];then [ -z "$USB" ] || exit 0;USB=$candidate;fi
+done
+[ -n "$USB" ] && [ ! -L "$USB/altscreen-setup.txt" ] || exit 0
+TEMP=''
+matches() { [ -f "$1" ] && [ ! -L "$1" ] || return 1;actual=$(sha256sum "$1") || return 1;[ "${actual%% *}" = "$2" ]; }
+run() {
+ BASE="$R/lge/app_rw/smartlink/carplay";STAGE="$BASE/.moi3-codec-test-v22"
+ echo 'MOI3 MU0841 V22 synthetic codec comparison setup'
+ [ "$(id -u)" = 0 ] || return 1
+ for name in ALTSCREEN_TEST_ONCE.txt PROBE_ONLY.txt SUMMARY_PROBE_ONLY.txt COLLECT_ONLY.txt REVERT.txt;do [ ! -e "$USB/$name" ] || { echo 'ABORT: mixed modes';return 1;};done
+ matches "$R/etc/os-release" '@OS_SHA@' && matches "$USB/payload/file-guard" '@GUARD_SHA@' || return 1
+ candidate="$R/tmp/moi3-codec-v22-preflight-$$"
+ [ ! -e "$candidate" ] && [ ! -L "$candidate" ] || return 1
+ (set -C;cat "$USB/payload/file-guard" > "$candidate") || return 1
+ TEMP=$candidate
+ chmod 700 "$TEMP" && matches "$TEMP" '@GUARD_SHA@' || return 1
+ if [ -f "$USB/RESTORE_FACTORY_STARTUP.txt" ] && [ ! -L "$USB/RESTORE_FACTORY_STARTUP.txt" ];then
+  matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$BASE/carplay" '@CARPLAY_SHA@' || return 1
+  matches "$BASE/carplay.sh" '@STARTUP_SHA@' || matches "$BASE/carplay.sh" '@BOOT_SHA@' || return 1
+  "$TEMP" same-meta "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" && "$TEMP" replace "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" || return 1
+  rm -f "$STAGE/ARMED" "$STAGE/ARMED.pending";echo 'RESULT: FACTORY STARTUP RESTORED';return 0
+ fi
+ matches "$BASE/carplay" '@CARPLAY_SHA@' && matches "$BASE/carplay.sh" '@STARTUP_SHA@' || { echo 'ABORT: baseline mismatch';return 1; }
+ for pair in 'synthetic-player @PLAYER_SHA@' 'controller.sh @CONTROLLER_SHA@' 'oneshot-boot.sh @BOOT_SHA@' 'codec-test.service @UNIT_SHA@' 'baseline-ref1-p.synthetic @CLIP1_SHA@' 'high-ref1-p.synthetic @CLIP2_SHA@' 'high-ref4-p.synthetic @CLIP3_SHA@' 'high-intra.synthetic @CLIP4_SHA@';do
+  set -- $pair;matches "$USB/payload/$1" "$2" || { echo 'ABORT: payload hash mismatch';return 1; }
+ done
+ for location in "$BASE" "$R/data";do
+  [ -d "$location" ] || continue
+  available=$("$TEMP" available "$location") || return 1
+  case "$available" in ''|*[!0-9]*) return 1;;esac
+  [ "$available" -ge 33554432 ] || { echo 'ABORT: insufficient storage; no staging or activation';return 1; }
+ done
+ [ ! -e "$STAGE" ] && [ ! -L "$STAGE" ] || { echo 'ABORT: prior V22 stage exists; preserve for review';return 1; }
+ mkdir -m 700 "$STAGE" && "$TEMP" meta "$BASE" "$STAGE" || return 1
+ "$TEMP" create "$USB/payload/file-guard" "$STAGE/file-guard" "$BASE/carplay.sh" && chmod 700 "$STAGE/file-guard" || return 1
+ "$TEMP" clone "$BASE/carplay.sh" "$STAGE/factory-carplay.sh" || return 1
+ "$TEMP" clone "$BASE/carplay.sh" "$STAGE/startup-new.sh" && "$TEMP" replace "$USB/payload/oneshot-boot.sh" "$STAGE/startup-new.sh" || return 1
+ for name in controller.sh codec-test.service baseline-ref1-p.synthetic high-ref1-p.synthetic high-ref4-p.synthetic high-intra.synthetic;do
+  "$TEMP" create "$USB/payload/$name" "$STAGE/$name" "$BASE/carplay.sh" || return 1
+ done
+ "$TEMP" create "$USB/payload/synthetic-player" "$STAGE/synthetic-player" "$BASE/carplay" || return 1
+ matches "$STAGE/file-guard" '@GUARD_SHA@' && matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$STAGE/startup-new.sh" '@BOOT_SHA@' && matches "$STAGE/synthetic-player" '@PLAYER_SHA@' && matches "$STAGE/controller.sh" '@CONTROLLER_SHA@' || return 1
+ "$STAGE/synthetic-player" --validate "$STAGE" || return 1
+ "$TEMP" same-meta "$BASE/carplay.sh" "$STAGE/factory-carplay.sh" || return 1
+ [ ! -e "$USB/factory-carplay.sh.backup" ] && [ ! -L "$USB/factory-carplay.sh.backup" ] || return 1
+ cp "$STAGE/factory-carplay.sh" "$USB/factory-carplay.sh.backup" && matches "$USB/factory-carplay.sh.backup" '@STARTUP_SHA@' || return 1
+ sync
+ "$TEMP" replace "$STAGE/startup-new.sh" "$BASE/carplay.sh" && matches "$BASE/carplay.sh" '@BOOT_SHA@' || return 1
+ printf 'CODEC_TEST_V22\n' > "$STAGE/ARMED.pending" && mv "$STAGE/ARMED.pending" "$STAGE/ARMED" || return 1
+ echo 'RESULT: CODEC TEST ARMED; factory executable unchanged; startup restores before monitor'
+}
+if run > "$USB/altscreen-setup.txt" 2>&1;then echo 'SETUP COMPLETE' >> "$USB/altscreen-setup.txt";else echo 'SETUP FAILED: preserve report, do not repeat' >> "$USB/altscreen-setup.txt";fi
+[ -z "$TEMP" ] || rm -f "$TEMP"
+sync
+exit 0

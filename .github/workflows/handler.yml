@@ -136,6 +136,23 @@ jobs:
         run: |
           sudo python3 tests/test-codec-v20-systemd.py recovery/codec-v20-controller.sh.in
           sudo python3 tests/test-codec-v21-systemd.py recovery/codec-v21-controller.sh.in recovery/codec-v21.service.in
+  synthetic-timing-v22:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build timing player and metadata helper
+        run: |
+          gcc -O2 -Wall -Wextra -Werror tools/synthetic-player-v22.c -o /tmp/player-v22
+          gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard-v22
+          python3 -m pip install --timeout 20 --retries 1 --only-binary=:all: --target /tmp/codec-pyav av==19.0.2
+      - name: Verify unchanged recovery safeguards for V22
+        run: |
+          python3 tests/test-codec-v22-setup.py /tmp/guard-v22 recovery
+          python3 tests/test-codec-v22-controller.py recovery/codec-v22-controller.sh.in
+          sudo python3 tests/test-codec-v22-systemd.py recovery/codec-v22-controller.sh.in recovery/codec-v22.service.in
+      - name: Verify continuous Baseline playback and timing summaries
+        run: sudo unshare --net python3 tests/test-synthetic-player-v22.py /tmp/player-v22 --network
   codec-v20-report-collection:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
