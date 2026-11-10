@@ -123,13 +123,19 @@ jobs:
           gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/codec-file-guard
           python3 -m pip install --timeout 20 --retries 1 --only-binary=:all: --target /tmp/codec-pyav av==19.0.2
       - name: Check staging and recovery-first startup
-        run: python3 tests/test-codec-v20-setup.py /tmp/codec-file-guard recovery
+        run: |
+          python3 tests/test-codec-v20-setup.py /tmp/codec-file-guard recovery
+          python3 tests/test-codec-v21-setup.py /tmp/codec-file-guard recovery
       - name: Check controller refusal and restoration
-        run: python3 tests/test-codec-v20-controller.py recovery/codec-v20-controller.sh.in
+        run: |
+          python3 tests/test-codec-v20-controller.py recovery/codec-v20-controller.sh.in
+          python3 tests/test-codec-v21-controller.py recovery/codec-v21-controller.sh.in
       - name: Check paced isolated multicast and decode every picture
         run: sudo unshare --net python3 tests/test-synthetic-player-v20.py /tmp/synthetic-player --network
       - name: Check real service death and timeout restoration
-        run: sudo python3 tests/test-codec-v20-systemd.py recovery/codec-v20-controller.sh.in
+        run: |
+          sudo python3 tests/test-codec-v20-systemd.py recovery/codec-v20-controller.sh.in
+          sudo python3 tests/test-codec-v21-systemd.py recovery/codec-v21-controller.sh.in recovery/codec-v21.service.in
   codec-v20-report-collection:
     runs-on: ubuntu-24.04
     timeout-minutes: 2

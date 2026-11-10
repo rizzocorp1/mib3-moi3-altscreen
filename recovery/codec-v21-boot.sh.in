@@ -1,0 +1,33 @@
+#!/bin/sh
+R='@ROOT@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-codec-test-v21"
+LOG="$STAGE/boot-status.txt"
+GUARD="$STAGE/file-guard"
+matches() { [ -f "$1" ] && [ ! -L "$1" ] || return 1;actual=$(sha256sum "$1") || return 1;[ "${actual%% *}" = "$2" ]; }
+export_boot() {
+ for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+  if [ -f "$usb/CODEC_TEST_V21.txt" ] && [ ! -L "$LOG" ] && [ -f "$LOG" ] && [ ! -L "$usb/boot-status.txt" ];then cp "$LOG" "$usb/boot-status.txt" 2>/dev/null || true;fi
+ done
+}
+status() { [ ! -L "$LOG" ] && printf '%s\n' "$*" >> "$LOG";export_boot; }
+trap export_boot EXIT
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode2" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_state" 2>/dev/null || true
+status 'BOOT: V21 runtime-unit launcher entered'
+if ! matches "$GUARD" '@GUARD_SHA@' || ! matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@';then status 'ABORT: recovery helper/baseline mismatch';exit 0;fi
+if ! "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" || ! "$GUARD" replace "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" || ! matches "$BASE/carplay.sh" '@STARTUP_SHA@';then status 'ABORT: exact startup restoration failed';exit 0;fi
+status 'RECOVERY: exact factory startup restored before any service or video change'
+if [ ! -f "$STAGE/ARMED" ] || [ -L "$STAGE/ARMED" ] || [ -e "$STAGE/CONSUMED" ];then status 'DISARMED';exit 0;fi
+mv "$STAGE/ARMED" "$STAGE/CONSUMED" || exit 0
+if ! matches "$BASE/carplay" '@CARPLAY_SHA@' || ! matches "$STAGE/synthetic-player" '@PLAYER_SHA@' || ! matches "$STAGE/controller.sh" '@CONTROLLER_SHA@' || ! matches "$STAGE/codec-test.service" '@UNIT_SHA@';then status 'ABORT: staged checksum mismatch; native operation retained';exit 0;fi
+UNITDIR="$R/run/systemd/system"
+UNIT="$UNITDIR/moi3-codec-v21.service"
+if [ ! -d "$UNITDIR" ] || [ -L "$UNITDIR" ] || [ -e "$UNIT" ] || [ -L "$UNIT" ];then status 'ABORT: runtime unit directory unavailable or unit already exists';exit 0;fi
+if ! "$GUARD" create "$STAGE/codec-test.service" "$UNIT" "$R/lib/systemd/system/carplay.service" || ! matches "$UNIT" '@UNIT_SHA@';then status 'ABORT: runtime unit creation/verification failed';exit 0;fi
+if ! systemctl daemon-reload >> "$LOG" 2>&1;then status 'ABORT: runtime unit reload failed';exit 0;fi
+if systemctl start --no-block moi3-codec-v21.service >> "$LOG" 2>&1;then
+ status 'CODEC MONITOR QUEUED: /run unit, no systemd-run property parser, no executable bind mount'
+else status 'ABORT: runtime monitor start rejected; factory sender untouched';fi
+exit 0
