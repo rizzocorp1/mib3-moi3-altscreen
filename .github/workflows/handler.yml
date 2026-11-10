@@ -130,3 +130,10 @@ jobs:
         run: sudo unshare --net python3 tests/test-synthetic-player-v20.py /tmp/synthetic-player --network
       - name: Check real service death and timeout restoration
         run: sudo python3 tests/test-codec-v20-systemd.py recovery/codec-v20-controller.sh.in
+  codec-v20-report-collection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check collection without unit-side mutations
+        run: python3 tests/test-codec-v20-collect.py recovery/codec-v20-collect.sh.in
