@@ -59,7 +59,7 @@ run() {
         for source in "$R/data/lge/smartlink/carplay/carplay-handler-v27.log" "$BASE/carplay-handler-v27.log" "$R/tmp/carplay-handler-v27.log"; do
             if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$USB/altscreen-handler.log" ]; then cp "$source" "$USB/altscreen-handler.log" || return 1; fi
         done
-        echo 'RESULT: COLLECTION ONLY � no activation or restoration attempted'
+        echo 'RESULT: COLLECTION ONLY — no activation or restoration attempted'
         return 0
     fi
     if [ -f "$USB/RESTORE_FACTORY_STARTUP.txt" ] && [ ! -L "$USB/RESTORE_FACTORY_STARTUP.txt" ]; then
@@ -81,7 +81,7 @@ run() {
         matches "$TARGET" '@CARPLAY_SHA@' || return 1
         rm -f "$STAGE/ARMED" "$STAGE/ARMED.pending"
         sync
-        echo 'RESULT: FACTORY STARTUP RESTORED � backup/log assets retained; use normal updater completion/Resume'
+        echo 'RESULT: FACTORY STARTUP RESTORED — backup/log assets retained; use normal updater completion/Resume'
         return 0
     fi
     matches "$TARGET" '@CARPLAY_SHA@' && matches "$STARTUP" '@STARTUP_SHA@' || { echo 'ABORT: vehicle baseline mismatch'; return 1; }
@@ -159,13 +159,13 @@ run() {
     printf 'map-session-v27\n' > "$STAGE/ARMED.pending" || return 1
     mv "$STAGE/ARMED.pending" "$STAGE/ARMED" || return 1
     sync
-    echo 'RESULT: MAP TEST ARMED � factory executable unchanged; startup restores itself before the map attempt'
+    echo 'RESULT: MAP TEST ARMED — factory executable unchanged; startup restores itself before the map attempt'
     echo 'Allow the updater to finish, then use Resume. Keep the stick connected for logs.'
 }
 if run > "$REPORT" 2>&1; then
     echo 'SETUP COMPLETE' >> "$REPORT"
 else
-    echo 'SETUP FAILED � do not repeat or install another package; preserve this report' >> "$REPORT"
+    echo 'SETUP FAILED — do not repeat or install another package; preserve this report' >> "$REPORT"
 fi
 [ -z "$EARLY_GUARD" ] || rm -f "$EARLY_GUARD"
 sync

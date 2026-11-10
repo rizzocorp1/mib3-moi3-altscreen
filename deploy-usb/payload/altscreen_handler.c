@@ -1,5 +1,5 @@
 /*
- * altscreen_handler.c v6.1 � Genuine CarPlay AltScreen Gen-2 Cluster Streamer
+ * altscreen_handler.c v6.1 — Genuine CarPlay AltScreen Gen-2 Cluster Streamer
  * =============================================================================
  * Arquitetura de Producao IRC-Parity (MIB3 MOI3 LG AArch64 / Linux glibc 2.17+):
  *
