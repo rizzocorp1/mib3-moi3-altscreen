@@ -1,0 +1,187 @@
+#!/bin/sh
+# Remove only byte-identified obsolete program copies, after verified USB backup.
+# Keep factory metadata backups, reports, unknown files, directories and active stages.
+set -u
+stage=$1
+usb=$2
+R=${3:-}
+BASE="$R/lge/app_rw/smartlink/carplay"
+GUARD="$stage/file-guard"
+REPORT="$usb/housekeeping-v24.txt"
+[ "$stage" = "$BASE/.moi3-altscreen-map-v24" ] || exit 2
+case "$usb" in "$R/tmp/USB/PORT1/PART1"|"$R/tmp/USB/PORT2/PART1") ;; *) exit 2;; esac
+[ -d "$usb" ] && [ ! -L "$usb" ] && [ ! -L "$REPORT" ] || exit 2
+matches() {
+    [ -f "$1" ] && [ ! -L "$1" ] || return 1
+    actual=$(sha256sum "$1" 2>/dev/null) || return 1
+    [ "${actual%% *}" = "$2" ]
+}
+run() {
+    echo 'MOI3 V24 READ-ONLY INVENTORY AND VERIFIED OBSOLETE-PROGRAM CLEANUP'
+    matches "$GUARD" '@GUARD_SHA@' && matches "$BASE/carplay" '@CARPLAY_SHA@' && matches "$BASE/carplay.sh" '@STARTUP_SHA@' && matches "$stage/factory-carplay.sh" '@STARTUP_SHA@' || {
+        echo 'CLEANUP REFUSED: factory baseline/helper verification failed; no deletions';return 1;
+    }
+    "$GUARD" same-meta "$stage/factory-carplay.sh" "$BASE/carplay.sh" || return 1
+    echo 'BEFORE app_rw';"$GUARD" space "$BASE" || return 1
+    if [ -d "$R/data" ] && [ ! -L "$R/data" ]; then echo 'BEFORE data';"$GUARD" space "$R/data" || return 1;fi
+    "$GUARD" inventory "$BASE" || return 1
+    archive="$usb/moi3-obsolete-programs-v24"
+    if [ -e "$archive" ] || [ -L "$archive" ]; then
+        [ -d "$archive" ] && [ ! -L "$archive" ] && [ -f "$archive/BACKUP_SCOPE.txt" ] && [ ! -L "$archive/BACKUP_SCOPE.txt" ] && [ "$(cat "$archive/BACKUP_SCOPE.txt")" = MOI3_OBSOLETE_TEST_PROGRAMS_V24 ] || {
+            echo 'CLEANUP REFUSED: unknown backup directory; preserving all old programs';return 1;
+        }
+    else
+        mkdir "$archive" || return 1
+        (set -C;printf 'MOI3_OBSOLETE_TEST_PROGRAMS_V24\n' > "$archive/BACKUP_SCOPE.txt") || return 1
+    fi
+    reclaimed=0;removed=0;last_version='';eligible=0
+    while IFS='|' read -r version name expected; do
+        case "$version" in v6|v7|v8|v9|v10|v11|v12|v13|v14|v15|v16|v17|v18) ;; *) echo 'PRESERVED invalid version row';continue;; esac
+        case "$name" in file-guard|packet-audit|carplay-once|altscreen_handler.so|managed-log-collector.sh|startup-new.sh) ;; *) echo 'PRESERVED invalid file row';continue;; esac
+        case "$expected" in *[!0-9a-f]*) continue;; esac
+        [ "${#expected}" = 64 ] || continue
+        old="$BASE/.moi3-altscreen-map-$version"
+        if [ "$last_version" != "$version" ]; then
+            last_version=$version;eligible=0
+            [ -d "$old" ] && [ ! -L "$old" ] || continue
+            if systemctl is-active --quiet "moi3-altscreen-log-$version.service"; then
+                printf 'PRESERVED active stage=%s\n' "$version";continue
+            fi
+            if matches "$old/factory-carplay.sh" '@STARTUP_SHA@' && "$GUARD" same-meta "$old/factory-carplay.sh" "$stage/factory-carplay.sh"; then eligible=1
+            else printf 'PRESERVED stage=%s: baseline or metadata not verified\n' "$version";fi
+        fi
+        [ "$eligible" = 1 ] || continue
+        source="$old/$name"
+        [ -e "$source" ] || [ -L "$source" ] || continue
+        matches "$source" "$expected" || continue
+        bytes=$("$GUARD" size "$source") || continue
+        case "$bytes" in ''|*[!0-9]*) continue;; esac
+        if [ "$removed" -ge 24 ] || [ $((reclaimed+bytes)) -gt 33554432 ]; then
+            echo 'CLEANUP BUDGET REACHED: maximum24 copies/32MiB per update; remaining copies preserved for a later verified pass'
+            break
+        fi
+        backup_dir="$archive/$version"
+        if [ ! -e "$backup_dir" ] && [ ! -L "$backup_dir" ]; then mkdir "$backup_dir" || continue;fi
+        [ -d "$backup_dir" ] && [ ! -L "$backup_dir" ] || continue
+        backup="$backup_dir/$name.$expected.backup"
+        if [ -e "$backup" ] || [ -L "$backup" ]; then matches "$backup" "$expected" || { echo 'PRESERVED conflicting backup';continue; }
+        else cp "$source" "$backup" || { echo 'PRESERVED copy failure';continue; };fi
+        matches "$backup" "$expected" && matches "$source" "$expected" || { echo 'PRESERVED backup/source verification failure';continue; }
+        bytes=$("$GUARD" size "$source") || continue
+        case "$bytes" in ''|*[!0-9]*) continue;; esac
+        # Literal, fixed basename inside a validated stage. Never recursive delete.
+        if rm -f "$source"; then
+            reclaimed=$((reclaimed+bytes));removed=$((removed+1))
+            printf 'REMOVED verified obsolete copy version=%s file=%s bytes=%s\n' "$version" "$name" "$bytes"
+        fi
+    done <<'VERIFIED_PROGRAM_ROWS'
+v10|altscreen_handler.so|d2650b706b39dd89ab56782e1256064d836d92a0c3e1a4fb291b99476b765a04
+v10|carplay-once|fed2f6c892df6a8e037b40b6e9ffcf1a507f92b86a96c5ad6fb2a508dc242f13
+v10|file-guard|1a8b923f973e34e8a8521763b411a9f72840b5cf4551824e59df3959a21cc930
+v10|file-guard|2de15cea8f77fe1bd224c128dbaa8c873219900c7954225eeb9cbecb8ec7b157
+v10|file-guard|8f75dfd89cd1fab58d31c814c6b45badb004f22d8dc2a888381cb3f065946e25
+v10|file-guard|98638c0934182b24735b5633d005dbde7e8bb978246e4b14c4d7c6eb7e929c4d
+v10|managed-log-collector.sh|3e871595be7fa01f1fce58ed2bad17645d17e821fa8c0eb1b2677fa252434226
+v10|managed-log-collector.sh|f446293977da26716827b78f97fbf223f6fa8d4956f6f1e5b4c17e996c52e485
+v10|packet-audit|0b85ab4a460980db6fa8a21eee4e59d292eb926d6c4b5fe0a5f0851c9ad41348
+v10|packet-audit|33d07f54f6a9b8b864f98da78e1843d20ba27bfea289e8bfc23f771367e4a82a
+v10|packet-audit|7b51a96e2bee481dcc7d5524d3627e7015c40baae231f93951c1876de2131a3b
+v10|packet-audit|f04a0bb290f738353b02ef4f4eb45acf2b3e51fb6a02722277857eb979dd0ad8
+v10|startup-new.sh|586a2459a910dfe78fbe4d5d06ead382c00ea58c45bd142b027842ae66418a9f
+v10|startup-new.sh|7923e1113e1eb9a856359576184064a9136e8c3f4d10a05ee2e7b56d2c88ebec
+v10|startup-new.sh|ab11a09fb8958b926f673d31b89c2b4befeb32f1534959ed4571864b9f415eed
+v10|startup-new.sh|cf222b8664ba381159fd965597d8a3f7f385732799eeee73c8ac76610cbe541c
+v11|altscreen_handler.so|4943ebf9a8df4b245ce6c9c066390edbe4dff4fd98e1a3bf9435c7f8f7f0415c
+v11|carplay-once|62c803cbb7d26747d21574b9a192ca2ae42e702c85c2d1dc45faf9b8dc650609
+v11|file-guard|ad4d8ad13f89d726dd0b6a088e7b5e156ed2037ddae98a72280f05b948ec56c0
+v11|managed-log-collector.sh|bac75a70eb944a296e3c59b8086efefec1e1bc04e04bda15378b3edf128dedc3
+v11|packet-audit|33d0dc9b3d3554fba12013142a94a957164c78de5d97fb6ef52090e01b8be985
+v11|startup-new.sh|ad0ca598db7a151935302318fce29b2359a1493ffbbb198ad27c2415b79633e7
+v12|altscreen_handler.so|aecd9b64f28b85b685840ed4516532bd4286c52fd2676dc5fc5c7eae84156b6f
+v12|altscreen_handler.so|cd12ac19ffa3a40ab2d39cfbb9faa4bb88edbd64f46f1ba3458cb0352c061078
+v12|carplay-once|807b1912b47cff3183a88ecf1272d9386c7d29f74ee53b5c21c3ba044c63762e
+v12|file-guard|02a21dd13771e64a1200e54ea02815fb24349a4e043b3d5e054dc3f159e1a306
+v12|file-guard|20a9c05f37d325c87c7d03ad28507b6b4d7b81eeba41fcd4794c3c93041f39a8
+v12|managed-log-collector.sh|72478443d674882bea81841479ca0cd0bca618cb8d0fdc68e7363dbe065657c2
+v12|packet-audit|6fed1c5c89dbe003a83e8143c0e0dd4333bdb230c0c299200b6c08905e9db5bc
+v12|packet-audit|77afffb2710b5f923b79dc9a45a8aaeea642fc7432e73268c3c527170059162c
+v12|startup-new.sh|2e639df17604a0da9cc297c2702ee9ad6a59fe9c252e184382cde1cd9e725ecb
+v12|startup-new.sh|c27c565ab873a6a4580ee399ef007d72fdd113e9ea6f9ccf89e5bb2d4a526c20
+v13|altscreen_handler.so|aaa4ffc31b1e71b401e7a5b57b2dd416c750c4b28f32aafbffbeca6c6ae3c751
+v13|carplay-once|d6eba4d62266a045a1e8f5257dbb3120d7cd388ec5c060a8430c5b49c7083fca
+v13|file-guard|304abdb17aa017f039679508af46c26dc0becd8b376a96be9b9e15e8ca1ba676
+v13|managed-log-collector.sh|11d375401e05cdf34bc2d007717489f3174f20a31ae997798fe08be8e33d5cb0
+v13|packet-audit|7af974adc62f8c8c9c9842f62ea85928b797c2dfbe2f53bd54731e0ee3486f70
+v13|startup-new.sh|30e4c67715127773e8268370d09968e92a394933f6631f7c75d628870d139d37
+v14|altscreen_handler.so|3e96e04524d9acf5a7ce73625320449d0689c2a95c1339359a58abd115b1a3c5
+v14|carplay-once|fc985a692b934e02575d0cd2d3f3c7c25ac68fa808bca2e10fca46f79196200b
+v14|file-guard|904e2d418205d6263a454dc5b046c62ffded8c72d31ad0ff3ddebfc651664167
+v14|managed-log-collector.sh|b2fd5dee58023462c8df5ea2a7aba30277a2a461dff03d30f230baf4883d9384
+v14|packet-audit|d878d2017f44b3fd3d5eb227503232833a79bcaca45ff5fde79a47444a3de9b0
+v14|startup-new.sh|f6cb86247f1b46fd32a000044b9cd9108d181b4bc5e8c8b336ba81461ef46132
+v15|altscreen_handler.so|1867c0a5f44c20d4bb73ba623a45e9ebc19de2fb4cca0e530331d33ab2a86a6d
+v15|altscreen_handler.so|432e73ebf8ea3569a6bcde65ab4e61807b4513f0db76308e3363f806ee694be3
+v15|carplay-once|40393110cc5d487df4bb58a16421629df0071ca0bb43961f2584bef42ab4d05a
+v15|file-guard|a574016fcf25e9647343b6617d448b2feeb1da37039d8732e4012877a650d5cf
+v15|file-guard|d9d920bcfb65a4f13d1e574c011cd14118bfb5c1ccfe195d061ea3bcd9d7b1db
+v15|managed-log-collector.sh|565e524f1909d9c90e6541e19298dfbd9d2d9c723e77ed825b41dc4e544bc896
+v15|managed-log-collector.sh|79943b4cee1e447157e02147586f344ffeb05e8af5762eb1edbfbd71ecd8be57
+v15|packet-audit|0550f0ba2c4914f01bd9525026629f3f8d4133658dac6cda2af08f08f0a11de5
+v15|packet-audit|45c0f401174c02ec7220b862a7d1b4bc7ab8277e24787e43fe478c4dab6391f8
+v15|startup-new.sh|a4238116c8d8782cb66a5351308e282cf7de860dee2d6c470baae775ae585c3b
+v15|startup-new.sh|bed640c356b1e87f4f2c5e27e08838d4959f4e0aaf1c83da1a4b88ac123c729c
+v16|altscreen_handler.so|d14c717212765cff35b57338f957d76397e2e2be2eb8892cb75b63f96cc5eb68
+v16|carplay-once|8fa0631fcd17d2c3f9017a7dad042ce025343fddc9b3f665acecf479466cd965
+v16|file-guard|771f80a6c361d8200b60085325be11d8f0b78451ec9a990d580ec47215079abf
+v16|managed-log-collector.sh|822066db260121093d85c61fcbac2ec16b6be27a74a8152481c4b50c35886129
+v16|packet-audit|76881d9ebcb41cab0701f327737bb854a9136e13aad8d87c11b5016645ff4359
+v16|startup-new.sh|cc6c89415be8d757fb5144bc0aa9ea380fb165d312aa71208d2b85d91d520fe2
+v6|altscreen_handler.so|ef3af3ee6aa5b8b731030c802ae3a75384b75eb649596d0489ded2c937fa2879
+v6|carplay-once|42404c6b3de64e32797e09cdfce4477e2e4b2ff389e05b045f3d79a628d2abed
+v6|file-guard|a8f5ff79d37633b715e4c45aa14eb8bcba342a9008952b67db1956c53c9bfe30
+v6|managed-log-collector.sh|eba6d87029f9d7596b7cd47a684222031d6be424c48b239ff5746610456f5df9
+v6|startup-new.sh|42e6f77162eb4361f61ca3e14e2a2e1576ca180c7d9f343471e4854afbf89969
+v7|altscreen_handler.so|c81215694931cbae83d147d83ebf7a752f6a341ffc772b95fa1dd33381546d0e
+v7|carplay-once|13aba2c6c2283f552dbcdc5a9beb71457f5746cf2cb41e98b2d7cf9d7f906369
+v7|file-guard|4abe7a2407042f614059b08c63e3bdcfe66da96c8c620f3037f174e6828df41e
+v7|managed-log-collector.sh|2d6fa8991b4148ea9d9d60c8138aa5e5250e7d06b2337cbe5be536e523607bcb
+v7|startup-new.sh|4f6ebb4b65dbe504b81663e905f30e31b9e15c69c45190adae05c1907360ef06
+v8|altscreen_handler.so|b8aec37ade63bd28fba5d64f9cc4557983ca29c8b6be3a4fe186f063c066e302
+v8|carplay-once|9aa5fb235a6d9658103d4240be74c0d4a8baebdba1ec94b535a9276302a67cac
+v8|file-guard|0f1332ae1f7c46e766a2829100824047b4683037946f1f41eb5113b45d2041b8
+v8|managed-log-collector.sh|d6bd63d13c0ede40659c554f49462610ac20b51ac92edd28127c053e7f6b09b3
+v8|startup-new.sh|f996f483aba7db0927d42fe5ebbf5cdd337c2e6e4c361fdf1114b37f56ed3a23
+v9|altscreen_handler.so|282830ca11208ad3aa064277b4bc48b60d38b6ff08b5d60360c2e473a211f2db
+v9|altscreen_handler.so|44a8a12051023881a099f38c150afe98e8b429c08d9e6190f27e39094e1231a2
+v9|altscreen_handler.so|b8a96de6ef560ca3e02675b4880b84222b1d1154d0bc0c42f76e118c4251b0ce
+v9|altscreen_handler.so|eb7c85aa12627afe4d8c987f072e96d1bb826ccc493c919f07e0433a61522821
+v9|carplay-once|bf149b2e6fcfa1c6acf80345b399d6e44b12c1fbb02c6c1f5687ed36c47b8800
+v9|file-guard|acb03056dc0f4fb9c18ad6ee90b84de6168dcf08fd7116881bdc028e04b94242
+v9|file-guard|ae49babd058d45782b267119dbbbc41ffcf33a3fb98501285ed290234b254b49
+v9|file-guard|ea4bf99cbf9472b956c18dd92be4dc5dceba2d1f947255b9c91aaa9c9d7ee3b0
+v9|file-guard|ec1c1628abfbb2936a649268dbefc1ef3a8852f09ebba00a1880b76bb14dd72c
+v9|managed-log-collector.sh|f45d20d87fc0d37533cec6ed26d085b6e31ceb75846ac19f6d8df350192b3363
+v9|startup-new.sh|02091db2b4574c3b402e12fa3fc4612db1cc78af88c6b37b7b857b4adef95efe
+v9|startup-new.sh|080c8ffa3ffbb0f52be9b6eac458489de3c45bc82dedfb3bd2bdba1fb80d10b8
+v9|startup-new.sh|4ed46ff21f91b8b1eeb44f2d3d85c711864547bff850edb93d8474b1503edf43
+v9|startup-new.sh|e1aa3b1e68b39db0852494038c04b99f0ec856c28490ba4a5999971ce9e5b1c3
+v17|file-guard|dfd46bf21715786470beb84dc467d7bf4fef84afe1af59beb3a03b47f942b11a
+v17|packet-audit|d583a300ab024f2af09f3229b3921f5d1684f2e7c241996617ea9110137d8fbb
+v17|carplay-once|0bfbe60a9eaf71dfcceb8ccbc7aea57de00b9075b67c2156d3dda0bf931d690d
+v17|altscreen_handler.so|130edd2eca7e9f586345ccf09c9dfe8cede160713df929110b6c40ae0c2c9b47
+v17|managed-log-collector.sh|24e7c3b7ceba5f5e02bee980cc037ba5848ac561e3749a4d1bf40e7943488c74
+v17|startup-new.sh|671ddab837df60b8d957e32fcc7e3dc4a3f19185a13f6d13208c447b130e84a3
+v18|file-guard|f6f4ac40fd757d2092e41f06dbe4819fb8c770643f6abe9d72426141d6d2e1bd
+v18|packet-audit|3dfa9048e74860dfec21f20a1b27af23a7e5607cbb0487b58630bc6cd4690596
+v18|carplay-once|0ee128e031ed6be1c458549a526de389615842cf2cea3e3ed72eae17bbb30df2
+v18|altscreen_handler.so|9e9d53f07b24f2a61dc8b3051590d1096fac80879d0a8d3f17a01ad583b891de
+v18|managed-log-collector.sh|95800d90dd5b159e62b7f23c391ba5d87cd8ab56000a2b31b6c66be2e7a1556b
+v18|startup-new.sh|79ccd7532c3014df4d322569c3c40c505a751651ae83b94368446ef87a8da450
+VERIFIED_PROGRAM_ROWS
+    sync
+    printf 'CLEANUP COMPLETE removedCopies=%s logicalBytesRemoved=%s; factory backups/reports/unknown files retained\n' "$removed" "$reclaimed"
+    echo 'AFTER app_rw';"$GUARD" space "$BASE"
+    if [ -d "$R/data" ] && [ ! -L "$R/data" ]; then echo 'AFTER data';"$GUARD" space "$R/data";fi
+    "$GUARD" inventory "$BASE"
+}
+run > "$REPORT" 2>&1

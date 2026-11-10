@@ -3,8 +3,8 @@
 #include "../deploy-usb/payload/altscreen_handler.c"
 #include <assert.h>
 static void reset_private_fixture(const char *directory) {
-    char path[512];snprintf(path,sizeof(path),"%s/map-v19-video.bin",directory);unlink(path);
-    snprintf(path,sizeof(path),"%s/map-v19-video.ready",directory);unlink(path);
+    char path[512];snprintf(path,sizeof(path),"%s/map-v24-video.bin",directory);unlink(path);
+    snprintf(path,sizeof(path),"%s/map-v24-video.ready",directory);unlink(path);
     g_video_capture.fd=-1;g_video_capture.attempted=0;g_video_capture.frames=0;g_video_capture.bytes=0;
 }
 int main(void) {
@@ -15,7 +15,7 @@ int main(void) {
     capture_video(bytes,sizeof(bytes),90000,1000000,1);assert(g_video_capture.frames==1 && g_video_capture.fd>=0);
     capture_video(bytes,sizeof(bytes),93000,1033333,0);assert(g_video_capture.frames==2);
     capture_video(bytes,sizeof(bytes),360000,4000000,0);assert(g_video_capture.fd==-1);
-    char path[512],ready[512];snprintf(path,sizeof(path),"%s/map-v19-video.bin",directory);snprintf(ready,sizeof(ready),"%s/map-v19-video.ready",directory);
+    char path[512],ready[512];snprintf(path,sizeof(path),"%s/map-v24-video.bin",directory);snprintf(ready,sizeof(ready),"%s/map-v24-video.ready",directory);
     FILE *f=fopen(path,"rb");assert(f);uint8_t all[4096];size_t n=fread(all,1,sizeof(all),f);assert(feof(f));fclose(f);
     assert(n==8+2*(12+sizeof(bytes))&&!memcmp(all,"MOI3VC1\n",8));
     assert(all[8]==0 && all[9]==4 && all[10]==0 && all[11]==0);

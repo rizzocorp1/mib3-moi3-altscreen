@@ -1,5 +1,5 @@
 /*
- * altscreen_handler.c v6.1 — Genuine CarPlay AltScreen Gen-2 Cluster Streamer
+ * altscreen_handler.c v6.1 â€” Genuine CarPlay AltScreen Gen-2 Cluster Streamer
  * =============================================================================
  * Arquitetura de Producao IRC-Parity (MIB3 MOI3 LG AArch64 / Linux glibc 2.17+):
  *
@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v19.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v19.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v19.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v24.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v24.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v24.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -200,7 +200,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v19-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v24-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -294,7 +294,7 @@ static void *array_clone(void *arr) {
 /* =============================================================================
  * ViewAreas e enabledFeatures (AltScreen Apple CarPlay Specification)
  * ============================================================================= */
-#include "layout-v19.h"
+#include "layout-v24.h"
 
 static int set_reference_enabled_features(void *dict, int enable_viewareas) {
     if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
@@ -435,8 +435,8 @@ static uint8_t g_pat_cc = 0;
 static uint8_t g_pmt_cc = 0;
 static uint8_t g_video_cc = 0;
 static int g_video_discontinuity=1;
-#include "transport-clock-v19.h"
-static transport_clock_v19 g_transport_clock;
+#include "transport-clock-v24.h"
+static transport_clock_v24 g_transport_clock;
 
 static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
@@ -638,9 +638,10 @@ static void mux_and_stream_h264_frame(const uint8_t *frame_data, size_t frame_le
     pes_buf[2] = 0x01;
     pes_buf[3] = 0xE0;
 
-    uint32_t pes_payload_len = (pes_total_len - 6 > 65535) ? 0 : (uint32_t)(pes_total_len - 6);
-    pes_buf[4] = (uint8_t)((pes_payload_len >> 8) & 0xFF);
-    pes_buf[5] = (uint8_t)(pes_payload_len & 0xFF);
+    /* Matching MU0841 factory getStreamPacket: video PES length is zero.
+     * Keep access-unit bytes, clocks and TS/RTP packetization unchanged. */
+    pes_buf[4] = 0;
+    pes_buf[5] = 0;
 
     pes_buf[6] = 0x80;
     pes_buf[7] = 0x80;
@@ -807,7 +808,7 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v19.h"
+#include "frame-gate-v24.h"
 #include "deferred-video-v9.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
@@ -827,7 +828,7 @@ static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *
     return 0;
 }
 #define PRIVATE_CAPTURE_ENABLED 0
-#include "capture-v19.h"
+#include "capture-v24.h"
 
 static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
@@ -943,7 +944,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v19.h"
+#include "aux-refresh-v24.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1712,7 +1713,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v19 (session lease recovery) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v24 (factory zero-length video PES; session lease recovery) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();

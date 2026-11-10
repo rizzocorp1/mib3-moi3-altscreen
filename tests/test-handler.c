@@ -107,7 +107,7 @@ static void test_source_signals(void) {
     reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1,99000);assert(captured[5]==0xd0);
 }
 static void test_local_transport_clock(void) {
-    transport_clock_v19 clock={0};uint64_t pts,pcr_ticks,value;
+    transport_clock_v24 clock={0};uint64_t pts,pcr_ticks,value;
     assert(transport_clock_at(&clock,8000000,&pts)==0&&pts==90000);
     assert(transport_clock_at(&clock,8000007,&pcr_ticks)==0&&pcr_ticks==90630);
     assert(transport_clock_at(&clock,8000006,&value)==-1);
@@ -119,6 +119,7 @@ static void test_local_transport_clock(void) {
     assert(pcr(captured)==pcr_ticks&&video_payload(pes)==sizeof(frame)+14);
     uint64_t encoded_pts=((uint64_t)((pes[9]>>1)&7)<<30)|((uint64_t)pes[10]<<22)|
         ((uint64_t)(pes[11]>>1)<<15)|((uint64_t)pes[12]<<7)|(pes[13]>>1);
+    assert(pes[4]==0 && pes[5]==0);
     assert(encoded_pts==pts&&memcmp(pes+14,frame,sizeof(frame))==0);
     reset_capture(0);mux_and_stream_h264_frame(frame,sizeof(frame),(1ULL<<33)-90,0,(1ULL<<33)+90);
     assert(pcr(captured)==90);
