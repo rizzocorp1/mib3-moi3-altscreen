@@ -15,3 +15,8 @@ jobs:
         run: gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-transport-audit-v25.c -ldl -pthread -o /tmp/transport-audit
       - name: Reproduce timing collapse and hidden output failures
         run: /tmp/transport-audit
+      - name: Reproduce monitor crash gap with real systemd and external output owner
+        run: |
+          gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/audit-guard
+          gcc -O2 recovery/packet-audit.c -o /tmp/audit-packets
+          sudo python3 tests/test-map-monitor-death-audit.py recovery/map-v25-log-collector.sh /tmp/audit-guard /tmp/audit-packets
