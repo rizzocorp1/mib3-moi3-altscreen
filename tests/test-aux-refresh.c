@@ -41,7 +41,8 @@ int main(void){
     s_aux_queue=queue;s_aux_async=asynchronous;s_aux_send=send_command;
     Object *session=object(3),*other=object(3);g_alt_session=session;g_alt_thread_running=1;g_alt_chacha_valid=1;g_received_frames=1;
     assert(aux_refresh_tick_at(100000)==0&&!queued); /* no encoder grant */
-    g_handoff_started=1;assert(aux_refresh_tick_at(100000)==1&&queued==1&&session->refs==2);
+    g_handoff_started=1;assert(aux_refresh_tick_at(100000)==0&&!queued); /* active output: no periodic keyframe */
+    g_handoff_started=0;g_idr_frames=1;assert(aux_refresh_tick_at(100000)==1&&queued==1&&session->refs==2);
     assert(aux_refresh_tick_at(110000)==0&&queued==1); /* pending command coalesces */
     run_one();assert(native_calls==1&&session->refs==1&&!g_aux_queued_total&&live==2);
     assert(aux_refresh_tick_at(101999)==0);
@@ -56,17 +57,19 @@ int main(void){
     g_aux_attempts=90;assert(aux_refresh_tick_at(239000)==1&&queued==1);invalidate();run_one();assert(native_calls==2);
     assert(aux_refresh_tick_at(242000)==1);g_alt_chacha_valid=0;run_one();assert(native_calls==2&&live==2);
     g_alt_chacha_valid=1;assert(aux_refresh_tick_at(245000)==1);g_handoff_started=0;invalidate();run_one();assert(native_calls==2&&live==2);
-    g_handoff_started=1;invalidate();assert(aux_refresh_tick_at(250000)==1);
+    g_handoff_started=0;invalidate();assert(aux_refresh_tick_at(250000)==1);
     block_native=1;pthread_t worker;assert(pthread_create(&worker,NULL,run_worker,NULL)==0);
     pthread_mutex_lock(&native_lock);while(!native_entered)pthread_cond_wait(&native_condition,&native_lock);pthread_mutex_unlock(&native_lock);
     /* Invalidation/teardown never waits for the blocked native dispatch. */
     invalidate();assert(other->refs==2);
     pthread_mutex_lock(&native_lock);release_native=1;pthread_cond_signal(&native_condition);pthread_mutex_unlock(&native_lock);
     assert(pthread_join(worker,NULL)==0 && g_aux_results==0 && other->refs==1 && live==2);
-    block_native=0;invalidate();g_layout_advertised=1;
+    block_native=0;invalidate();g_layout_advertised=1;g_handoff_started=1;
     assert(aux_refresh_tick_at(300000)==1 && ((AuxRefreshJob*)jobs[0].context)->layout);
     run_one();assert(g_aux_layout_attempted && g_aux_attempts==0);
-    assert(aux_refresh_tick_at(302000)==1 && !((AuxRefreshJob*)jobs[0].context)->layout);
+    assert(aux_refresh_tick_at(302000)==0&&!queued); /* layout done; active output remains untouched */
+    g_handoff_started=0; /* new configuration awaiting an IDR */
+    assert(aux_refresh_tick_at(304000)==1 && !((AuxRefreshJob*)jobs[0].context)->layout);
     run_one();assert(g_aux_attempts==1);
     invalidate();assert(aux_refresh_tick_at(304000)==1 && ((AuxRefreshJob*)jobs[0].context)->layout);
     int before=native_calls;invalidate();run_one();assert(native_calls==before);

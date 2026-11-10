@@ -92,6 +92,8 @@ jobs:
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v19-usb.sh.in recovery/map-v19-boot.sh.in
           python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v24-boot.sh.in
           python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v24-usb.sh.in recovery/map-v24-boot.sh.in
+          python3 tests/test-oneshot-boot.py /tmp/file-guard recovery/map-v25-boot.sh.in
+          python3 tests/test-oneshot-setup.py /tmp/file-guard recovery/map-v25-usb.sh.in recovery/map-v25-boot.sh.in
       - name: Check deferred native-encoder handoff and production output gate
         run: python3 tests/test-frame-handoff.py deploy-usb/payload/frame-gate-v12.h recovery/map-v12-log-collector.sh /tmp/file-guard
       - name: Check v13 session lease and native restoration
@@ -102,6 +104,10 @@ jobs:
         run: python3 tests/test-lease-v19.py deploy-usb/payload/frame-gate-v19.h recovery/map-v19-log-collector.sh /tmp/file-guard /tmp/packet-audit
       - name: Check V24 map session recovery
         run: python3 tests/test-lease-v24.py deploy-usb/payload/frame-gate-v24.h recovery/map-v24-log-collector.sh /tmp/file-guard /tmp/packet-audit
+      - name: Check V25 map lease and reliable report export
+        run: |
+          python3 tests/test-lease-v25.py deploy-usb/payload/frame-gate-v25.h recovery/map-v25-log-collector.sh /tmp/file-guard /tmp/packet-audit
+          sudo python3 tests/test-map-v25-export.py recovery/map-v25-log-collector.sh
       - name: Check read-only cluster packet audit
         run: |
           gcc -O2 -Wall -Wextra -Werror recovery/packet-audit.c -o /tmp/packet-audit
