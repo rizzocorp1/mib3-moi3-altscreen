@@ -65,11 +65,11 @@ run() {
  sleep 20
  kill -0 "$audit_pid" 2>/dev/null || { echo 'ABORT: observer stopped before comparison';return 1; }
  grep -Eq 'FRAME_TIMING .*direction=outgoing sourcePort=42989 encoderGrant=0 pts=[1-9]' "$STAGE/packet-timing.log" || { echo 'ABORT: no outgoing factory PES timing; preserve report, factory untouched';return 1; }
- (set -C;printf 'CUSTOM\n' > "$STAGE/CUSTOM_TIMING") || return 1
  systemctl is-active --quiet multi-display.service || { echo 'ABORT: factory sender was not active; no takeover';return 1; }
  (set -C;printf 'CODEC_V23_OWNERSHIP\n' > "$OWNED") || return 1
  if ! systemctl stop multi-display.service || systemctl is-active --quiet multi-display.service; then echo 'ABORT: factory stop not confirmed';return 1;fi
  "$PLAYER" --port-free || { echo 'ABORT: source port occupied; no playback';return 1; }
+ (set -C;printf 'CUSTOM\n' > "$STAGE/CUSTOM_TIMING") || return 1
  echo 'PLAYBACK START: 32-second Baseline timing run (counter repeats every eight seconds); no CarPlay connection needed'
  "$PLAYER" --play "$STAGE" & player_pid=$!
  wait "$player_pid";result=$?;player_pid=''
@@ -79,8 +79,8 @@ run() {
 cleanup() {
  trap - EXIT INT TERM
  if [ -n "$player_pid" ];then kill -TERM "$player_pid" 2>/dev/null || true;sleep 1;kill -KILL "$player_pid" 2>/dev/null || true;wait "$player_pid" 2>/dev/null || true;fi
- restore_native || true
  if [ -n "$audit_pid" ];then kill -TERM "$audit_pid" 2>/dev/null || true;wait "$audit_pid";echo "AUDIT EXIT status=$?";audit_pid='';fi
+ restore_native || true
  export_reports
 }
 trap 'cleanup >> "$LOG" 2>&1' EXIT

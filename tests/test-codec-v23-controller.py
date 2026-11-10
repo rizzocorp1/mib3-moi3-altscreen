@@ -36,13 +36,18 @@ if a=='stop':
  if scenario=='stop-failure':sys.exit(1)
  if scenario!='still-active':(r/'native-active').unlink(missing_ok=True)
 if a=='start':
+ pidfile=r/'lge/app_rw/smartlink/carplay/.moi3-codec-test-v23/audit-pid'
+ if pidfile.exists():
+  try:os.kill(int(pidfile.read_text()),0)
+  except ProcessLookupError:pass
+  else:(r/'unsafe-start').write_text('observer still active');sys.exit(2)
  sock=socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
  try:sock.bind(('::',42989))
  except OSError:(r/'unsafe-start').write_text('busy');sys.exit(2)
  (r/'native-active').write_text('yes')
 ''');ctl.chmod(0o755)
   sleep=tools/'sleep';sleep.write_text('#!/bin/sh\n/bin/sleep .03\n');sleep.chmod(0o755)
-  audit=s/'packet-timing';audit.write_text("#!/usr/bin/python3\nimport sys,time,signal,os\nfrom pathlib import Path\nscenario=os.environ.get('SCENARIO','')\nif scenario=='observer-failure':sys.exit(2)\nPath(sys.argv[2]).write_text('fixture observer\\n'+('' if scenario=='no-factory-timing' else 'FRAME_TIMING flow=0 direction=outgoing sourcePort=42989 encoderGrant=0 pts=100\\n'))\nPath(sys.argv[3]).write_text('READY')\nsignal.signal(signal.SIGTERM,lambda *_:sys.exit(0))\ntime.sleep(120)\n");audit.chmod(0o755)
+  audit=s/'packet-timing';audit.write_text("#!/usr/bin/python3\nimport sys,time,signal,os\nfrom pathlib import Path\nscenario=os.environ.get('SCENARIO','')\nif scenario=='observer-failure':sys.exit(2)\nPath(sys.argv[2]).write_text('fixture observer\\n'+('' if scenario=='no-factory-timing' else 'FRAME_TIMING flow=0 direction=outgoing sourcePort=42989 encoderGrant=0 pts=100\\n'))\nPath(sys.argv[3]).write_text('READY')\n(Path(sys.argv[2]).parent/'audit-pid').write_text(str(os.getpid()))\nsignal.signal(signal.SIGTERM,lambda *_:sys.exit(0))\ntime.sleep(120)\n");audit.chmod(0o755)
   values={'AUDIT_SHA':hashlib.sha256(audit.read_bytes()).hexdigest(),'PLAYER_SHA':hashlib.sha256(player.read_bytes()).hexdigest(),'CARPLAY_SHA':hashlib.sha256((base/'carplay').read_bytes()).hexdigest(),'STARTUP_SHA':hashlib.sha256((base/'carplay.sh').read_bytes()).hexdigest()}
   for i,name in enumerate(('baseline-ref1-p.synthetic','high-ref1-p.synthetic','high-ref4-p.synthetic','high-intra.synthetic'),1):
    (s/name).write_bytes(b'synthetic fixture');values['CLIP'+str(i)+'_SHA']=hashlib.sha256((s/name).read_bytes()).hexdigest()
