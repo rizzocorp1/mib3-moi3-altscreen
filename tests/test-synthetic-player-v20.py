@@ -7,7 +7,9 @@ def fixtures(root):
  for n,name in enumerate(names):
   profile='baseline' if n==0 else 'high';keyint=1 if n==3 else 20;refs=4 if n==2 else 1;cabac=0 if n==0 else 1
   raw=root/(name+'.h264')
-  subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','testsrc2=size=1280x480:rate=10','-frames:v','80','-c:v','libx264','-preset','veryfast','-tune','zerolatency','-profile:v',profile,'-level:v','3.1','-x264-params',f'keyint={keyint}:min-keyint={keyint}:scenecut=0:bframes=0:ref={refs}:cabac={cabac}:8x8dct={cabac}:repeat-headers=1:aud=1','-f','h264',raw],check=True)
+  # Low-detail fixtures stay within the player's deliberate one-MiB file bound.
+  # Visual motion in the actual counter assets is checked separately offline.
+  subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=gray:size=1280x480:rate=10','-frames:v','80','-c:v','libx264','-preset','veryfast','-tune','zerolatency','-profile:v',profile,'-level:v','3.1','-x264-params',f'keyint={keyint}:min-keyint={keyint}:scenecut=0:bframes=0:ref={refs}:cabac={cabac}:8x8dct={cabac}:repeat-headers=1:aud=1','-f','h264',raw],check=True)
   b=raw.read_bytes();starts=[m.start() for m in re.finditer(b'\x00\x00(?:\x00)?\x01',b) if b[m.end()]&31==9];assert len(starts)==80 and starts[0]==0
   units=[b[start:(starts[i+1] if i+1<len(starts) else len(b))] for i,start in enumerate(starts)]
   (root/(name+'.synthetic')).write_bytes(b'MOI3SYN1'+b''.join(struct.pack('<IQ',len(au),90000+i*9000)+au for i,au in enumerate(units)))
