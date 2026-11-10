@@ -9,7 +9,7 @@
 #include <time.h>
 #include <sys/socket.h>
 #include <unistd.h>
-static uint64_t fake_us=10000000,pts_seen[16];static unsigned seen;
+static uint64_t fake_us=10000000,pts_seen[16],send_us[16],pcr_seen[16];static unsigned seen;
 static int fail_allocation=-1,fail_send;
 static int audit_sleep(const struct timespec *t,struct timespec *unused){(void)unused;fake_us+=(uint64_t)t->tv_sec*1000000+t->tv_nsec/1000;return 0;}
 static void *audit_malloc(size_t n){if(fail_allocation==0)return NULL;if(fail_allocation>0)fail_allocation--;return malloc(n);}
@@ -21,7 +21,9 @@ static ssize_t audit_send(int fd,const void *bytes,size_t n,int flags,const stru
  for(size_t i=12;i+188<=n;i+=188){const uint8_t *t=r+i;if((((t[1]&31)<<8)|t[2])!=17 || !(t[1]&64))continue;
   size_t o=4;if((t[3]&0x30)==0x30)o+=1+t[4];assert(o+14<=188);const uint8_t *p=t+o;assert(!p[0]&&!p[1]&&p[2]==1&&p[3]==0xe0);
   uint64_t pts=((uint64_t)((p[9]>>1)&7)<<30)|((uint64_t)p[10]<<22)|((uint64_t)(p[11]>>1)<<15)|((uint64_t)p[12]<<7)|(p[13]>>1);
-  assert(seen<16);pts_seen[seen++]=pts;
+  assert(seen<16);pts_seen[seen]=pts;send_us[seen]=fake_us;
+  assert((t[3]&0x30)==0x30 && (t[5]&0x10));
+  pcr_seen[seen]=((uint64_t)t[6]<<25)|((uint64_t)t[7]<<17)|((uint64_t)t[8]<<9)|((uint64_t)t[9]<<1)|(t[10]>>7);seen++;
  }return (ssize_t)n;
 }
 #define ALTSCREEN_TEST
@@ -43,7 +45,9 @@ int main(void){
  char grant[512],request[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,dir);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,dir);
  FILE *f=fopen(grant,"w");assert(f);assert(fwrite(HANDOFF_TOKEN,1,sizeof(HANDOFF_TOKEN)-1,f)==sizeof(HANDOFF_TOKEN)-1);fclose(f);fake_us+=100000;
  assert(deferred_video_flush(dir,emit_h264_frame)==1);assert(seen==3&&g_total_frames_sent==3);assert(pts_seen[1]-pts_seen[0]>=2880 && pts_seen[1]-pts_seen[0]<=3060);assert(pts_seen[2]-pts_seen[1]>=2880 && pts_seen[2]-pts_seen[1]<=3060);assert(fake_us>=10233332);
- printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu when drained in one millisecond\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);rmdir(dir);
+ assert(send_us[1]-send_us[0]>=33333 && send_us[2]-send_us[1]>=33333);
+ for(unsigned i=0;i<3;i++)assert(pts_seen[i]-pcr_seen[i]==9000);
+ printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu with source-paced delivery and 100ms presentation lead\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);rmdir(dir);
  reset();char stale[]="/tmp/v27-stale-XXXXXX";assert(mkdtemp(stale));g_handoff_started=0;
  assert(deferred_video_submit(stale,idr,sizeof(idr),1000000,1,1,emit_h264_frame)==0);
  snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,stale);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,stale);
@@ -52,6 +56,8 @@ int main(void){
  assert(deferred_video_submit(stale,dependent,sizeof(dependent),3000000,0,1,emit_h264_frame)==0 && !seen);
  assert(deferred_video_submit(stale,idr,sizeof(idr),3033333,1,1,emit_h264_frame)==0 && seen==1);
  puts("PASS: stale startup GOP discarded as a whole; dependent pictures withheld until new IDR");
+ fake_us+=600000000;assert(handoff_lifetime_expired());assert(frame_gate_at(stale,1,1)==-1);
+ puts("PASS: receiver lifetime expires independently of a valid grant/hung monitor");
  unlink(grant);unlink(request);rmdir(stale);
  reset();fail_allocation=0;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2a: AnnexB allocation failure propagates");
  reset();fail_allocation=1;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2b: PES allocation failure propagates");
