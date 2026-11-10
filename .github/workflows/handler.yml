@@ -153,6 +153,26 @@ jobs:
           sudo python3 tests/test-codec-v22-systemd.py recovery/codec-v22-controller.sh.in recovery/codec-v22.service.in
       - name: Verify continuous Baseline playback and timing summaries
         run: sudo unshare --net python3 tests/test-synthetic-player-v22.py /tmp/player-v22 --network
+  factory-timing-v23:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build bounded passive observer and metadata helper
+        run: |
+          gcc -O2 -Wall -Wextra -Werror recovery/packet-timing-v23.c -o /tmp/timing-v23
+          gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard-v23
+      - name: Verify exact timestamp arithmetic and malformed data
+        run: python3 tests/test-packet-timing-v23.py recovery/packet-timing-v23.c
+      - name: Verify actual passive packet capture and bounded lifetime
+        run: |
+          sudo unshare --net python3 tests/test-packet-audit.py /tmp/timing-v23 recovery/packet-timing-v23.c
+          sudo unshare --net python3 tests/test-packet-audit-vlan.py /tmp/timing-v23 --isolated
+      - name: Verify factory-first setup, refusal and restoration
+        run: |
+          python3 tests/test-codec-v23-setup.py /tmp/guard-v23 recovery
+          python3 tests/test-codec-v23-controller.py recovery/codec-v23-controller.sh.in
+          sudo python3 tests/test-codec-v23-systemd.py recovery/codec-v23-controller.sh.in recovery/codec-v23.service.in
   codec-v20-report-collection:
     runs-on: ubuntu-24.04
     timeout-minutes: 2
