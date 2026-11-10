@@ -35,7 +35,7 @@ static int transport_picture_time(transport_clock_v27 *c,uint64_t source,uint64_
     uint64_t due=c->due_us+(source-c->source_us);
     /* A single future interval is limited so an invalid source cannot stall
      * the receiver, renewal/teardown checks or native handback. */
-    if((due>now && due-now>100000) || (now>due && now-due>250000))return -1;
+    if((due>now && due-now>100000) || (now>due && now-due>75000))return -1;
     while(now<due){
         uint64_t wait=due-now;struct timespec pause={.tv_sec=0,.tv_nsec=(long)(wait*1000)};
         if(nanosleep(&pause,NULL)!=0 && errno!=EINTR)return -1;
@@ -43,7 +43,7 @@ static int transport_picture_time(transport_clock_v27 *c,uint64_t source,uint64_
         uint64_t next=(uint64_t)t.tv_sec*1000000+(uint64_t)t.tv_nsec/1000;
         if(next<now)return -1;now=next;
     }
-    if(now-due>250000 || transport_clock_at(c,now/1000,pcr)<0)return -1;
+    if(now-due>75000 || transport_clock_at(c,now/1000,pcr)<0)return -1;
     uint64_t due_ms=due/1000;
     if(due_ms<c->epoch_ms || due_ms-c->epoch_ms>UINT64_MAX/90-1100)return -1;
     *pts=(1100+due_ms-c->epoch_ms)*90;c->last_source_us=source;return 0;

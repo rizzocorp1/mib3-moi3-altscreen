@@ -898,9 +898,9 @@ static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
 
 
     if(g_total_frames_sent<3 || g_total_frames_sent%300==0)
-        log_msg("TRANSPORT_CLOCK","mode=source-paced-100ms-lead pts90k=%llu pcr90k=%llu queueToPacketUs=%llu phoneRelativeUs=%llu",
+        log_msg("TRANSPORT_CLOCK","mode=source-paced-100ms-lead pts90k=%llu pcr90k=%llu presentationLeadUs=%lld phoneRelativeUs=%llu",
             (unsigned long long)pts_90k,(unsigned long long)pcr_90k,
-            (unsigned long long)((pts_90k-pcr_90k)*1000/90),(unsigned long long)timestamp);
+            (long long)(((int64_t)pts_90k-(int64_t)pcr_90k)*1000/90),(unsigned long long)timestamp);
     if(PRIVATE_CAPTURE_ENABLED)capture_video(annexb_frame,annexb_pos,pts_90k,timestamp,is_keyframe);
     int result=mux_and_stream_h264_frame(annexb_frame, annexb_pos, pts_90k,is_keyframe,pcr_90k);
     free(annexb_frame);

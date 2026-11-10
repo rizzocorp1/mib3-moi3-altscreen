@@ -42,6 +42,8 @@ jobs:
         run: |
           gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
           gcc -O2 recovery/packet-audit.c -o /tmp/packets
+          python3 tests/test-oneshot-boot.py /tmp/guard recovery/map-v27-boot.sh.in
           sudo python3 tests/test-map-v27-export.py recovery/map-v27-log-collector.sh
           sudo python3 tests/test-map-crash-recovery.py recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets
+          sudo python3 tests/test-map-crash-recovery.py recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets timeout
           python3 tests/test-lease-v27.py deploy-usb/payload/frame-gate-v27.h recovery/map-v27-log-collector.sh /tmp/guard /tmp/packets
