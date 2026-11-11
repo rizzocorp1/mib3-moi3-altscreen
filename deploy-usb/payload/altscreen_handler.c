@@ -1771,7 +1771,7 @@ static void altscreen_cleanup(void) {
     }
     pthread_mutex_lock(&g_log_mutex);
     g_log_closed=1;
-    if (important && g_kmsg_fd >= 0) {
+    if (g_kmsg_fd >= 0) {
         close(g_kmsg_fd);
         g_kmsg_fd = -1;
     }
