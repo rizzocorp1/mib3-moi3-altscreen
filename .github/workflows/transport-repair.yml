@@ -1,7 +1,7 @@
-name: V29 transport repair validation
+name: V30 transport repair validation
 on:
   push:
-    branches: [fix/v29-packet-pacing]
+    branches: [fix/v30-eta-layout]
   workflow_dispatch:
 permissions:
   contents: read
@@ -47,12 +47,12 @@ jobs:
       - name: Real systemd SIGKILL with separate output writer
         run: |
           gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
-          gcc -O2 recovery/packet-audit-v29.c -o /tmp/packets
-          python3 tests/test-map-v29-boot.py /tmp/guard recovery/map-v29-boot.sh.in
-          sudo python3 tests/test-map-v29-export.py recovery/map-v29-log-collector.sh
-          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets recovery/map-v29-boot.sh.in
-          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets recovery/map-v29-boot.sh.in timeout
-          python3 tests/test-lease-v29.py deploy-usb/payload/frame-gate-v29.h recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets
+          gcc -O2 recovery/packet-audit-v30.c -o /tmp/packets
+          python3 tests/test-map-v30-boot.py /tmp/guard recovery/map-v30-boot.sh.in
+          sudo python3 tests/test-map-v30-export.py recovery/map-v30-log-collector.sh
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v30-log-collector.sh /tmp/guard /tmp/packets recovery/map-v30-boot.sh.in
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v30-log-collector.sh /tmp/guard /tmp/packets recovery/map-v30-boot.sh.in timeout
+          python3 tests/test-lease-v30.py deploy-usb/payload/frame-gate-v30.h recovery/map-v30-log-collector.sh /tmp/guard /tmp/packets
 
   observer:
     runs-on: ubuntu-24.04
@@ -61,10 +61,10 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Compile exact deployed observer and exercise metadata/privacy boundaries
         run: |
-          gcc -O2 -Wall -Wextra -Werror recovery/packet-audit-v29.c -o /tmp/observer
+          gcc -O2 -Wall -Wextra -Werror recovery/packet-audit-v30.c -o /tmp/observer
           gcc -O1 -g -fsanitize=address,undefined tests/test-packet-detail.c -o /tmp/detail
           /tmp/detail
       - name: Real packet capture, kernel drop stats and outgoing VLAN traffic
         run: |
-          sudo python3 tests/test-packet-audit-v29.py /tmp/observer recovery/packet-audit-v29.c
+          sudo python3 tests/test-packet-audit-v30.py /tmp/observer recovery/packet-audit-v30.c
           sudo unshare --net python3 tests/test-packet-audit-vlan.py /tmp/observer --isolated

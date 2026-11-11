@@ -66,7 +66,7 @@ int main(void) {
     assert(field(p,"widthPixels")->number==784&&field(p,"heightPixels")->number==468&&field(p,"primaryInputDevice")->number==7);
     const LayoutObject *areas=field(c,"viewAreas"),*view=lat(areas,0),*safe=field(view,"safeArea");
     assert(field(view,"widthPixels")->number==1280&&field(view,"heightPixels")->number==480);
-    assert(field(safe,"originXPixels")->number==464&&field(safe,"originYPixels")->number==64&&field(safe,"widthPixels")->number==352&&field(safe,"heightPixels")->number==320);
+    assert(field(safe,"originXPixels")->number==464&&field(safe,"originYPixels")->number==48&&field(safe,"widthPixels")->number==352&&field(safe,"heightPixels")->number==368);
     assert(field(c,"initialViewArea")->number==0&&lcount(field(c,"adjacentViewAreas"))==0);
     assert(!field(view,"viewAreaTransitionControl")&&!field(view,"drawUIOutsideSafeArea"));
     assert(!field(primary,"viewAreas")&&!field(alt,"viewAreas"));lr(prepared);assert(layout_live==baseline);
@@ -78,6 +78,8 @@ int main(void) {
     layout_failure=0;assert(!layout_rect_valid(1280,480,-1,0,960,320)&&!layout_rect_valid(1280,480,0,400,960,320));
     assert(!layout_rect_valid(1280,480,INT64_MAX,0,1,1));
     assert(strstr(ALT_TOP_URL,"maneuverLayout=topaligned")&&!strstr(ALT_TOP_URL,"applemaps"));
+    assert(strstr(ALT_TOP_URL,"showETA=yes") && !strstr(ALT_TOP_URL,"showETA=no"));
+    assert(ALT_SAFE_X+ALT_SAFE_W/2==640 && ALT_SAFE_Y+ALT_SAFE_H==416);
     g_layout_advertised=0;assert(!layout_advertised());g_layout_advertised=1;assert(layout_advertised());
     lr(stock);lr(primary);lr(alt);assert(layout_live==0);
     puts("PASS: complete primary/auxiliary viewAreas, original dimensions and input preserved, top-safe geometry, every allocation failure bounded without stock mutation/leaks, invalid geometry refused");

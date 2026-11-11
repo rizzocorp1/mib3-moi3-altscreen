@@ -28,6 +28,11 @@ int main(void){
  assert(field(main_display,"widthPixels")->number==784 && field(main_display,"heightPixels")->number==468);
  assert(field(aux,"type")->number==111 && field(aux,"maxFPS")->number==30);
  assert(field(aux,"widthPixels")->number==1280 && field(aux,"heightPixels")->number==480);
+ assert(!strcmp(field(aux,"initialURL")->text,ALT_TOP_URL));
+ assert(strstr(field(aux,"initialURL")->text,"showETA=yes"));
+ const LayoutObject *areas=field(aux,"viewAreas"),*view=lat(areas,0),*safe=field(view,"safeArea");
+ assert(field(safe,"originXPixels")->number==464 && field(safe,"widthPixels")->number==352);
+ assert(field(safe,"originYPixels")->number==48 && field(safe,"heightPixels")->number==368);
  lr(info);lr(native_root);lr(stock);lr(primary);assert(layout_live==0);
  puts("PASS: actual info hook advertises auxiliary30fps, preserves native60fps/geometry and original dictionary, no object leaks");return 0;
 }
