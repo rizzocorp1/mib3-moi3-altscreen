@@ -61,3 +61,12 @@ jobs:
           gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard-v31.c -o /tmp/guard
           gcc -O1 -g -fsanitize=address,undefined tests/managed-writer.c -ldl -pthread -o /tmp/writer
           sudo python3 tests/test-managed-systemd.py /tmp/guard /tmp/writer recovery
+  managed-install-restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Actual install/stock-return scripts, Linux metadata and private bind mounts
+        run: |
+          gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard-v31.c -o /tmp/guard
+          sudo unshare --mount --net --propagation private python3 tests/test-managed-install.py /tmp/guard recovery
