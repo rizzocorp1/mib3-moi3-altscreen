@@ -64,9 +64,9 @@
 #include <errno.h>
 #include <poll.h>
 
-#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v30.log"
-#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v30.log"
-#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v30.log"
+#define LOG_FILE_DATA       "/data/lge/smartlink/carplay/carplay-handler-v31.log"
+#define LOG_FILE_APPRW      "/lge/app_rw/smartlink/carplay/carplay-handler-v31.log"
+#define LOG_FILE_FALLBACK   "/tmp/carplay-handler-v31.log"
 
 static FILE *g_log_fp = NULL;
 static int g_log_closed;
@@ -85,12 +85,13 @@ static void log_msg(const char *tag, const char *fmt, ...) {
     va_end(args);
 
     /* journald provides a second path if SMACK denies our file locations. */
-    fprintf(stderr, "[ALTSCREEN][%s] %s\n", tag, buffer);
+    int important=strstr(tag,"ERR") || !strcmp(tag,"INIT") || !strcmp(tag,"HANDOFF") || !strcmp(tag,"SUMMARY") || !strcmp(tag,"CRYPTO");
+    if(important)fprintf(stderr, "[ALTSCREEN][%s] %s\n", tag, buffer);
 
-    if (g_kmsg_fd < 0) {
+    if (important && g_kmsg_fd < 0) {
         g_kmsg_fd = open("/dev/kmsg", O_WRONLY | O_CLOEXEC);
     }
-    if (g_kmsg_fd >= 0) {
+    if (important && g_kmsg_fd >= 0) {
         char kmsg_buf[1152];
         snprintf(kmsg_buf, sizeof(kmsg_buf), "<3>[ALTSCREEN][%s] %s\n", tag, buffer);
         ssize_t wr = write(g_kmsg_fd, kmsg_buf, strlen(kmsg_buf));
@@ -101,6 +102,12 @@ static void log_msg(const char *tag, const char *fmt, ...) {
         g_log_fp = fopen(LOG_FILE_DATA, "a");
         if (!g_log_fp) g_log_fp = fopen(LOG_FILE_APPRW, "a");
         if (!g_log_fp) g_log_fp = fopen(LOG_FILE_FALLBACK, "a");
+    }
+    if (g_log_fp) {
+        /* Bound persistent file logging; retain metadata on the open inode.
+         * No picture data is logged. A failed rotation disables this sink. */
+        long position=ftell(g_log_fp);
+        if(position<0 || (position>=524288 && (ftruncate(fileno(g_log_fp),0)!=0 || fseek(g_log_fp,0,SEEK_SET)!=0))){fclose(g_log_fp);g_log_fp=NULL;}
     }
     if (g_log_fp) {
         time_t now = time(NULL);
@@ -200,7 +207,7 @@ static void save_info_snapshot(const void *info,const char *name,unsigned bit) {
     pthread_mutex_lock(&g_info_snapshot_lock);
     if(!(g_info_saved & bit)) {
         char path[160],pending[176];
-        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v30-%s.plist",name);
+        snprintf(path,sizeof(path),"/data/lge/smartlink/carplay/map-v31-%s.plist",name);
         snprintf(pending,sizeof(pending),"%s.pending",path);
         int32_t result=s_CFPropertyListWriteToFilePath(info,"binary1",pending);
         if(result==0 && rename(pending,path)==0)g_info_saved|=bit;
@@ -294,7 +301,7 @@ static void *array_clone(void *arr) {
 /* =============================================================================
  * ViewAreas e enabledFeatures (AltScreen Apple CarPlay Specification)
  * ============================================================================= */
-#include "layout-v30.h"
+#include "layout-v31.h"
 
 static int set_reference_enabled_features(void *dict, int enable_viewareas) {
     if (!dict || !s_CFArrayEnsureCreatedAndAppendCString || !s_CFDictionaryGetValue ||
@@ -435,8 +442,8 @@ static uint8_t g_pat_cc = 0;
 static uint8_t g_pmt_cc = 0;
 static uint8_t g_video_cc = 0;
 static int g_video_discontinuity=1;
-#include "transport-clock-v30.h"
-static transport_clock_v30 g_transport_clock;
+#include "transport-clock-v31.h"
+static transport_clock_v31 g_transport_clock;
 
 static uint8_t g_rtp_buf[RTP_PACKET_SIZE];
 static int g_rtp_ts_in_buf = 0;
@@ -447,7 +454,7 @@ static uint64_t g_sent_packets,g_send_errors;
 static int g_output_failed,g_wait_output_idr=1;
 static uint64_t g_total_bytes_sent = 0;
 
-#include "packet-pacer-v30.h"
+#include "packet-pacer-v31.h"
 
 static uint32_t ts_crc32(const uint8_t *data, size_t len) {
     uint32_t crc = 0xFFFFFFFF;
@@ -823,9 +830,9 @@ static void parse_and_store_avcc(const uint8_t *avcc, size_t len) {
     log_msg("AVCC_META","profile=%u compatibility=%u level=%u annexbParameterSets=%s",avcc[1],avcc[2],avcc[3],codec_hex);
 }
 
-#include "frame-gate-v30.h"
+#include "frame-gate-v31.h"
 static void deferred_video_need_idr(void){g_wait_output_idr=1;g_video_discontinuity=1;}
-#include "deferred-video-v30.h"
+#include "deferred-video-v31.h"
 static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *is_keyframe) {
     if (!data || !len || len > MAX_SCREEN_BODY || !g_sps_pps_len) return -1;
     /* Validate the entire access unit before emitting anything. In particular,
@@ -844,7 +851,7 @@ static int validate_h264_frame(const uint8_t *data,size_t len,size_t *nals,int *
     return 0;
 }
 #define PRIVATE_CAPTURE_ENABLED 0
-#include "capture-v30.h"
+#include "capture-v31.h"
 
 static int emit_h264_frame(const uint8_t *data,size_t len,uint64_t timestamp) {
     size_t nals;int is_keyframe;
@@ -972,7 +979,7 @@ static int receiver_active(void) {
     return active;
 }
 
-#include "aux-refresh-v30.h"
+#include "aux-refresh-v31.h"
 
 /* MU0841's factory screen receiver reads a 64-bit timestamp at header offset 8
  * and passes it to its NTP time synchronizer. Preserve those relative intervals
@@ -1745,7 +1752,7 @@ void ScreenStreamSetWidthHeight(void *inStream, uint32_t inWidth, uint32_t inHei
 __attribute__((constructor))
 static void altscreen_init(void) {
     log_msg("INIT", "=================================================");
-    log_msg("INIT", "altscreen_handler.so MU0841 v30 (paced datagrams; 30fps auxiliary request; periodic IDRs retained) ativo no PID: %d", getpid());
+    log_msg("INIT", "altscreen_handler.so MU0841 v31 (paced datagrams; 30fps auxiliary request; periodic IDRs retained) ativo no PID: %d", getpid());
     log_msg("INIT", "Display 0: Cinemo 100%% nativo | Display 1: Type 111 (1280x480) -> RTP [ff14::2:4]:42800 (PID 17, eth0.5)");
     log_msg("INIT", "=================================================");
     init_cf_symbols();
@@ -1764,7 +1771,7 @@ static void altscreen_cleanup(void) {
     }
     pthread_mutex_lock(&g_log_mutex);
     g_log_closed=1;
-    if (g_kmsg_fd >= 0) {
+    if (important && g_kmsg_fd >= 0) {
         close(g_kmsg_fd);
         g_kmsg_fd = -1;
     }

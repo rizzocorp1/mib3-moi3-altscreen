@@ -1,0 +1,104 @@
+#!/bin/sh
+# Root runtime controller: RAM heartbeat + systemd watchdog, no global changes.
+set -u
+STAGE=$1
+READY=$2
+R=${3:-}
+ACTION=${4:-run}
+BASE="$R/lge/app_rw/smartlink/carplay"
+[ "$STAGE" = "$BASE/.moi3-altscreen-managed-v31" ] && [ -d "$STAGE" ] && [ ! -L "$STAGE" ] || exit 2
+RAM="$R/run/moi3-altscreen-map-v31"
+DATA="$R/data/lge/smartlink/carplay"
+GUARD="$STAGE/file-guard"
+LOG="$STAGE/boot-status.txt"
+TOKEN=AUTHENTICATED_H264_V31
+REQUEST="$DATA/altscreen-v31-frame-ready"
+GRANT="$DATA/altscreen-v31-encoder-ready"
+EXPIRED="$DATA/altscreen-v31-expired"
+owned=0
+finished=0
+umask 077
+matches(){ [ -f "$1" ] && [ ! -L "$1" ] || return 1; value=$(sha256sum "$1") || return 1; [ "${value%% *}" = "$2" ]; }
+token(){ [ -f "$1" ] && [ ! -L "$1" ] && [ "$(cat "$1")" = "$TOKEN" ]; }
+enabled(){ [ -f "$STAGE/ENABLED" ] && [ ! -L "$STAGE/ENABLED" ] && [ "$(cat "$STAGE/ENABLED")" = MOI3_MANAGED_V31 ]; }
+status(){ [ ! -L "$LOG" ] || return 1; count=$(wc -c < "$LOG" 2>/dev/null) || count=0; if [ "$count" -gt 524288 ];then : > "$LOG";fi;printf '%s\n' "$*" >> "$LOG"; }
+expire(){ if [ -e "$EXPIRED" ] || [ -L "$EXPIRED" ];then token "$EXPIRED";else (set -C;printf '%s\n' "$TOKEN" > "$EXPIRED") && chmod 644 "$EXPIRED";fi; }
+revoke(){
+ if token "$GRANT";then rm -f "$GRANT" || return 1;elif [ -e "$GRANT" ] || [ -L "$GRANT" ];then expire || return 1;fi
+ if [ -f "$RAM/lease" ] && [ ! -L "$RAM/lease" ];then rm -f "$RAM/lease" || return 1;fi
+}
+restore_native(){
+ revoke || return 1
+ token "$RAM/OWNED" || return 0
+ i=0
+ while [ "$i" -lt 12 ];do
+  if systemctl is-active --quiet multi-display.service;then rm -f "$RAM/OWNED";owned=0;status 'NATIVE ALREADY ACTIVE';return 0;fi
+  if "$GUARD" port-free;then
+   if systemctl start multi-display.service && systemctl is-active --quiet multi-display.service;then rm -f "$RAM/OWNED";owned=0;status 'NATIVE RESTORED: custom port free';return 0;fi
+   status 'RESTORE FAILED: factory sender did not become active';return 1
+  fi
+  i=$((i+1));sleep 1
+ done
+ status 'RESTORE WAIT: output port busy; no competing factory sender started';return 1
+}
+disable_startup(){
+ if matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@';then
+  if matches "$BASE/carplay.sh" '@STARTUP_SHA@' || cmp -s "$BASE/carplay.sh" "$STAGE/managed-boot.sh";then
+   if "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$BASE/carplay.sh" && "$GUARD" replace "$STAGE/factory-carplay.sh" "$BASE/carplay.sh";then
+    if enabled;then rm -f "$STAGE/ENABLED";fi
+    status 'FAILURE FALLBACK: verified factory startup restored; integration disabled'
+   fi
+  fi
+ fi
+}
+export_reports(){
+ # Only when an explicitly marked install/restore USB is present. Normal
+ # long-term operation does not run packet capture or copy files to storage.
+ for usb in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+  [ -d "$usb" ] && [ ! -L "$usb" ] || continue
+  [ -f "$usb/ALTSCREEN_MANAGED_INSTALL.txt" ] || [ -f "$usb/ALTSCREEN_MANAGED_RESTORE.txt" ] || continue
+  for name in boot-status.txt;do [ -L "$usb/managed-v31-$name" ] || cp "$STAGE/$name" "$usb/managed-v31-$name" 2>/dev/null || true;done
+  source="$DATA/carplay-handler-v31.log"
+  if [ -f "$source" ] && [ ! -L "$source" ] && [ ! -L "$usb/managed-v31-handler.log" ];then cp "$source" "$usb/managed-v31-handler.log" 2>/dev/null || true;fi
+ done
+}
+finish(){
+ [ "$finished" = 0 ] || return
+ finished=1;trap - EXIT INT TERM
+ expire || status 'REVOCATION FAILED: review restore report'
+ restore_native || true
+ export_reports
+}
+matches "$GUARD" '@GUARD_SHA@' || exit 2
+if [ "$ACTION" = --recover ];then
+ finish
+ case "${SERVICE_RESULT:-success}" in success) ;; *) disable_startup;; esac
+ exit 0
+fi
+trap finish EXIT
+trap 'finish;exit 0' INT TERM
+[ -d "$RAM" ] && [ ! -L "$RAM" ] && [ ! -e "$READY" ] && [ ! -L "$READY" ] || exit 2
+"$GUARD" notify-watchdog || { status 'ABORT: systemd watchdog notification failed';exit 2; }
+(set -C;printf 'READY\n' > "$READY") || exit 2
+count=0
+while enabled;do
+ "$GUARD" notify-watchdog || { status 'WATCHDOG NOTIFY FAILED';exit 2; }
+ if token "$RAM/OWNED";then owned=1;fi
+ if [ "$owned" = 1 ];then
+  if token "$REQUEST" && ! token "$EXPIRED";then
+   if ! "$GUARD" pulse "$RAM/lease" "$REQUEST";then
+    if ! token "$REQUEST";then restore_native || exit 2;else status 'RAM LEASE RENEWAL FAILED';exit 2;fi
+   fi
+  else restore_native || exit 2;fi
+ fi
+ if [ "$owned" = 0 ] && token "$REQUEST" && ! token "$EXPIRED";then
+  if [ -e "$GRANT" ] || [ -L "$GRANT" ];then status 'HANDOFF REFUSED: unexpected grant';exit 2;fi
+  (set -C;printf '%s\n' "$TOKEN" > "$RAM/OWNED") || exit 2
+  owned=1
+  if systemctl stop multi-display.service && ! systemctl is-active --quiet multi-display.service && "$GUARD" port-free;then
+   if token "$REQUEST" && "$GUARD" pulse "$RAM/lease" "$REQUEST" && "$GUARD" clone "$REQUEST" "$GRANT";then status 'HANDOFF ACTIVE: renewable RAM lease';else restore_native || exit 2;fi
+  else status 'HANDOFF FAILED: native stop/port release not confirmed';restore_native || exit 2;fi
+ fi
+ count=$((count+1));if [ $((count%5)) = 0 ];then export_reports;fi
+ sleep 2
+done

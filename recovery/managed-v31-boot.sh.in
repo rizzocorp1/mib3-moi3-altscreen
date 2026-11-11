@@ -1,0 +1,74 @@
+#!/bin/sh
+# Persistent hook; factory executable bytes remain untouched on disk.
+R='@ROOT@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-altscreen-managed-v31"
+RAM="$R/run/moi3-altscreen-map-v31"
+DATA="$R/data/lge/smartlink/carplay"
+GUARD="$STAGE/file-guard"
+TARGET="$BASE/carplay"
+STARTUP="$BASE/carplay.sh"
+LOG="$STAGE/boot-status.txt"
+UNITDIR="$R/run/systemd/system"
+UNITFILE="$UNITDIR/moi3-altscreen-managed-v31.service"
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_mode2" 2>/dev/null || true
+chmod 0777 "$R/sys/devices/platform/extcon-iap2.0/iap2_state" 2>/dev/null || true
+matches(){ [ -f "$1" ] && [ ! -L "$1" ] || return 1;v=$(sha256sum "$1") || return 1;[ "${v%% *}" = "$2" ]; }
+token(){ [ -f "$1" ] && [ ! -L "$1" ] && [ "$(cat "$1")" = AUTHENTICATED_H264_V31 ]; }
+enabled(){ [ -f "$STAGE/ENABLED" ] && [ ! -L "$STAGE/ENABLED" ] && [ "$(cat "$STAGE/ENABLED")" = MOI3_MANAGED_V31 ]; }
+status(){ [ -d "$STAGE" ] && [ ! -L "$STAGE" ] && [ ! -L "$LOG" ] || return;printf '%s\n' "$*" >> "$LOG"; }
+fallback(){
+ status "FALLBACK: $*"
+ if matches "$GUARD" '@GUARD_SHA@' && matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@';then
+  if matches "$STARTUP" '@STARTUP_SHA@' || cmp -s "$STARTUP" "$STAGE/managed-boot.sh";then
+   "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" && "$GUARD" replace "$STAGE/factory-carplay.sh" "$STARTUP" || true
+  fi
+  if enabled;then rm -f "$STAGE/ENABLED";fi
+ fi
+ exit 0
+}
+[ -d "$STAGE" ] && [ ! -L "$STAGE" ] || exit 0
+[ ! -L "$LOG" ] || exit 0
+: > "$LOG"
+status 'MANAGED STARTUP: v31'
+matches "$GUARD" '@GUARD_SHA@' && matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' || fallback 'helper/baseline corrupt; native executable retained'
+enabled || fallback 'integration not enabled'
+matches "$R/etc/os-release" '@OS_SHA@' || fallback 'firmware identity changed'
+"$GUARD" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" || fallback 'startup metadata changed'
+cmp -s "$STARTUP" "$STAGE/managed-boot.sh" || fallback 'startup hook differs from installed copy'
+matches "$STAGE/carplay-managed" '@PATCH_SHA@' && matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@' && matches "$STAGE/managed-controller.sh" '@CONTROLLER_SHA@' || fallback 'managed asset corrupt'
+if [ -d "$RAM" ] && [ ! -L "$RAM" ] && matches "$TARGET" '@PATCH_SHA@' && matches "$RAM/carplay" '@PATCH_SHA@' && "$GUARD" same-inode "$TARGET" "$RAM/carplay" && systemctl is-active --quiet moi3-altscreen-managed-v31.service;then
+ status 'MANAGED RESTART: verified existing RAM executable/controller retained'
+ exit 0
+fi
+matches "$TARGET" '@CARPLAY_SHA@' || fallback 'executable differs; no unknown mount changed'
+for name in altscreen-v31-frame-ready altscreen-v31-encoder-ready altscreen-v31-expired;do
+ path="$DATA/$name"
+ if [ -e "$path" ] || [ -L "$path" ];then token "$path" && rm -f "$path" || fallback 'unknown runtime marker preserved';fi
+done
+[ ! -e "$RAM" ] && [ ! -L "$RAM" ] && mkdir -m 700 "$RAM" || fallback 'unexpected runtime directory'
+"$GUARD" meta "$BASE" "$RAM" && "$GUARD" create "$STAGE/carplay-managed" "$RAM/carplay" "$TARGET" && matches "$RAM/carplay" '@PATCH_SHA@' || fallback 'RAM executable preparation failed'
+[ ! -L "$UNITDIR" ] && [ ! -e "$UNITFILE" ] && [ ! -L "$UNITFILE" ] && mkdir -p "$UNITDIR" || fallback 'runtime unit path unavailable'
+if ! (umask 077;set -C;cat > "$UNITFILE" <<EOF_MANAGED_UNIT
+[Unit]
+Description=Managed AltScreen controller
+[Service]
+Type=simple
+ExecStart=/bin/sh "$STAGE/managed-controller.sh" "$STAGE" "$RAM/ready" "$R"
+ExecStopPost=/bin/sh "$STAGE/managed-controller.sh" "$STAGE" "$RAM/ready" "$R" --recover
+WatchdogSec=20
+NotifyAccess=all
+TimeoutStopSec=20
+KillMode=control-group
+Restart=no
+EOF_MANAGED_UNIT
+);then fallback 'runtime unit creation failed';fi
+systemctl daemon-reload >> "$LOG" 2>&1 && systemctl start --no-block moi3-altscreen-managed-v31.service >> "$LOG" 2>&1 || fallback 'controller start failed'
+i=0
+while [ ! -f "$RAM/ready" ] && [ "$i" -lt 5 ];do sleep 1;i=$((i+1));done
+[ -f "$RAM/ready" ] && [ ! -L "$RAM/ready" ] || fallback 'controller/watchdog readiness failed'
+mount --bind "$RAM/carplay" "$TARGET" || fallback 'RAM bind mount failed'
+if ! matches "$TARGET" '@PATCH_SHA@' || ! "$GUARD" same-inode "$TARGET" "$RAM/carplay";then umount "$TARGET" 2>/dev/null || true;fallback 'RAM bind verification failed';fi
+status 'MANAGED ACTIVE: persistent startup, original disk executable, renewable RAM lease'
+exit 0

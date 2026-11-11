@@ -36,29 +36,31 @@ static ssize_t audit_send(int fd,const void *bytes,size_t n,int flags,const stru
 #undef clock_gettime
 #undef sendto
 static const uint8_t idr[]={0,0,0,2,0x65,0xaa},dependent[]={0,0,0,2,0x41,0xbb};
-static void reset(void){packet_pacer_reset();seen=0;fail_allocation=-1;fail_send=0;g_rtp_sock=99;g_rtp_owned=0;g_rtp_ts_in_buf=0;g_total_frames_sent=0;g_send_errors=0;g_video_discontinuity=1;g_wait_output_idr=1;g_output_failed=0;g_handoff_deadline_ms=0;transport_clock_reset(&g_transport_clock);g_nal_length_bytes=4;g_sps_pps_len=12;memcpy(g_sps_pps_buf,"\0\0\0\1\x67\x42\0\x1f\0\0\0\1",12);}
+static void reset(void){packet_pacer_reset();seen=0;fail_allocation=-1;fail_send=0;g_rtp_sock=99;g_rtp_owned=0;g_rtp_ts_in_buf=0;g_total_frames_sent=0;g_send_errors=0;g_video_discontinuity=1;g_wait_output_idr=1;g_output_failed=0;transport_clock_reset(&g_transport_clock);g_nal_length_bytes=4;g_sps_pps_len=12;memcpy(g_sps_pps_buf,"\0\0\0\1\x67\x42\0\x1f\0\0\0\1",12);}
+static char lease_path[512];
+static void fixture_lease(const char *dir){snprintf(lease_path,sizeof(lease_path),"%s/lease",dir);g_handoff_lease_path=lease_path;FILE *f=fopen(lease_path,"w");assert(f);fprintf(f,HANDOFF_TOKEN "%llu\n",(unsigned long long)(fake_us/1000+12000));fclose(f);}
 int main(void){
  reset();char dir[]="/tmp/v25-audit-XXXXXX";assert(mkdtemp(dir));g_handoff_started=0;
  assert(deferred_video_submit(dir,idr,sizeof(idr),1000000,1,1,emit_h264_frame)==0);fake_us+=33333;
  assert(deferred_video_submit(dir,dependent,sizeof(dependent),1033333,0,1,emit_h264_frame)==0);fake_us+=33333;
  assert(deferred_video_submit(dir,dependent,sizeof(dependent),1066666,0,1,emit_h264_frame)==0);assert(g_deferred_count==3&&!seen);
  char grant[512],request[512];snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,dir);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,dir);
- FILE *f=fopen(grant,"w");assert(f);assert(fwrite(HANDOFF_TOKEN,1,sizeof(HANDOFF_TOKEN)-1,f)==sizeof(HANDOFF_TOKEN)-1);fclose(f);fake_us+=100000;
+ FILE *f=fopen(grant,"w");assert(f);assert(fwrite(HANDOFF_TOKEN,1,sizeof(HANDOFF_TOKEN)-1,f)==sizeof(HANDOFF_TOKEN)-1);fclose(f);fixture_lease(dir);fake_us+=100000;
  assert(deferred_video_flush(dir,emit_h264_frame)==1);assert(seen==3&&g_total_frames_sent==3);assert(pts_seen[1]-pts_seen[0]>=2880 && pts_seen[1]-pts_seen[0]<=3060);assert(pts_seen[2]-pts_seen[1]>=2880 && pts_seen[2]-pts_seen[1]<=3060);assert(fake_us>=10233332);
  assert(send_us[1]-send_us[0]>=33333 && send_us[2]-send_us[1]>=33333);
  for(unsigned i=0;i<3;i++)assert(pts_seen[i]-pcr_seen[i]==9000);
- printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu with source-paced delivery and 100ms presentation lead\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);rmdir(dir);
- reset();char stale[]="/tmp/v30-stale-XXXXXX";assert(mkdtemp(stale));g_handoff_started=0;
+ printf("PASS A1: buffered frames paced with source-spaced PTS=%llu,%llu,%llu with source-paced delivery and 100ms presentation lead\n",(unsigned long long)pts_seen[0],(unsigned long long)pts_seen[1],(unsigned long long)pts_seen[2]);unlink(grant);unlink(request);unlink(lease_path);rmdir(dir);
+ reset();char stale[]="/tmp/v31-stale-XXXXXX";assert(mkdtemp(stale));g_handoff_started=0;
  assert(deferred_video_submit(stale,idr,sizeof(idr),1000000,1,1,emit_h264_frame)==0);
  snprintf(grant,sizeof(grant),"%s/" HANDOFF_GRANT_FILE,stale);snprintf(request,sizeof(request),"%s/" HANDOFF_REQUEST_FILE,stale);
- f=fopen(grant,"w");assert(f);fputs(HANDOFF_TOKEN,f);fclose(f);fake_us+=2000000;
+ f=fopen(grant,"w");assert(f);fputs(HANDOFF_TOKEN,f);fclose(f);fixture_lease(stale);fake_us+=2000000;
  assert(deferred_video_flush(stale,emit_h264_frame)==0 && !seen && g_wait_output_idr && !g_deferred_count);
  assert(deferred_video_submit(stale,dependent,sizeof(dependent),3000000,0,1,emit_h264_frame)==0 && !seen);
  assert(deferred_video_submit(stale,idr,sizeof(idr),3033333,1,1,emit_h264_frame)==0 && seen==1);
  puts("PASS: stale startup GOP discarded as a whole; dependent pictures withheld until new IDR");
  fake_us+=600000000;assert(handoff_lifetime_expired());assert(frame_gate_at(stale,1,1)==-1);
  puts("PASS: receiver lifetime expires independently of a valid grant/hung monitor");
- unlink(grant);unlink(request);rmdir(stale);
+ unlink(grant);unlink(request);unlink(lease_path);rmdir(stale);
  reset();fail_allocation=0;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2a: AnnexB allocation failure propagates");
  reset();fail_allocation=1;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_total_frames_sent==0&&!seen);puts("PASS A2b: PES allocation failure propagates");
  reset();fail_send=1;assert(emit_h264_frame(idr,sizeof(idr),1000000)==-1&&g_send_errors>0&&g_total_frames_sent==0&&g_wait_output_idr);puts("PASS A3: UDP failure propagates without false frame success");

@@ -1,0 +1,63 @@
+name: V31 transport repair validation
+on:
+  push:
+    branches: [fix/v31-managed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  transport:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Timing, allocation, UDP failure, IDR recovery and unchanged configuration
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-transport-repair.c -ldl -pthread -o /tmp/repair
+          /tmp/repair
+      - name: Large-picture datagram pacing and bounded failure recovery
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-packet-pacer.c -ldl -pthread -o /tmp/pacer
+          /tmp/pacer
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-packet-pacer-network.c -ldl -pthread -o /tmp/pacer-network
+          sudo unshare --net sh -c 'ip link set lo up; /tmp/pacer-network'
+      - name: Full handler and crypto regressions
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/handler
+          sudo unshare --net sh -c 'ip link set lo up; timeout 40 /tmp/handler'
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-homekit-crypto.c -ldl -pthread -lcrypto -o /tmp/crypto
+          timeout 30 /tmp/crypto
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-layout.c -ldl -pthread -o /tmp/layout
+          /tmp/layout
+          gcc -O1 -g -fsanitize=address,undefined tests/test-aux-refresh.c -ldl -pthread -o /tmp/refresh
+          /tmp/refresh
+          gcc -O1 -g -fsanitize=address,undefined tests/test-screen-response.c -ldl -pthread -o /tmp/response
+          /tmp/response
+          python3 tests/test-advertised-fps.py deploy-usb/payload/altscreen_handler.c tests/test-layout.c
+      - name: Decode every dependent picture from actual production conversion and mux
+        run: |
+          python3 -m pip install --timeout 20 --retries 1 --only-binary=:all: --target /tmp/codec-pyav av==19.0.2
+          python3 tests/test-interframe.py /tmp/handler
+          python3 tests/test-transport-decode.py /tmp/handler
+  managed-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Native metadata helper and renewable lease bounds
+        run: |
+          gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard-v31.c -o /tmp/guard
+          python3 tests/test-file-guard.py /tmp/guard
+          python3 tests/test-managed-guard.py /tmp/guard
+          gcc -O1 -g -fsanitize=address,undefined tests/test-managed-lease.c -o /tmp/lease
+          /tmp/lease
+  managed-systemd:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Real watchdog, independent lease expiry and factory fallback
+        run: |
+          gcc -O2 -Wall -Wextra -Werror -DFILE_GUARD_TEST recovery/file-guard-v31.c -o /tmp/guard
+          gcc -O1 -g -fsanitize=address,undefined tests/managed-writer.c -ldl -pthread -o /tmp/writer
+          sudo python3 tests/test-managed-systemd.py /tmp/guard /tmp/writer recovery

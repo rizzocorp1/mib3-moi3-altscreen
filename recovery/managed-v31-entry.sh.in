@@ -1,0 +1,108 @@
+#!/bin/sh
+# Exactly one package mode. Signed-carrier speech resets precede this script.
+umask 077
+R='@ROOT@'
+MODE='@MODE@'
+BASE="$R/lge/app_rw/smartlink/carplay"
+STAGE="$BASE/.moi3-altscreen-managed-v31"
+RAM="$R/run/moi3-altscreen-map-v31"
+DATA="$R/data/lge/smartlink/carplay"
+TARGET="$BASE/carplay"
+STARTUP="$BASE/carplay.sh"
+USB=''
+case "$MODE" in install) MARKER=ALTSCREEN_MANAGED_INSTALL.txt;; restore) MARKER=ALTSCREEN_MANAGED_RESTORE.txt;; *) exit 0;;esac
+for path in "$R/tmp/USB/PORT1/PART1" "$R/tmp/USB/PORT2/PART1";do
+ if [ -f "$path/$MARKER" ] && [ ! -L "$path/$MARKER" ];then [ -z "$USB" ] || exit 0;USB=$path;fi
+done
+[ -n "$USB" ] && [ ! -L "$USB/managed-v31-setup.txt" ] || exit 0
+matches(){ [ -f "$1" ] && [ ! -L "$1" ] || return 1;v=$(sha256sum "$1") || return 1;[ "${v%% *}" = "$2" ]; }
+token(){ [ -f "$1" ] && [ ! -L "$1" ] && [ "$(cat "$1")" = AUTHENTICATED_H264_V31 ]; }
+enabled(){ [ -f "$STAGE/ENABLED" ] && [ ! -L "$STAGE/ENABLED" ] && [ "$(cat "$STAGE/ENABLED")" = MOI3_MANAGED_V31 ]; }
+GUARD="$R/tmp/moi3-managed-v31-guard-$$"
+export_backup(){
+ backup="$USB/managed-v31-stock-backup"
+ if [ -e "$backup" ] || [ -L "$backup" ];then
+  [ -d "$backup" ] && [ ! -L "$backup" ] && [ -f "$backup/SCOPE.txt" ] && [ ! -L "$backup/SCOPE.txt" ] && [ "$(cat "$backup/SCOPE.txt")" = MOI3_STOCK_BASELINE_V31 ] || return 1
+ else mkdir "$backup" && (set -C;printf 'MOI3_STOCK_BASELINE_V31\n' > "$backup/SCOPE.txt") || return 1;fi
+ for name in factory-carplay.sh factory-carplay factory-carplay.sh.metadata factory-carplay.metadata;do
+  source="$STAGE/$name";dest="$backup/$name"
+  [ -f "$source" ] && [ ! -L "$source" ] || return 1
+  if [ -e "$dest" ] || [ -L "$dest" ];then [ ! -L "$dest" ] && cmp -s "$source" "$dest" || return 1;else cp "$source" "$dest" || return 1;fi
+  a=$(sha256sum "$source") && b=$(sha256sum "$dest") && [ "${a%% *}" = "${b%% *}" ] || return 1
+ done
+ echo 'BACKUP VERIFIED: factory bytes plus metadata records on USB; Linux metadata clones retained on unit'
+}
+run(){
+ [ "$(id -u)" = 0 ] || { echo 'ABORT: root required';return 1; }
+ for marker in ALTSCREEN_TEST_ONCE.txt ALTSCREEN_MANAGED_INSTALL.txt ALTSCREEN_MANAGED_RESTORE.txt;do [ "$marker" = "$MARKER" ] || [ ! -e "$USB/$marker" ] || { echo 'ABORT: mixed USB modes';return 1; };done
+ matches "$USB/payload/file-guard" '@GUARD_SHA@' && matches "$R/etc/os-release" '@OS_SHA@' || { echo 'ABORT: helper or firmware mismatch';return 1; }
+ [ ! -e "$GUARD" ] && [ ! -L "$GUARD" ] && (set -C;cat "$USB/payload/file-guard" > "$GUARD") && chmod 700 "$GUARD" && matches "$GUARD" '@GUARD_SHA@' || return 1
+ if [ "$MODE" = restore ];then
+  if [ ! -e "$STAGE" ] && [ ! -L "$STAGE" ] && matches "$STARTUP" '@STARTUP_SHA@' && matches "$TARGET" '@CARPLAY_SHA@';then echo 'ALREADY STOCK: no managed stage';return 0;fi
+  [ -d "$STAGE" ] && [ ! -L "$STAGE" ] && matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$STAGE/factory-carplay" '@CARPLAY_SHA@' || { echo 'ABORT: verified factory backup missing/corrupt';return 1; }
+  matches "$STARTUP" '@STARTUP_SHA@' || matches "$STARTUP" '@BOOT_SHA@' || { echo 'ABORT: unknown startup preserved';return 1; }
+  matches "$TARGET" '@CARPLAY_SHA@' || matches "$TARGET" '@PATCH_SHA@' || { echo 'ABORT: unknown executable preserved';return 1; }
+  "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" || { echo 'ABORT: startup metadata differs from baseline';return 1; }
+  export_backup || { echo 'ABORT: verified offline backup could not be preserved';return 1; }
+  "$GUARD" replace "$STAGE/factory-carplay.sh" "$STARTUP" && matches "$STARTUP" '@STARTUP_SHA@' && "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" || return 1
+  if enabled;then rm -f "$STAGE/ENABLED" || return 1;fi
+  # Stop completes the independent post-stop revocation/handback before cleanup.
+  systemctl stop moi3-altscreen-managed-v31.service || { echo 'RESTORE PENDING: stock startup restored; controller stop failed; reboot before retry';return 1; }
+  grant="$DATA/altscreen-v31-encoder-ready"
+  if token "$grant";then rm -f "$grant" || return 1;elif [ -e "$grant" ] || [ -L "$grant" ];then echo 'RESTORE PENDING: unknown grant preserved';return 1;fi
+  if [ -f "$RAM/lease" ] && [ ! -L "$RAM/lease" ];then rm -f "$RAM/lease" || return 1;fi
+  if matches "$TARGET" '@PATCH_SHA@';then
+   matches "$RAM/carplay" '@PATCH_SHA@' && "$GUARD" same-inode "$TARGET" "$RAM/carplay" || { echo 'RESTORE PENDING: not our verified RAM mount';return 1; }
+   umount "$TARGET" || { echo 'RESTORE PENDING: unmount failed; reboot restores factory mount state';return 1; }
+  fi
+  matches "$TARGET" '@CARPLAY_SHA@' && "$GUARD" same-meta "$STAGE/factory-carplay" "$TARGET" || return 1
+  if ! systemctl is-active --quiet multi-display.service;then
+   "$GUARD" port-free || { echo 'RESTORE PENDING: output port still busy';return 1; }
+   systemctl start multi-display.service || { echo 'RESTORE PENDING: factory sender start failed';return 1; }
+  fi
+  systemctl is-active --quiet multi-display.service || return 1
+  # Remove only exact installed code. Backups, logs and unknown files remain
+  # inactive for verification, never recursively delete an installation tree.
+  while IFS='|' read -r name expected;do
+   if matches "$STAGE/$name" "$expected";then rm -f "$STAGE/$name" || return 1
+   elif [ -e "$STAGE/$name" ] || [ -L "$STAGE/$name" ];then echo "PRESERVED unknown/modified managed asset: $name";fi
+  done <<EOF_REMOVE
+carplay-managed|@PATCH_SHA@
+altscreen_handler.so|@HANDLER_SHA@
+managed-controller.sh|@CONTROLLER_SHA@
+managed-boot.sh|@BOOT_SHA@
+file-guard|@GUARD_SHA@
+EOF_REMOVE
+  archive="$BASE/.moi3-altscreen-managed-v31-backup-$$"
+  if [ ! -e "$archive" ] && [ ! -L "$archive" ];then
+   mv "$STAGE" "$archive" || { echo 'RESTORE NOTE: inactive backups remain in original stage'; }
+   echo "INACTIVE BASELINE BACKUP RETAINED: $archive"
+  fi
+  echo 'STOCK RESTORED: startup content/metadata and original executable verified; backups retained'
+  echo 'Complete updater/Resume and normal reboot, then verify stock map/CarPlay. No AltScreen autostart remains.'
+  sync;return 0
+ fi
+ matches "$STARTUP" '@STARTUP_SHA@' && matches "$TARGET" '@CARPLAY_SHA@' || { echo 'ABORT: start from stock after a normal reboot';return 1; }
+ for spec in "file-guard|@GUARD_SHA@" "carplay-managed|@PATCH_SHA@" "altscreen_handler.so|@HANDLER_SHA@" "managed-controller.sh|@CONTROLLER_SHA@" "managed-boot.sh|@BOOT_SHA@" "factory-carplay.sh|@STARTUP_SHA@" "factory-carplay|@CARPLAY_SHA@";do
+  name=${spec%%|*};hash=${spec#*|};matches "$USB/payload/$name" "$hash" || { echo "ABORT: payload changed: $name";return 1; }
+ done
+ for filesystem in "$BASE" "$R/data";do available=$("$GUARD" available "$filesystem") || return 1;[ "$available" -ge 67108864 ] || { echo 'ABORT: less than64MiB free';return 1; };done
+ if [ -e "$STAGE" ] || [ -L "$STAGE" ];then echo 'ABORT: managed stage already exists; restore before reinstalling; prior evidence preserved';return 1;fi
+ mkdir -m 700 "$STAGE" && "$GUARD" meta "$BASE" "$STAGE" || return 1
+ "$GUARD" clone "$STARTUP" "$STAGE/factory-carplay.sh" && "$GUARD" clone "$TARGET" "$STAGE/factory-carplay" || return 1
+ "$GUARD" metadata "$STARTUP" > "$STAGE/factory-carplay.sh.metadata" && "$GUARD" metadata "$TARGET" > "$STAGE/factory-carplay.metadata" || return 1
+ matches "$STAGE/factory-carplay.sh" '@STARTUP_SHA@' && matches "$STAGE/factory-carplay" '@CARPLAY_SHA@' && "$GUARD" same-meta "$STAGE/factory-carplay.sh" "$STARTUP" && "$GUARD" same-meta "$STAGE/factory-carplay" "$TARGET" || return 1
+ export_backup || { echo 'ABORT: offline baseline backup verification failed; no startup change';return 1; }
+ for name in file-guard managed-controller.sh managed-boot.sh;do "$GUARD" create "$USB/payload/$name" "$STAGE/$name" "$STARTUP" || return 1;done
+ "$GUARD" create "$USB/payload/carplay-managed" "$STAGE/carplay-managed" "$TARGET" && "$GUARD" create "$USB/payload/altscreen_handler.so" "$STAGE/altscreen_handler.so" "$R/lge/app_rw/lib64/libAirPlay.so" || return 1
+ # Commit startup only after every staged byte and both verified backups exist.
+ matches "$STAGE/managed-boot.sh" '@BOOT_SHA@' && matches "$STAGE/managed-controller.sh" '@CONTROLLER_SHA@' && matches "$STAGE/file-guard" '@GUARD_SHA@' && matches "$STAGE/carplay-managed" '@PATCH_SHA@' && matches "$STAGE/altscreen_handler.so" '@HANDLER_SHA@' || return 1
+ "$GUARD" replace "$STAGE/managed-boot.sh" "$STARTUP" && matches "$STARTUP" '@BOOT_SHA@' || return 1
+ (set -C;printf 'MOI3_MANAGED_V31\n' > "$STAGE/ENABLED.pending") && mv "$STAGE/ENABLED.pending" "$STAGE/ENABLED" || return 1
+ sync;echo 'INSTALLED: managed autostart enabled; original executable unchanged; stock-return files verified'
+ echo 'Complete updater/Resume. USB is not required for normal operation.'
+}
+if run > "$USB/managed-v31-setup.txt" 2>&1;then echo 'OPERATION COMPLETE' >> "$USB/managed-v31-setup.txt";else echo 'OPERATION FAILED/PENDING: preserve report; do not blindly repeat' >> "$USB/managed-v31-setup.txt";fi
+if matches "$GUARD" '@GUARD_SHA@';then rm -f "$GUARD";fi
+sync
+exit 0
