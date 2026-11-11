@@ -19,6 +19,8 @@ jobs:
         run: |
           gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-packet-pacer.c -ldl -pthread -o /tmp/pacer
           /tmp/pacer
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-packet-pacer-network.c -ldl -pthread -o /tmp/pacer-network
+          sudo unshare --net sh -c 'ip link set lo up; /tmp/pacer-network'
       - name: Full handler and crypto regressions
         run: |
           gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/handler
