@@ -40,7 +40,7 @@ static int cbc_result;
 static int32_t cbc_stub(void *c,const uint8_t k[16],const uint8_t iv[16],int encrypt) {
     (void)c;(void)k;(void)iv;(void)encrypt;return cbc_result;
 }
-static void reset_capture(uint32_t ts) {captured_len=0;g_output_failed=0;g_wait_output_idr=1;transport_clock_reset(&g_transport_clock);expected_rtp=ts;g_rtp_ts_in_buf=0;g_rtp_sock=99;}
+static void reset_capture(uint32_t ts) {captured_len=0;packet_pacer_reset();g_output_failed=0;g_wait_output_idr=1;transport_clock_reset(&g_transport_clock);expected_rtp=ts;g_rtp_ts_in_buf=0;g_rtp_sock=99;}
 static uint64_t pcr(const uint8_t *p) {
     return ((uint64_t)p[6]<<25)|((uint64_t)p[7]<<17)|((uint64_t)p[8]<<9)|((uint64_t)p[9]<<1)|(p[10]>>7);
 }
@@ -107,7 +107,7 @@ static void test_source_signals(void) {
     reset_capture(99000);mux_and_stream_h264_frame(frame,sizeof(frame),99000,1,99000);assert(captured[5]==0xd0);
 }
 static void test_local_transport_clock(void) {
-    transport_clock_v28 clock={0};uint64_t pts,pcr_ticks,value;
+    transport_clock_v29 clock={0};uint64_t pts,pcr_ticks,value;
     assert(transport_clock_at(&clock,8000000,&pts)==0&&pts==90000);
     assert(transport_clock_at(&clock,8000007,&pcr_ticks)==0&&pcr_ticks==90630);
     assert(transport_clock_at(&clock,8000006,&value)==-1);

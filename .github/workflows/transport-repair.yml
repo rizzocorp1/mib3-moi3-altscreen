@@ -1,7 +1,7 @@
-name: V28 transport repair validation
+name: V29 transport repair validation
 on:
   push:
-    branches: [fix/v28-runtime-unit]
+    branches: [fix/v29-packet-pacing]
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,6 +15,10 @@ jobs:
         run: |
           gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-transport-repair.c -ldl -pthread -o /tmp/repair
           /tmp/repair
+      - name: Large-picture datagram pacing and bounded failure recovery
+        run: |
+          gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-packet-pacer.c -ldl -pthread -o /tmp/pacer
+          /tmp/pacer
       - name: Full handler and crypto regressions
         run: |
           gcc -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer tests/test-handler.c -ldl -pthread -o /tmp/handler
@@ -41,9 +45,24 @@ jobs:
       - name: Real systemd SIGKILL with separate output writer
         run: |
           gcc -O2 -DFILE_GUARD_TEST recovery/file-guard.c -o /tmp/guard
-          gcc -O2 recovery/packet-audit.c -o /tmp/packets
-          python3 tests/test-map-v28-boot.py /tmp/guard recovery/map-v28-boot.sh.in
-          sudo python3 tests/test-map-v28-export.py recovery/map-v28-log-collector.sh
-          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v28-log-collector.sh /tmp/guard /tmp/packets recovery/map-v28-boot.sh.in
-          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v28-log-collector.sh /tmp/guard /tmp/packets recovery/map-v28-boot.sh.in timeout
-          python3 tests/test-lease-v28.py deploy-usb/payload/frame-gate-v28.h recovery/map-v28-log-collector.sh /tmp/guard /tmp/packets
+          gcc -O2 recovery/packet-audit-v29.c -o /tmp/packets
+          python3 tests/test-map-v29-boot.py /tmp/guard recovery/map-v29-boot.sh.in
+          sudo python3 tests/test-map-v29-export.py recovery/map-v29-log-collector.sh
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets recovery/map-v29-boot.sh.in
+          sudo python3 tests/test-runtime-unit-recovery.py recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets recovery/map-v29-boot.sh.in timeout
+          python3 tests/test-lease-v29.py deploy-usb/payload/frame-gate-v29.h recovery/map-v29-log-collector.sh /tmp/guard /tmp/packets
+
+  observer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile exact deployed observer and exercise metadata/privacy boundaries
+        run: |
+          gcc -O2 -Wall -Wextra -Werror recovery/packet-audit-v29.c -o /tmp/observer
+          gcc -O1 -g -fsanitize=address,undefined tests/test-packet-detail.c -o /tmp/detail
+          /tmp/detail
+      - name: Real packet capture, kernel drop stats and outgoing VLAN traffic
+        run: |
+          sudo python3 tests/test-packet-audit-v29.py /tmp/observer recovery/packet-audit-v29.c
+          sudo unshare --net python3 tests/test-packet-audit-vlan.py /tmp/observer --isolated

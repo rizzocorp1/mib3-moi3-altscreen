@@ -1,4 +1,4 @@
-"""Reproduce missing crash cleanup using the unchanged V28 collector and real systemd."""
+"""Reproduce missing crash cleanup using the unchanged V29 collector and real systemd."""
 from pathlib import Path
 import os,sys,socket,subprocess,tempfile,time,uuid
 assert os.geteuid()==0 and Path('/proc/1/comm').read_text().strip()=='systemd'
@@ -17,7 +17,7 @@ with tempfile.TemporaryDirectory() as tmp:
  import shutil
  shutil.copyfile(collector,stage/"managed-log-collector.sh")
  for name,source in (('file-guard',guard),('packet-audit',audit)):shutil.copyfile(source,stage/name);(stage/name).chmod(0o755)
- token=b'AUTHENTICATED_H264_V28\n';request=data/'altscreen-v28-frame-ready';grant=data/'altscreen-v28-encoder-ready';expired=data/'altscreen-v28-expired';request.write_bytes(token)
+ token=b'AUTHENTICATED_H264_V29\n';request=data/'altscreen-v29-frame-ready';grant=data/'altscreen-v29-encoder-ready';expired=data/'altscreen-v29-expired';request.write_bytes(token)
  (stage/'boot-status.txt').write_text('fixture\n');(r/'native-active').write_text('yes');tools=r/'tools';tools.mkdir()
  script=tools/'systemctl';script.write_text('#!/usr/bin/python3\nimport sys\nfrom pathlib import Path\nr=Path('+repr(str(r))+')\na=sys.argv[1]\nif a=="stop":(r/"native-active").unlink(missing_ok=True)\nelif a=="start":(r/"native-active").write_text("yes")\nelif a=="is-active":sys.exit(0 if (r/"native-active").exists() else 3)\n');script.chmod(0o755)
  unit='moi3-map-death-audit-'+uuid.uuid4().hex;writer=None
